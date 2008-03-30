@@ -23,16 +23,16 @@ def sign(x):
 				return 0
 		return 1
 class estimate:
-	def init(self,x,y):
+	def __init__(self,x,y):
 		# set variables
 		if len(x) != len(y):
 			raise StandardError, 'input/output values have different cardinality'
 		self.x = matrix(x)
 		self.y = matrix(y)
 
-	def xy(i,j):
-		signmatrix = matrix( [ sign(i-self.x[k])*sign(j-self.y[k]) for k in range(x) ] )
-		sum(signmatrix)/len(x)
+	def xy(self,i,j):
+		signmatrix = matrix( [ sign(i-self.x[k])*sign(j-self.y[k]) for k in range(len(self.x)) ] )
+		return sum(signmatrix)/len(self.x)
 class kernel:
 	def __init__(self,x,y,gamma):
 		# set variables
@@ -46,40 +46,32 @@ class kernel:
 		# calculate matrix
 		for i in range(len(x)):
 			for j in range(len(x)):
-				self.xx[i][j] = self._calc(self.x[i],self.x[j])
+				self.xx[i,j] = self._calc(self.x[i],self.x[j])
 			for j in range(len(y)):
-				self.xy[i][j] = self._calc(self.x[i],self.y[j])
+				self.xy[i,j] = self._calc(self.x[i],self.y[j])
 		for i in range(len(y)):
 			for j in range(len(y)):
-				self.yy[i][j] = self._calc(self.y[i],y[j])
+				self.yy[i,j] = self._calc(self.y[i],y[j])
 
 		# Normalize
 		self.xx /= sum(self.xx)
 		self.xy /= sum(self.xy)
 		self.yy /= sum(self.yy)
 
-	def xx(self,i,j):
-		return self.xx[i][j]
-	def xy(self,i,j):
-		return self.xy[i][j]
-	def yy(self,i,j):
-		return self.yy[i][j]
 	def int(self,i,j):
 		# \int_{-\infty}^{y_i} K_\gamma{y_i,y_j}dy_i
 		# When y_i is a vector of length 'n', the integral is a coordinate integral in the form
 		# \int_{-\infty}^{y_p^1} ... \int_{-\infty}^{y_p^n} K_\gamma(y',y_i) dy_p^1 ... dy_p^n
-		a=array()
+		a=list()
 		for n in range(len(self.y)):
 			if sign(self.y[i]-self.y[n]):
-				a.append(self.yy(n,j))
+				a.append(self.yy[n,j])
 		return sum( matrix(a) )
 
 	def _calc(self,a,b):
 		return math.exp(-abs((a-b)/self.gamma))
 
 def run():
-	print 'starting'
-
 	# Retrieve dataset
 	data = getData('B1.dat')[:5]	
 	
@@ -88,28 +80,28 @@ def run():
 	N = len(data)-1
 	sigma = 50/sqrt(N)
 	K = kernel(data[:-1],data[1:],gamma)
+	F = estimate(data[:-1],data[1:])
 	
 	# Objective Function
 	P = matrix(0.0,(N,N))
 	for m in range(N):
-		for n in range(n):
-			P[m][n] = K(data[n],data[m],gamma)*K(data[n+1],data[m+1],gamma)
+		for n in range(N):
+			P[m,n] = K.xx[n,m]*K.yy[n,m]
 	q = matrix(0,(1,N))
 
 	# Equality Constraint
 	A = matrix(0.0, (1,N))
 	for n in range(N):
-		A[n] = sum(matrix( K(data[i],data[n]) for i in range(N) )) / N
+		A[n] = sum(matrix( [ K.xx[i,n] for i in range(N) ] ) ) / N
 	b = matrix(1.0)
 	
 	# Inequality Constraint
-	G = matrix(0.0, (n,n))
+	G = matrix(0.0, (N,N))
 	for m in range(N):
 		for n in range(N):
-			tmp = matrix( [ (K.xx(i,m)*sign(data[n]-data[i])*K.int(n+1,m+1)) for i in range(N) ] )
-			G[m][n] = sum(tmp)/N - F(data[n],data[n+1],gamma)
+			tmp = matrix( [ (K.xx[i,m]*sign(data[n]-data[i])*K.int(n,m)) for i in range(N) ] )
+			G[m,n] = sum(tmp)/N - F.xy(data[n],data[n+1])
 	h = matrix(sigma, (N,1))
-
 
 	# Optimize
 	#optimized = qp(P, q, G, h, A, b)
