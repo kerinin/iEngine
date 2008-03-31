@@ -10,6 +10,9 @@ from cvxopt.base import matrix
 from cvxopt.blas import dot 
 from cvxopt.solvers import qp
 
+from cvxopt import solvers
+solvers.options['show_progress'] = False
+
 from santa_fe import getData
 
 _Functions = ['run']
@@ -23,16 +26,38 @@ def sign(x):
 				return 0
 		return 1
 class estimate:
-	def __init__(self,x,y):
+	def __init__(self,x,y,kernel):
 		# set variables
 		if len(x) != len(y):
 			raise StandardError, 'input/output values have different cardinality'
+		self.l = len(x)
 		self.x = matrix(x)
 		self.y = matrix(y)
+		self.kernel = kernel
+		self.beta = None
 
 	def xy(self,i,j):
 		signmatrix = matrix( [ sign(i-self.x[k])*sign(j-self.y[k]) for k in range(len(self.x)) ] )
 		return sum(signmatrix)/len(self.x)
+	
+	def equality_check(self):
+		c_matrix = matrix(0.0,(self.l,self.l))
+		for i in range(self.l):
+			for j in range(self.l):
+				c_matrix[i,j] = self.beta[j]*self.kernel.xx[i,j]/self.l
+		return sum(c_matrix)
+
+	def inequality_check(self):
+		c_matrix = matrix(0.0,(self.l,1))
+		for p in range(self.l):
+			p_matrix = matrix(0.0,(self.l,self.l))
+			for i in range(self.l):
+				for j in range(self.l):
+					p_matrix[i,j] = self.beta[i]*(self.kernel.xx[j,i]*sign(self.x[p]-self.x[j])*
+					self.kernel.int(p,i)-self.xy(self.x[p],self.y[p]))/self.l
+			c_matrix[p,0] = sum(p_matrix)
+		return c_matrix
+
 class kernel:
 	def __init__(self,x,y,gamma):
 		# set variables
@@ -45,13 +70,24 @@ class kernel:
 
 		# calculate matrix
 		for i in range(len(x)):
+			print i
 			for j in range(len(x)):
-				self.xx[i,j] = self._calc(self.x[i],self.x[j])
+				if j>=i:
+					val = self._calc(self.x[i],self.x[j])
+					self.xx[i,j] = val
+					self.xx[j,i] = val
 			for j in range(len(y)):
-				self.xy[i,j] = self._calc(self.x[i],self.y[j])
+				if j>=i:
+					val = self._calc(self.x[i],self.y[j])
+					self.xy[i,j] = val
+					self.xy[j,i] = val
 		for i in range(len(y)):
+			print i
 			for j in range(len(y)):
-				self.yy[i,j] = self._calc(self.y[i],y[j])
+				if j>=i:
+					val = self._calc(self.y[i],y[j])
+					self.yy[i,j] = val
+					self.yy[j,i] = val
 
 		# Normalize
 		self.xx /= sum(self.xx)
@@ -62,11 +98,11 @@ class kernel:
 		# \int_{-\infty}^{y_i} K_\gamma{y_i,y_j}dy_i
 		# When y_i is a vector of length 'n', the integral is a coordinate integral in the form
 		# \int_{-\infty}^{y_p^1} ... \int_{-\infty}^{y_p^n} K_\gamma(y',y_i) dy_p^1 ... dy_p^n
-		a=list()
+		retval = 0
 		for n in range(len(self.y)):
 			if sign(self.y[i]-self.y[n]):
-				a.append(self.yy[n,j])
-		return sum( matrix(a) )
+				retval += self.yy[n,j] 
+		return retval
 
 	def _calc(self,a,b):
 		return math.exp(-abs((a-b)/self.gamma))
@@ -80,41 +116,50 @@ def run():
 	N = len(data)-1
 	sigma = 50/sqrt(N)
 	K = kernel(data[:-1],data[1:],gamma)
-	F = estimate(data[:-1],data[1:])
+	F = estimate(data[:-1],data[1:],K)
 	
 	# Objective Function
+	print 'constructing objective function...'
 	P = matrix(0.0,(N,N))
 	for m in range(N):
 		for n in range(N):
 			P[m,n] = K.xx[n,m]*K.yy[n,m]
-	q = matrix(0,(1,N))
+	q = matrix(0.0,(N,1))
 
 	# Equality Constraint
+	print 'constructing equality constraints...'
 	A = matrix(0.0, (1,N))
 	for n in range(N):
 		A[n] = sum(matrix( [ K.xx[i,n] for i in range(N) ] ) ) / N
 	b = matrix(1.0)
 	
 	# Inequality Constraint
+	print 'construction inequality constraints...'
 	G = matrix(0.0, (N,N))
 	for m in range(N):
+		print "%s of %s" % (m,N)
 		for n in range(N):
-			tmp = matrix( [ (K.xx[i,m]*sign(data[n]-data[i])*K.int(n,m)) for i in range(N) ] )
-			G[m,n] = sum(tmp)/N - F.xy(data[n],data[n+1])
+			sumval = 0
+			for i in range(N):
+				a=K.xx[i,m]
+				if a:
+					sumval += (a*sign(data[n]-data[i])*K.int(n,m))
+			G[m,n] = sumval/N - F.xy(data[n],data[n+1])
 	h = matrix(sigma, (N,1))
 
 	# Optimize
-	#optimized = qp(P, q, G, h, A, b)
-	print 'computed'
-	print P
-	print q
-	print G
-	print h
-	print A
-	print b
+	print 'starting optimization...'
+	optimized = qp(P, q, G, h, A, b)
+	F.beta = optimized['x']
 
 	# Display Results
-
+	print 'optimized'
+	print 'data points: %s' % N
+	print 'validation...'
+	print 'equality check:  %s' % ( 1.0 - F.equality_check() )
+	print 'inequality check: %s' % bool( sign( sigma-F.inequality_check() ) ) 
+	print 'P: %s' % P
+	
 def help():
 	print __doc__
 	return 0
