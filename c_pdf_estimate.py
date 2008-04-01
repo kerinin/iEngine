@@ -6,12 +6,12 @@ from math import sqrt
 from numpy import *
 from pylab import plot,bar,show,legend,title,xlabel,ylabel,axis
 
-from cvxopt.base import matrix
+from cvxopt.base import *
 from cvxopt.blas import dot 
 from cvxopt.solvers import qp
 
 from cvxopt import solvers
-solvers.options['show_progress'] = False
+#solvers.options['show_progress'] = False
 
 from santa_fe import getData
 
@@ -131,6 +131,11 @@ def run():
 	A = matrix(0.0, (1,N))
 	for n in range(N):
 		A[n] = sum(matrix( [ K.xx[i,n] for i in range(N) ] ) ) / N
+	#A = matrix(0.0, (N,N))
+	#for m in range(N):
+	#	for n in range(N):
+	#		A[m,n] = K.xx[m,n] / N
+	#b = matrix(1.0,(N,1))
 	b = matrix(1.0)
 	
 	# Inequality Constraint
@@ -149,7 +154,13 @@ def run():
 
 	# Optimize
 	print 'starting optimization...'
-	optimized = qp(P, q, G, h, A, b)
+	print 'P.size = %s' % repr(P.size)
+	print 'q.size = %s' % repr(q.size)
+	print 'G.size = %s' % repr(G.size)
+	print 'h.size = %s' % repr(h.size)
+	print 'A.size = %s' % repr(A.size)
+	print 'b.size = %s' % repr(b.size)
+	optimized = qp(P, q,G= G, h=h, A=A, b=b)
 	F.beta = optimized['x']
 
 	# Display Results
@@ -159,6 +170,7 @@ def run():
 	print 'equality check:  %s' % ( 1.0 - F.equality_check() )
 	print 'inequality check: %s' % bool( sign( sigma-F.inequality_check() ) ) 
 	print 'P: %s' % P
+	print 'beta: %s' % optimized['x']
 	
 def help():
 	print __doc__
