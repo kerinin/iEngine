@@ -109,7 +109,7 @@ class kernel:
 
 def run():
 	# Retrieve dataset
-	data = getData('B1.dat')[:5]	
+	data = getData('B1.dat')[:9]	
 	
 	# Construct Variables
 	gamma = 1.0
@@ -144,7 +144,7 @@ def run():
 				a=K.xx[i,m]
 				if a:
 					sumval += (a*sign(data[n]-data[i])*K.int(n,m))
-			G[m,n] = sumval/N - F.xy(data[n],data[n+1])
+			G[n,m] = sumval/N - F.xy(data[n],data[n+1])
 	h = matrix(sigma, (N,1))
 
 	# Optimize
