@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-import sys, getopt, math, datetime
+import sys, getopt, math, datetime, os
 from math import sqrt
 
 from numpy import *
@@ -21,18 +21,19 @@ def sign(x):
 	if isinstance(x, (int, long, float)):
 		return int( x > 0 )
 	else:
-		for i in x:
-			if i <= 0:
-				return 0
-		return 1
+		return int( x.min() > 0)
+		#for i in x:
+		#	if i <= 0:
+		#		return 0
+		#return 1
 class estimate:
 	def __init__(self,x,y,kernel):
 		# set variables
 		if len(x) != len(y):
 			raise StandardError, 'input/output values have different cardinality'
 		self.l = len(x)
-		self.x = matrix(x)
-		self.y = matrix(y)
+		self.x = x
+		self.y = y
 		self.kernel = kernel
 		self.beta = None
 
@@ -67,10 +68,11 @@ class kernel:
 		self.xx = matrix(0.0,(len(x),len(x)))
 		self.xy = matrix(0.0,(len(x),len(y)))
 		self.yy = matrix(0.0,(len(y),len(y)))
-
+		
+		N = len(x)
 		# calculate matrix
 		for i in range(len(x)):
-			print i
+			print 'x_ (%s, n) of %s calculated' % (i,N)
 			for j in range(len(x)):
 				if j>=i:
 					val = self._calc(self.x[i],self.x[j])
@@ -81,13 +83,25 @@ class kernel:
 					val = self._calc(self.x[i],self.y[j])
 					self.xy[i,j] = val
 					self.xy[j,i] = val
+		f=open('xx.matrix','w')
+		self.xy.tofile(f)
+		f.close()
+		f=open('xy.matrix','w')
+		self.xy.tofile(f)
+		f.close()
+		print 'xy saved to file'
 		for i in range(len(y)):
+			print 'y_ (%s, n) of %s calculated' % (i,N)
 			print i
 			for j in range(len(y)):
 				if j>=i:
 					val = self._calc(self.y[i],y[j])
 					self.yy[i,j] = val
 					self.yy[j,i] = val
+		f=open('yy.matrix','w')
+		self.yy.tofile(f)
+		f.close()
+		print 'yy saved to file'
 
 		# Normalize
 		self.xx /= sum(self.xx)
@@ -105,11 +119,12 @@ class kernel:
 		return retval
 
 	def _calc(self,a,b):
-		return math.exp(-abs((a-b)/self.gamma))
+	 	k = math.exp(-linalg.norm((a-b)/self.gamma))
+		return k
 
 def run():
 	# Retrieve dataset
-	data = getData('B1.dat')[:9]	
+	data = getData('B1.dat')[:100]
 	
 	# Construct Variables
 	gamma = 1.0
@@ -123,7 +138,8 @@ def run():
 	P = matrix(0.0,(N,N))
 	for m in range(N):
 		for n in range(N):
-			P[m,n] = K.xx[n,m]*K.yy[n,m]
+			if n >= m:
+				P[m,n] = K.xx[n,m]*K.yy[n,m]
 	q = matrix(0.0,(N,1))
 
 	# Equality Constraint
@@ -142,14 +158,19 @@ def run():
 	print 'construction inequality constraints...'
 	G = matrix(0.0, (N,N))
 	for m in range(N):
-		print "%s of %s" % (m,N)
+		print "Inequality (%s,n) of %s calculated" % (m,N)
 		for n in range(N):
-			sumval = 0
-			for i in range(N):
-				a=K.xx[i,m]
-				if a:
-					sumval += (a*sign(data[n]-data[i])*K.int(n,m))
-			G[n,m] = sumval/N - F.xy(data[n],data[n+1])
+			if n>= m:
+				# CHECK THIS MATH - it's probably wrong, but you get the point
+				K_int = K.int(n,m)
+				def f(a,x):
+					Kxx = K.xx[m::N]
+					xn = resize(array(K.x[n]),(N,1))
+					xx = array(K.x)
+					return xx*K_int*(xn>xx)
+				a=fromfunction(f,(1,N))
+				
+				G[n,m] = sum(a)/N - F.xy(data[n],data[n])
 	h = matrix(sigma, (N,1))
 
 	# Optimize
@@ -162,15 +183,15 @@ def run():
 	print 'b.size = %s' % repr(b.size)
 	optimized = qp(P, q,G= G, h=h, A=A, b=b)
 	F.beta = optimized['x']
+	f=open('beta.matrix','w')
+	F.beta.tofile(f)
+	f.close()
+	print 'beta saved to file'
 
 	# Display Results
 	print 'optimized'
 	print 'data points: %s' % N
-	print 'validation...'
-	print 'equality check:  %s' % ( 1.0 - F.equality_check() )
-	print 'inequality check: %s' % bool( sign( sigma-F.inequality_check() ) ) 
-	print 'P: %s' % P
-	print 'beta: %s' % optimized['x']
+
 	
 def help():
 	print __doc__
