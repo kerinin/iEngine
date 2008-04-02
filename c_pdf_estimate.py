@@ -127,7 +127,7 @@ def run():
 	gamma = 1.0
 	N = len(data)-1
 	sigma = 50/sqrt(N)
-	K = kernel(data[:-1],data[1:],gamma)
+	K = kernel(data,gamma)
 	F = estimate(data[:-1],data[1:],K)
 	
 	# Objective Function
