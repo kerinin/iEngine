@@ -21,11 +21,8 @@ def sign(x):
 	if isinstance(x, (int, long, float)):
 		return int( x > 0 )
 	else:
+		# This assumes that x is a matrix object, and returns 1 if the minimum element > 0, 0 otherwise
 		return int( x.min() > 0)
-		#for i in x:
-		#	if i <= 0:
-		#		return 0
-		#return 1
 class estimate:
 	def __init__(self,x,y,kernel):
 		# set variables
@@ -38,8 +35,17 @@ class estimate:
 		self.beta = None
 
 	def xy(self,i,j):
-		signmatrix = matrix( [ sign(i-self.x[k])*sign(j-self.y[k]) for k in range(len(self.x)) ] )
-		return sum(signmatrix)/len(self.x)
+	################################################################################
+	#
+	#	F_\ell(y,x) = frac{1}{\ell} \sum_{i=1}^{\ell} \theta(y-y_i) \theta(x-x_i)
+	#
+	# where y=i, x=j, l=self.l
+	# and i,j are both vectors of x and y (not indices of training data)
+	#
+	################################################################################
+	
+		signmatrix = array( [ sign(i-self.x[k])*sign(j-self.y[k]) for k in range(self.l) ] )
+		return sum(signmatrix)/self.l
 	
 	def equality_check(self):
 		c_matrix = matrix(0.0,(self.l,self.l))
@@ -138,8 +144,9 @@ def run():
 	P = matrix(0.0,(N,N))
 	for m in range(N):
 		for n in range(N):
-			if n >= m:
-				P[m,n] = K.xx[n,m]*K.yy[n,m]
+			if (n+1)==N:
+				n = N-n-1
+			P[m,n] = K.xx[n,m]*K.yy[n,m]
 	q = matrix(0.0,(N,1))
 
 	# Equality Constraint
@@ -160,17 +167,17 @@ def run():
 	for m in range(N):
 		print "Inequality (%s,n) of %s calculated" % (m,N)
 		for n in range(N):
-			if n>= m:
-				# CHECK THIS MATH - it's probably wrong, but you get the point
-				K_int = K.int(n,m)
-				def f(a,x):
-					Kxx = K.xx[m::N]
-					xn = resize(array(K.x[n]),(N,1))
-					xx = array(K.x)
-					return xx*K_int*(xn>xx)
-				a=fromfunction(f,(1,N))
-				
-				G[n,m] = sum(a)/N - F.xy(data[n],data[n])
+			# CHECK THIS MATH - it's probably wrong, but you get the point
+			K_int = K.int(n,m)
+			def f(a,x):
+				Kxx = K.xx[m::N]
+				xn = resize(array(K.x[n]),(N,1))
+				xx = array(K.x)
+				return xx*K_int*(xn>xx)
+			a=fromfunction(f,(1,N))
+			if (m+1)==N:
+				m = N-m-1
+			G[n,m] = sum(a)/N - F.xy(data[n],data[n])
 	h = matrix(sigma, (N,1))
 
 	# Optimize
