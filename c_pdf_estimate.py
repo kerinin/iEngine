@@ -66,40 +66,32 @@ class estimate:
 		return c_matrix
 
 class kernel:
-	def __init__(self,x,y,gamma):
+	def __init__(self,data,gamma):
 		# set variables
 		self.gamma = gamma
-		self.x = y
-		self.y = y
-		self.xx = matrix(0.0,(len(x),len(x)))
-		self.xy = matrix(0.0,(len(x),len(y)))
-		self.yy = matrix(0.0,(len(y),len(y)))
+		self.x = data[:-1]
+		self.y = data[1:]
+		self.l = len(data)-1
+		self.xx = matrix(0.0,(self.l,self,l))
+		self.yy = matrix(0.0,(self.l,self.l))
 		
-		N = len(x)
-		# calculate matrix
-		for i in range(len(x)):
-			print 'x_ (%s, n) of %s calculated' % (i,N)
-			for j in range(len(x)):
+		# calculate xx matrix
+		for i in range(self.l):
+			print 'x_ (%s, n) of %s calculated' % (i,self.l)
+			for j in range(self.l):
 				if j>=i:
 					val = self._calc(self.x[i],self.x[j])
 					self.xx[i,j] = val
 					self.xx[j,i] = val
-			for j in range(len(y)):
-				if j>=i:
-					val = self._calc(self.x[i],self.y[j])
-					self.xy[i,j] = val
-					self.xy[j,i] = val
 		f=open('xx.matrix','w')
-		self.xy.tofile(f)
+		self.xx.tofile(f)
 		f.close()
-		f=open('xy.matrix','w')
-		self.xy.tofile(f)
-		f.close()
-		print 'xy saved to file'
-		for i in range(len(y)):
-			print 'y_ (%s, n) of %s calculated' % (i,N)
-			print i
-			for j in range(len(y)):
+		print 'xx saved to file'
+		
+		# calculate yy matrix
+		for i in range(self.l):
+			print 'y_ (%s, n) of %s calculated' % (i,self.l)
+			for j in range(self.l):
 				if j>=i:
 					val = self._calc(self.y[i],y[j])
 					self.yy[i,j] = val
@@ -111,7 +103,6 @@ class kernel:
 
 		# Normalize
 		self.xx /= sum(self.xx)
-		self.xy /= sum(self.xy)
 		self.yy /= sum(self.yy)
 
 	def int(self,i,j):
