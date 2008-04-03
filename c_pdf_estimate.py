@@ -72,7 +72,7 @@ class kernel:
 		self.x = data[:-1]
 		self.y = data[1:]
 		self.l = len(data)-1
-		self.xx = matrix(0.0,(self.l,self,l))
+		self.xx = matrix(0.0,(self.l,self.l))
 		self.yy = matrix(0.0,(self.l,self.l))
 		
 		# calculate xx matrix
@@ -93,7 +93,7 @@ class kernel:
 			print 'y_ (%s, n) of %s calculated' % (i,self.l)
 			for j in range(self.l):
 				if j>=i:
-					val = self._calc(self.y[i],y[j])
+					val = self._calc(self.y[i],self.y[j])
 					self.yy[i,j] = val
 					self.yy[j,i] = val
 		f=open('yy.matrix','w')
@@ -113,10 +113,10 @@ class kernel:
 		
 		#FIXME: This is not taking into account the width of intervals between y[n]
 		# select the row (*,j) of self.yy 
-		yi = self.yy[:j:self.l]
+		yi = self.yy[self.l*j:self.l*(j+1)]
 		for n in range(self.l):
 			# zero out all values in self.yy(*.j) for which self.y[n] is greater than self.y[i]
-			yi[n] = yi[n]*(self.y[i]>=self.y[n])
+			yi[n,0] = yi[n,0]*sign(self.y[i]-self.y[n])
 		# return the sum of the remaining values of K
 		return sum(yi)
 
