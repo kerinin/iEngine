@@ -17,11 +17,11 @@ from santa_fe import getData
 
 _Functions = ['run']
 	
-def sign(x):
+def sign(x,y):
 	if isinstance(x, (int, long, float)):
 		return int( x > 0 )
 	else:
-		# This assumes that x is a matrix object, and returns 1 if the minimum element > 0, 0 otherwise
+		return int( sum(x>y) == len(x) )
 		return int( x.min() > 0)
 class estimate:
 	def __init__(self,x,y,kernel):
@@ -44,7 +44,7 @@ class estimate:
 	#
 	################################################################################
 	
-		signmatrix = array( [ sign(i-self.x[k])*sign(j-self.y[k]) for k in range(self.l) ] )
+		signmatrix = array( [ sign(i,self.x[k])*sign(j,self.y[k]) for k in range(self.l) ] )
 		return sum(signmatrix)/self.l
 	
 	def equality_check(self):
@@ -60,19 +60,20 @@ class estimate:
 			p_matrix = matrix(0.0,(self.l,self.l))
 			for i in range(self.l):
 				for j in range(self.l):
-					p_matrix[i,j] = self.beta[i]*(self.kernel.xx[j,i]*sign(self.x[p]-self.x[j])*
+					p_matrix[i,j] = self.beta[i]*(self.kernel.xx[j,i]*sign(self.x[p],self.x[j])*
 					self.kernel.int(p,i)-self.xy(self.x[p],self.y[p]))/self.l
 			c_matrix[p,0] = sum(p_matrix)
 		return c_matrix
 
 class kernel:
-	def __init__(self,data,gamma):
+	def __init__(self,data,gamma,sigma_q):
 		# set variables
-		self.gamma = gamma
-		self.x = data[:-1]
-		self.y = data[1:]
 		self.l = len(data)-1
 		self.n = len(data[0])
+		self.gamma = gamma
+		self.sigma = sigma_q/sqrt(self.l)
+		self.x = data[:-1]
+		self.y = data[1:]
 		self.xx = matrix(0.0,(self.l,self.l))
 		self.yy = matrix(0.0,(self.l,self.l))
 		
@@ -135,12 +136,8 @@ def run():
 	data = getData('B1.dat')[:100]
 	
 	# Construct Variables
-	gamma = 1.0
-
-	K = kernel(data,gamma)
+	K = kernel(data,gamma=1,sigma_q=.5)
 	F = estimate(data[:-1],data[1:],K)
-	
-	sigma = 50/sqrt(K.l)
 	
 	# Objective Function
 	print 'constructing objective function...'
@@ -181,7 +178,7 @@ def run():
 			if (m+1)==K.l:
 				m = K.l-m-1
 			G[n,m] = sum(a)/K.l - F.xy(data[n],data[n])
-	h = matrix(sigma, (K.l,1))
+	h = matrix(K.sigma, (K.l,1))
 
 	# Optimize
 	print 'starting optimization...'
