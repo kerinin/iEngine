@@ -89,6 +89,7 @@ class kernel:
 		print 'xx saved to file'
 		
 		# calculate yy matrix
+		#FIXME: Work integration into here?
 		for i in range(self.l):
 			print 'y_ (%s, n) of %s calculated' % (i,self.l)
 			for j in range(self.l):
@@ -112,6 +113,7 @@ class kernel:
 		# note that self.y is a vector array, while self.yy is a matrix of K values
 		
 		#FIXME: This is not taking into account the width of intervals between y[n]
+		#FIXME: it also may not be doing the partial integration part correctly
 		# select the row (*,j) of self.yy 
 		yi = self.yy[self.l*j:self.l*(j+1)]
 		for n in range(self.l):
