@@ -136,26 +136,27 @@ def run():
 	
 	# Construct Variables
 	gamma = 1.0
-	N = len(data)-1
-	sigma = 50/sqrt(N)
+
 	K = kernel(data,gamma)
 	F = estimate(data[:-1],data[1:],K)
 	
+	sigma = 50/sqrt(K.l)
+	
 	# Objective Function
 	print 'constructing objective function...'
-	P = matrix(0.0,(N,N))
-	for m in range(N):
-		for n in range(N):
-			if (n+1)==N:
-				n = N-n-1
+	P = matrix(0.0,(K.l,K.l))
+	for m in range(K.l):
+		for n in range(K.l):
+			if (n+1)==K.l:
+				n = K.l-n-1
 			P[m,n] = K.xx[n,m]*K.yy[n,m]
-	q = matrix(0.0,(N,1))
+	q = matrix(0.0,(K.l,1))
 
 	# Equality Constraint
 	print 'constructing equality constraints...'
-	A = matrix(0.0, (1,N))
-	for n in range(N):
-		A[n] = sum(matrix( [ K.xx[i,n] for i in range(N) ] ) ) / N
+	A = matrix(0.0, (1,K.l))
+	for n in range(K.l):
+		A[n] = sum(matrix( [ K.xx[i,n] for i in range(K.l) ] ) ) / K.l
 	#A = matrix(0.0, (N,N))
 	#for m in range(N):
 	#	for n in range(N):
@@ -165,22 +166,22 @@ def run():
 	
 	# Inequality Constraint
 	print 'construction inequality constraints...'
-	G = matrix(0.0, (N,N))
-	for m in range(N):
-		print "Inequality (%s,n) of %s calculated" % (m,N)
-		for n in range(N):
+	G = matrix(0.0, (K.l,K.l))
+	for m in range(K.l):		
+		print "Inequality (%s,n) of %s calculated" % (m,K.l)
+		for n in range(K.l):
 			# CHECK THIS MATH - it's probably wrong, but you get the point
 			K_int = K.int(n,m)
 			def f(a,x):
-				Kxx = K.xx[m::N]
-				xn = resize(array(K.x[n]),(N,1))
+				Kxx = K.xx[m::K.l]
+				xn = resize(array(K.x[n]),(K.l,1))
 				xx = array(K.x)
 				return xx*K_int*(xn>xx)
-			a=fromfunction(f,(1,N))
-			if (m+1)==N:
-				m = N-m-1
-			G[n,m] = sum(a)/N - F.xy(data[n],data[n])
-	h = matrix(sigma, (N,1))
+			a=fromfunction(f,(1,K.l))
+			if (m+1)==K.l:
+				m = K.l-m-1
+			G[n,m] = sum(a)/K.l - F.xy(data[n],data[n])
+	h = matrix(sigma, (K.l,1))
 
 	# Optimize
 	print 'starting optimization...'
@@ -199,7 +200,7 @@ def run():
 
 	# Display Results
 	print 'optimized'
-	print 'data points: %s' % N
+	print 'data points: %s' % K.l
 
 	
 def help():
