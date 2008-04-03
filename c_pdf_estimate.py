@@ -72,6 +72,7 @@ class kernel:
 		self.x = data[:-1]
 		self.y = data[1:]
 		self.l = len(data)-1
+		self.n = len(data[0])
 		self.xx = matrix(0.0,(self.l,self.l))
 		self.yy = matrix(0.0,(self.l,self.l))
 		
@@ -111,16 +112,20 @@ class kernel:
 		# When y_i is a vector of length 'n', the integral is a coordinate integral in the form
 		# \int_{-\infty}^{y_p^1} ... \int_{-\infty}^{y_p^n} K_\gamma(y',y_i) dy_p^1 ... dy_p^n
 		# note that self.y is a vector array, while self.yy is a matrix of K values
+		# 
+		# After going over the math, the integral of the function should be calculated as follows
+		# take the sum of K for all values of y which have at least one dimension less than y_p
+		# times the inverse of lxn where l is the total number of y and n is the dimensionality of y
 		
-		#FIXME: This is not taking into account the width of intervals between y[n]
-		#FIXME: it also may not be doing the partial integration part correctly
 		# select the row (*,j) of self.yy 
 		yi = self.yy[self.l*j:self.l*(j+1)]
 		for n in range(self.l):
-			# zero out all values in self.yy(*.j) for which self.y[n] is greater than self.y[i]
-			yi[n,0] = yi[n,0]*sign(self.y[i]-self.y[n])
-		# return the sum of the remaining values of K
-		return sum(yi)
+			# scale K according to how many dimensions are less than y_p 
+			# ( note that this also zeroes out y which are larger than y_p)
+			yi[n,0] = yi[n,0]*(sum(y[n]<y[i]))
+			
+		# return the sum of the remaining values of K divided by lxn where l is the number of y and n is the dimensionality
+		return sum(yi)/(self.l*self.n)
 
 	def _calc(self,a,b):
 	 	return math.exp(-linalg.norm((a-b)/self.gamma))
