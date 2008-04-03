@@ -109,11 +109,15 @@ class kernel:
 		# \int_{-\infty}^{y_i} K_\gamma{y_i,y_j}dy_i
 		# When y_i is a vector of length 'n', the integral is a coordinate integral in the form
 		# \int_{-\infty}^{y_p^1} ... \int_{-\infty}^{y_p^n} K_\gamma(y',y_i) dy_p^1 ... dy_p^n
-		retval = 0
-		for n in range(len(self.y)):
-			if sign(self.y[i]-self.y[n]):
-				retval += self.yy[n,j] 
-		return retval
+		# note that self.y is a vector array, while self.yy is a matrix of K values
+		
+		# select the row (*,j) of self.yy 
+		yi = self.yy[:j:self.l]
+		for n in range(self.l):
+			# zero out all values in self.yy(*.j) for which self.y[n] is greater than self.y[i]
+			yi[n] = yi[n]*(self.y[i]>=self.y[n])
+		# return the sum of the remaining values of K
+		return sum(yi)
 
 	def _calc(self,a,b):
 	 	k = math.exp(-linalg.norm((a-b)/self.gamma))
