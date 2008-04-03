@@ -142,19 +142,12 @@ def run():
 	# Objective Function
 	#FIXME: check the math for all the remaining stuff
 	print 'constructing objective function...'
-	P = matrix(mul(K.xx,K.yy),(K.l,K.l))
+	P = mul(K.xx,K.yy)
 	q = matrix(0.0,(K.l,1))
-
+	
 	# Equality Constraint
 	print 'constructing equality constraints...'
-	A = matrix(0.0, (1,K.l))
-	for n in range(K.l):
-		A[n] = sum(matrix( [ K.xx[i,n] for i in range(K.l) ] ) ) / K.l
-	#A = matrix(0.0, (N,N))
-	#for m in range(N):
-	#	for n in range(N):
-	#		A[m,n] = K.xx[m,n] / N
-	#b = matrix(1.0,(N,1))
+	A = matrix( [ sum( K.xx[ n*K.l:( n+1 )*K.l ] for n in range( K.l ) ) ], ( 1,K.l ) ) / K.l
 	b = matrix(1.0)
 	
 	# Inequality Constraint
