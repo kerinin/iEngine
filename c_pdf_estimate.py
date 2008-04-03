@@ -111,6 +111,7 @@ class kernel:
 		# \int_{-\infty}^{y_p^1} ... \int_{-\infty}^{y_p^n} K_\gamma(y',y_i) dy_p^1 ... dy_p^n
 		# note that self.y is a vector array, while self.yy is a matrix of K values
 		
+		#FIXME: This is not taking into account the width of intervals between y[n]
 		# select the row (*,j) of self.yy 
 		yi = self.yy[:j:self.l]
 		for n in range(self.l):
@@ -120,8 +121,7 @@ class kernel:
 		return sum(yi)
 
 	def _calc(self,a,b):
-	 	k = math.exp(-linalg.norm((a-b)/self.gamma))
-		return k
+	 	return math.exp(-linalg.norm((a-b)/self.gamma))
 
 def run():
 	# Retrieve dataset
