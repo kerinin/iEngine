@@ -122,7 +122,7 @@ class kernel:
 		for n in range(self.l):
 			# scale K according to how many dimensions are less than y_p 
 			# ( note that this also zeroes out y which are larger than y_p)
-			yi[n,0] = yi[n,0]*(sum(y[n]<y[i]))
+			yi[n,0] = yi[n,0]*(sum(self.y[n]<self.y[i]))
 			
 		# return the sum of the remaining values of K divided by lxn where l is the number of y and n is the dimensionality
 		return sum(yi)/(self.l*self.n)
