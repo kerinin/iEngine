@@ -133,20 +133,16 @@ class kernel:
 
 def run():
 	# Retrieve dataset
-	data = getData('B1.dat')[:100]
+	data = getData('B1.dat')[:5]
 	
 	# Construct Variables
 	K = kernel(data,gamma=1,sigma_q=.5)
 	F = estimate(data[:-1],data[1:],K)
 	
 	# Objective Function
+	#FIXME: check the math for all the remaining stuff
 	print 'constructing objective function...'
-	P = matrix(0.0,(K.l,K.l))
-	for m in range(K.l):
-		for n in range(K.l):
-			if (n+1)==K.l:
-				n = K.l-n-1
-			P[m,n] = K.xx[n,m]*K.yy[n,m]
+	P = matrix(mul(K.xx,K.yy),(K.l,K.l))
 	q = matrix(0.0,(K.l,1))
 
 	# Equality Constraint
@@ -190,6 +186,7 @@ def run():
 	print 'b.size = %s' % repr(b.size)
 	optimized = qp(P, q,G= G, h=h, A=A, b=b)
 	F.beta = optimized['x']
+	print F.beta
 	f=open('beta.matrix','w')
 	F.beta.tofile(f)
 	f.close()
