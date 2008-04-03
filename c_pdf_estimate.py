@@ -22,7 +22,7 @@ def sign(x,y):
 		return int( x > 0 )
 	else:
 		return int( sum(x>y) == len(x) )
-		return int( x.min() > 0)
+		
 class estimate:
 	def __init__(self,x,y,kernel):
 		# set variables
