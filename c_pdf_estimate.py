@@ -11,7 +11,7 @@ from cvxopt.blas import dot
 from cvxopt.solvers import qp
 
 from cvxopt import solvers
-#solvers.options['show_progress'] = False
+solvers.options['show_progress'] = False
 
 from santa_fe import getData
 
@@ -76,10 +76,10 @@ class kernel:
 		self.y = data[1:]
 		self.xx = matrix(0.0,(self.l,self.l))
 		self.yy = matrix(0.0,(self.l,self.l))
+		self.intg = matrix(0.0,(self.l,self.l))
 		
 		# calculate xx matrix
 		for i in range(self.l):
-			print 'x_ (%s, n) of %s calculated' % (i,self.l)
 			for j in range(self.l):
 				if j>=i:
 					val = self._calc(self.x[i],self.x[j])
@@ -91,9 +91,7 @@ class kernel:
 		print 'xx saved to file'
 		
 		# calculate yy matrix
-		#FIXME: Work integration into here?
 		for i in range(self.l):
-			print 'y_ (%s, n) of %s calculated' % (i,self.l)
 			for j in range(self.l):
 				if j>=i:
 					val = self._calc(self.y[i],self.y[j])
@@ -107,6 +105,14 @@ class kernel:
 		# Normalize
 		self.xx /= sum(self.xx)
 		self.yy /= sum(self.yy)
+		
+		# calculate integration matrix
+		print 'computing integrals...'
+		for i in range(self.l):
+			for j in range(i,self.l):
+				val = self.int(i,j)
+				self.intg[i,j] = val
+				self.intg[j,i] = val
 
 	def int(self,i,j):
 		# \int_{-\infty}^{y_i} K_\gamma{y_i,y_j}dy_i
@@ -159,24 +165,16 @@ def run():
 			if n >= m:
 				k = K.xx[m::K.l]
 				t = array( [min(K.x[n] - K.x[i]) > 0 for i in range(K.l)] )
-				i = array([K.int(i,m) for i in range(K.l)])
+				i = K.intg[m::K.l]
 				
 				G[n,m] = sum(k*t*i)/K.l - F.xy(K.x[n],K.y[n])
 				G[m,n] = sum(k*t*i)/K.l - F.xy(K.x[n],K.y[n])
 				
 	h = matrix(K.sigma, (K.l,1))
-	print G
-	print G_1
-	print slkdfj
+
 	# Optimize
 	print 'starting optimization...'
-	print 'P.size = %s' % repr(P.size)
-	print 'q.size = %s' % repr(q.size)
-	print 'G.size = %s' % repr(G.size)
-	print 'h.size = %s' % repr(h.size)
-	print 'A.size = %s' % repr(A.size)
-	print 'b.size = %s' % repr(b.size)
-	optimized = qp(P, q,G= G, h=h, A=A, b=b)
+	optimized = qp(P, q,G=G, h=h, A=A, b=b)
 	F.beta = optimized['x']
 	print F.beta
 	f=open('beta.matrix','w')
