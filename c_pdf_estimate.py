@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
 import sys, getopt, math, datetime, os
-from math import sqrt
+from math import sqrt, sin
 
 from numpy import *
 from pylab import plot,bar,show,legend,title,xlabel,ylabel,axis
@@ -75,14 +75,18 @@ class kernel:
 	def __init__(self,data,gamma,sigma_q):
 		# set variables
 		self.l = len(data)-1
-		self.n = len(data[0])
-		self.gamma = gamma
-		self.sigma = sigma_q/sqrt(self.l)
+		try:
+			self.n = len(data[0])
+		except TypeError:
+			self.n = 1
 		self.x = data[:-1]
 		self.y = data[1:]
 		self.xx = matrix(0.0,(self.l,self.l))
 		self.yy = matrix(0.0,(self.l,self.l))
 		self.intg = matrix(0.0,(self.l,self.l))
+		self.gamma = gamma
+		self.sigma = .5
+
 		
 		# calculate xx matrix
 		for i in range(self.l):
@@ -147,10 +151,12 @@ class kernel:
 
 def run():
 	# Retrieve dataset
-	data = getData('B1.dat')[:30]
+	#data = getData('B1.dat')[:80]
+	data = array(range(50))
+	data = sinc(data)
 	
 	# Construct Variables
-	K = kernel(data,gamma=.1,sigma_q=.5)
+	K = kernel(data,gamma=.8,sigma_q=.5)
 	F = estimate(data[:-1],data[1:],K)
 	
 	# Objective Function
@@ -171,7 +177,10 @@ def run():
 		print "Inequality (%s,n) of %s calculated" % (m,K.l)
 		for n in range(m,K.l):
 			k = K.xx[m::K.l]
-			t = array( [min(K.x[n] - K.x[i]) > 0 for i in range(K.l)] )
+			if K.n > 1:
+				t = array( [min(K.x[n] - K.x[i]) > 0 for i in range(K.l)] )
+			else:
+				t = array( [K.x[n] - K.x[i] > 0 for i in range(K.l)])
 			i = K.intg[m::K.l]
 				
 			G[n,m] = sum(k*t*i)/K.l - F.xy(K.x[n],K.y[n])
@@ -195,8 +204,8 @@ def run():
 	
 	for i in range(K.l):
 		est = F.r(K.x[i])
-		x_1.append( est[0] )
-		y_1.append( K.y[i][0])
+		x_1.append( est)
+		y_1.append( K.y[i])
 		
 	plot(x_1,label="x'")
 	plot(y_1,label="y")
