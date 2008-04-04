@@ -155,7 +155,7 @@ def run():
 	data = array([sin(i/4.) for i in range(50)])
 	
 	# Construct Variables
-	K = kernel(data,gamma=.1,sigma_q=.005)
+	K = kernel(data,gamma=.01,sigma_q=.5)
 	F = estimate(data[:-1],data[1:],K)
 	
 	# Objective Function
@@ -176,10 +176,7 @@ def run():
 		print "Inequality (%s,n) of %s calculated" % (m,K.l)
 		for n in range(m,K.l):
 			k = K.xx[m::K.l]
-			if K.n > 1:
-				t = array( [min(K.x[n] - K.x[i]) > 0 for i in range(K.l)] )
-			else:
-				t = array( [K.x[n] - K.x[i] > 0 for i in range(K.l)])
+			t = ( K.n > 1 and array( [min(K.x[n] - K.x[i]) > 0 for i in range(K.l)] ) or array( [K.x[n] - K.x[i] > 0 for i in range(K.l)]) )
 			i = K.intg[m::K.l]
 				
 			G[n,m] = sum(k*t*i)/K.l - F.xy(K.x[n],K.y[n])
@@ -202,12 +199,12 @@ def run():
 	y_1 = list()
 	
 	for i in range(K.l):
-		est = F.r(K.x[i])
-		x_1.append( est)
-		y_1.append( K.y[i])
+		x_1.append( F.r(K.x[i]) )
+		y_1.append( K.y[i] )
 		
 	plot(x_1,label="x'")
 	plot(y_1,label="y")
+	plot(F.beta,label="beta")
 	legend()
 	show()
 	
