@@ -47,6 +47,12 @@ class estimate:
 		signmatrix = array( [ sign(i,self.x[k])*sign(j,self.y[k]) for k in range(self.l) ] )
 		return sum(signmatrix)/self.l
 	
+	def r(self,x):
+		ret = zeros(self.kernel.n)
+		for i in range(self.kernel.l):
+			ret += self.kernel.y[i]*self.beta[i]*self.kernel._calc(x,self.kernel.x[i])
+		return ret
+		
 	def equality_check(self):
 		c_matrix = matrix(0.0,(self.l,self.l))
 		for i in range(self.l):
@@ -80,11 +86,12 @@ class kernel:
 		
 		# calculate xx matrix
 		for i in range(self.l):
-			for j in range(self.l):
-				if j>=i:
-					val = self._calc(self.x[i],self.x[j])
-					self.xx[i,j] = val
-					self.xx[j,i] = val
+			for j in range(i,self.l):
+				val = self._calc(self.x[i],self.x[j])
+				self.xx[i,j] = val
+				self.xx[j,i] = val
+		# normalize
+		self.xx /= (sum(self.xx)/self.l)
 		f=open('xx.matrix','w')
 		self.xx.tofile(f)
 		f.close()
@@ -92,20 +99,17 @@ class kernel:
 		
 		# calculate yy matrix
 		for i in range(self.l):
-			for j in range(self.l):
-				if j>=i:
-					val = self._calc(self.y[i],self.y[j])
-					self.yy[i,j] = val
-					self.yy[j,i] = val
+			for j in range(i,self.l):
+				val = self._calc(self.y[i],self.y[j])
+				self.yy[i,j] = val
+				self.yy[j,i] = val
+		# normalize
+		self.yy /= (sum(self.yy)/self.l)
 		f=open('yy.matrix','w')
 		self.yy.tofile(f)
 		f.close()
 		print 'yy saved to file'
 
-		# Normalize
-		self.xx /= sum(self.xx)
-		self.yy /= sum(self.yy)
-		
 		# calculate integration matrix
 		print 'computing integrals...'
 		for i in range(self.l):
@@ -113,6 +117,10 @@ class kernel:
 				val = self.int(i,j)
 				self.intg[i,j] = val
 				self.intg[j,i] = val
+		f=open('intg.matrix','w')
+		self.intg.tofile(f)
+		f.close()
+		print 'intg saved to file'
 
 	def int(self,i,j):
 		# \int_{-\infty}^{y_i} K_\gamma{y_i,y_j}dy_i
@@ -139,10 +147,10 @@ class kernel:
 
 def run():
 	# Retrieve dataset
-	data = getData('B1.dat')[:100]
+	data = getData('B1.dat')[:30]
 	
 	# Construct Variables
-	K = kernel(data,gamma=1,sigma_q=.5)
+	K = kernel(data,gamma=.1,sigma_q=.5)
 	F = estimate(data[:-1],data[1:],K)
 	
 	# Objective Function
@@ -161,14 +169,13 @@ def run():
 	G = matrix(0.0, (K.l,K.l))
 	for m in range(K.l):		
 		print "Inequality (%s,n) of %s calculated" % (m,K.l)
-		for n in range(K.l):
-			if n >= m:
-				k = K.xx[m::K.l]
-				t = array( [min(K.x[n] - K.x[i]) > 0 for i in range(K.l)] )
-				i = K.intg[m::K.l]
+		for n in range(m,K.l):
+			k = K.xx[m::K.l]
+			t = array( [min(K.x[n] - K.x[i]) > 0 for i in range(K.l)] )
+			i = K.intg[m::K.l]
 				
-				G[n,m] = sum(k*t*i)/K.l - F.xy(K.x[n],K.y[n])
-				G[m,n] = sum(k*t*i)/K.l - F.xy(K.x[n],K.y[n])
+			G[n,m] = sum(k*t*i)/K.l - F.xy(K.x[n],K.y[n])
+			G[m,n] = sum(k*t*i)/K.l - F.xy(K.x[n],K.y[n])
 				
 	h = matrix(K.sigma, (K.l,1))
 
@@ -182,10 +189,19 @@ def run():
 	f.close()
 	print 'beta saved to file'
 
-	# Display Results
-	print 'optimized'
-	print 'data points: %s' % K.l
-
+	# test on training data
+	x_1 = list()
+	y_1 = list()
+	
+	for i in range(K.l):
+		est = F.r(K.x[i])
+		x_1.append( est[0] )
+		y_1.append( K.y[i][0])
+		
+	plot(x_1,label="x'")
+	plot(y_1,label="y")
+	legend()
+	show()
 	
 def help():
 	print __doc__
