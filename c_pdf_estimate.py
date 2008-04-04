@@ -152,11 +152,10 @@ class kernel:
 def run():
 	# Retrieve dataset
 	#data = getData('B1.dat')[:80]
-	data = array(range(50))
-	data = sinc(data)
+	data = array([sin(i/4.) for i in range(50)])
 	
 	# Construct Variables
-	K = kernel(data,gamma=.8,sigma_q=.5)
+	K = kernel(data,gamma=.1,sigma_q=.005)
 	F = estimate(data[:-1],data[1:],K)
 	
 	# Objective Function
