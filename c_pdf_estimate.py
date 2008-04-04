@@ -133,7 +133,7 @@ class kernel:
 
 def run():
 	# Retrieve dataset
-	data = getData('B1.dat')[:5]
+	data = getData('B1.dat')[:100]
 	
 	# Construct Variables
 	K = kernel(data,gamma=1,sigma_q=.5)
@@ -156,19 +156,18 @@ def run():
 	for m in range(K.l):		
 		print "Inequality (%s,n) of %s calculated" % (m,K.l)
 		for n in range(K.l):
-			# CHECK THIS MATH - it's probably wrong, but you get the point
-			K_int = K.int(n,m)
-			def f(a,x):
-				Kxx = K.xx[m::K.l]
-				xn = resize(array(K.x[n]),(K.l,1))
-				xx = array(K.x)
-				return xx*K_int*(xn>xx)
-			a=fromfunction(f,(1,K.l))
-			if (m+1)==K.l:
-				m = K.l-m-1
-			G[n,m] = sum(a)/K.l - F.xy(data[n],data[n])
+			if n >= m:
+				k = K.xx[m::K.l]
+				t = array( [min(K.x[n] - K.x[i]) > 0 for i in range(K.l)] )
+				i = array([K.int(i,m) for i in range(K.l)])
+				
+				G[n,m] = sum(k*t*i)/K.l - F.xy(K.x[n],K.y[n])
+				G[m,n] = sum(k*t*i)/K.l - F.xy(K.x[n],K.y[n])
+				
 	h = matrix(K.sigma, (K.l,1))
-
+	print G
+	print G_1
+	print slkdfj
 	# Optimize
 	print 'starting optimization...'
 	print 'P.size = %s' % repr(P.size)
