@@ -152,36 +152,40 @@ class kernel:
 def run():
 	# Retrieve dataset
 	#data = getData('B1.dat')[:80]
-	data = array([sin(i/4.) for i in range(50)])
+	data = array([sin(i/4.) for i in range(33)])
 	
 	# Construct Variables
-	K = kernel(data,gamma=.01,sigma_q=.5)
+	K = kernel(data,gamma=.1,sigma_q=.5)
 	F = estimate(data[:-1],data[1:],K)
 	
 	# Objective Function
-	#FIXME: check the math for all the remaining stuff
+	#FIXME: The approximation problem is probably the result of incorrect math in the optimization constraints
+	#FIXME: make sure this stuff is working properly (check the algorithms)
+	#FIXME: one option would be to do this all as iterative sums, then check the outputs
 	print 'constructing objective function...'
 	P = mul(K.xx,K.yy)
 	q = matrix(0.0,(K.l,1))
 	
 	# Equality Constraint
 	print 'constructing equality constraints...'
-	A = matrix( [ sum( K.xx[ n*K.l:( n+1 )*K.l ] for n in range( K.l ) ) ], ( 1,K.l ) ) / K.l
+	#A = matrix( [ sum( K.xx[ n*K.l:( n+1 )*K.l ] for n in range( K.l ) ) ], ( 1,K.l ) ) / K.l
+	A = matrix( [ sum( K.xx[ n::K.l ] for n in range( K.l ) ) ], ( 1,K.l ) ) / K.l
 	b = matrix(1.0)
 	
 	# Inequality Constraint
-	print 'construction inequality constraints...'
+	print 'constructing inequality constraints...'
 	G = matrix(0.0, (K.l,K.l))
 	for m in range(K.l):		
 		print "Inequality (%s,n) of %s calculated" % (m,K.l)
+		k = K.xx[m::K.l]
+		
 		for n in range(m,K.l):
-			k = K.xx[m::K.l]
 			t = ( K.n > 1 and array( [min(K.x[n] - K.x[i]) > 0 for i in range(K.l)] ) or array( [K.x[n] - K.x[i] > 0 for i in range(K.l)]) )
-			i = K.intg[m::K.l]
-				
+			i = K.intg[m,n]
+			
 			G[n,m] = sum(k*t*i)/K.l - F.xy(K.x[n],K.y[n])
 			G[m,n] = sum(k*t*i)/K.l - F.xy(K.x[n],K.y[n])
-				
+	print G
 	h = matrix(K.sigma, (K.l,1))
 
 	# Optimize
