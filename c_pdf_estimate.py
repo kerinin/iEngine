@@ -89,6 +89,10 @@ class kernel:
 
 		
 		# calculate xx matrix
+		#f=open('xx.matrix','r')
+		#self.xx.fromfile(f)
+		#f.close()
+		
 		for i in range(self.l):
 			for j in range(i,self.l):
 				val = self._calc(self.x[i],self.x[j])
@@ -102,6 +106,10 @@ class kernel:
 		print 'xx saved to file'
 		
 		# calculate yy matrix
+		#f=open('yy.matrix','r')
+		#self.yy.fromfile(f)
+		#f.close()
+		
 		for i in range(self.l):
 			for j in range(i,self.l):
 				val = self._calc(self.y[i],self.y[j])
@@ -113,8 +121,12 @@ class kernel:
 		self.yy.tofile(f)
 		f.close()
 		print 'yy saved to file'
-
+	
 		# calculate integration matrix
+		#f=open('intg.matrix','r')
+		#self.intg.fromfile(f)
+		#f.close()
+		
 		print 'computing integrals...'
 		for i in range(self.l):
 			for j in range(i,self.l):
@@ -125,7 +137,7 @@ class kernel:
 		self.intg.tofile(f)
 		f.close()
 		print 'intg saved to file'
-
+		
 	def int(self,i,j):
 		# \int_{-\infty}^{y_i} K_\gamma{y_i,y_j}dy_i
 		# When y_i is a vector of length 'n', the integral is a coordinate integral in the form
@@ -151,17 +163,14 @@ class kernel:
 
 def run():
 	# Retrieve dataset
-	#data = getData('B1.dat')[:80]
-	data = array([sin(i/4.) for i in range(33)])
+	data = getData('B1.dat')[:20]
+	#data = array([sin(i/4.) for i in range(33)])
 	
 	# Construct Variables
 	K = kernel(data,gamma=.1,sigma_q=.5)
 	F = estimate(data[:-1],data[1:],K)
 	
 	# Objective Function
-	#FIXME: The approximation problem is probably the result of incorrect math in the optimization constraints
-	#FIXME: make sure this stuff is working properly (check the algorithms)
-	#FIXME: one option would be to do this all as iterative sums, then check the outputs
 	print 'constructing objective function...'
 	P = mul(K.xx,K.yy)
 	q = matrix(0.0,(K.l,1))
@@ -180,15 +189,22 @@ def run():
 		k = K.xx[m::K.l]
 		
 		for n in range(m,K.l):
-			t = ( K.n > 1 and array( [min(K.x[n] - K.x[i]) > 0 for i in range(K.l)] ) or array( [K.x[n] - K.x[i] > 0 for i in range(K.l)]) )
+			if K.n > 1:
+				t =array( [min(K.x[n] - K.x[i]) > 0 for i in range(K.l)] )
+			else:
+				t = array( [K.x[n] - K.x[i] > 0 for i in range(K.l)])
 			i = K.intg[m,n]
 			
 			G[n,m] = sum(k*t*i)/K.l - F.xy(K.x[n],K.y[n])
 			G[m,n] = sum(k*t*i)/K.l - F.xy(K.x[n],K.y[n])
 	print G
 	h = matrix(K.sigma, (K.l,1))
-
+	
 	# Optimize
+	#f=open('beta.matrix','r')
+	#F.beta = fromfile(f)
+	#f.close()
+	
 	print 'starting optimization...'
 	optimized = qp(P, q,G=G, h=h, A=A, b=b)
 	F.beta = optimized['x']
@@ -197,21 +213,21 @@ def run():
 	F.beta.tofile(f)
 	f.close()
 	print 'beta saved to file'
-
+	
 	# test on training data
 	x_1 = list()
 	y_1 = list()
 	
 	for i in range(K.l):
-		x_1.append( F.r(K.x[i]) )
-		y_1.append( K.y[i] )
+		x_1.append( F.r(K.x[i])[0] )
+		y_1.append( K.y[i][0] )
 		
 	plot(x_1,label="x'")
 	plot(y_1,label="y")
-	plot(F.beta,label="beta")
+	
 	legend()
 	show()
-	
+
 def help():
 	print __doc__
 	return 0
