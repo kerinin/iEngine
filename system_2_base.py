@@ -16,8 +16,7 @@
 # all optimization and clustering is done transparently at the time of a 
 # data request	
 
-import time
-import datetime
+from datetime import *
 
 class cluster_space_base:
 # a cluster of functions
@@ -27,7 +26,7 @@ class cluster_space_base:
 	f = list()	# list of functions to cluster
 	C = list()		# list of defined clusters	
 	
-	def __init__(self, t_delta=datetime.timedelta(seconds=1)):
+	def __init__(self, t_delta=timedelta(seconds=1)):
 		self.t_delta = t_delta
 		
 	def optimize(self):
@@ -43,18 +42,15 @@ class cluster_space_base:
 
 class observation_list_base(list):
 # provides a container for a series of observations
-
-	def __init__(self,*args,**kargs):
-		super(list,self).__init__(*args,**kargs)
 	
 	def interval(self,t_start, t_delta):
 	# returns a list of observations which occur between t_start and t_start + t_delta and have not yet been killed
-		pass
-		
-	def __append__(self,*arg,**karg):
-	# overloads the add operation to keep the list sorted by time
-		super(self,list).__append__(*arg,**karg)
-		self.sort(sort_time)
+		#NOTE: this is not very efficient - the list is sorted		
+		ret = list()
+		for i in self:
+			if i.t >= t_start and i.t <= (t_start + t_delta):
+				ret.append(i)
+		return ret
 
 class observation_base(list):
 # provides a representation of a single piece of data at a set time
@@ -62,7 +58,7 @@ class observation_base(list):
 	def __init__(self, val, t=None):
 		super(list,self).__init__()
 		
-		self.append( t and t or time.localtime() )
+		self.append( t and t or datetime.now() )
 		self.append( val )
 	
 	def __getattr__(self,value):
@@ -84,7 +80,7 @@ class input_base:
 	clusters = list()			# a set of clusters operating on this input
 		
 	def __init__(self):
-		self.t_cache = time.localtime()
+		self.t_cache = datetime.now()
 		
 	def add(self, val, t=None):
 	# adds an observation to the estimate
