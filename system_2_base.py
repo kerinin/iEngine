@@ -23,7 +23,7 @@ class cluster_space_base:
 	
 	t_delta = None		# the time interval length for this cluser
 	
-	f = list()	# list of functions to cluster
+	f = list()		# list of functions to cluster
 	C = list()		# list of defined clusters	
 	
 	def __init__(self, t_delta=timedelta(seconds=1)):
@@ -77,7 +77,7 @@ class input_base:
 
 	o = observation_list_class()		# a list of class observation instances defining the observations of this input
 	f = list()				# a set of all functions defined over the observations for this input
-	clusters = list()			# a set of clusters operating on this input
+	clusters = list()			# a set of cluster spaces operating on this input
 		
 	def __init__(self):
 		self.t_cache = datetime.now()
@@ -86,15 +86,22 @@ class input_base:
 	# adds an observation to the estimate
 	# if no time is specified the current system time is used
 	
-		self.o.append( observation_class(val) )
-
-	def optimize(self,t_delta,time=None):
-		raise StandardError, 'This function not implemented'
+		self.o.append( self.observation_class(val=val,t=t) )
 		
+	def attach(self,cluster_space):
+	# attaches this input to the cluster space specified
+		if not cluster in self.clusters:
+			self.clusters.append(cluster_space)
+
 	def estimate(self, time=None, hypotheses = None):
 	# estimates the input's value at time under the constraints that at the time/value pairs
 	# in hypothesis the input has the specified values.
 		
+		raise StandardError, 'This function not implemented'
+
+	def aggregate(self,estimates,time):
+	# combines multiple CPDF's into a single PDF or value
+
 		raise StandardError, 'This function not implemented'
 
 class layer_base:

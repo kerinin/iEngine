@@ -62,5 +62,13 @@ def test_observation_list():
 		observation(t=v4[0],val=v1[1]) ] )
 	assert len(o_list) == 4
 	assert o_list.interval(v2[0],(v3[0]-v2[0])) == [observation(t=v2[0],val=v1[1]),observation(t=v3[0],val=v1[1])]
-		
+
+def test_input():
+	i = input()
+	i.add(5)
+	i.add(10)
+	i.add(15)
+	i.add(20)
+	assert len(i.o) == 4
+	
 
