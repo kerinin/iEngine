@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-from system_2 import cluster_space_base
+from system_2_base import cluster_space_base
 
 class cluster_space_svc(cluster_space_base):
 		

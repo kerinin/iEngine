@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-from system_2 import input_base, function_base
+from system_2_base import input_base, function_base
 
 import sys, getopt, math, datetime, os
 from math import sqrt, sin
@@ -31,16 +31,16 @@ class function_svm(function_base):
 		
 	def __sub__(self,a):
 	# overloads the subtract function to compute distance between two functions or a function and a cluster
-		raise StandardError 'This function not implemented'
+		raise StandardError, 'This function not implemented'
 		
 	def optimize(self,data,CPDF,*args,**kargs):
 	# optimizes data using the specified Conditional Probability Distribution Function estimator
-		raise StandardError 'This function not implemented'
+		raise StandardError, 'This function not implemented'
 		
 	def reg(self,t):
 	# evaluates the most function at time t
-		raise StandardError 'This function not implemented'
+		raise StandardError, 'This function not implemented'
 		
 	def den(self,t):
 	# returns a probability density over the range of the function at time t
-		raise StandardError 'This function not implemented'
+		raise StandardError, 'This function not implemented'
