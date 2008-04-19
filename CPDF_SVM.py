@@ -1,36 +1,32 @@
 
+from system_2 import input_base, function_base
 
-class SVM:
-# A CPDF estimator based on the SVM architecture.
-# 
-# takes one parameter which controls how many support vectors from the data set
-# are used in the estimation.  This parameter controls both the compression
-# generalization, and the smoothing of the resulting function
+class input_svm(input_base):
 	
-	gamma = None						# smoothness / sparseness parameter for kernel computations
-	
-	def __init__(self, gamma=None):
-		self.gamma = gamma
+	def optimize(self,t_delta,time=None):
+		raise StandardError, 'This function not implemented'
 		
-	def optimize(self, data, gamma):
-	# determines the optimal SV's and weights for the given data with the given smoothing parameter
+	def estimate(self, time=None, hypotheses = None):
+	# estimates the input's value at time under the constraints that at the time/value pairs
+	# in hypothesis the input has the specified values.
 		
-		# SVM stuff here...
+		raise StandardError, 'This function not implemented'
+
+class function_svm(function_base):
+# a function describing the behavior of an input over a specific observed time interval
 		
-		return CPDF(SV,beta)
+	def __sub__(self,a):
+	# overloads the subtract function to compute distance between two functions or a function and a cluster
+		raise StandardError 'This function not implemented'
 		
-class CPDF:
-# A container for the optimiztion parameters which provides regression and PDF's based on 
-# those parameters
-	SV = list()
-	beta = list()
-	
-	def __init__(self,SV,beta):
-		self.SV = SV
-		self.beta = beta
+	def optimize(self,data,CPDF,*args,**kargs):
+	# optimizes data using the specified Conditional Probability Distribution Function estimator
+		raise StandardError 'This function not implemented'
 		
-	def reg(self,x):
-		pass
+	def reg(self,t):
+	# evaluates the most function at time t
+		raise StandardError 'This function not implemented'
 		
-	def den(self,x):
-		pass
+	def den(self,t):
+	# returns a probability density over the range of the function at time t
+		raise StandardError 'This function not implemented'
