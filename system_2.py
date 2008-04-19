@@ -1,3 +1,4 @@
+#! /usr/bin/env python
 
 from CPDF_SVM import *
 from cluster_SVC import *

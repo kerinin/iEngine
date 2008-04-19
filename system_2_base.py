@@ -1,4 +1,4 @@
-
+#! /usr/bin/env python
 
 # This module provides a general class heirarchy and set of methods to implement what I'm calling system 2, and attempts to make
 # no assumptions about the nature of the underlying optimization algorithms.  The only specific algorithms included in this code
@@ -65,7 +65,7 @@ class cluster_space_base:
 	
 	t_delta = None		# the time interval length for this cluser
 	
-	functions = list()	# list of functions to cluster
+	f = list()	# list of functions to cluster
 	C = list()		# list of defined clusters	
 	
 	def __init__(self, t_delta=timedelta(seconds=1)):
@@ -87,9 +87,7 @@ class cluster_base:
 
 	output = None		# The input at a higher level which this cluster maps to
 	t_delta = None		# the time delta for this cluster
-	
-	def __init__(self):
-		pass
+
 		
 class input_base:
 # provides a representation of a source of information to the system.
@@ -104,15 +102,15 @@ class input_base:
 		
 	def __init__(self):
 		self.t_cache = time.now()
-	
-	def optimize(self,t_delta,time=None):
-		raise StandardError, 'This function not implemented'
 		
 	def add(self, val, t=None):
 	# adds an observation to the estimate
 	# if no time is specified the current system time is used
 	
 		self.o.append( observation_class(val) )
+
+	def optimize(self,t_delta,time=None):
+		raise StandardError, 'This function not implemented'
 		
 	def estimate(self, time=None, hypotheses = None):
 	# estimates the input's value at time under the constraints that at the time/value pairs

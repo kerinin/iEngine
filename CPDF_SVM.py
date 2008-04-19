@@ -1,5 +1,19 @@
+#! /usr/bin/env python
 
 from system_2 import input_base, function_base
+
+import sys, getopt, math, datetime, os
+from math import sqrt, sin
+
+from numpy import *
+from pylab import plot,bar,show,legend,title,xlabel,ylabel,axis
+
+from cvxopt.base import *
+from cvxopt.blas import dot 
+from cvxopt.solvers import qp
+
+from cvxopt import solvers
+solvers.options['show_progress'] = False
 
 class input_svm(input_base):
 	
