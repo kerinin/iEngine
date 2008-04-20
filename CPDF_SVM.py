@@ -15,6 +15,43 @@ from cvxopt.solvers import qp
 from cvxopt import solvers
 solvers.options['show_progress'] = False
 
+
+class function_svm(function_base):
+# implements functional estimation using the SVM architecture
+
+	# kill = None		# the kill time of the function
+
+	SV = list()		# list of SV functions
+	beta = list()		# list of SV multipliers
+	_function_d = None	# list of computed distances to different functions
+	
+	def __sub__(self,a):
+		raise StandardError, 'This function not implemented'
+		
+	def optimize(self,data,*args,**kargs):
+		
+		pass
+		# get kernel values
+		
+		# construct objective functions
+		
+		# construct equality constraints
+
+		# construct inequality constraints
+
+		# optimize and set variables
+		
+	def reg(self,t):
+		
+		ret = zeros(self.kernel.n)
+		for i in range(self.kernel.l):
+			ret += self.kernel.y[i]*self.beta[i]*self.kernel._calc(x,self.kernel.x[i])
+		return ret
+		
+	def den(self,t):
+		
+		raise StandardError, 'This function not implemented'
+		
 class input_svm(input_base):
 # implements inputs using the SVM architecture
 
@@ -60,38 +97,3 @@ class input_svm(input_base):
 	def aggregate(self,estimates,time):
 		pass
 
-class function_svm(function_base):
-# implements functional estimation using the SVM architecture
-
-	# kill = None		# the kill time of the function
-
-	SV = list()		# list of SV functions
-	beta = list()		# list of SV multipliers
-	_function_d = None	# list of computed distances to different functions
-	
-	def __sub__(self,a):
-		raise StandardError, 'This function not implemented'
-		
-	def optimize(self,data,*args,**kargs):
-		
-		pass
-		# get kernel values
-		
-		# construct objective functions
-		
-		# construct equality constraints
-
-		# construct inequality constraints
-
-		# optimize and set variables
-		
-	def reg(self,t):
-		
-		ret = zeros(self.kernel.n)
-		for i in range(self.kernel.l):
-			ret += self.kernel.y[i]*self.beta[i]*self.kernel._calc(x,self.kernel.x[i])
-		return ret
-		
-	def den(self,t):
-		
-		raise StandardError, 'This function not implemented'
