@@ -63,6 +63,11 @@ class input_svm(input_base):
 	t_cache = {}					# caches the most recent function (as end of interval)
 	kernel = kernel()				# the kernel function used for estimating functions	
 	
+	def add(self,*args,**kargs):
+		super(input_base,self).add(*args,**kargs)
+		
+		self.kernel.add( self.o[-1] )
+		
 	def estimate(self, time=None, hypotheses = None):
 		
 		# generate any missing functions needed by clusters using this input
@@ -99,71 +104,63 @@ class input_svm(input_base):
 		pass
 
 class kernel:
-	def __init__(self,data,gamma,sigma_q):
-		# set variables
-		self.l = len(data)-1
-		try:
-			self.n = len(data[0])
-		except TypeError:
-			self.n = 1
-		self.x = data[:-1]
-		self.y = data[1:]
-		self.xx = matrix(0.0,(self.l,self.l))
-		self.yy = matrix(0.0,(self.l,self.l))
-		self.intg = matrix(0.0,(self.l,self.l))
-		self.gamma = gamma
-		self.sigma = .5
-
-		
-		# calculate xx matrix
-		#f=open('xx.matrix','r')
-		#self.xx.fromfile(f)
-		#f.close()
-		
-		for i in range(self.l):
-			for j in range(i,self.l):
-				val = self._calc(self.x[i],self.x[j])
-				self.xx[i,j] = val
-				self.xx[j,i] = val
-		# normalize
-		self.xx /= (sum(self.xx)/self.l)
-		f=open('xx.matrix','w')
-		self.xx.tofile(f)
-		f.close()
-		print 'xx saved to file'
-		
-		# calculate yy matrix
-		#f=open('yy.matrix','r')
-		#self.yy.fromfile(f)
-		#f.close()
-		
-		for i in range(self.l):
-			for j in range(i,self.l):
-				val = self._calc(self.y[i],self.y[j])
-				self.yy[i,j] = val
-				self.yy[j,i] = val
-		# normalize
-		self.yy /= (sum(self.yy)/self.l)
-		f=open('yy.matrix','w')
-		self.yy.tofile(f)
-		f.close()
-		print 'yy saved to file'
+	l = 0				# the number of data points cached so far
+	n = 1			# the dimensionality of the data (assumed to be one in all cases here)
 	
-		# calculate integration matrix
-		#f=open('intg.matrix','r')
-		#self.intg.fromfile(f)
-		#f.close()
+	x = list()			# the x values calculated for this kernel (time)
+	y = list()			# the y values caluclated for this kernel (value)
+	xx = None		# kernel values between time values
+	yy = None		# kernel values between values
+	intg = None		# integrals for values of y
+	gamma = None	# smoothing variable
+	sigma_q = None	# quantile to consider for the residual principal 
+	sigma = 1		# calculated sigma value from last observation and given quantile
+	
+	def __init__(self,data,gamma=.5,sigma_q=.5):
+		self.gamma = gamma
+		self.sigma_q = sigma_q
 		
-		print 'computing integrals...'
-		for i in range(self.l):
-			for j in range(i,self.l):
-				val = self.int(i,j)
-				self.intg[i,j] = val
-				self.intg[j,i] = val
-		f=open('intg.matrix','w')
-		self.intg.tofile(f)
-		f.close()
-		print 'intg saved to file'
+	def add(self,observation):
+		if not observation.t in self.x or not observation.val in self.y:
+			# set variables
+			self.l += 1
+			
+			self.intg = matrix(0.0,(self.l,self.l))
+			
+			if not observation.t in self.x:
+				self.x.append(observation.t)
+				self.xx = matrix(0.0,(self.l,self.l))
+				
+				#NOTE: this should only be for the new observation
+				for i in range(self.l):
+					for j in range(i,self.l):
+						val = self._calc(self.x[i],self.x[j])
+						self.xx[i,j] = val
+						self.xx[j,i] = val
+				# normalize
+				self.xx /= (sum(self.xx)/self.l)
+					
+			if not observation.val in self.y:
+				self.y.append(observation.val)
+				self.yy = matrix(0.0,(self.l,self.l))
+				
+				#NOTE: this should only be for the new observation
+				for i in range(self.l):
+					for j in range(i,self.l):
+						val = self._calc(self.y[i],self.y[j])
+						self.yy[i,j] = val
+						self.yy[j,i] = val
+				# normalize
+				self.yy /= (sum(self.yy)/self.l)
+				
+				#NOTE: this should only be for the new observation
+				for i in range(self.l):
+					for j in range(i,self.l):
+						val = self.int(i,j)
+						self.intg[i,j] = val
+						self.intg[j,i] = val
+						
+			self.sigma = None #NOTE: this should be the quantile code - figure out what the hell to do
 		
 	def int(self,i,j):
 		# \int_{-\infty}^{y_i} K_\gamma{y_i,y_j}dy_i
