@@ -62,11 +62,6 @@ class input_svm(input_base):
 		
 	t_cache = {}					# caches the most recent function (as end of interval)
 	kernel = kernel()				# the kernel function used for estimating functions	
-	
-	def add(self,*args,**kargs):
-		super(input_base,self).add(*args,**kargs)
-		
-		self.kernel.add( self.o[-1] )
 		
 	def estimate(self, time=None, hypotheses = None):
 		
@@ -104,63 +99,57 @@ class input_svm(input_base):
 		pass
 
 class kernel:
-	l = 0				# the number of data points cached so far
-	n = 1			# the dimensionality of the data (assumed to be one in all cases here)
+	l = 0							# the number of data points cached so far
+	n = 1						# the dimensionality of the data (assumed to be one in all cases here)
 	
-	x = list()			# the x values calculated for this kernel (time)
-	y = list()			# the y values caluclated for this kernel (value)
-	xx = None		# kernel values between time values
-	yy = None		# kernel values between values
-	intg = None		# integrals for values of y
-	gamma = None	# smoothing variable
-	sigma_q = None	# quantile to consider for the residual principal 
-	sigma = 1		# calculated sigma value from last observation and given quantile
+	gamma = None				# smoothing variable
+	sigma_q = None				# quantile to consider for the residual principal 
+	sigma = 1					# calculated sigma value from last observation and given quantile
 	
 	def __init__(self,data,gamma=.5,sigma_q=.5):
 		self.gamma = gamma
 		self.sigma_q = sigma_q
 		
-	def add(self,observation):
-		if not observation.t in self.x or not observation.val in self.y:
-			# set variables
-			self.l += 1
+	def load(self,observations):
+		# set variables
+		self.l = len(observations)
+		self.x = list()
+		self.y = list()
+		
+		for observation in observations:
+			self.x.append(observation.t)
+			self.y.append(observation.val)
 			
-			self.intg = matrix(0.0,(self.l,self.l))
-			
-			if not observation.t in self.x:
-				self.x.append(observation.t)
-				self.xx = matrix(0.0,(self.l,self.l))
-				
-				#NOTE: this should only be for the new observation
-				for i in range(self.l):
-					for j in range(i,self.l):
-						val = self._calc(self.x[i],self.x[j])
-						self.xx[i,j] = val
-						self.xx[j,i] = val
-				# normalize
-				self.xx /= (sum(self.xx)/self.l)
-					
-			if not observation.val in self.y:
-				self.y.append(observation.val)
-				self.yy = matrix(0.0,(self.l,self.l))
-				
-				#NOTE: this should only be for the new observation
-				for i in range(self.l):
-					for j in range(i,self.l):
-						val = self._calc(self.y[i],self.y[j])
-						self.yy[i,j] = val
-						self.yy[j,i] = val
-				# normalize
-				self.yy /= (sum(self.yy)/self.l)
-				
-				#NOTE: this should only be for the new observation
-				for i in range(self.l):
-					for j in range(i,self.l):
-						val = self.int(i,j)
-						self.intg[i,j] = val
-						self.intg[j,i] = val
-						
-			self.sigma = None #NOTE: this should be the quantile code - figure out what the hell to do
+		self.xx = matrix(0.0,(self.l,self.l))
+		self.yy = matrix(0.0,(self.l,self.l))
+		self.intg = matrix(0.0,(self.l,self.l))
+		self.gamma = gamma
+		self.sigma = .5
+		
+		# calculate x distances
+		for i in range(self.l):
+			for j in range(i,self.l):
+				val = self._calc(self.x[i],self.x[j])
+				self.xx[i,j] = val
+				self.xx[j,i] = val
+		# normalize
+		self.xx /= (sum(self.xx)/self.l)
+		
+		# calculate y distances
+		for i in range(self.l):
+			for j in range(i,self.l):
+				val = self._calc(self.y[i],self.y[j])
+				self.yy[i,j] = val
+				self.yy[j,i] = val
+		# normalize
+		self.yy /= (sum(self.yy)/self.l)
+		
+		# calculate integrals
+		for i in range(self.l):
+			for j in range(i,self.l):
+				val = self.int(i,j)
+				self.intg[i,j] = val
+				self.intg[j,i] = val
 		
 	def int(self,i,j):
 		# \int_{-\infty}^{y_i} K_\gamma{y_i,y_j}dy_i
