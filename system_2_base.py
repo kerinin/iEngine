@@ -18,40 +18,6 @@
 
 from datetime import *
 
-class cluster_space_base:
-# a cluster of functions
-	
-	t_delta = None		# the time interval length for this cluser
-	
-	f = list()		# list of functions to cluster
-	C = list()		# list of defined clusters	
-	
-	def __init__(self, t_delta=timedelta(seconds=1)):
-		self.t_delta = t_delta
-		
-	def optimize(self):
-	# determines the optimal weights for clustering the functions
-	# defined in self.f and updates the clusters defined over the data
-		raise StandardError, 'This function not implemented'
-		
-	def infer(self, CPDF, time):
-	# returns a PDF at the given time based on proximity of *complete* intervals
-	# to the *partial* interval (or hypothesis) given by CPDF for *each* p value
-	# specified for this cluster space
-		raise StandardError, 'This function not implemented'
-
-class observation_list_base(list):
-# provides a container for a series of observations
-	
-	def interval(self,t_start, t_delta):
-	# returns a list of observations which occur between t_start and t_start + t_delta and have not yet been killed
-		#NOTE: this is not very efficient - the list is sorted		
-		ret = list()
-		for i in self:
-			if i.t >= t_start and i.t <= (t_start + t_delta):
-				ret.append(i)
-		return ret
-
 class observation_base(list):
 # provides a representation of a single piece of data at a set time
 
@@ -66,7 +32,44 @@ class observation_base(list):
 			return self[1]
 		elif value == 't':
 			return self[0]
+			
+class observation_list_base(list):
+# provides a container for a series of observations
+	
+	def interval(self,t_start, t_delta):
+	# returns a list of observations which occur between t_start and t_start + t_delta and have not yet been killed
+		#NOTE: this is not very efficient - the list is sorted		
+		ret = list()
+		for i in self:
+			if i.t >= t_start and i.t <= (t_start + t_delta):
+				ret.append(i)
+		return ret
 
+class function_base:
+# a function describing the behavior of an input over a specific observed time interval
+	
+	kill = None		# the kill time of the function
+	
+	def __init__(self,data=None,*args,**kargs):
+		if data:
+			self.optimize(data, *args, **kargs)
+		
+	def __sub__(self,a):
+	# overloads the subtract function to compute distance between two functions or a function and a cluster
+		raise StandardError, 'This function not implemented'
+		
+	def optimize(self,data,*args,**kargs):
+	# optimizes data using the specified Conditional Probability Distribution Function estimator
+		raise StandardError, 'This function not implemented'
+		
+	def reg(self,t):
+	# evaluates the most function at time t
+		raise StandardError, 'This function not implemented'
+		
+	def den(self,t):
+	# returns a probability density over the range of the function at time t
+		raise StandardError, 'This function not implemented'
+		
 class input_base:
 # provides a representation of a source of information to the system.
 # inputs take single scalar values and a timestamp.  Each component of a
@@ -101,6 +104,34 @@ class input_base:
 	def aggregate(self,estimates,time):
 	# combines multiple CPDF's into a single PDF or value
 
+		raise StandardError, 'This function not implemented'
+	
+class cluster_base:
+# representation of a cluster in some space
+
+	output = None		# The input at a higher level which this cluster maps to
+	t_delta = None		# the time delta for this cluster
+
+class cluster_space_base:
+# a cluster of functions
+	
+	t_delta = None		# the time interval length for this cluser
+	
+	f = list()		# list of functions to cluster
+	C = list()		# list of defined clusters	
+	
+	def __init__(self, t_delta=timedelta(seconds=1)):
+		self.t_delta = t_delta
+		
+	def optimize(self):
+	# determines the optimal weights for clustering the functions
+	# defined in self.f and updates the clusters defined over the data
+		raise StandardError, 'This function not implemented'
+		
+	def infer(self, CPDF, time):
+	# returns a PDF at the given time based on proximity of *complete* intervals
+	# to the *partial* interval (or hypothesis) given by CPDF for *each* p value
+	# specified for this cluster space
 		raise StandardError, 'This function not implemented'
 
 class layer_base:
@@ -142,38 +173,3 @@ class sys_2_base:
 	def __init__(self,t_delta_init):
 		self.t_delta_init = t_delta_init
 		self.layers.append( self.layer_class(sys=self) )
-
-		
-class cluster_base:
-# representation of a cluster in some space
-
-	output = None		# The input at a higher level which this cluster maps to
-	t_delta = None		# the time delta for this cluster
-
-			
-class function_base:
-# a function describing the behavior of an input over a specific observed time interval
-	
-	kill = None		# the kill time of the function
-	
-	def __init__(self,data=None,*args,**kargs):
-		if data:
-			self.optimize(data, *args, **kargs)
-		
-	def __sub__(self,a):
-	# overloads the subtract function to compute distance between two functions or a function and a cluster
-		raise StandardError, 'This function not implemented'
-		
-	def optimize(self,data,*args,**kargs):
-	# optimizes data using the specified Conditional Probability Distribution Function estimator
-		raise StandardError, 'This function not implemented'
-		
-	def reg(self,t):
-	# evaluates the most function at time t
-		raise StandardError, 'This function not implemented'
-		
-	def den(self,t):
-	# returns a probability density over the range of the function at time t
-		raise StandardError, 'This function not implemented'
-		
-		

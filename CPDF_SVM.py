@@ -81,6 +81,7 @@ class function_svm(function_base):
 		
 	def optimize(self,data,*args,**kargs):
 	# optimizes data
+		pass
 		# get kernel values
 		
 		# construct objective functions
