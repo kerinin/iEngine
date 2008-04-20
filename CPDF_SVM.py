@@ -23,6 +23,8 @@ class input_svm(input_base):
 	# o = observation_list_class()		# a list of class observation instances defining the observations of this input
 	# clusters = list()			# a set of cluster spaces operating on this input
 		
+	t_cache = {}					# caches the most recent function (as end of interval)
+	
 	def estimate(self, time=None, hypotheses = None):
 		
 		# generate any missing functions needed by clusters using this input
@@ -34,10 +36,13 @@ class input_svm(input_base):
 		
 		estimates = list()
 		for cluster in self.clusters:
-			#NOTE: this is not going to work any more	
-			# functions added to cluster, not retained
-			while self.observation_list[-1].t > self.t_cache[cluster.t_delta]:
-				self.f.append( function( self.o.interval( self.t_cache[cluster.t_delta]+cluster.t_delta, cluster.t_delta) ) )
+			# test predictive scope
+			if time - datetime.now() > cluster.t_delta:
+				break
+			
+			# generate any missing functions
+			while not cluster.t_delta in self.t_cache.keys() or self.o[-1].t > self.t_cache[cluster.t_delta]:
+				cluster.f.append( function( self.o.interval( self.t_cache[cluster.t_delta]+cluster.t_delta, cluster.t_delta) ) )
 				self.t_cache[cluster.t_delta] += cluster.t_delta
 		
 			# update cluster
@@ -46,7 +51,8 @@ class input_svm(input_base):
 			# generate estimate
 			# NOTE: this is not using the hypotheses at all currently - some method of
 			# determining the time location in intervals will be required.
-			estimates.add( cluster.infer( function( self.o.interval( time, cluster.t_delta ) ) ) )
+			known_data = function( self.o.interval(time-cluster.t_delta,cluster.t_delta) )
+			estimates.add( cluster.infer( known_data ) )
 			
 		# combine estimates
 		return self.aggregate( estimates, time )
