@@ -16,27 +16,14 @@ from cvxopt import solvers
 solvers.options['show_progress'] = False
 
 class input_svm(input_base):
+# implements inputs using the SVM architecture
 
 	# observation_class = observation_base
 	# observation_list_class = observation_list_base
 	# o = observation_list_class()		# a list of class observation instances defining the observations of this input
 	# clusters = list()			# a set of cluster spaces operating on this input
-
-	def optimize(self,t_delta,time=None):
-	# computes a function to describe the data over the time interval ending at time
-	# and starting at time-t_delta.  If time not provided, computes a function over the 
-	# time interval ending now, and starting now-t_delta
-		if not time: time = datetime.now()
-
-		# generate functions
-		for cluster in self.clusters:
-			data = self.o.interval(time,cluster.t_delta)
-			function = function(data)
-			cluster.f.append(function)
 		
 	def estimate(self, time=None, hypotheses = None):
-	# estimates the input's value at time under the constraints that at the time/value pairs
-	# in hypothesis the input has the specified values.
 		
 		# generate any missing functions needed by clusters using this input
 		#
@@ -47,7 +34,8 @@ class input_svm(input_base):
 		
 		estimates = list()
 		for cluster in self.clusters:
-			#NOTE: this is not going to work any more			
+			#NOTE: this is not going to work any more	
+			# functions added to cluster, not retained
 			while self.observation_list[-1].t > self.t_cache[cluster.t_delta]:
 				self.f.append( function( self.o.interval( self.t_cache[cluster.t_delta]+cluster.t_delta, cluster.t_delta) ) )
 				self.t_cache[cluster.t_delta] += cluster.t_delta
@@ -67,7 +55,7 @@ class input_svm(input_base):
 		pass
 
 class function_svm(function_base):
-# a function describing the behavior of an input over a specific observed time interval
+# implements functional estimation using the SVM architecture
 
 	# kill = None		# the kill time of the function
 
@@ -76,11 +64,10 @@ class function_svm(function_base):
 	_function_d = None	# list of computed distances to different functions
 	
 	def __sub__(self,a):
-	# overloads the subtract function to compute distance between two functions or a function and a cluster
 		raise StandardError, 'This function not implemented'
 		
 	def optimize(self,data,*args,**kargs):
-	# optimizes data
+		
 		pass
 		# get kernel values
 		
@@ -93,12 +80,12 @@ class function_svm(function_base):
 		# optimize and set variables
 		
 	def reg(self,t):
-	# evaluates the most likely value of the function at time t
+		
 		ret = zeros(self.kernel.n)
 		for i in range(self.kernel.l):
 			ret += self.kernel.y[i]*self.beta[i]*self.kernel._calc(x,self.kernel.x[i])
 		return ret
 		
 	def den(self,t):
-	# returns a probability density over the range of the function at time t
+		
 		raise StandardError, 'This function not implemented'
