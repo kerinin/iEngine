@@ -62,11 +62,11 @@ class function_base:
 	# optimizes data using the specified Conditional Probability Distribution Function estimator
 		raise StandardError, 'This function not implemented'
 		
-	def reg(self,t):
+	def reg(self,t,*args,**kargs):
 	# evaluates the most function at time t
 		raise StandardError, 'This function not implemented'
 		
-	def den(self,t):
+	def den(self,t,*args,**kargs):
 	# returns a probability density over the range of the function at time t
 		raise StandardError, 'This function not implemented'
 		

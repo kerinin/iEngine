@@ -24,14 +24,14 @@ class function_svm(function_base):
 	SV = list()		# list of SV functions
 	beta = list()		# list of SV multipliers
 	_function_d = None	# list of computed distances to different functions
-	
+		
 	def __sub__(self,a):
 		raise StandardError, 'This function not implemented'
 		
-	def optimize(self,data,*args,**kargs):
+	def optimize(self,data,kernel):
 		
-		pass
 		# get kernel values
+		
 		
 		# construct objective functions
 		
@@ -41,14 +41,14 @@ class function_svm(function_base):
 
 		# optimize and set variables
 		
-	def reg(self,t):
+	def reg(self,t,kernel):
 		
-		ret = zeros(self.kernel.n)
-		for i in range(self.kernel.l):
-			ret += self.kernel.y[i]*self.beta[i]*self.kernel._calc(x,self.kernel.x[i])
+		ret = zeros(kernel.n)
+		for i in range(kernel.l):
+			ret += kernel.y[i]*self.beta[i]*kernel._calc(x,kernel.x[i])
 		return ret
 		
-	def den(self,t):
+	def den(self,t,kernel):
 		
 		raise StandardError, 'This function not implemented'
 		
@@ -58,9 +58,10 @@ class input_svm(input_base):
 	# observation_class = observation_base
 	# observation_list_class = observation_list_base
 	# o = observation_list_class()		# a list of class observation instances defining the observations of this input
-	# clusters = list()			# a set of cluster spaces operating on this input
+	# clusters = list()				# a set of cluster spaces operating on this input
 		
 	t_cache = {}					# caches the most recent function (as end of interval)
+	kernel = None				# the kernel function used for estimating functions	
 	
 	def estimate(self, time=None, hypotheses = None):
 		
@@ -79,7 +80,7 @@ class input_svm(input_base):
 			
 			# generate any missing functions
 			while not cluster.t_delta in self.t_cache.keys() or self.o[-1].t > self.t_cache[cluster.t_delta]:
-				cluster.f.append( function( self.o.interval( self.t_cache[cluster.t_delta]+cluster.t_delta, cluster.t_delta) ) )
+				cluster.f.append( function( self.o.interval( self.t_cache[cluster.t_delta]+cluster.t_delta, cluster.t_delta), self.kernel ) )
 				self.t_cache[cluster.t_delta] += cluster.t_delta
 		
 			# update cluster
@@ -88,7 +89,7 @@ class input_svm(input_base):
 			# generate estimate
 			# NOTE: this is not using the hypotheses at all currently - some method of
 			# determining the time location in intervals will be required.
-			known_data = function( self.o.interval(time-cluster.t_delta,cluster.t_delta) )
+			known_data = function( self.o.interval(time-cluster.t_delta,cluster.t_delta), self.kernel )
 			estimates.add( cluster.infer( known_data ) )
 			
 		# combine estimates
