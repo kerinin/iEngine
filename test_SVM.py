@@ -3,6 +3,7 @@
 import py.test
 
 import CPDF_SVM as svm
+from system_2_base import observation_base, observation_list_base
 
 import sys, getopt, math, datetime, os
 from math import sqrt, sin
@@ -26,7 +27,27 @@ def test_sign():
 	assert not svm.sign( array([[1,2,3],[4,-5,6]]) )
 	
 def test_kernel():
-	pass
+	K = svm.kernel(gamma=.05,sigma_q=.25)
+	l = observation_list_base()
+	l.append( observation_base(val=5,t=datetime.datetime.now() ) )
+	l.append( observation_base(val=6,t=datetime.datetime.now() ) )
+	l.append( observation_base(val=7,t=datetime.datetime.now() ) )
+	l.append( observation_base(val=8,t=datetime.datetime.now() ) )
+	l.append( observation_base(val=9,t=datetime.datetime.now() ) )
+	l.append( observation_base(val=9,t=datetime.datetime.now() ) )
+	
+	K.load(l)
+	
+	assert K.x
+	assert K.y
+	assert K.xx
+	assert K.yy
+	assert K.intg
+	assert K.l == 6
+	assert K.xx.size == (K.l,K.l)
+	assert K.yy.size == (K.l,K.l)
+	assert K.intg.size == (K.l,K.l)
+	assert K.xy(1,2)
 	
 def test_function():
 	pass

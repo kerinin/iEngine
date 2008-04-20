@@ -15,6 +15,9 @@ from cvxopt.solvers import qp
 from cvxopt import solvers
 solvers.options['show_progress'] = False
 
+def timedelta_float(td):
+	return (td.days>1 and td.days or 0)*86400+td.seconds+float(td.microseconds)/1000000
+	
 def sign(x,y=0):
 	if isinstance(x, (int, long, float)):
 		return int( x > 0 )
@@ -46,8 +49,6 @@ class kernel:
 		self.xx = matrix(0.0,(self.l,self.l))
 		self.yy = matrix(0.0,(self.l,self.l))
 		self.intg = matrix(0.0,(self.l,self.l))
-		self.gamma = gamma
-		self.sigma = .5
 		
 		# calculate x distances
 		for i in range(self.l):
@@ -104,7 +105,10 @@ class kernel:
 		return sum(signmatrix)/self.l
 
 	def _calc(self,a,b):
-	 	return math.exp(-linalg.norm((a-b)/self.gamma))
+		try:
+			return math.exp(-linalg.norm((a-b)/self.gamma))
+		except TypeError:
+			return math.exp(-linalg.norm(timedelta_float(a-b)/self.gamma))
 
 		
 class function_svm(function_base):
