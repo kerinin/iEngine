@@ -15,11 +15,11 @@ from cvxopt.solvers import qp
 from cvxopt import solvers
 solvers.options['show_progress'] = False
 
-def sign(x,y):
+def sign(x,y=0):
 	if isinstance(x, (int, long, float)):
 		return int( x > 0 )
 	else:
-		return int( sum(x>y) == len(x) )
+		return int( array( x > y ).all() )
 		
 class kernel:
 	l = 0							# the number of data points cached so far
