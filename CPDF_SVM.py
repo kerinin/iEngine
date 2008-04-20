@@ -61,7 +61,7 @@ class input_svm(input_base):
 	# clusters = list()				# a set of cluster spaces operating on this input
 		
 	t_cache = {}					# caches the most recent function (as end of interval)
-	kernel = None				# the kernel function used for estimating functions	
+	kernel = kernel()				# the kernel function used for estimating functions	
 	
 	def estimate(self, time=None, hypotheses = None):
 		
@@ -98,3 +98,92 @@ class input_svm(input_base):
 	def aggregate(self,estimates,time):
 		pass
 
+class kernel:
+	def __init__(self,data,gamma,sigma_q):
+		# set variables
+		self.l = len(data)-1
+		try:
+			self.n = len(data[0])
+		except TypeError:
+			self.n = 1
+		self.x = data[:-1]
+		self.y = data[1:]
+		self.xx = matrix(0.0,(self.l,self.l))
+		self.yy = matrix(0.0,(self.l,self.l))
+		self.intg = matrix(0.0,(self.l,self.l))
+		self.gamma = gamma
+		self.sigma = .5
+
+		
+		# calculate xx matrix
+		#f=open('xx.matrix','r')
+		#self.xx.fromfile(f)
+		#f.close()
+		
+		for i in range(self.l):
+			for j in range(i,self.l):
+				val = self._calc(self.x[i],self.x[j])
+				self.xx[i,j] = val
+				self.xx[j,i] = val
+		# normalize
+		self.xx /= (sum(self.xx)/self.l)
+		f=open('xx.matrix','w')
+		self.xx.tofile(f)
+		f.close()
+		print 'xx saved to file'
+		
+		# calculate yy matrix
+		#f=open('yy.matrix','r')
+		#self.yy.fromfile(f)
+		#f.close()
+		
+		for i in range(self.l):
+			for j in range(i,self.l):
+				val = self._calc(self.y[i],self.y[j])
+				self.yy[i,j] = val
+				self.yy[j,i] = val
+		# normalize
+		self.yy /= (sum(self.yy)/self.l)
+		f=open('yy.matrix','w')
+		self.yy.tofile(f)
+		f.close()
+		print 'yy saved to file'
+	
+		# calculate integration matrix
+		#f=open('intg.matrix','r')
+		#self.intg.fromfile(f)
+		#f.close()
+		
+		print 'computing integrals...'
+		for i in range(self.l):
+			for j in range(i,self.l):
+				val = self.int(i,j)
+				self.intg[i,j] = val
+				self.intg[j,i] = val
+		f=open('intg.matrix','w')
+		self.intg.tofile(f)
+		f.close()
+		print 'intg saved to file'
+		
+	def int(self,i,j):
+		# \int_{-\infty}^{y_i} K_\gamma{y_i,y_j}dy_i
+		# When y_i is a vector of length 'n', the integral is a coordinate integral in the form
+		# \int_{-\infty}^{y_p^1} ... \int_{-\infty}^{y_p^n} K_\gamma(y',y_i) dy_p^1 ... dy_p^n
+		# note that self.y is a vector array, while self.yy is a matrix of K values
+		# 
+		# After going over the math, the integral of the function should be calculated as follows
+		# take the sum of K for all values of y which have at least one dimension less than y_p
+		# times the inverse of lxn where l is the total number of y and n is the dimensionality of y
+		
+		# select the row (*,j) of self.yy 
+		yi = self.yy[self.l*j:self.l*(j+1)]
+		for n in range(self.l):
+			# scale K according to how many dimensions are less than y_p 
+			# ( note that this also zeroes out y which are larger than y_p)
+			yi[n,0] = yi[n,0]*(sum(self.y[n]<self.y[i]))
+			
+		# return the sum of the remaining values of K divided by lxn where l is the number of y and n is the dimensionality
+		return sum(yi)/(self.l*self.n)
+
+	def _calc(self,a,b):
+	 	return math.exp(-linalg.norm((a-b)/self.gamma))
