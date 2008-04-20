@@ -76,7 +76,6 @@ class input_base:
 	observation_list_class = observation_list_base
 
 	o = observation_list_class()		# a list of class observation instances defining the observations of this input
-	f = list()				# a set of all functions defined over the observations for this input
 	clusters = list()			# a set of cluster spaces operating on this input
 		
 	def __init__(self):
@@ -165,7 +164,7 @@ class function_base:
 	# overloads the subtract function to compute distance between two functions or a function and a cluster
 		raise StandardError, 'This function not implemented'
 		
-	def optimize(self,data,CPDF,*args,**kargs):
+	def optimize(self,data,*args,**kargs):
 	# optimizes data using the specified Conditional Probability Distribution Function estimator
 		raise StandardError, 'This function not implemented'
 		

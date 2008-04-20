@@ -71,4 +71,5 @@ def test_input():
 	i.add(20)
 	assert len(i.o) == 4
 	
+	
 
