@@ -161,14 +161,14 @@ class function_svm(function_base):
 		optimized = qp(P, q,G=G,h=h,A=A, b=b)
 		for i in range(len(optimized['x'])):
 			if optimized['x'][i]:
-				self.SV.append( K.x[i] )
+				self.SV.append( (K.x[i],K.y[i]) )
 				self.beta.append( optimized['x'][i] )
 		
 		
 	def reg(self,x):
-		ret = zeros(self.kernel.n)
-		for i in range(self.kernel.l):
-			ret += self.kernel.y[i]*self.beta[i]*self.kernel._calc(x,self.kernel.x[i])
+		ret = 0
+		for i in range(len(self.SV)):
+			ret += self.SV[i][1]*self.beta[i]*self.kernel._calc(x,self.SV[i][0])
 		return ret
 		
 	def den(self,t):
