@@ -30,7 +30,7 @@ class kernel:
 	
 	gamma = None				# smoothing variable
 	sigma_q = None				# quantile to consider for the residual principal 
-	sigma = 1					# calculated sigma value from last observation and given quantile
+	sigma = 1.0					# calculated sigma value from last observation and given quantile
 	
 	def __init__(self,gamma=.5,sigma_q=.5):
 		self.gamma = gamma
@@ -74,6 +74,8 @@ class kernel:
 				val = self.int(i,j)
 				self.intg[i,j] = val
 				self.intg[j,i] = val
+				
+		return self
 		
 	def int(self,i,j):
 	# \int_{-\infty}^{y_i} K_\gamma{y_i,y_j}dy_i
@@ -124,8 +126,7 @@ class function_svm(function_base):
 		raise StandardError, 'This function not implemented'
 		
 	def optimize(self,data,kernel):
-		K = kernel
-		F = CPDF(data,kernel)
+		K = kernel.load(data)
 		
 		# construct objective functions
 		P = mul(K.xx,K.yy)
@@ -138,14 +139,13 @@ class function_svm(function_base):
 		# construct inequality constraints
 		G = matrix(0.0, (K.l,K.l))
 		for m in range(K.l):		
-			print "Inequality (%s,n) of %s calculated" % (m,K.l)
 			k = K.xx[m::K.l]
 			
 			for n in range(m,K.l):
 				if K.n > 1:
-					t =array( [min(K.x[n] - K.x[i]) > 0 for i in range(K.l)] )
+					t =array( [min(K.x[n] - K.x[i]) > datetime.timedelta() for i in range(K.l)] )
 				else:
-					t = array( [K.x[n] - K.x[i] > 0 for i in range(K.l)])
+					t = array( [K.x[n] - K.x[i] > datetime.timedelta() for i in range(K.l)])
 				i = K.intg[m,n]
 				
 				G[n,m] = sum(k*t*i)/K.l - K.xy(K.x[n],K.y[n])
@@ -153,14 +153,20 @@ class function_svm(function_base):
 		h = matrix(K.sigma, (K.l,1))
 		
 		# optimize and set variables
-		optimized = qp(P, q,G=G, h=h, A=A, b=b)
+		print P
+		print q
+		print G
+		print h
+		print A
+		print b
+		optimized = qp(P, q,G=G,h=h,A=A, b=b)
 		for i in range(len(optimized['x'])):
 			if optimized['x'][i]:
-				self.SV.append( F.x[i] )
+				self.SV.append( K.x[i] )
 				self.beta.append( optimized['x'][i] )
 		
 		
-	def reg(self,t,kernel):
+	def reg(self,x,kernel):
 		
 		ret = zeros(kernel.n)
 		for i in range(kernel.l):
@@ -171,12 +177,12 @@ class function_svm(function_base):
 		
 		raise StandardError, 'This function not implemented'
 		
-	def equality_check(self):
-		c_matrix = matrix(0.0,(self.l,self.l))
-		for i in range(self.l):
-			for j in range(self.l):
-				c_matrix[i,j] = self.beta[j]*self.kernel.xx[i,j]/self.l
-		return sum(c_matrix)
+	def equality_check(self,kernel):
+		c_matrix = matrix(0.0,(kernel.l,kernel.l))
+		for i in range(kernel.l):
+			for j in range(kernel.l):
+				c_matrix[i,j] = (self.beta[j] and self.beta[j]*kernel.xx[i,j]/kernel.l or 0)
+		return abs( sum(c_matrix) - 1.0 ) < .0001
 
 		
 class input_svm(input_base):

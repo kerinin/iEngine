@@ -50,7 +50,19 @@ def test_kernel():
 	assert K.xy(1,2)
 	
 def test_function():
-	pass
+	K = svm.kernel(gamma=.05,sigma_q=.25)
+	l = observation_list_base()
+	test_t = datetime.datetime.now()
+	l.append( observation_base(val=5,t=test_t ) )
+	l.append( observation_base(val=6,t=datetime.datetime.now() ) )
+	l.append( observation_base(val=7,t=datetime.datetime.now() ) )
+	l.append( observation_base(val=8,t=datetime.datetime.now() ) )
+	l.append( observation_base(val=9,t=datetime.datetime.now() ) )
+	l.append( observation_base(val=9,t=datetime.datetime.now() ) )
+	
+	F = svm.function_svm(l,K)
+	assert F.equality_check(K), F.equality_check(K)
+	assert abs( F.reg(test_t,K) - 5) < .001
 	
 def test_input():
 	pass
