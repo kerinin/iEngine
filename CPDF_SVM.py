@@ -176,10 +176,12 @@ class function_svm(function_base):
 		raise StandardError, 'This function not implemented'
 		
 	def equality_check(self):
-		c_matrix = matrix(0.0,(self.kernel.l,self.kernel.l))
-		for i in range(self.kernel.l):
-			for j in range(self.kernel.l):
-				c_matrix[i,j] = (self.beta[j] and self.beta[j]*self.kernel.xx[i,j]/self.kernel.l or 0)
+		l = len(self.SV)
+		c_matrix = matrix(0.0,(l,l))
+		for i in range(l):
+			for j in range(i,l):
+				val = (self.beta[j]*self.kernel._calc(self.SV[i][0],self.SV[j][0])/l)
+				c_matrix[i,j] = val
 		return abs( sum(c_matrix) - 1.0 ) < .0001
 
 		
