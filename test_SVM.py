@@ -61,8 +61,9 @@ def test_function():
 	l.append( observation_base(val=9,t=datetime.datetime.now() ) )
 	
 	F = svm.function_svm(l,K)
-	assert F.equality_check(K), F.equality_check(K)
-	assert abs( F.reg(test_t,K) - 5) < .001
+	assert F.equality_check(), F.equality_check()
+	assert abs( F.reg(test_t) - 5) < .001
+	assert len(F.SV) <= 6
 	
 def test_input():
 	pass

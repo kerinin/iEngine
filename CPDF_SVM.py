@@ -117,16 +117,21 @@ class function_svm(function_base):
 # implements functional estimation using the SVM architecture
 
 	# kill = None			# the kill time of the function
-
+	
+	kernel = None		# kernel for this function
 	SV = list()			# list of SV functions
 	beta = list()			# list of SV multipliers
 	_function_d = None	# list of computed distances to different functions
 		
+	def __init__(self,data=None,kernel=None,*args,**kargs):
+		self.kernel = kernel
+		function_base.__init__(self,data,*args,**kargs)
+			
 	def __sub__(self,a):
 		raise StandardError, 'This function not implemented'
 		
-	def optimize(self,data,kernel):
-		K = kernel.load(data)
+	def optimize(self,data):
+		K = self.kernel.load(data)
 		
 		# construct objective functions
 		P = mul(K.xx,K.yy)
@@ -153,12 +158,6 @@ class function_svm(function_base):
 		h = matrix(K.sigma, (K.l,1))
 		
 		# optimize and set variables
-		print P
-		print q
-		print G
-		print h
-		print A
-		print b
 		optimized = qp(P, q,G=G,h=h,A=A, b=b)
 		for i in range(len(optimized['x'])):
 			if optimized['x'][i]:
@@ -166,22 +165,21 @@ class function_svm(function_base):
 				self.beta.append( optimized['x'][i] )
 		
 		
-	def reg(self,x,kernel):
-		
-		ret = zeros(kernel.n)
-		for i in range(kernel.l):
-			ret += kernel.y[i]*self.beta[i]*kernel._calc(x,kernel.x[i])
+	def reg(self,x):
+		ret = zeros(self.kernel.n)
+		for i in range(self.kernel.l):
+			ret += self.kernel.y[i]*self.beta[i]*self.kernel._calc(x,self.kernel.x[i])
 		return ret
 		
-	def den(self,t,kernel):
+	def den(self,t):
 		
 		raise StandardError, 'This function not implemented'
 		
-	def equality_check(self,kernel):
-		c_matrix = matrix(0.0,(kernel.l,kernel.l))
-		for i in range(kernel.l):
-			for j in range(kernel.l):
-				c_matrix[i,j] = (self.beta[j] and self.beta[j]*kernel.xx[i,j]/kernel.l or 0)
+	def equality_check(self):
+		c_matrix = matrix(0.0,(self.kernel.l,self.kernel.l))
+		for i in range(self.kernel.l):
+			for j in range(self.kernel.l):
+				c_matrix[i,j] = (self.beta[j] and self.beta[j]*self.kernel.xx[i,j]/self.kernel.l or 0)
 		return abs( sum(c_matrix) - 1.0 ) < .0001
 
 		
