@@ -36,11 +36,17 @@ class kernel:
 		self.gamma = gamma
 		self.sigma_q = sigma_q
 		
-	def load(self,observations):
-		# set variables
-		self.l = len(observations)
+	def flush(self):
 		self.x = list()
 		self.y = list()
+		self.xx = None
+		self.yy = None
+		self.intg = None
+		
+	def load(self,observations):
+		# set variables
+		self.flush()
+		self.l = len(observations)
 		
 		for observation in observations:
 			self.x.append(observation.t)
@@ -164,6 +170,8 @@ class function_svm(function_base):
 				self.SV.append( (K.x[i],K.y[i]) )
 				self.beta.append( optimized['x'][i] )
 		
+		# release resources from kernel cache
+		K.flush()
 		
 	def reg(self,x):
 		ret = 0
