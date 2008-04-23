@@ -3,6 +3,7 @@
 import py.test
 
 import CPDF_SVM as svm
+import system_2
 from system_2_base import observation_base, observation_list_base
 
 import sys, getopt, math, datetime, os
@@ -66,5 +67,17 @@ def test_function():
 	assert len(F.SV) <= 6
 	
 def test_input():
-	pass
+	S = system_2.sys_2(t_delta_init=datetime.timedelta(seconds=1))
+	L = S.layers[0]
+	C = L.cluster_spaces[0]
+	I = L.add_input()
+	I.attach(C)
+	I.add( observation_base(val=5,t=datetime.datetime.now() ) )
+	I.add( observation_base(val=6,t=datetime.datetime.now() ) )
+	I.add( observation_base(val=7,t=datetime.datetime.now() ) )
+	t_val = datetime.datetime.now()
+	I.add( observation_base(val=8,t=t_val ) )
+	I.add( observation_base(val=9,t=datetime.datetime.now() ) )
+	I.add( observation_base(val=9,t=datetime.datetime.now() ) )
 	
+	#assert I.estimate(t_val)

@@ -74,16 +74,14 @@ class input_base:
 # provides a representation of a source of information to the system.
 # inputs take single scalar values and a timestamp.  Each component of a
 # multi-dimensional source of information should have its own input instance
-	
+
 	observation_class = observation_base
 	observation_list_class = observation_list_base
 
-	o = observation_list_class()		# a list of class observation instances defining the observations of this input
-	clusters = list()			# a set of cluster spaces operating on this input
-		
-	def __init__(self):
-		self.t_cache = datetime.now()
-		
+	def __init__(self,*args,**kargs):
+		self.o = self.observation_list_class()		# a list of class observation instances defining the observations of this input
+		self.cluster_spaces = list()			# a set of cluster spaces operating on this input
+	
 	def add(self, val, t=None):
 	# adds an observation to the estimate
 	# if no time is specified the current system time is used
@@ -92,8 +90,8 @@ class input_base:
 		
 	def attach(self,cluster_space):
 	# attaches this input to the cluster space specified
-		if not cluster in self.clusters:
-			self.clusters.append(cluster_space)
+		if not cluster_space in self.cluster_spaces:
+			self.cluster_spaces.append(cluster_space)
 
 	def estimate(self, time=None, hypotheses = None):
 	# estimates the input's value at time under the constraints that at the time/value pairs
@@ -149,7 +147,7 @@ class layer_base:
 		self.add_cluster_space()
 		
 	def add_input(self):
-		i = input_class()
+		i = self.input_class()
 		self.inputs.append(i)
 		return i
 	

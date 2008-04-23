@@ -199,9 +199,9 @@ class input_svm(input_base):
 	# observation_class = observation_base
 	# observation_list_class = observation_list_base
 	# o = observation_list_class()		# a list of class observation instances defining the observations of this input
-	# clusters = list()				# a set of cluster spaces operating on this input
+	# cluster_spaces = list()				# a set of cluster spaces operating on this input
 		
-	t_cache = {}					# caches the most recent function (as end of interval)
+	t_cache = dict()				# caches the most recent function (as end of interval)
 	kernel = kernel()				# the kernel function used for estimating functions	
 		
 	def estimate(self, time=None, hypotheses = None):
@@ -214,16 +214,20 @@ class input_svm(input_base):
 		# of the most recent observation
 		
 		estimates = list()
-		for cluster in self.clusters:
+		for cluster in self.cluster_spaces:
 			# test predictive scope
-			if time - datetime.now() > cluster.t_delta:
+			if time - datetime.datetime.now() > cluster.t_delta:
 				break
 			
 			# generate any missing functions
-			while not cluster.t_delta in self.t_cache.keys() or self.o[-1].t > self.t_cache[cluster.t_delta]:
-				cluster.f.append( function( self.o.interval( self.t_cache[cluster.t_delta]+cluster.t_delta, cluster.t_delta), self.kernel ) )
-				self.t_cache[cluster.t_delta] += cluster.t_delta
-		
+			while not str(timedelta_float(cluster.t_delta)) in self.t_cache.keys() or self.o[-1].t > self.t_cache[str(timedelta_float(cluster.t_delta))]:
+				try:
+					cluster.f.append( function_svm( self.o.interval( self.t_cache[str( timedelta_float(cluster.t_delta))]+cluster.t_delta, cluster.t_delta), self.kernel ) )
+					self.t_cache[str(timedelta_float(cluster.t_delta))] += cluster.t_delta
+				except KeyError:
+					self.t_cache[str(timedelta_float(cluster.t_delta))] = self.o[0].t
+					cluster.f.append( function_svm( self.o.interval( self.t_cache[str( timedelta_float(cluster.t_delta))]+cluster.t_delta, cluster.t_delta), self.kernel ) )
+			
 			# update cluster
 			cluster.optimize()
 		
