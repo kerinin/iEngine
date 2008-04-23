@@ -48,9 +48,9 @@ class observation_list_base(list):
 class function_base:
 # a function describing the behavior of an input over a specific observed time interval
 	
-	kill = None		# the kill time of the function
-	
 	def __init__(self,data=None,*args,**kargs):
+		self.kill = None						# the kill time of the function
+		
 		if data:
 			self.optimize(data, *args, **kargs)
 		
@@ -80,7 +80,7 @@ class input_base:
 
 	def __init__(self,*args,**kargs):
 		self.o = self.observation_list_class()		# a list of class observation instances defining the observations of this input
-		self.cluster_spaces = list()			# a set of cluster spaces operating on this input
+		self.cluster_spaces = list()				# a set of cluster spaces operating on this input
 	
 	def add(self, val, t=None):
 	# adds an observation to the estimate
@@ -107,19 +107,18 @@ class input_base:
 class cluster_base:
 # representation of a cluster in some space
 
-	output = None		# The input at a higher level which this cluster maps to
-	t_delta = None		# the time delta for this cluster
+	def __init__(self):
+		self.output = None			# The input at a higher level which this cluster maps to
+		self.t_delta = None			# the time delta for this cluster
 
 class cluster_space_base:
 # a cluster of functions
-	
-	t_delta = None		# the time interval length for this cluser
-	
-	f = list()		# list of functions to cluster
-	C = list()		# list of defined clusters	
-	
+
 	def __init__(self, t_delta=timedelta(seconds=1)):
-		self.t_delta = t_delta
+		self.t_delta = None		# the time interval length for this cluser
+		
+		self.f = list()				# list of functions to cluster
+		self.C = list()				# list of defined clusters	
 		
 	def optimize(self):
 	# determines the optimal weights for clustering the functions
@@ -137,13 +136,12 @@ class layer_base:
 
 	input_class = input_base
 	cluster_space_class = cluster_space_base
-
-	sys = None				# the system instance this layer belongs to
-	cluster_spaces = list()			# cluster spaces for this layer
-	inputs = list()				# inputs for this layer
 	
 	def __init__(self, sys):
-		self.sys = sys
+		self.sys = sys						# the system instance this layer belongs to
+		self.cluster_spaces = list()			# cluster spaces for this layer
+		self.inputs = list()					# inputs for this layer
+		
 		self.add_cluster_space()
 		
 	def add_input(self):
@@ -165,9 +163,8 @@ class sys_2_base:
 	
 	layer_class = layer_base
 	
-	t_delta_init = None
-	layers = list()		# the layers defined for this system
-	
 	def __init__(self,t_delta_init):
 		self.t_delta_init = t_delta_init
+		self.layers = list()						# the layers defined for this system
+
 		self.layers.append( self.layer_class(sys=self) )

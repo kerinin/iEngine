@@ -25,16 +25,13 @@ def sign(x,y=0):
 		return int( array( x > y ).all() )
 		
 class kernel:
-	l = 0							# the number of data points cached so far
-	n = 1						# the dimensionality of the data (assumed to be one in all cases here)
-	
-	gamma = None				# smoothing variable
-	sigma_q = None				# quantile to consider for the residual principal 
-	sigma = 1.0					# calculated sigma value from last observation and given quantile
-	
 	def __init__(self,gamma=.5,sigma_q=.5):
-		self.gamma = gamma
-		self.sigma_q = sigma_q
+		self.l = 0							# the number of data points cached so far
+		self.n = 1							# the dimensionality of the data (assumed to be one in all cases here)
+		
+		self.gamma = gamma				# smoothing variable
+		self.sigma_q = sigma_q				# quantile to consider for the residual principal 
+		self.sigma = 1.0					# calculated sigma value from last observation and given quantile
 		
 	def flush(self):
 		self.x = list()
@@ -122,17 +119,16 @@ class kernel:
 class function_svm(function_base):
 # implements functional estimation using the SVM architecture
 
-	# kill = None			# the kill time of the function
-	
-	kernel = None		# kernel for this function
-	SV = list()			# list of SV functions
-	beta = list()			# list of SV multipliers
-	_function_d = None	# list of computed distances to different functions
-		
 	def __init__(self,data=None,kernel=None,*args,**kargs):
-		self.kernel = kernel
+		# kill = None				# the kill time of the function
+
+		self.kernel = kernel			# kernel for this function
+		self.SV = list()				# list of SV functions
+		self.beta = list()			# list of SV multipliers
+		self._function_d = None		# list of computed distances to different functions
+		
 		function_base.__init__(self,data,*args,**kargs)
-			
+	
 	def __sub__(self,a):
 		raise StandardError, 'This function not implemented'
 		
@@ -195,15 +191,18 @@ class function_svm(function_base):
 		
 class input_svm(input_base):
 # implements inputs using the SVM architecture
-
-	# observation_class = observation_base
-	# observation_list_class = observation_list_base
-	# o = observation_list_class()		# a list of class observation instances defining the observations of this input
-	# cluster_spaces = list()				# a set of cluster spaces operating on this input
 		
-	t_cache = dict()				# caches the most recent function (as end of interval)
-	kernel = kernel()				# the kernel function used for estimating functions	
+	def __init__(self,*args,**kargs):
+		# observation_class = observation_base
+		# observation_list_class = observation_list_base
+		# o = observation_list_class()		# a list of class observation instances defining the observations of this input
+		# cluster_spaces = list()				# a set of cluster spaces operating on this input
+	
+		input_base.__init__(self,*args,**kargs)
 		
+		self.t_cache = dict()				# caches the most recent function (as end of interval)
+		self.kernel = kernel()				# the kernel function used for estimating functions	
+	
 	def estimate(self, time=None, hypotheses = None):
 		
 		# generate any missing functions needed by clusters using this input
