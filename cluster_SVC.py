@@ -3,12 +3,16 @@
 from system_2_base import cluster_space_base, cluster_base
 
 class cluster_space_svc(cluster_space_base):
-	# t_delta = None		# the time interval length for this cluser
-	# f = list()		# list of functions to cluster
-	# C = list()		# list of defined clusters
-
-	p = list()			# cluster radii in feature space
-	q = None			# soft margin
+	
+	def __init__(self,*args,**kargs):
+		# t_delta = None		# the time interval length for this cluser
+		# f = list()			# list of functions to cluster
+		# C = list()			# list of defined clusters
+		
+		cluster_space_base.__init__(self,*args,**kargs)
+		
+		self.p = list()				# cluster radii in feature space
+		self.q = None			# soft margin
 
 	def optimize(self):
 	# determines the optimal weights for clustering the functions
@@ -22,9 +26,12 @@ class cluster_space_svc(cluster_space_base):
 		raise StandardError, 'This function not implemented'
 
 class cluster_svc(cluster_base):
-
-	# output = None		# The input at a higher level which this cluster maps to
-	# t_delta = None		# the time delta for this cluster
-
-	f = list()			# the SV functions defining the edge of the cluster
-	beta = list()		# the SV weights
+	
+	def __init__(self,*args,**kargs):
+		# output = None		# The input at a higher level which this cluster maps to
+		# t_delta = None		# the time delta for this cluster
+		
+		cluster_base.__init__(self,*args,**kargs)
+		
+		self.f = list()				# the SV functions defining the edge of the cluster
+		self.beta = list()			# the SV weights
