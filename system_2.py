@@ -28,7 +28,22 @@ class layer(layer_base):
 	cluster_space_class = cluster_space
 
 class sys_2(sys_2_base):
+# the system needs to handle the evolution of the architecture
+# in such a way that performance is optimized
+#
+# this involves balancing the following variables
+#	# of layers
+#	number of cluster spaces for each layer and the time intervals used for each cluster space
+#	kernel radius parameters calculated for each cluster space
+#	aging parameters for derived functions
+#	smoothness parameter for derived functions
+
 	layer_class = layer
+	
+	def __init__(self,*args,**kargs):
+		sys_2_base.__init__(self,*args,**kargs)
+		
+		
 
 
 
