@@ -4,7 +4,7 @@ import sys, getopt, math, datetime, os
 from math import sqrt, sin
 
 from numpy import *
-from pylab import plot,bar,show,legend,title,xlabel,ylabel,axis
+from pylab import *
 
 from cvxopt.base import *
 from cvxopt.blas import dot 
@@ -19,22 +19,34 @@ from components import inference_module
 _Functions = ['run']
 	
 def run():
+	print "Starting"
+	
+	print "Loading Dataset"
 	# Retrieve dataset
-	data = getData('B1.dat')[:20]
+	data = getData('B1.dat')[:40]
 	#data = array([sin(i/4.) for i in range(33)])
 	
+	# test on training data
 	mod = inference_module()
 	mod.optimize(data)
 	
-	# test on training data
-	BSV = list()
-	SV = list()
-	other = list()
-		
-	plot(BSV,label="Bounded Support Vectors")
-	plot(SV,label="Support Vectors")
-	plot(other,label="Enclosed")
 	
+	print "Displaying Results"
+	x = list()
+	y = list()
+	
+	for point in data:
+		x.append(point[0])
+		y.append(point[1])
+	scatter(x,y,marker="+",label="input data")
+	
+	for i in len(mod.clusters):
+		SVx = list()
+		SVy = list()
+		for point in clusters[i]:
+			SVx.append(point[0])
+			SVy.append(point[1])
+			scatter(x,y,label="Cluster %s" % i)
 	legend()
 	show()
 
@@ -52,4 +64,5 @@ def process(arg='run'):
 						apply(f,(opts,args))
 						return 0				help()
 				# process arguments		for arg in args:			process(arg) # process() is defined elsewhere
+			
 	except Usage, err:		print >>sys.stderr, err.msg		print >>sys.stderr, "for help use --help"		return 2if __name__ == "__main__":	sys.exit(main())
