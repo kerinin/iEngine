@@ -1,7 +1,5 @@
 #! /usr/bin/env python
 
-from system_2_base import cluster_space_base, cluster_base
-
 class kernel:
 	def __init__(self,C=1,q=.5):
 		self.l = 0								# the number of data points cached so far
@@ -51,8 +49,8 @@ class kernel:
 			
 class inference_module(object):
 	
-	def __init__(self,kernel,*args,**kargs):
-		self.kernel = kernel
+	def __init__(self,C=None,q=None,args,**kargs):
+		self.kernel = kernel(C,q)
 		self.beta = list()		# function weights
 		#self.R_2 = 0.0			# minimal hypersphere radius squared
 		self.Z = None			# maximum distance btw SV's
@@ -95,7 +93,7 @@ class inference_module(object):
 	
 		# construct inequality constraints
 		G = matrix( [ matrix(-1.0, (self.kernel.l,1)), matrix(1.0, (self.kernel.l,1)) ] )
-		h = matrix( [ matrix(0, (self.kernel.l,1)), matrix( self.C, (self.kernel.l,1)) ] )
+		h = matrix( [ matrix(0, (self.kernel.l,1)), matrix( self.kernel.C, (self.kernel.l,1)) ] )
 		
 		# optimize and set variables
 		optimized = qp(P, q,G=G,h=h,A=A, b=b)
