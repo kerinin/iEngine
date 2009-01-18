@@ -3,11 +3,11 @@
 from system_2_base import cluster_space_base, cluster_base
 
 class kernel:
-	def __init__(self,C=1):
+	def __init__(self,C=1,q=.5):
 		self.l = 0								# the number of data points cached so far
 		
 		self.C = C								# soft margin variable
-		self.q_init = 0							# gaussian kernel width 
+		self.q = q								# gaussian kernel width 
 		
 	def flush(self):
 		self.x = list()
@@ -26,7 +26,7 @@ class kernel:
 		# calculate x norms
 		for i in range(self.l):
 			for j in range(i,self.l):
-				val = _calc_norm(self.x[i],self.x[j])
+				val = self.norm(self.x[i],self.x[j])
 				self.xx_norm[i,j] = val
 				self.xx_norm[j,i] = val
 				
@@ -36,30 +36,29 @@ class kernel:
 		# calculate x distances
 		for i in range(self.l):
 			for j in range(i,self.l):
-				val = self._calc(self.xx_norm[i,j])
+				val = self.calc(self.xx_norm[i,j])
 				self.xx[i,j] = val
 				self.xx[j,i] = val
 				
 		return self
 
-	def _calc(self,norm):
+	def calc(self,norm):
 	# returns the gaussian distance between two functions after calculating the strict distance
 		return exp( -self.q_init * (norm ** 2) )
+		
+	def norm(self,x,y):
+		return sqrt( sum( (x-y)^2 )
 			
-class cluster_space_svc(cluster_space_base):
+class inference_module(object):
 	
-	def __init__(self,kernel=None,*args,**kargs):
-		# t_delta = None		# the time interval length for this cluser
-		# f = list()			# list of functions to cluster
-		# C = list()			# list of defined clusters
-		
-		cluster_space_base.__init__(self,*args,**kargs)
-		
+	def __init__(self,kernel,*args,**kargs):
 		self.kernel = kernel
 		self.beta = list()		# function weights
-		self.R_2 = 0.0			# minimal hypersphere radius squared
+		#self.R_2 = 0.0			# minimal hypersphere radius squared
+		self.Z = None			# maximum distance btw SV's
+		self.clusters = list()		# set of cluster SV's
 		
-	def optimize(self):
+	def optimize(self,data):
 	# determines the optimal weights for clustering the functions
 	# defined in self.f and updates the clusters defined over the data
 	#
@@ -84,19 +83,19 @@ class cluster_space_svc(cluster_space_base):
 	# a[0,i] = 1
 	# b = 1
 	
-		K = self.kernel.load(data)
+		self.kernel.load(data)
 		
 		# construct objective functions
-		P = K.xx
-		q = K.xx[:K.l] * -1.0
+		P = self.kernel.xx
+		q = self.kernel.xx[:self.kernel.l] * -1.0
 		
 		# construct equality constraints
-		A = matrix( 1.0, (1,K.l) )
+		A = matrix( 1.0, (1,self.kernel.l) )
 		b = matrix(1.0)
 	
 		# construct inequality constraints
-		G = matrix( [ matrix(-1.0, (K.l,1)), matrix(1.0, (K.l,1)) ] )
-		h = matrix( [ matrix(0, (K.l,1)), matrix( self.C, (K.1,1)) ] )
+		G = matrix( [ matrix(-1.0, (self.kernel.l,1)), matrix(1.0, (self.kernel.l,1)) ] )
+		h = matrix( [ matrix(0, (self.kernel.l,1)), matrix( self.C, (self.kernel.l,1)) ] )
 		
 		# optimize and set variables
 		optimized = qp(P, q,G=G,h=h,A=A, b=b)
@@ -106,45 +105,21 @@ class cluster_space_svc(cluster_space_base):
 		# determine sphere radius
 		# the sphere radius is the function we're maximizing
 		# \sum_i \beta_i K(x_i, x_i) - \sum_{i,j} \beta_i \beta_j K(x_i, x_j)
-		self.R_2 = self.beta.T * P * self.beta + self.beta[0::K.l] * q
+		#self.R_2 = self.beta.T * P * self.beta + self.beta[0::self.kernel.l] * q
 		
 		# determine clusters
 		self.boundaries()
 		
 		# release resources from kernel cache
-		K.flush()
+		self.kernel.flush()
 		
 	def boundaries(self):
 	# determine cluster boundaries and add any clusters which do not yet exist
 	
-		# find changed SV's (if clusters already exist)
+		# Calculate Z
 		
-		# check changed SV's against existing clusters (if any)
+		# Construct adjacency matrix
 		
-		# make new clusters with any remaining SV's and add to self
-		
-		raise StandardError, 'This function not implemented'
-		
-	def infer(self, CPDF, time):
-	# returns a PDF at the given time based on proximity of *complete* intervals
-	# to the *partial* interval (or hypothesis) given by CPDF for *each* p value
-	# specified for this cluster space
-	
-		# compute distance matrix to existing functions
-		
-		# aggregate weighted functions
-		
-		# return PDF at time specified from aggregate
+		# Assign SV's to clusters
 		
 		raise StandardError, 'This function not implemented'
-
-class cluster_svc(cluster_base):
-	
-	def __init__(self,*args,**kargs):
-		# output = None		# The input at a higher level which this cluster maps to
-		# t_delta = None		# the time delta for this cluster
-		
-		cluster_base.__init__(self,*args,**kargs)
-		
-		self.f = list()				# the SV functions defining the edge of the cluster
-		self.beta = list()			# the SV weights
