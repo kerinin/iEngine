@@ -64,7 +64,7 @@ class kernel:
 class inference_module:
 	
 	def __init__(self,C=1.0,q=None,*args,**kargs):
-		self.kernel = kernel(C=.8)
+		self.kernel = kernel(C=1)
 		self.beta = list()		# function weights
 		#self.R_2 = 0.0			# minimal hypersphere radius squared
 		self.Z = None			# maximum distance btw SV's
@@ -132,7 +132,7 @@ class inference_module:
 		# determine clusters
 		self.boundaries()
 		
-		svCount = ( self.beta < 1e-5 ).sum()
+		svCount = ( self.beta > 1e-5 ).sum()
 		stray = svCount
 		for c in self.clusters:
 			stray -= len(c)
@@ -140,8 +140,6 @@ class inference_module:
 		print "Clusters generated in %ss using C=%s, q=%s" % ((datetime.datetime.now()-sTime).seconds,self.kernel.C, self.kernel.q)
 		print "%s SV's out of %s total observations" % (svCount, self.kernel.l)
 		print "%s clusters and %s stray SV's found" % (len(self.clusters), stray)
-		for cluster in self.clusters:
-			print "cluster contains %s SV's" % len(cluster)
 		
 		# release resources from kernel cache
 		self.kernel.flush()
