@@ -2,6 +2,7 @@
 
 import sys, getopt, math, datetime, os
 from math import sqrt, sin
+from random import gauss
 
 from numpy import *
 from pylab import *
@@ -23,14 +24,20 @@ def run():
 	
 	print "Loading Dataset"
 	# Retrieve dataset
-	data = getData('B1.dat')[:20]
-	#data = array([sin(i/4.) for i in range(33)])
+	#data = getData('B1.dat')[:100]
+
+	data = list()
 	
+	for i in range(60):
+		data.append( array( [gauss(2.0,.1), gauss(0.0,.1) ]) )
+		
+	for i in range(60):
+		data.append( array( [gauss(0.0,.1), gauss(2.0,.1) ]) )
+
 	# test on training data
 	mod = inference_module()
 	mod.optimize(data)
-	
-	
+
 	print "Displaying Results"
 	x = list()
 	y = list()
@@ -40,13 +47,15 @@ def run():
 		y.append(point[1])
 	scatter(x,y,marker="+",label="input data")
 	
+	colors = ('r','g','b','y','o','p')
 	for i in range(len(mod.clusters)):
 		SVx = list()
 		SVy = list()
 		for point in mod.clusters[i]:
 			SVx.append(point[0])
 			SVy.append(point[1])
-		scatter(SVx,SVy,label="Cluster %s" % i)
+		scatter(SVx,SVy,c=colors[i%6],label="Cluster %s" % i)
+	
 	legend()
 	show()
 

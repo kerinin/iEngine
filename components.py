@@ -10,7 +10,7 @@ from cvxmod.atoms import quadform
 from cvxmod.sets import probsimp
 
 class kernel:
-	def __init__(self,C,q):
+	def __init__(self,C=1,q=None):
 		self.l = 0								# the number of data points cached so far
 		
 		self.C = C								# soft margin variable
@@ -55,7 +55,7 @@ class kernel:
 	def calc(self,norm):
 	# returns the gaussian distance between two functions after calculating the strict distance
 		s=norm.size
-		new =exp( -1 * self.q * (norm ** 2) )
+		new =exp( -self.q * norm )
 		return matrix(new,s)
 		
 	def norm(self,x,y):
@@ -64,7 +64,7 @@ class kernel:
 class inference_module:
 	
 	def __init__(self,C=1.0,q=None,*args,**kargs):
-		self.kernel = kernel(C,q)
+		self.kernel = kernel(C=.8)
 		self.beta = list()		# function weights
 		#self.R_2 = 0.0			# minimal hypersphere radius squared
 		self.Z = None			# maximum distance btw SV's
@@ -107,20 +107,27 @@ class inference_module:
 		
 		q = param('q',d,1)
 		A = param('A',1,d)
+		b = param('b',1,d)
 		x = optvar('x', d,1)
 		x.pos = True
 		
 		P.value = self.kernel.xx
 		q.value =P.value[:d]
 		A.value = matrix(1.0,(1,d))
+		b.value = matrix(0.0,(1,d))
+		for i in range(d):
+			b.value[0,i] = self.kernel.xx[i,i]
+	
 		
 		#print self.kernel.xx_norm
-		
-		#p = problem(minimize( tp(q)*x - tp(x)*P*x ), [x <= self.kernel.C, A*x == 1.0])
-		#p = problem(minimize(  quadform(x,P) ), [x <= self.kernel.C, A*x == 1.0])
-		p = problem( minimize(  quadform(x,P) - tp(q)*x ), [x <= self.kernel.C, A*x == 1.0])
+		#p = problem( minimize(   tp(q)*x + quadform(x,P) ), [x <= self.kernel.C, A*x == 1.0])
+		p = problem( minimize( quadform(x,P) + tp(q)*x ), [x <= self.kernel.C, A*x == 1.0])
 		p.solve()
 		self.beta = array(x.value)
+		
+		print 'coef sum to %s' % self.beta.sum()
+		print '%s coef larger than C (%s), %s BSV' % ( (self.beta > self.kernel.C ).sum(), self.kernel.C, (self.beta - self.kernel.C < 1e-8).sum() )
+		
 		
 		# determine clusters
 		self.boundaries()
@@ -133,6 +140,8 @@ class inference_module:
 		print "Clusters generated in %ss using C=%s, q=%s" % ((datetime.datetime.now()-sTime).seconds,self.kernel.C, self.kernel.q)
 		print "%s SV's out of %s total observations" % (svCount, self.kernel.l)
 		print "%s clusters and %s stray SV's found" % (len(self.clusters), stray)
+		for cluster in self.clusters:
+			print "cluster contains %s SV's" % len(cluster)
 		
 		# release resources from kernel cache
 		self.kernel.flush()
@@ -140,7 +149,7 @@ class inference_module:
 	def boundaries(self):
 	# determine cluster boundaries and add any clusters which do not yet exist
 		# create SV mask
-		SV = ( self.kernel.C/1e5 < self.beta ) * ( self.beta <= self.kernel.C )
+		SV = ( 1e-5 < self.beta ) * ( self.beta < self.kernel.C )
 		
 		# Calculate R
 		#R^2(x) = K(x,x) - 2 \sum_j \beta_j K(x_j,x) + \sum_{i,j} \beta_i \beta_j K(x_i,x_j)
@@ -155,14 +164,16 @@ class inference_module:
 		Z = sqrt( -1* log( sqrt( 1- R ** 2 ) )  / self.kernel.q )
 		
 		# Construct SV adjacency matrix
-		M = (SV*self.kernel.xx_norm) < Z
+		M = ( array( self.kernel.xx_norm) < Z) * SV * SV.T
 		
 		# Assign SV's to clusters
 		for i in range(self.kernel.l):
+			
 			# if the point is an SV and has not been added to a cluster yet
-			if M[i,0] and ( not i or not M[i::i].sum() ):
+			if SV[i] and (not i or not M[i,:i-1].sum() ):
 				l=[self.kernel.x[i],]
 				for j in range(i,self.kernel.l):
 					if M[i,j]:
 						l.append(self.kernel.x[j])
 				self.clusters.append(l)
+
