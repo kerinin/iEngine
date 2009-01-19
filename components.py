@@ -9,6 +9,9 @@ from cvxmod import *
 from cvxmod.atoms import quadform
 from cvxmod.sets import probsimp
 
+def parseSVM(file):
+	# return a tuple containing all SV and BSV found by the SVM
+	
 class kernel:
 	def __init__(self,C=1,q=None):
 		self.l = 0								# the number of data points cached so far

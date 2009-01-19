@@ -4,6 +4,8 @@ import sys, getopt, math, datetime, os
 from math import sqrt, sin
 from random import gauss
 
+from svm import *
+
 from numpy import *
 from pylab import *
 
@@ -24,39 +26,23 @@ def run():
 	
 	print "Loading Dataset"
 	# Retrieve dataset
-	data = getData('B1.dat')[:200]
+	data = getData('B1.dat')[:100]
 	#data = list()
 	#for i in range(60):
 	#	data.append( array( [gauss(2.0,.1), gauss(0.0,.1) ]) )
 	#for i in range(60):
 	#	data.append( array( [gauss(0.0,.1), gauss(2.0,.1) ]) )
 
-	# test on training data
-	mod = inference_module()
-	mod.optimize(data)
 
-	print "Displaying Results"
-	x = list()
-	y = list()
+
+
+	param = svm_parameter(svm_type=ONE_CLASS, kernel_type = RBF)
+	prob = svm_problem( range(100), data)
+	m= svm_model(prob,param)
+	m.save('output.svm')
 	
-	#hist(mod.kernel.xx[:mod.kernel.l] )
+	(SV, BSV) = parseSVM('output.svm')
 	
-	for point in data:
-		x.append(point[0])
-		y.append(point[1])
-	scatter(x,y,marker="+",label="input data")
-	
-	colors = ('r','g','b','y')
-	for i in range(len(mod.clusters)):
-		SVx = list()
-		SVy = list()
-		for point in mod.clusters[i]:
-			SVx.append(point[0])
-			SVy.append(point[1])
-		scatter(SVx,SVy,c=colors[i%4],label="Cluster %s" % i)
-	
-	legend()
-	show()
 
 def help():
 	print __doc__
