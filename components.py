@@ -5,12 +5,9 @@ from math import sqrt, log
 
 from numpy import *
 
-from cvxopt.base import *
-#from cvxopt.blas import dot 
-from cvxopt.solvers import qp
-
-from cvxopt import solvers
-solvers.options['show_progress'] = False
+from cvxmod import *
+from cvxmod.atoms import quadform
+from cvxmod.sets import probsimp
 
 class kernel:
 	def __init__(self,C,q):
@@ -46,20 +43,27 @@ class kernel:
 		#		val = self.calc(self.xx_norm[i,j])
 		#		self.xx[i,j] = val
 		#		self.xx[j,i] = val
+		
+		if not self.q:
+			self.q = 1/max(self.xx_norm)
+			print 'q set to %s' % self.q			
+			
 		self.xx = self.calc(self.xx_norm)
 		
 		return self
 
 	def calc(self,norm):
 	# returns the gaussian distance between two functions after calculating the strict distance
-		return exp( -1 * self.q * (norm ** 2) )
+		s=norm.size
+		new =exp( -1 * self.q * (norm ** 2) )
+		return matrix(new,s)
 		
 	def norm(self,x,y):
-		return sqrt( (x-y).sum() ** 2 )
+		return sqrt(((x-y)**2).sum())
 			
 class inference_module:
 	
-	def __init__(self,C=1.0,q=5e-6,*args,**kargs):
+	def __init__(self,C=1.0,q=None,*args,**kargs):
 		self.kernel = kernel(C,q)
 		self.beta = list()		# function weights
 		#self.R_2 = 0.0			# minimal hypersphere radius squared
@@ -90,39 +94,45 @@ class inference_module:
 	# finally, we have a single equality constraint which we formulate as
 	# a[0,i] = 1
 	# b = 1
-	
+		sTime = datetime.datetime.now()
+		
 		self.kernel.load(data)
 		
 		d = self.kernel.l
 		
 		# construct objective functions
-		P = self.kernel.xx
-		q = self.kernel.xx[:d] * -1.0
+		P = param('P',d,d)
+		P.psd = True
+		P.semidefinite = True
 		
-		# construct equality constraints
-		A = matrix( 1.0, (1,d) )
-		b = matrix(1.0)
-	
-		# construct inequality constraints
-		#G = matrix(1.0/d, (d,d))
-		#h = matrix(self.kernel.C, (d,1))
-		G = matrix(1.0/self.kernel.C,(1,d) )
-		h = matrix(0.0)
+		q = param('q',d,1)
+		A = param('A',1,d)
+		x = optvar('x', d,1)
+		x.pos = True
 		
-		# optimize and set variables
-		optimized = qp(P, q,G=G,h=h,A=A, b=b)
-		self.f = self.kernel.x
-		self.beta = array(optimized['x'])
+		P.value = self.kernel.xx
+		q.value =P.value[:d]
+		A.value = matrix(1.0,(1,d))
 		
-		print self.beta
+		#print self.kernel.xx_norm
 		
-		# determine sphere radius
-		# the sphere radius is the function we're maximizing
-		# \sum_i \beta_i K(x_i, x_i) - \sum_{i,j} \beta_i \beta_j K(x_i, x_j)
-		#self.R_2 = self.beta.T * P * self.beta + self.beta[0::self.kernel.l] * q
+		#p = problem(minimize( tp(q)*x - tp(x)*P*x ), [x <= self.kernel.C, A*x == 1.0])
+		#p = problem(minimize(  quadform(x,P) ), [x <= self.kernel.C, A*x == 1.0])
+		p = problem( minimize(  quadform(x,P) - tp(q)*x ), [x <= self.kernel.C, A*x == 1.0])
+		p.solve()
+		self.beta = array(x.value)
 		
 		# determine clusters
-		# self.boundaries()
+		self.boundaries()
+		
+		svCount = ( self.beta < 1e-5 ).sum()
+		stray = svCount
+		for c in self.clusters:
+			stray -= len(c)
+			
+		print "Clusters generated in %ss using C=%s, q=%s" % ((datetime.datetime.now()-sTime).seconds,self.kernel.C, self.kernel.q)
+		print "%s SV's out of %s total observations" % (svCount, self.kernel.l)
+		print "%s clusters and %s stray SV's found" % (len(self.clusters), stray)
 		
 		# release resources from kernel cache
 		self.kernel.flush()
@@ -130,7 +140,7 @@ class inference_module:
 	def boundaries(self):
 	# determine cluster boundaries and add any clusters which do not yet exist
 		# create SV mask
-		SV = ( self.kernel.C/10000000 < self.beta ) * ( self.beta <= self.kernel.C )
+		SV = ( self.kernel.C/1e5 < self.beta ) * ( self.beta <= self.kernel.C )
 		
 		# Calculate R
 		#R^2(x) = K(x,x) - 2 \sum_j \beta_j K(x_j,x) + \sum_{i,j} \beta_i \beta_j K(x_i,x_j)
@@ -150,9 +160,9 @@ class inference_module:
 		# Assign SV's to clusters
 		for i in range(self.kernel.l):
 			# if the point is an SV and has not been added to a cluster yet
-			if M[i,0] and not M[i::i].sum():
-				l=[self.x[i],]
+			if M[i,0] and ( not i or not M[i::i].sum() ):
+				l=[self.kernel.x[i],]
 				for j in range(i,self.kernel.l):
 					if M[i,j]:
-						l.append(self.x[j])
+						l.append(self.kernel.x[j])
 				self.clusters.append(l)

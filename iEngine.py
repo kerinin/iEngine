@@ -23,7 +23,7 @@ def run():
 	
 	print "Loading Dataset"
 	# Retrieve dataset
-	data = getData('B1.dat')[:40]
+	data = getData('B1.dat')[:20]
 	#data = array([sin(i/4.) for i in range(33)])
 	
 	# test on training data
@@ -40,13 +40,13 @@ def run():
 		y.append(point[1])
 	scatter(x,y,marker="+",label="input data")
 	
-	for i in len(mod.clusters):
+	for i in range(len(mod.clusters)):
 		SVx = list()
 		SVy = list()
-		for point in clusters[i]:
+		for point in mod.clusters[i]:
 			SVx.append(point[0])
 			SVy.append(point[1])
-			scatter(x,y,label="Cluster %s" % i)
+		scatter(SVx,SVy,label="Cluster %s" % i)
 	legend()
 	show()
 
