@@ -63,7 +63,7 @@ class kernel:
 			
 class inference_module:
 	
-	def __init__(self,C=1.0,q=None,*args,**kargs):
+	def __init__(self,C=1.0,*args,**kargs):
 		self.kernel = kernel(C=1)
 		self.beta = list()		# function weights
 		#self.R_2 = 0.0			# minimal hypersphere radius squared
@@ -107,22 +107,17 @@ class inference_module:
 		
 		q = param('q',d,1)
 		A = param('A',1,d)
-		b = param('b',1,d)
 		x = optvar('x', d,1)
 		x.pos = True
 		
 		P.value = self.kernel.xx
 		q.value =P.value[:d]
 		A.value = matrix(1.0,(1,d))
-		b.value = matrix(0.0,(1,d))
-		for i in range(d):
-			b.value[0,i] = self.kernel.xx[i,i]
-	
 		
 		#print self.kernel.xx_norm
 		#p = problem( minimize(   tp(q)*x + quadform(x,P) ), [x <= self.kernel.C, A*x == 1.0])
 		p = problem( minimize( quadform(x,P) + tp(q)*x ), [x <= self.kernel.C, A*x == 1.0])
-		p.solve()
+		p.solve(True)
 		self.beta = array(x.value)
 		
 		print 'coef sum to %s' % self.beta.sum()
@@ -142,7 +137,7 @@ class inference_module:
 		print "%s clusters and %s stray SV's found" % (len(self.clusters), stray)
 		
 		# release resources from kernel cache
-		self.kernel.flush()
+		#self.kernel.flush()
 		
 	def boundaries(self):
 	# determine cluster boundaries and add any clusters which do not yet exist

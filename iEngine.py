@@ -24,12 +24,12 @@ def run():
 	
 	print "Loading Dataset"
 	# Retrieve dataset
-	#data = getData('B1.dat')[:100]
-	data = list()
-	for i in range(60):
-		data.append( array( [gauss(2.0,.1), gauss(0.0,.1) ]) )
-	for i in range(60):
-		data.append( array( [gauss(0.0,.1), gauss(2.0,.1) ]) )
+	data = getData('B1.dat')[:200]
+	#data = list()
+	#for i in range(60):
+	#	data.append( array( [gauss(2.0,.1), gauss(0.0,.1) ]) )
+	#for i in range(60):
+	#	data.append( array( [gauss(0.0,.1), gauss(2.0,.1) ]) )
 
 	# test on training data
 	mod = inference_module()
@@ -38,6 +38,8 @@ def run():
 	print "Displaying Results"
 	x = list()
 	y = list()
+	
+	#hist(mod.kernel.xx[:mod.kernel.l] )
 	
 	for point in data:
 		x.append(point[0])
