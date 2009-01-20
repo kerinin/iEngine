@@ -33,15 +33,15 @@ def run():
 	#for i in range(60):
 	#	data.append( array( [gauss(0.0,.1), gauss(2.0,.1) ]) )
 
-
-
-
 	param = svm_parameter(svm_type=ONE_CLASS, kernel_type = RBF)
 	prob = svm_problem( range(100), data)
 	m= svm_model(prob,param)
 	m.save('output.svm')
 	
-	(SV, BSV) = parseSVM('output.svm')
+	mod = module('output.svm')
+	
+	mod.get_SV()
+	mod.get_BSV()
 	
 
 def help():

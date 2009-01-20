@@ -12,6 +12,71 @@ from cvxmod.sets import probsimp
 def parseSVM(file):
 	# return a tuple containing all SV and BSV found by the SVM
 	
+	
+class module:
+	def __init__(self,path):
+		parse_file = file(path,'r')
+		data = list()
+		# parse file
+		lines = parse_file.readlines()
+		
+		self.SV = list()
+		self.BSV = list()
+		self.kernel = lines[1].split(' ')[1]
+		self.gamma = float( lines[2].split(' ')[1] )
+		self.rho = float( lines[5].split(' ')[1] )
+		
+		for line in lines[7:]
+			target = self.SV
+			text = line.split(' ')
+			if text[0] == 'BSV':
+				target = self.BSV
+			beta = text[0]
+			data = dict()
+			for value in text[1:]:
+				v  = value.split(':')
+				data[v[0]] = float(v[1])
+			target.append( support_vector(beta,data) )
+			
+		self.boundaries()
+			
+	def get_SV(self):
+		for sv in self.SV:
+			print sv
+			
+	def get_BSV(self):
+		for bsv in self.BSV:
+			print bsv
+		
+	def boundaries(self):
+	# determine cluster boundaries and add any clusters which do not yet exist
+
+		# Calculate R
+		R = sqrt( self.kernel.xx[i,i] - 2 * ( self.beta * self.kernel.xx[i::self.kernel.l] ).sum() + ( self.beta.T * self.kernel.xx * self.beta ).sum() )
+		
+		# Calculate Z
+		#Z = \sqrt{ -\frac{ln( \sqrt{ 1-R^2} )}{q} }
+		Z = sqrt( -1* log( sqrt( 1- R ** 2 ) )  / self.kernel.q )
+		
+		# Construct SV adjacency matrix
+		M = ( array( self.kernel.xx_norm) < Z) * SV * SV.T
+		
+		# Assign SV's to clusters
+		for i in range(self.kernel.l):
+			# if the point is an SV and has not been added to a cluster yet
+			if SV[i] and (not i or not M[i,:i-1].sum() ):
+				l=[self.kernel.x[i],]
+				for j in range(i,self.kernel.l):
+					if M[i,j]:
+						l.append(self.kernel.x[j])
+				self.clusters.append(l)
+	
+class support_vector(dict):
+	def __init__(self,beta,data):
+		self.beta = beta
+		dict.__init__(self,data)
+		self.cluster = None
+	
 class kernel:
 	def __init__(self,C=1,q=None):
 		self.l = 0								# the number of data points cached so far
