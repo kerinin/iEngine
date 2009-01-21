@@ -43,6 +43,8 @@ def run():
 	mod.get_SV()
 	mod.get_BSV()
 	
+	clusters = [list(),]*len(clusters)
+	
 
 def help():
 	print __doc__
