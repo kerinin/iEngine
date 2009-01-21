@@ -47,35 +47,46 @@ class module:
 	def get_BSV(self):
 		for bsv in self.BSV:
 			print bsv
+			
+	def norm(self,x,y):
+		return sqrt(((x - y)**2).sum())
+		
+	def classify(self,point):
 		
 	def boundaries(self):
 	# determine cluster boundaries and add any clusters which do not yet exist
-
-		# Calculate R
-		R = sqrt( self.kernel.xx[i,i] - 2 * ( self.beta * self.kernel.xx[i::self.kernel.l] ).sum() + ( self.beta.T * self.kernel.xx * self.beta ).sum() )
-		
+	
 		# Calculate Z
 		#Z = \sqrt{ -\frac{ln( \sqrt{ 1-R^2} )}{q} }
-		Z = sqrt( -1* log( sqrt( 1- R ** 2 ) )  / self.kernel.q )
+		Z = sqrt( -1* log( sqrt( 1- self.rho ** 2 ) )  / self.gamma )
 		
 		# Construct SV adjacency matrix
-		M = ( array( self.kernel.xx_norm) < Z) * SV * SV.T
+		d = len(self.SV)
+		M = zeros(d,d)
+		for i in range(d):
+			for j in range(i,d):
+				val = self.norm(self.SV[i].data, self.SV[j].data) < Z
+				M[i,j] = val
+				M[j,i] = val
 		
 		# Assign SV's to clusters
-		for i in range(self.kernel.l):
+		for i in range(d):
 			# if the point is an SV and has not been added to a cluster yet
-			if SV[i] and (not i or not M[i,:i-1].sum() ):
-				l=[self.kernel.x[i],]
-				for j in range(i,self.kernel.l):
+			if not i or not M[i,:i-1].sum():
+				self.SV[i].cluster = i
+				for j in range(i,d):
 					if M[i,j]:
-						l.append(self.kernel.x[j])
-				self.clusters.append(l)
+						self.SV[j].cluster = i
 	
-class support_vector(dict):
-	def __init__(self,beta,data):
+class data_vector(dict):
+	def __init__(self,data,cluster=None,*args,**kargs):
+		self.cluster = cluster
+		dict.__init__(self,data,*args,**kargs)
+	
+class support_vector(data_vector):
+	def __init__(self,beta,data,*args,**kargs):
 		self.beta = beta
-		dict.__init__(self,data)
-		self.cluster = None
+		data_vector.__init__(self,data,*args,**kargs)
 	
 class kernel:
 	def __init__(self,C=1,q=None):
