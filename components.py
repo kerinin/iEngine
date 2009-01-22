@@ -9,11 +9,8 @@ from cvxmod import *
 from cvxmod.atoms import quadform
 from cvxmod.sets import probsimp
 
-def parseSVM(file):
-	# return a tuple containing all SV and BSV found by the SVM
 	
-	
-class module:
+class inference_module:
 	def __init__(self,path):
 		parse_file = file(path,'r')
 		data = list()
@@ -28,7 +25,7 @@ class module:
 		
 		self.gamma_start = None
 		
-		for line in lines[7:]
+		for line in lines[7:]:
 			target = self.SV
 			text = line.split(' ')
 			if text[0] == 'BSV':
@@ -116,7 +113,7 @@ class module:
 				r(i,i,stack)
 				self.cluster_count += 1
 			
-class data_vector(array):
+class data_vector(list):
 	def __init__(self,data,*args,**kargs):
 		self.SV_matrix = None
 		self.cluster = None

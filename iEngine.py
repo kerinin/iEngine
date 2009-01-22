@@ -43,7 +43,15 @@ def run():
 	mod.get_SV()
 	mod.get_BSV()
 	
-	clusters = [list(),]*len(clusters)
+	clusters = [list(),]*mod.cluster_count
+	for point in data:
+		mod.classify( point )
+		clusters[ point.cluster].append(point)
+	for cluster in clusters:
+		plot(cluster,label="Cluster %s" % cluster[0].cluster)
+	
+	legend()
+	show()
 	
 
 def help():
