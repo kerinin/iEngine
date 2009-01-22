@@ -65,10 +65,9 @@ class inference_module:
 			if point.SV_array[i] < min:
 				min = point.SV_array[i]
 				nearest = self.SV[i]
-		point.SV_array *= nearest.SV_array
-		
-		#NOTE: this should probably be checking for BSV...
-		point.cluster = nearest.cluster
+		if nearest:
+			point.SV_array *= nearest.SV_array
+			point.cluster = nearest.cluster
 		
 		return point
 		

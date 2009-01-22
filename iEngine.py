@@ -26,15 +26,15 @@ def run():
 	
 	print "Loading Dataset"
 	# Retrieve dataset
-	#data = getData('B1.dat')[:100]
-	data = list()
-	for i in range(60):
-		data.append( array( [gauss(2.0,.1), gauss(0.0,.1) ]) )
-	for i in range(60):
-		data.append( array( [gauss(0.0,.1), gauss(2.0,.1) ]) )
+	data = getData('B1.dat')[:100]
+	#data = list()
+	#for i in range(60):
+	#	data.append( array( [gauss(2.0,.1), gauss(0.0,.1) ]) )
+	#for i in range(60):
+	#	data.append( array( [gauss(0.0,.1), gauss(2.0,.1) ]) )
 
 	param = svm_parameter(svm_type=ONE_CLASS, kernel_type = RBF)
-	prob = svm_problem( range(120), data)
+	prob = svm_problem( range(100), data)
 	m= svm_model(prob,param)
 	m.save('output.svm')
 	
@@ -51,17 +51,17 @@ def run():
 		vector = mod.classify( data_vector(point) )
 		
 		print vector.cluster
-		
-		clusters[vector.cluster].append(vector)
+		if vector.cluster:
+			clusters[vector.cluster].append(vector)
 	for cluster in clusters:
 		x = list()
 		y = list()
 		for point in cluster:
 			x.append( point.data[0] )
 			y.append( point.data[1] )
-		plot(x,y,label="Cluster %s" % cluster[0].cluster)
+		plot(x,y)
 	
-	legend()
+	#legend()
 	show()
 	
 	
