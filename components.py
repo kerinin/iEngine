@@ -79,7 +79,7 @@ class module:
 		
 		# Construct SV adjacency matrix
 		d = len(self.SV)
-		M = zeros(d,d)
+		N = zeros(d,d)
 		for i in range(d):
 			for j in range(i,d):
 				val = self.norm(self.SV[i].data, self.SV[j].data)
@@ -88,24 +88,34 @@ class module:
 		
 		# Determine a 'good' gamma starting point
 		self.gamma_start = 1/M.max()
-		M = M < Z
+		M = N < Z
 		
+		self.cluster_count = 0
+		
+		def r(base,offset,stack):
+			for j in range(offset,d):
+				if M[offfset,j] and not SV[j].cluster:
+					SV[j].cluster = self.cluster_count
+					
+					# set SV[i]'s inhibition matrix value for SV[j] to their norm (since they're in the same cluster)
+					self.SV[base].SV_array[j] *= self.inhibition
+					
+					stack.append(j)
+			while len(stack):
+				r(base,stack.pop(0),stack)
+				
 		# Assign SV's to clusters
 		#NOTE: THIS DOES NOT WORK!!! it's only assiging adjacency; it isn't tracing the entire perimeter
+		#try a while loop with a FIFO stack used to choose the next SV offset to use, and push adjacent SV'S onto the stack when found, otherwise go to the next unchecked offset
 		for i in range(d):
 			# Set SV[i]'s inhibition matrix to the inverse of the norm, reduced by the intra-cluster inhibition factor
-			self.SV[i].SV_array = 1/M[i]*self.inhibition
+			self.SV[i].SV_array = 1/N[i]*self.inhibition
 			
-			# if the point is an SV and has not been added to a cluster yet
-			if not i or not M[i,:i-1].sum():
-				self.SV[i].cluster = i
-				for j in range(i,d):
-					if M[i,j]:
-						self.SV[j].cluster = i
-						
-						# set SV[i]'s inhibition matrix value for SV[j] to their norm (since they're in the same cluster)
-						self.SV[i].SV_array[j] *= self.inhibition
-	
+			if not self.SV[i].cluster:
+				stack = list()
+				r(i,i,stack)
+				self.cluster_count += 1
+			
 class data_vector(array):
 	def __init__(self,data,*args,**kargs):
 		self.SV_matrix = None
