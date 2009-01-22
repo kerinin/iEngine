@@ -27,7 +27,7 @@ class inference_module:
 			text = line.split(' ')
 			if text[0] == 'BSV':
 				target = self.BSV
-			beta = text[0]
+			beta = float( text[0] )
 			# NOTE: this is NOT using sparse datasets - each observation needs to be fully defined
 			data = list()
 			try:
@@ -87,8 +87,9 @@ class inference_module:
 				
 		# Calculate R^2
 		# R^2(x) = K_(x,x) - 2 sum_j{\beta_j K(x_j,x)} + sum_{i,j}{\beta_i \beta_j K(x_i,x_j)
-		betas = array( [sv.beta for sv in self.SV] ).reshape(d,1)
-		R2 = self.K(N[0,0]) - 2* ( dot( betas.T, N[:d].reshape(d,1)) ) + ( dot( dot(betas.T, N), betas) )
+		betas = array( [ [ sv.beta for sv in self.SV] ] )
+		
+		R2 = self.K(N[0,0]) - 2* ( dot( betas.T, N[:1:] ) ) + ( dot( dot(betas, N), betas.T) )
 		
 		#NOTE: the problem here is that the arrays are 1-d...
 				
