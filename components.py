@@ -93,14 +93,15 @@ class inference_module:
 		self.cluster_count = 0
 		
 		def r(base,offset,stack):
-			for j in range(offset,d):
-				if (not N[offset,j] or M[offset,j] ) and not self.SV[j].cluster:
+			for j in range(offset,d):	
+				if not self.SV[j].cluster and M[offset,j]:
 					self.SV[j].cluster = self.cluster_count
 					
 					# set SV[i]'s inhibition matrix value for SV[j] to their norm (since they're in the same cluster)
-					self.SV[base].SV_array[j] *= self.inhibition
+					self.SV[base].SV_array[j] *= self.inhibition	
 					
-					stack.append(j)
+					if not offset == j:
+						stack.append(j)
 			while len(stack):
 				r(base,stack.pop(0),stack)
 			
