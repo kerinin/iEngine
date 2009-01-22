@@ -62,7 +62,6 @@ class inference_module:
 		if nearest:
 			point.SV_array *= nearest.SV_array
 			point.cluster = nearest.cluster
-		
 		return point
 		
 		

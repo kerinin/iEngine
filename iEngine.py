@@ -33,40 +33,36 @@ def run():
 	for i in range(60):
 		data.append( array( [gauss(0.0,.1), gauss(2.0,.1) ]) )
 
-	param = svm_parameter(svm_type=ONE_CLASS, kernel_type = RBF)
+	param = svm_parameter(svm_type=ONE_CLASS, kernel_type = RBF,gamma=1e-2,=1e10)
 	prob = svm_problem( range(120), data)
 	m= svm_model(prob,param)
 	m.save('output.svm')
 	
 	mod = inference_module('output.svm')
-	param.gamma = mod.gamma_start
 	
-	m = svm_model(prob,param)
-	m.save('output.svm')
+	clusters = [ None , ]*mod.cluster_count
 	
-	mod = inference_module('output.svm')
-	
-	clusters = [list(),]*mod.cluster_count
+	colors = ['b','r','g']
 	for point in data:
 		vector = mod.classify( data_vector(point) )
 		
 		if vector.cluster:
-			clusters[vector.cluster].append(vector)
+			if not clusters[vector.cluster]:
+				clusters[vector.cluster] = [vector,]
+			else:
+				clusters[vector.cluster].append(vector)
 	for cluster in clusters:
-		x = list()
-		y = list()
-		for point in cluster:
-			x.append( point.data[0] )
-			y.append( point.data[1] )
-		plot(x,y)
-	
-	for sv in mod.SV:
-		print sv.cluster
-	#legend()
-	#show()
-	
-	
-	
+		if cluster:
+			x = list()
+			y = list()
+			for point in cluster:
+				x.append( point.data[0] )
+				y.append( point.data[1] )
+			scatter(x,y,c=colors[cluster[0].cluster % 3], label="Cluster %s" % cluster[0].cluster)
+			
+	title('%s clusters from %s points' % (mod.cluster_count,len(data)))
+	legend()
+	show()
 
 def help():
 	print __doc__
