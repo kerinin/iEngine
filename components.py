@@ -14,7 +14,6 @@ class inference_module:
 		lines = parse_file.readlines()
 		
 		self.SV = list()
-		self.BSV = list()
 		self.kernel = lines[1].split(' ')[1]
 		self.gamma = float( lines[2].split(' ')[1] )
 		self.rho = float( lines[5].split(' ')[1] )
@@ -22,11 +21,10 @@ class inference_module:
 		self.gamma_start = None
 		self.inhibition = inhibition
 		
+		self.cluster_count = None
+		
 		for line in lines[7:]:
-			target = self.SV
 			text = line.split(' ')
-			if text[0] == 'BSV':
-				target = self.BSV
 			beta = float( text[0] )
 			# NOTE: this is NOT using sparse datasets - each observation needs to be fully defined
 			data = list()
@@ -37,17 +35,13 @@ class inference_module:
 			except IndexError:
 				pass
 			support_vector(beta,data)
-			target.append( support_vector(beta,data) )
+			self.SV.append( support_vector(beta,data) )
 			
 		self.boundaries()
 			
 	def get_SV(self):
 		for sv in self.SV:
 			print sv
-			
-	def get_BSV(self):
-		for bsv in self.BSV:
-			print bsv
 			
 	def norm(self,x,y):
 		return sqrt(((x - y)**2).sum())
@@ -109,9 +103,6 @@ class inference_module:
 					
 					# set SV[i]'s inhibition matrix value for SV[j] to their norm (since they're in the same cluster)
 					self.SV[base].SV_array[j] *= self.inhibition	
-					
-					if not offset == j:
-						stack.append(j)
 			while len(stack):
 				r(base,stack.pop(0),stack)
 		for i in range(d):
@@ -119,6 +110,7 @@ class inference_module:
 			self.SV[i].SV_array = 1/N[i]*self.inhibition
 
 			if not self.SV[i].cluster:
+				self.SV[i].cluster = self.cluster_count
 				stack = list()
 				r(i,i,stack)
 				self.cluster_count += 1
