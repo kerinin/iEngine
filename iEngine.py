@@ -17,7 +17,7 @@ from cvxopt import solvers
 solvers.options['show_progress'] = False
 
 from santa_fe import getData
-from components import inference_module
+from components import *
 
 _Functions = ['run']
 	
@@ -26,32 +26,45 @@ def run():
 	
 	print "Loading Dataset"
 	# Retrieve dataset
-	data = getData('B1.dat')[:100]
-	#data = list()
-	#for i in range(60):
-	#	data.append( array( [gauss(2.0,.1), gauss(0.0,.1) ]) )
-	#for i in range(60):
-	#	data.append( array( [gauss(0.0,.1), gauss(2.0,.1) ]) )
+	#data = getData('B1.dat')[:100]
+	data = list()
+	for i in range(60):
+		data.append( array( [gauss(2.0,.1), gauss(0.0,.1) ]) )
+	for i in range(60):
+		data.append( array( [gauss(0.0,.1), gauss(2.0,.1) ]) )
 
 	param = svm_parameter(svm_type=ONE_CLASS, kernel_type = RBF)
-	prob = svm_problem( range(100), data)
+	prob = svm_problem( range(120), data)
 	m= svm_model(prob,param)
 	m.save('output.svm')
 	
-	mod = module('output.svm')
+	mod = inference_module('output.svm')
+	#param.gamma = mod.gamma_start
 	
-	mod.get_SV()
-	mod.get_BSV()
+	#m = svm_model(prob,param)
+	#m.save('output.svm')
+	
+	#mod = inference_module('output.svm')
 	
 	clusters = [list(),]*mod.cluster_count
 	for point in data:
-		mod.classify( point )
-		clusters[ point.cluster].append(point)
+		vector = mod.classify( data_vector(point) )
+		
+		print vector.cluster
+		
+		clusters[vector.cluster].append(vector)
 	for cluster in clusters:
-		plot(cluster,label="Cluster %s" % cluster[0].cluster)
+		x = list()
+		y = list()
+		for point in cluster:
+			x.append( point.data[0] )
+			y.append( point.data[1] )
+		plot(x,y,label="Cluster %s" % cluster[0].cluster)
 	
 	legend()
 	show()
+	
+	
 	
 
 def help():
