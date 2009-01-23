@@ -4,6 +4,7 @@ import sys, getopt, math, datetime, os, cmath
 from math import sqrt, log
 
 from numpy import *
+from networkx import *
 
 	
 class inference_module:
@@ -91,28 +92,17 @@ class inference_module:
 		
 		# Determine a 'good' gamma starting point
 		self.gamma_start = 1/N.max()
-		M = N < Z
+		G = Graph( N <= Z )
 		
 		# Assign SV's to clusters
-		self.cluster_count = -1
-		def r(base,offset,stack):
-			for j in range(offset,d):	
-				if not self.SV[j].cluster and M[offset,j]:
-					self.SV[j].cluster = self.cluster_count
-					
-					# set SV[i]'s inhibition matrix value for SV[j] to their norm (since they're in the same cluster)
-					self.SV[base].SV_array[j] *= self.inhibition	
-			while len(stack):
-				r(base,stack.pop(0),stack)
-		for i in range(d):
-			# Set SV[i]'s inhibition matrix to the inverse of the norm, reduced by the intra-cluster inhibition factor
-			self.SV[i].SV_array = 1/N[i]*self.inhibition
-
-			if not self.SV[i].cluster:
-				self.cluster_count += 1
-				self.SV[i].cluster = self.cluster_count
-				stack = list()
-				r(i,i,stack)
+		clusters = connected_component_subgraphs(G)
+		self.cluster_count = len(clusters)-1
+		
+		for i in range(len(clusters)):
+			for j in clusters[i].nodes():
+				self.SV[j].SV_array = 1/N[j]
+				self.SV[j].cluster = i
+		print self.cluster_count
 				
 class data_vector:
 	def __init__(self,data,*args,**kargs):
