@@ -3,6 +3,7 @@
 import sys, getopt, math, datetime, os, cmath
 from math import sqrt, log
 
+import numpy
 from numpy import *
 from networkx import *
 
@@ -22,7 +23,7 @@ class inference_module:
 		self.gamma_start = None
 		self.inhibition = inhibition
 		
-		self.cluster_count = None
+		self.clusters = list()
 		
 		for line in lines[7:]:
 			text = line.split(' ')
@@ -44,6 +45,9 @@ class inference_module:
 		for sv in self.SV:
 			print sv
 			
+	def anorm(self,x,y):
+		return numpy.sqrt(((x - y)**2).T.sum(0))
+		
 	def norm(self,x,y):
 		return sqrt(((x - y)**2).sum())
 		
@@ -51,20 +55,10 @@ class inference_module:
 		return exp(-self.gamma*(norm**2))
 		
 	def classify(self,point):
-		point.SV_array = empty(len(self.SV))
-		nearest = None
-		min = self.norm(point.data,self.SV[0].data)
+		point.SV_array = self.anorm( point.data, array([SV.data for SV in self.SV]) )
+		point.cluster = self.SV[ point.SV_array.argmin() ].cluster
 		
-		for i in range(len(self.SV)):
-			point.SV_array[i] = self.norm( point.data, self.SV[i].data )
-			if point.SV_array[i] < min:
-				min = point.SV_array[i]
-				nearest = self.SV[i]
-		if nearest:
-			point.SV_array *= nearest.SV_array
-			point.cluster = nearest.cluster
 		return point
-		
 		
 	def boundaries(self):
 	# determine cluster boundaries and add any clusters which do not yet exist
@@ -96,13 +90,12 @@ class inference_module:
 		
 		# Assign SV's to clusters
 		clusters = connected_component_subgraphs(G)
-		self.cluster_count = len(clusters)-1
-		
 		for i in range(len(clusters)):
+			self.clusters.append(list())
 			for j in clusters[i].nodes():
 				self.SV[j].SV_array = 1/N[j]
 				self.SV[j].cluster = i
-		print self.cluster_count
+				self.clusters[i].append(self.SV[j])
 				
 class data_vector:
 	def __init__(self,data,*args,**kargs):

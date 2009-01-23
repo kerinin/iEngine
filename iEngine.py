@@ -44,32 +44,24 @@ def run():
 	print "Parsing Output"
 	mod = inference_module('output.svm')
 	
-	clusters = [ None , ]*(mod.cluster_count+1)
+	clusters = [ None , ]*(len(mod.clusters))
 	colors = ['b','r','g']
 	for point in data:
 		vector = mod.classify( data_vector(point) )
-		
-		if vector.cluster:
-			if not clusters[vector.cluster]:
-				clusters[vector.cluster] = [vector,]
-			else:
-				clusters[vector.cluster].append(vector)
+
+		if not clusters[vector.cluster]:
+			clusters[vector.cluster] = [vector,]
+		else:
+			clusters[vector.cluster].append(vector)
 				
 	print "Formatting Results"
 	for cluster in clusters:
-		if cluster:
-			scatter( [point.data[0] for point in cluster], [point.data[1] for point in cluster],s=10,c=colors[cluster[0].cluster % 3])
+		scatter( [point.data[0] for point in cluster], [point.data[1] for point in cluster],s=10,  c=colors[cluster[0].cluster % 3])
 		
-	clustersSV = [ None , ]*(mod.cluster_count+1)	
-	for SV in mod.SV:
-		if not clustersSV[SV .cluster]:
-			clustersSV[SV .cluster] = [SV ,]
-		else:
-			clustersSV[SV .cluster].append(SV )
-	for cluster in clustersSV:
+	for cluster in mod.clusters:
 		scatter( [SV.data[0] for SV in cluster],  [SV.data[1] for SV in cluster],  s=30,  c=colors[cluster[0].cluster % 3],  label="Cluster %s" % cluster[0].cluster )
 			
-	title('%s SV in %s clusters from %s points' % (len(mod.SV),mod.cluster_count+1,len(data)))
+	title('%s SV in %s clusters from %s points' % (len(mod.SV),len(mod.clusters),len(data)))
 	legend()
 	show()
 	
