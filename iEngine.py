@@ -28,18 +28,18 @@ def run():
 	# Retrieve dataset
 	#data = getData('B1.dat')[:100]
 	data = list()
-	for i in range(60):
+	for i in range(600):
 		data.append( array( [gauss(2.0,.1), gauss(0.0,.1) ]) )
-	for i in range(60):
+	for i in range(600):
 		data.append( array( [gauss(0.0,.1), gauss(2.0,.1) ]) )
 		
 	print "Optimizing Coeffiecients"
 	# large gamma = small cluster
 	# large nu = lots of SV
-	param = svm_parameter(svm_type=ONE_CLASS, kernel_type = RBF,gamma=1,nu=.1)
-	prob = svm_problem( range(120), data)
-	m= svm_model(prob,param)
-	m.save('output.svm')
+	#param = svm_parameter(svm_type=ONE_CLASS, kernel_type = RBF,gamma=1,nu=.1)
+	#prob = svm_problem( range(1200), data)
+	#m= svm_model(prob,param)
+	#m.save('output.svm')
 	
 	print "Parsing Output"
 	mod = inference_module('output.svm')

@@ -77,8 +77,9 @@ class inference_module:
 				
 		# Calculate R^2
 		# R^2(x) = K_(x,x) - 2 sum_j{\beta_j K(x_j,x)} + sum_{i,j}{\beta_i \beta_j K(x_i,x_j)
+		M = self.K( N )
 		betas = array( [ [ sv.beta for sv in self.SV] ] )
-		R2 = complex( 1 - 2* ( dot( N[:1:], betas.T ) ) + ( dot( dot(betas, N), betas.T) )[0,0] )
+		R2 = complex( 1 - 2* ( dot( M[:1:], betas.T ) ) + ( dot( dot(betas, M), betas.T) )[0,0] )
 		
 		# Calculate Z
 		#Z = \sqrt{ -\frac{ln( \sqrt{ 1-R^2} )}{q} }
