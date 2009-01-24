@@ -5,26 +5,38 @@ from math import sqrt, log
 
 import numpy
 from numpy import *
+import scipy
 from networkx import *
-
+from pylab import *
+frim svm import*
 	
 class inference_module:
-	def __init__(self,path,inhibition=2.0):
-		parse_file = file(path,'r')
-		data = list()
-		# parse file
-		lines = parse_file.readlines()
-		
+	def __init__(self,param=svm_parameter(svm_type=ONE_CLASS, kernel_type = RBF),data=list()):
+		self.param = param
+		self.svm = None
+		self.data = data
 		self.SV = list()
+		self.kernel = None
+		self.rho = None
+		self.clusters = list()
+		
+		if data:
+			self.dump(data)
+			self.compute()
+	
+	def compute(self,path='output.svm'):
+		# calculate gamma (if not defined)
+		self.gamma_start = 1/N.max()
+		
+		self.svm = svm_model(svm_problem( range(len(self.data)), data ),param) )
+		self.svm.save(path)
+		
+		parse_file = file(path,'r')
+		lines = parse_file.readlines()
 		self.kernel = lines[1].split(' ')[1]
 		self.gamma = float( lines[2].split(' ')[1] )
 		self.rho = float( lines[5].split(' ')[1] )
-		
-		self.gamma_start = None
-		self.inhibition = inhibition
-		
-		self.clusters = list()
-		
+
 		for line in lines[7:]:
 			text = line.split(' ')
 			beta = float( text[0] )
@@ -52,7 +64,7 @@ class inference_module:
 		return sqrt(((x - y)**2).sum())
 		
 	def K(self,norm):
-		return exp(-self.gamma*(norm**2))
+		return exp(-(norm**2)/self.gamma)
 		
 	def classify(self,point):
 		point.SV_array = self.anorm( point.data, array([SV.data for SV in self.SV]) )
@@ -77,19 +89,18 @@ class inference_module:
 				
 		# Calculate R^2
 		# R^2(x) = K_(x,x) - 2 sum_j{\beta_j K(x_j,x)} + sum_{i,j}{\beta_i \beta_j K(x_i,x_j)
-		M = self.K( N )
-		betas = array( [ [ sv.beta for sv in self.SV] ] )
-		R2 = complex( 1 - 2* ( dot( M[:1:], betas.T ) ) + ( dot( dot(betas, M), betas.T) )[0,0] )
+		#M = self.K( N )
+		#betas = array( [ [ sv.beta for sv in self.SV] ] )
+		#R2 = complex( 1 - 2* ( dot( M[:1:], betas.T ) ) + ( dot( dot(betas, M), betas.T) )[0,0] )
+		
+		R2 = self.rho
 		
 		# Calculate Z
 		#Z = \sqrt{ -\frac{ln( \sqrt{ 1-R^2} )}{q} }
 		Z =  abs( cmath.sqrt( -1* cmath.log( cmath.sqrt( 1- ( R2 ** 2 ) ) )  / self.gamma ) )
-		
-		# Determine a 'good' gamma starting point
-		self.gamma_start = 1/N.max()
-		G = Graph( N <= Z )
-		
+
 		# Assign SV's to clusters
+		G = Graph( N <= Z )
 		clusters = connected_component_subgraphs(G)
 		for i in range(len(clusters)):
 			self.clusters.append(list())

@@ -26,26 +26,23 @@ def run():
 	
 	print "Loading Dataset"
 	# Retrieve dataset
-	#data = getData('B1.dat')[:100]
-	data = list()
-	for i in range(600):
-		data.append( array( [gauss(2.0,.1), gauss(0.0,.1) ]) )
-	for i in range(600):
-		data.append( array( [gauss(0.0,.1), gauss(2.0,.1) ]) )
+	data = getData('B1.dat')[:100]
+	#data = list()
+	#for i in range(100):
+	#	data.append( array( [gauss(2.0,.1), gauss(0.0,.1) ]) )
+	#for i in range(100):
+	#	data.append( array( [gauss(0.0,.1), gauss(2.0,.1) ]) )
 		
 	print "Optimizing Coeffiecients"
 	# large gamma = small cluster
 	# large nu = lots of SV
-	#param = svm_parameter(svm_type=ONE_CLASS, kernel_type = RBF,gamma=1,nu=.1)
-	#prob = svm_problem( range(1200), data)
-	#m= svm_model(prob,param)
-	#m.save('output.svm')
 	
 	print "Parsing Output"
 	mod = inference_module('output.svm')
 	
 	clusters = [ None , ]*(len(mod.clusters))
-	colors = ['b','r','g']
+	colors = ['b','r','g','c','m','y','w']
+
 	for point in data:
 		vector = mod.classify( data_vector(point) )
 
@@ -55,11 +52,12 @@ def run():
 			clusters[vector.cluster].append(vector)
 				
 	print "Formatting Results"
+	print "Suggested gamma: %s" % mod.gamma_start
 	for cluster in clusters:
-		scatter( [point.data[0] for point in cluster], [point.data[1] for point in cluster],s=10,  c=colors[cluster[0].cluster % 3])
+		scatter( [point.data[0] for point in cluster], [point.data[1] for point in cluster],s=10,  c=colors[cluster[0].cluster % 7])
 		
 	for cluster in mod.clusters:
-		scatter( [SV.data[0] for SV in cluster],  [SV.data[1] for SV in cluster],  s=30,  c=colors[cluster[0].cluster % 3],  label="Cluster %s" % cluster[0].cluster )
+		scatter( [SV.data[0] for SV in cluster],  [SV.data[1] for SV in cluster],  s=30,  c=colors[cluster[0].cluster % 7],  label="Cluster %s" % cluster[0].cluster )
 			
 	title('%s SV in %s clusters from %s points' % (len(mod.SV),len(mod.clusters),len(data)))
 	legend()
