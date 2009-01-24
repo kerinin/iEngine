@@ -49,7 +49,8 @@ def run():
 	for cluster in mod.clusters:
 		scatter( [SV.data[0] for SV in cluster],  [SV.data[1] for SV in cluster],  s=30,  c=colors[cluster[0].cluster % 7],  label="Cluster %s" % cluster[0].cluster )
 			
-	scatter( [v.data[0] for v in bsv], [v.data[1] for v in bsv], s=10, marker="x" )
+	if bsv:
+		scatter( [v.data[0] for v in bsv], [v.data[1] for v in bsv], s=10, marker="x" )
 			
 	title('%s SV in %s clusters from %s points' % (len(mod.SV),len(mod.clusters),len(data)))
 	show()

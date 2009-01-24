@@ -59,7 +59,7 @@ class inference_module:
 		#point.SV_array = self._anorm( vector.data, array([SV.data for SV in self.SV]) )
 		vector.SV_array = array( spatial.distance.cdist( [vector.data,], [SV.data for SV in self.SV] ) )
 		
-		if self.svm.predict(vector.data) > 0:
+		if ( vector.SV_array.min() > 1e-12 ) or (self.svm.predict(vector.data) > 0 ):
 			vector.cluster = self.SV[ vector.SV_array.argmin() ].cluster
 		
 		return vector
@@ -115,33 +115,16 @@ class inference_module:
 	def _boundaries(self):
 	# determine cluster boundaries and add any clusters which do not yet exist
 	
+		# Calculate Z
+		#Z = \sqrt{ -\frac{ln( \sqrt{ 1-R^2} )}{q} }
+		Z =  abs( cmath.sqrt( -1* cmath.log( cmath.sqrt( 1- ( self.rho ** 2 ) ) )  / self.param.gamma ) )	
+		
 		# Construct SV adjacency matrix
 		d = len(self.SV)
 		N = spatial.distance.squareform( spatial.distance.pdist( [SV.data for SV in self.SV] , 'euclidean' ) )
-		#N = zeros([d,d])
-		#for i in range(d):
-		#	for j in range(i,d):
-		#		if i==j:
-		#			N[i,j] = -1
-		#		else:
-		#			val = self._norm(self.SV[i].data, self.SV[j].data)
-		#			N[i,j] = val
-		#			N[j,i] = val
-				
-		# Calculate R^2
-		# R^2(x) = K_(x,x) - 2 sum_j{\beta_j K(x_j,x)} + sum_{i,j}{\beta_i \beta_j K(x_i,x_j)
-		#M = self.K( N )
-		#betas = array( [ [ sv.beta for sv in self.SV] ] )
-		#R2 = complex( 1 - 2* ( dot( M[:1:], betas.T ) ) + ( dot( dot(betas, M), betas.T) )[0,0] )
-		
-		R2 = self.rho
-		
-		# Calculate Z
-		#Z = \sqrt{ -\frac{ln( \sqrt{ 1-R^2} )}{q} }
-		Z =  abs( cmath.sqrt( -1* cmath.log( cmath.sqrt( 1- ( R2 ** 2 ) ) )  / self.param.gamma ) )
+		G = Graph( N <= Z )		
 
 		# Assign SV's to clusters
-		G = Graph( N <= Z )
 		clusters = connected_component_subgraphs(G)
 		for i in range(len(clusters)):
 			self.clusters.append(list())
