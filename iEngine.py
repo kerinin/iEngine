@@ -17,15 +17,17 @@ def run():
 	
 	print "Loading Dataset"
 	# Retrieve dataset
-	#data = getData('B1.dat')[:100]
-	data = list()
-	for i in range(100):
-		data.append( array( [gauss(2.0,.1), gauss(0.0,.1) ]) )
-	for i in range(100):
-		data.append( array( [gauss(0.0,.1), gauss(2.0,.1) ]) )
+	data = getData('B1.dat')[:10000]
+	#data = list()
+	#for i in range(100):
+	#	data.append( array( [gauss(2.0,.1), gauss(0.0,.1) ]) )
+	#for i in range(100):
+	#	data.append( array( [gauss(0.0,.1), gauss(2.0,.1) ]) )
 		
-	mod = inference_module(data,gamma=10, nu=.1)
+	print "Constructing Module"
+	mod = inference_module(data,gm=2,nu=.1)
 	
+	print "Parsing Results"
 	clusters = [ [] , ]*(len(mod.clusters))
 	bsv = list()
 	colors = ['b','r','g','c','m','y','w']

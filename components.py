@@ -22,11 +22,12 @@ class support_vector(data_vector):
 		data_vector.__init__(self,*args,**kargs)
 		
 class inference_module:
-	def __init__(self,data=list(),gamma=None,nu=1e-10):
-		self.param = svm_parameter(svm_type=ONE_CLASS, kernel_type = RBF)
+	def __init__(self,data=list(),gamma=None,nu=1e-1,gm=1):
+		self.param = svm_parameter(svm_type=ONE_CLASS, kernel_type = RBF,cache_size = 800)
 		self.svm = None
 		self.data = data
 		self.SV = list()
+		self.gm = gm
 		self.kernel = None
 		self.rho = None
 		self.clusters = list()
@@ -59,8 +60,10 @@ class inference_module:
 		#point.SV_array = self._anorm( vector.data, array([SV.data for SV in self.SV]) )
 		vector.SV_array = array( spatial.distance.cdist( [vector.data,], [SV.data for SV in self.SV] ) )
 		
-		if ( vector.SV_array.min() > 1e-12 ) or (self.svm.predict(vector.data) > 0 ):
+		if not vector.SV_array.min() or self.svm.predict(vector.data) > 0:
 			vector.cluster = self.SV[ vector.SV_array.argmin() ].cluster
+		else:
+			print 'Outlier found %s units away from nearest vector' % (vector.SV_array.min())
 		
 		return vector
 		
@@ -76,7 +79,7 @@ class inference_module:
 		
 	def _compute(self,path='output.svm'):
 		if not self.param.gamma:
-			self.param.gamma = 1/spatial.distance.pdist(self.data, 'euclidean').max()
+			self.param.gamma = self.gm/spatial.distance.pdist(self.data, 'euclidean').max()
 		
 		self.svm = svm_model(svm_problem( range(len(self.data)), self.data ),self.param)
 		self.svm.save(path)
