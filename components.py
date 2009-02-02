@@ -21,6 +21,47 @@ class support_vector(data_vector):
 		self.beta = beta
 		data_vector.__init__(self,*args,**kargs)
 		
+class timeseries(preprocessor):
+	def __init__(self, related, gamma = .5, nu = 1e-10, tStepMin, tWindow):
+		# init
+		#
+		# Generates a pre-processor using a given set of observed vectors
+		#
+		# @param related		An iterable set of observation vectors.  The first element of each vector should be a timestamp
+		
+		self.related = related
+		self.param = svm_parameter(svm_type=nu-SVR, kernel_type = RBF, cache_size = 500)
+		self.param.gamma = gamma
+		self.param.nu = nu
+		self.svm = svm_model(svm_problem( [point[0] for point in related], [point[1:] for point in related ),self.param)
+		self.tStepMin = tStepMin
+		self.tWindow = tWindow
+		
+	def preprocess(self,point):
+		# timeseries preprocessing
+		#
+		# executes a two stage process; it first generates a regression describing the related vectors,
+		# then generates a wavelet transform of the regression
+		#
+		# @param point		A time value for which the wavelet transform should be computed
+
+		
+		
+class preprocessor:
+	# Data Pre-processor 
+	#
+	# Generates a vector which encodes the relationship between a vector and a set of other vectors
+	def __init__():
+		pass
+	
+	def process(self, point, related = None):
+		# Processes the relationships between point and related
+		raise NotImplemented
+		
+	def reconstruct(self, point):
+		# reconstructs related values based on point
+		raise NotImplemented
+
 class inference_module:
 	def __init__(self,data=list(),gamma=None,nu=1e-1,gm=1):
 		self.param = svm_parameter(svm_type=ONE_CLASS, kernel_type = RBF,cache_size = 800)

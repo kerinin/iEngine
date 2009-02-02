@@ -17,7 +17,7 @@ def run():
 	
 	print "Loading Dataset"
 	# Retrieve dataset
-	data = getData('B1.dat')[:10000]
+	data = getData('B1.dat')[:100]
 	#data = list()
 	#for i in range(100):
 	#	data.append( array( [gauss(2.0,.1), gauss(0.0,.1) ]) )
