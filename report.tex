@@ -56,87 +56,87 @@ We refer to each of these sources as a channel, and refer to each channel as the
 
 For each channel we are given a set of \( \ell \) observations of dimension \( d \), each with a time value:
 
-\[ X^n = [(x_0^n,t_0^n),...,(x_\ell^n,t_\ell^n)] \in \mathbb{R}^d \times \mathbb{R}_+ \]
+\[ X^n = \left[ (x_0^n,t_0^n),...,(x_\ell^n,t_\ell^n) \right] \in \mathbb{R}^d \times \mathbb{R}_+ \]
 
 We assume that the probability of \(X \,\!\) is a time-dependent mixture of some set of distributions whose influence is unknown and changes over time.  We can refer to the specific mixture which corresponds to a given time window \(\mathcal{T}(t,\theta) = [t_i : t \le t_i < t + \theta ]\) as
 
-\[ F(t,\theta) = \sum_i \delta_i \cdot f_i \]
+\begin{equation} F(t,\theta) = \sum_i \delta_i \cdot f_i \end{equation}
 
 Finally, we assume that a similar mixture of densities can be determined for each channel:
 
-\[ F(t,\theta)^n = \sum_i \delta_i^n \cdot f_i^n \]
+\begin{equation} F(t,\theta)^n = \sum_i \delta_i^n \cdot f_i^n \end{equation}
 
 \section{Single Variable w/ Memory}
 \subsection{Estimation}
 We begin by considering the case where only one channel exists, so for now will omit the superscript and refer to \(F^n = (\Omega^n,\mathcal{F}^n,\mathcal{P}^n) \,\!\) as \(F = (\Omega, \mathcal{F},\mathcal{P}) \,\!\).  Our task is to determine both a set of underlying distributions \([f_0,...,f_i] \,\!\) and their relative influence over time.  We begin by estimating a set of probability distributions \(\Phi \,\!\) over various windows \([(t,\theta) \in \mathcal{T} ] \,\!\) using the samples which fall into the window using some function \(\psi_E \,\!\):
 
-\begin{align*}
-S_{(t,\theta)} &= [ (x_i,\frac{t_i - t}{\theta}) \in X : t \le t_i < t+\theta ] \\
-\psi_E( S_{(t,\theta)}:\alpha_E ) &\mapsto \phi_n \simeq F(t,\theta)  \\
-\Phi &= [\phi_0,...,\phi_p ] \\
-\end{align*} 
+\begin{equation} S_{(t,\theta)} = \left[ \left( x_i,\frac{t_i - t}{\theta} \right) \in X : t \le t_i < t+\theta \right] \end{equation}
+\begin{equation} \psi_E( S_{(t,\theta)}:\alpha_E ) \mapsto \phi_n \simeq F(t,\theta)  \end{equation}
+\[ \Phi = [\phi_0,...,\phi_p ] \nonumber \]
 
 The estimation algorithm \(\psi_{estimate} \,\!\) operates on the set of samples \(X_n \,\!\) in a given window \(\mathcal{T}_n \,\!\) and produces an estimate \(\phi_n \,\!\) of the probability distribution \(F \,\!\) of the random variable \(X \,\!\) localized at the window \(\mathcal{T}_n \,\!\).  Multiple algorithms exist to accomplish such density estimations this, so details will be omitted.
 
 \subsection{Correlation}
 The entropy value defines a new random variable, for which we will compute a density estimate using \(\psi_C \,\!\) as we have with the input data previously:
 
-\begin{align*}
-H_u( S_{(t,\theta)} ) \mapsto \delta_v &= -\sum_{(x,t) \in S_{(t,\theta)}} \phi_u(x,t) \log \phi_u(x,t) \\
-\Delta &= [\delta_0,...,\delta_q] \\
-\psi_C( \Delta , \alpha_C ) &\mapsto \phi_\Delta \\
-\phi_\Delta(S_{(t,\theta)},\delta_v) &\simeq Pr( H_u(S_{(t,\theta)}) = \delta_v ) \\
-\end{align*}
+\begin{equation} H_u( S_{(t,\theta)} ) \mapsto \delta_v = -\sum_{(x,t) \in S_{(t,\theta)}} \phi_u(x,t) \log \phi_u(x,t) \end{equation}
+\[ \Delta = [\delta_0,...,\delta_q] \]
+\begin{equation} \psi_C( \Delta , \alpha_C ) \mapsto \phi_\Delta \end{equation}
+\begin{equation} \phi_\Delta(S_{(t,\theta)},\delta_v) \simeq Pr \left( H_u(S_{(t,\theta)}) = \delta_v \right)
+\end{equation}
 
 \subsection{Prediction}
 The derivation algorithm produces predictions of \(X \,\!\) over a time window \((t,\theta) \,\!\) based on a set of observations which occur in that time window \(S_{(t,\theta)} \,\!\).  Rather than using the estimation algorithm \(\psi_E \,\!\) to predict these values, however, the derivation algorithm \(\psi_D \,\!\) predicts the probability distribution  using bayesian modification of existing estimates.  To accomplish this, we use the entropy value of the conditional probability given \(S_{(t,\theta)} \,\!\)
 
-\[ Pr( X = (x,t) | H_n(S_{(t,\theta)} = \delta_u ) = \frac { Pr( H_n( S_{(t,\theta)} ) = \delta_u | X = (x,t) ) \cdot Pr( X = (x,t) ) } { Pr( H_n( S_{(t,\theta)} = \delta_u ) } \]
+\begin{equation} Pr \left( X = (x,t) | H_n(S_{(t,\theta)}) = \delta_u \right) = \frac { Pr \left( H_n( S_{(t,\theta)} ) = \delta_u | X = (x,t) \right) \cdot Pr \left( X = (x,t) \right) } { Pr \left( H_n( S_{(t,\theta)} ) = \delta_u \right) } \end{equation}
 
 We can easily determine one of these terms:
 
-\[ Pr( X = (x,t) ) = \prod_{0 \le i < q} \phi_i(x,t) \]
+\begin{equation} Pr \left( X = (x,t) \right) = \prod_{0 \le i < q} \phi_i(x,t) \end{equation}
 
 Because the entropy is calculated as a sum of the entropy of each observation, we can determine the conditional probability \(H_n(S_{(t,\theta)}) = \delta_u | X = (x,t) \,\!\) by subtracting the entropy of \(H_n((x,t)) \,\!\) from the value of \(\delta_u \,\!\), and then using our correlation estimate \(\phi_\Delta \,\!\) to predict the probability of \(\delta_u - H_n((x,t)) \,\!\).  We include the expanded form of \(Pr( H_n(S_{(t,\theta)}) ) \,\!\) to clarify the cancellation of terms:
 
+\[H_n(X) \mapsto \delta= -\sum_{x \in X} \phi(x) \log \phi(x) \]
 \begin{align*}
-H_n(X) &\mapsto \delta= -\sum_{x \in X} \phi(x) \log \phi(x) \\
-Pr( H_n(S_{(t,\theta)}) = \delta_u ) &= \frac{ | y : H_n(y) = \delta_u | }{ | y : H_n(y) \ne \delta_u | } \\
-Pr( H_n(S_{(t,\theta)}) = \delta_u | X = S_{(t,\theta)} ) &= \frac{ | y : H_n(y) = \delta_u + H_n((x,t)) | }{ | y : H_n(y) \ne \delta_u | } \\
-\frac{ Pr( H_n( S_{(t,\theta)} ) = \delta_u | X = S_{(t,\theta)} ) }{ Pr( H_n( S_{(t,\theta)} ) = \delta_u ) } &= \frac{ | y : H_n(y) = \delta_u + H_n((x,t)) | \cdot | y : H_n(y) \ne \delta_u | }
+Pr \left( H_n(S_{(t,\theta)} \right) = \delta_u ) &= \frac{ | y : H_n(y) = \delta_u | }{ | y : H_n(y) \ne \delta_u | } \\
+\nonumber \\
+Pr \left( H_n(S_{(t,\theta)} \right) = \delta_u | X = S_{(t,\theta)} ) &= \frac{ | y : H_n(y) = \delta_u + H_n \left( (x,t) \right) | }{ | y : H_n(y) \ne \delta_u | } \\
+\nonumber \\
+\frac{ Pr \left( H_n( S_{(t,\theta)} \right) = \delta_u | X = S_{(t,\theta)} ) }{ Pr( H_n( S_{(t,\theta)} ) = \delta_u ) } &= \frac{ | y : H_n(y) = \delta_u + H_n \left( (x,t) \right) | \cdot | y : H_n(y) \ne \delta_u | }
 { | y : H_n(y) = \delta_u | \cdot | y : H_n(y) \ne \delta_u | } \\
-&= \frac{ Pr( H_n((x,t)) = \delta_u + H_n((x,t)) ) }{ Pr( H_n((x,t)) = \delta_u ) } 
+\nonumber \\
+&= \frac{ Pr \left( H_n \left( (x,t) \right) = \delta_u + H_n \left( (x,t) \right) \right) }{ Pr \left( H_n \left( (x,t) \right) = \delta_u \right) } 
 \end{align*}
 
 The derivation algorithm can easily be extended to multiple windows by using joint entropy probabilities.  Because we do not know anything about the conditional relationships between estimates, we must assume they are i.i.d., and that their joint probability is equal to the sum of the marginal probabilities.
 
-\begin{align*}
-Pr(A|B \cap C) &= \frac{ Pr(B \cap C|A) \cdot Pr(A) }{ Pr(B \cap C) } \\
-\begin{split} 
-Pr( X = (x,t) \ | \ H_n(S_{(t,\theta)}) = \delta_u \ \cap\  H_m(S_{(t,\theta)}) = \delta_v ) &= \\
-	\frac { Pr( H_n(S_{(t,\theta)}) = \delta_u \ \cap \ H_m(S_{(t,\theta)}) = \delta_v \ | \ X = (x,t) ) \cdot Pr(X = (x,t)) } { Pr( H_n(S_{(t,\theta)}) = \delta_u \ \cap \ H_m(S_{(t,\theta)}) = \delta_v ) }
-\end{split} \\
-\begin{split}
-Pr( H_n(S_{(t,\theta)}) = \delta_u \ \cap \ H_m(S_{(t,\theta)}) = \delta_v | X = (x,t) ) &= \\
-	\prod_{i=[n,m],j=[u,v]} Pr( H_i(S_{(t,\theta)}) = \delta_j + H_i((x,t)) )
-\end{split} \\
+
+\[ Pr(A|B \cap C) = \frac{ Pr(B \cap C|A) \cdot Pr(A) }{ Pr(B \cap C) } \]
+
+\begin{multline*} 
+Pr \left( X = (x,t) \ | \ H_n(S_{(t,\theta)}) = \delta_u \ \cap\  H_m(S_{(t,\theta)} \right) = \delta_v ) = \\
+	\frac { Pr \left( H_n(S_{(t,\theta)}) = \delta_u \ \cap \ H_m(S_{(t,\theta)}) = \delta_v \ | \ X = (x,t) \right) \cdot Pr \left( X = (x,t) \right) } { Pr \left( H_n(S_{(t,\theta)}) = \delta_u \ \cap \ H_m(S_{(t,\theta)}) = \delta_v \right) }
+\end{multline*}
+
+\begin{align}
+Pr \left( H_n(S_{(t,\theta)}) = \delta_u \ \cap \ H_m(S_{(t,\theta)}) = \delta_v | X = (x,t) \right) &=
+	\prod_{i=[n,m],j=[u,v]} Pr \left( H_i(S_{(t,\theta)}) = \delta_j + H_i((x,t)) \right) \nonumber  \\
+\nonumber \\
 &= \prod_{i=[n,m],j=[i,j]} \phi_\Delta(S_{(t,\theta)},\delta_j + H_i((x,t)) ) \\
-\begin{split}
-Pr( H_n(S_{(t,\theta)}) = \delta_u \ \cap \ H_m(S_{(t,\theta)}) = \delta_v ) &= \\
-	\prod_{i=[n,m],j=[u,v]} Pr( H_i(S_{(t,\theta)}) = \delta_j )
-\end{split} \\
-&= \prod_{i=[n,m],j=[u,v]} \phi_\Delta(S_{(t,\theta)},\delta_j ) \\
-\end{align*}
+\nonumber \\
+Pr \left( H_n(S_{(t,\theta)}) = \delta_u \ \cap \ H_m(S_{(t,\theta)}) = \delta_v \right) &= 
+	\prod_{i=[n,m],j=[u,v]} Pr \left( H_i(S_{(t,\theta)}) = \delta_j \right) \nonumber  \\
+&= \prod_{i=[n,m],j=[u,v]} \phi_\Delta(S_{(t,\theta)},\delta_j )
+\end{align}
 
 Which gives us the following as our prediction algorithm:
 
-\begin{align*}
-\begin{split}
-\psi_P( (x,t) :S_{(t,\theta)}, \Phi ) \mapsto \mathbb{P} \\
-	&= \frac{ \prod_{0 \le n < q} \phi_\Delta(S_{(t,\theta)}, H_n(S_{(t,\theta)})) \cdot \prod_{0 \le n < q} \phi_n((x,t)) }{ \prod_{0 \le n < q} \phi_\Delta(S_{(t,\theta)}, H_n(S_{(t,\theta)}) + H_n((x,t)) ) } 
-\end{split} \\
-&= \prod_{0 \le n < q} \phi_n((x,t)) \cdot \frac{ \phi_\Delta(S_{(t,\theta)}, H_n(S_{(t,\theta)})) }{ \phi_\Delta(S_{(t,\theta)}, H_n(S_{(t,\theta)}) + H_n((x,t)) ) }  \\
-\end{align*}
+\begin{align}
+\psi_P \left( (x,t) :S_{(t,\theta)}, \Phi \right) \mapsto \mathbb{P} 
+	&= \frac{ \prod_{0 \le n < q} \phi_\Delta \left( S_{(t,\theta)}, H_n(S_{(t,\theta)}) \right) \cdot \prod_{0 \le n < q} \phi_n \left( (x,t) \right) }{ \prod_{0 \le n < q} \phi_\Delta(S_{(t,\theta)}, H_n(S_{(t,\theta)}) + H_n((x,t)) ) }  \nonumber \\
+\nonumber \\
+&= \prod_{0 \le n < q} \phi_n \left( (x,t) \right) \cdot \frac{ \phi_\Delta \left (S_{(t,\theta)}, H_n(S_{(t,\theta)}) \right) }{ \phi_\Delta \left( S_{(t,\theta)}, H_n(S_{(t,\theta)}) + H_n((x,t)) \right) }
+\end{align}
 
 
 \section{Multiple Variables w/ Memory}
@@ -144,23 +144,20 @@ Algorithms for determining probability density functions tend to scale exponenti
 
 Extending the existing theory to this situation, return to our original setting of the problem:
 
-\begin{align*}
-X^n &: \Omega \mapsto \Omega^n \in \mathbb{R}^d \times \mathbb{R}_+ \\
-X^n &= (\Omega^n,\mathcal{F}^n,\mathcal{P}^n) \\
-\mathbf{X} &= [X^0,...,X^c]   \\
-C^A &= [\Omega^A,\mathcal{F}^A,\mathcal{P}^A] \\
-\end{align*}
+\[ X^n : \Omega \mapsto \Omega^n \in \mathbb{R}^d \times \mathbb{R}_+ \]
+\[ X^n = (\Omega^n,\mathcal{F}^n,\mathcal{P}^n) \]
+\[ \mathbf{X} = [X^0,...,X^c]   \]
+\[ C^A = [\Omega^A,\mathcal{F}^A,\mathcal{P}^A] \]
+
 
 We will now refer to observations, and estimates using superscript to denote their channel.  We previously developed three generalized algorithms, \(\psi_E, \psi_C, \psi_D \,\!\); we will now extend each one to handle multiple channels.
 
 \subsection{Estimation}
 The estimation algorithm is unchanged in the context of multiple channels.  Each channel generates its independent estimates over independent time windows.  The estimation process is intended to give each channel an understanding of its own behavior at a specific time window, and as such the generation of estimates does not rely on previous behaviors of the channel or the behavior of other channels.  We therefore re-write the estimation algorithm to reflect the new notation:
 
-\begin{align*}
-S_{t,\theta}^A &= [ (x_i^A,\frac{t_i - t}{\theta}) \in X^A : t \le t_i < t+\theta ] \\
-\psi_E( S_{t,\theta}^A:\alpha_E^A ) &\mapsto \phi_n^A \ \simeq \ F^A(t,\theta)  \\
-\Phi^A &= [\phi_0^A,...,\phi_p^A ] \\
-\end{align*}
+\begin{equation} S_{t,\theta}^A = \left[ (x_i^A,\frac{t_i - t}{\theta}) \in X^A : t \le t_i < t+\theta \right] \end{equation}
+\[ \psi_E( S_{t,\theta}^A:\alpha_E^A ) \mapsto \phi_n^A \ \simeq \ F^A(t,\theta)  \]
+\[ \Phi^A = [\phi_0^A,...,\phi_p^A ] \nonumber \]
 
 \subsection{Correlation}
 The correlation algorithm is where the most substantial changes must be made to accomodate multiple channels.  The biggest difference from the single-channel approach is that each channel takes place in an independent abstract space.  Recall that a critical component of the prediction algorithm is the evaluation of the entropy of a set of observations given an estimate:
@@ -173,65 +170,61 @@ To address this, we begin with the observation that all channels share the time 
 
 Using the same algorithm \(\psi_C \,\!\) as we used previously, we can estimate the probability density \(\phi_\Delta \,\!\) of this random vector. 
 
-\begin{align*}
-\Delta^A &= [\delta_0^A,...,\delta_p^A] \\
-\Delta &= [\Delta^i \forall i] \\
-\psi_C( \Delta , \alpha_C ) &\mapsto \phi_\Delta \\
-\end{align*}
+\[ \Delta^A = [\delta_0^A,...,\delta_p^A] \nonumber  \]
+\[ \Delta = [\Delta^i \forall i] \nonumber  \]
+\begin{equation} \psi_C( \Delta , \alpha_C ) \mapsto \phi_\Delta \end{equation}
 
 \subsection{Prediction}
 We begin by considering the situation in which we wish to make predictions on channel \(C^A \,\!\) using information from another, \(C^B \,\!\).  The derivation algorithm therefore produces predictions of \(X^A \,\!\) over a time window \((t,\theta) \,\!\) based on a set of observations which occur in that time window \(S_{t,\theta}^B \,\!\).  To do so we select estimates in both channels:
 
 \begin{align*}
 C^A &\rightarrow \phi_n^A \\
-C^B &\rightarrow \phi_m^B \\
+C^B &\rightarrow \phi_m^B
 \end{align*}
 
 We calculate the entropy of each estimate in its own context:
 
 \begin{align*}
 \delta^A &= H_n^A( S_{t,\theta}^A ) \\
-\delta^B &= H_m^B( S_{t,\theta}^B ) \\
+\delta^B &= H_m^B( S_{t,\theta}^B )
 \end{align*}
 
 Then calculate the probability of each point in \(X^A \,\!\) based on the joint probability of the entropy values \(Pr(\delta^A \cap \delta^B) \,\!\).
 
-\[ \begin{split}
-Pr( X^A = (x,t) | H_n^A = \delta^A \cap H_m^B = \delta^B ) &= \\
+\begin{multline}
+Pr \left( X^A = (x,t) | H_n^A = \delta^A \cap H_m^B = \delta^B \right) = \\
 \frac 
-{ Pr( H_n^A = h^A \cap H_m^B = \delta^B | X^A = (x,t) ) \cdot Pr( X^A = (x,t) ) }
-{ Pr( H_n^A = h^A \cap H_m^B = \delta^B ) } \\
-\end{split} \]
+{ Pr \left( H_n^A = \delta^A \cap H_m^B = \delta^B | X^A = (x,t) \right) \cdot Pr \left( X^A = (x,t) \right) }
+{ Pr \left( H_n^A = \delta^A \cap H_m^B = \delta^B \right) }
+\end{multline}
 
 This time, we can easily determine two of these terms:
 
-\begin{align*}
-Pr( X^A = (x,t) ) &= \prod_{0 \le i < q} \phi_i^A(x,t) \\
-Pr( H_n^A = \delta^A \cap H_m^B = \delta^B ) &= \phi_\Delta \Big( \{ A: \delta^A, B: \delta^B \} \Big) \\
-\end{align*}
+\begin{equation} Pr \left( X^A = (x,t) \right) = \prod_{0 \le i < q} \phi_i^A(x,t) \end{equation}
+\begin{equation} Pr \left( H_n^A = \delta^A \cap H_m^B = \delta^B \right) = \phi_\Delta \left( \{ A: \delta^A, B: \delta^B \} \right) \end{equation}
 
 Which leaves us with the process of calculating the effect of \(X^A = (x,t) \,\!\) on the entropy of \(\phi_n^A \,\!\) and \(\phi_m^B \,\!\).  We adopt the same process used in the single-channel case, replacing \(\delta^A \,\!\) with \(\delta^A + H_n^A((x,t)) \,\!\), and recalculating the joint probability. Since \(\phi_m^B \,\!\) is in a different abstract space, we cannot make any useful statements about the dependence of its entropy given a point outside the abstract space being predicted.  We can now determine the third of the three terms:
 
-\begin{align*}
-Pr( H_n^A = \delta^A \cap H_m^B = \delta^B | X^A = (x,t) ) &= Pr( H_n^A = \delta^A + H_n^A((x,t)) \cap H_m^B = \delta^B ) \\
-&= \phi_\Delta \Big( \{ A:\delta^A + H_n^A((x,t)), B: \delta^B \} \Big) \\
-\end{align*}
+\begin{align}
+Pr \left( H_n^A = \delta^A \cap H_m^B = \delta^B | X^A = (x,t) \right) &= Pr \left( H_n^A = \delta^A + H_n^A((x,t)) \cap H_m^B = \delta^B \right) \nonumber \\
+\nonumber \\
+&= \phi_\Delta \left( \{ A:\delta^A + H_n^A((x,t)), B: \delta^B \} \right)
+\end{align}
 
 To state the problem in a more general setting, let us assume we have a set of channels \(\mathbf{C} \,\!\) with an associated set of estimates \(\mathbf{\Phi} \,\!\) and we are attempting to predict the values of \(X^0; C^0 \in \mathbf{C} \,\!\) based on a set of observations \(\mathbf{S}_{t,\theta} \,\!\) over all the channels:
 
-\begin{align*}
-\mathbf{C} &= [C^0,...,C^c] \\
-\\
-\mathbf{\Phi} &= [\Phi^0,...,\Phi^c] \\
-\mathbf{S}_{t,\theta} &= [ S_{t,\theta}^0,...,S_{t,\theta}^c] \\
-\\
-\psi_D((x^0,t):\mathbf{S}_{t,\theta},\mathbf{\Phi}) \mapsto \mathbb{P} &= Pr( X^0 = (x^0,t) | \mathbf{S}_{t,\theta} ) \\
-\end{align*}
-\[
-= \prod_{ 0 \le n < q} \phi_n^0((x^0,t)) \cdot \frac
-{ \phi_\Delta \bigg( \Big\{ 0:H_n^0(S_{t,\theta}^0) \Big\} \ \bigcup \ \left [ \Big\{ c: H_m^c(S_{t,\theta}^c ) \Big\} : \forall m, \forall c \right ] \bigg) }
-{ \phi_\Delta \bigg( \Big\{ 0: H_n^o(S_{t,\theta}^0) + H_n^0((x,t)) \Big\} \ \bigcup \ \left [ \Big\{c:H_m^c(S_{t,\theta}^c) \Big\} : \forall m, \forall c ) \bigg] \right ) }  \\
-\]
+
+\[ \mathbf{C} = [C^0,...,C^c] \nonumber \]
+
+\[ \mathbf{\Phi} = [\Phi^0,...,\Phi^c] \nonumber \]
+\[ \mathbf{S}_{t,\theta} = [ S_{t,\theta}^0,...,S_{t,\theta}^c] \nonumber \]
+
+\begin{multline} \psi_D \left( (x^0,t):\mathbf{S}_{t,\theta},\mathbf{\Phi} \right) \mapsto \mathbb{P} = Pr \left( X^0 = (x^0,t) | \mathbf{S}_{t,\theta} \right) \\
+= \prod_{0 \le n < q} \phi_n^0 \left( (x^0,t) \right) \cdot \frac
+{ \phi_\Delta \left( \left \{ 0: H_n^0(S_{t,\theta}^0) \right \} \bigcup \left[ \left \{ c: H_m^c(S_{t,\theta}^c) \right \} : \forall m, \forall c \right] \right) }
+{ \phi_\Delta \left( \left \{ 0: H_n^0(S_{t,\theta}^0) + H_n^0 \left( (x,t) \right) \right \} \bigcup \left[ \left \{ c: H_m^c(S_{t,\theta}^c) \right \} : \forall m, \forall c \right] \right) }
+\end{multline}
+
 
 \section{Optimization}
 The system as described thus far makes several assumptions for simplicity which would lead to unnecessary computational performance.  We now spend some time discussion methods of reducing the computational demands of the system.  We will look at each component of the system in turn.
