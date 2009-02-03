@@ -232,7 +232,7 @@ To state the problem in a more general setting, let us assume we have a set of c
 
 
 \section{Optimization}
-The system as described thus far makes several assumptions for simplicity which would lead to unnecessary computational performance.  We now spend some time discussion methods of reducing the computational demands of the system.  We will look at each component of the system in turn.
+The system as described thus far makes several assumptions for simplicity which would lead to unnecessary computational demands.  We now spend some time discussion methods of reducing the computational demands of the system.  We will look at each component of the system in turn.
 
 \subsection{Estimation Optimization}
 The generation of estimates has been described as a process of selecting time windows at random from the full set of training data.  Selecting windows at random is not necessary to satisfy the i.i.d. requirements of producing an accurate probability estimate, so long as the selection of time windows for which entropy is calculated is random.  Let's consider the characteristics of a 'good' set of estimates for prediction.  
@@ -249,9 +249,57 @@ It is critical that correlation takes place using i.i.d. data in order to produc
 \subsection{Pediction}
 For prediction, it is not necessary to actually use each of the estimates in generating predictions, so long as we have accurate estimates of their individual probabilities and the joint probability of any two estimates.  Since we must evaluate a number of joint probabilities equal to the square of the number of estimates being considered, selecting a useful subset of the defined estimates can provide substantial reductions in computational demands.
 
-Our objective is to consider only estimates which will be relevant to the prediction task.  If we restrict our attention to a single channel, this can be done by selecting a subset of estimates which have the lowest entropy in the context of the prediction task.  Extending this approach to a situation with multiple channels becomes slightly more complex, as the influence of a given estimate depends not only on its entropy, but also on the entropy values of predictions in other channels.  We cannot restrict our attention to the set of all estimates below a given entropy, as with the single-channel case, because an estimate's influence may be increased based on a high entropy value of an estimate in another channel.
+% you need to get into details here
+% for a given estimate, we can ignore other estimates which
+% do not influence the estimates value.  That's all that
+% can really be said.  this can be measured by the
+% correlation in their PDF's.  low entropoy (measured against
+% a flat distribution) should equal low probability of influence.
 
-To restrict the estimates which are used in the multi-channel situation, we must establish the extent to which each estimate's probability correlates with each other estimate's.  If a given estimate's probability is only marginally dependent on another's, we can omit the other estimate from the set considered.
+\section{Sample Implementation}
+Implementing the inference architecture requires the specification of the two density estimation functions, \( \psi_E \) and \( \psi_C \).  We will use the same algorithm for both; Vapnik's SVM for conditional density estimation.  The SVM algorithm has been chosen due to its simplicity of parameters and determinacy. 
+ 
+\subsection{SVM-Density Algorithm}
+Our objective is to determine the conditional density function and regression functions
+
+\begin{equation} p(y|x) = \sum_{i=1}^\ell \beta_i K_\gamma(x,x_i) K_\gamma(y,y_i) , \beta \ge 0 \end{equation}
+\begin{equation} r(x) = \sum_{i=1}^\ell y_i \beta_i K_\gamma(x,x_i) \end{equation}
+
+Which are determined by optimizing for the values of \( \beta_i \) which minimize
+
+\begin{equation} W_\gamma(\beta) = \Omega(f) = \sum_{i,j=1}^\ell \beta_i \beta_j K_\gamma(x_j,x_i) K_\gamma(y_j,y_i) \end{equation}
+
+Subject to the Constraints
+
+\begin{equation} \max_p \left | \sum_{i=1}^\ell \beta_i \frac{1}{\ell} \sum_{j=1}^\ell K_\gamma(x_j,x_i)\theta(x_p-x_j) \int_{-\infty}^{y_p} K_\gamma(y',y_i)dy' - F_\ell(x_p,y_p) \right | = \sigma_\ell \end{equation}
+
+\begin{equation} \sum_{i=1}^\ell \left ( \frac{1}{\ell} \sum_{j=1}^\ell \beta_j K_\gamma(x_i,x_j) \right ) = 1 \end{equation}
+
+We use a kernel function defined as follows, where \( \gamma \) is chosen from the admissible set to control the desired properties of the solution.
+
+\begin{equation} K_\gamma(x,x_i) = a(\gamma) \exp \left ( - \left | \frac{x-x_i}{\gamma} \right | ^p \right ) , 0 < p \le 2 \end{equation}
+
+We choose \( \sigma \) based on an appropriate quantile of the universal distribution of discrepancy:
+
+\begin{equation} \sigma = \frac{q}{\sqrt \ell} \end{equation}
+
+\section{Results}
+The architecture has been tested against several data sets.  In all cases the system parameters are left unchanged to eliminate the possbility of optimizing the system performance to best match the known outcomes.
+
+\subsection{Eunite Competition Data}
+
+
+\subsection{Santa Fe Data}
+
+
+\subsection{CATS Benchmark Data}
+
+
+\subsection{Results Summary}
+
+
+\section{Conclusion}
+Eat it, bitches
 
 \end{document}
 
