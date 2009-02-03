@@ -15,6 +15,9 @@
 
 % Do we need to think about inhibition at all?
 
+% Window selection for estimates is *important*, and deserves its own section and algorithm. 
+
+
 \begin{document}
 \title{Spectral Analysis of Timeseries Data using Derived Probability Distributions}
 \author{Ryan Michael\\ \texttt{kerinin@gmail.com}}
@@ -31,6 +34,31 @@ Decomposed into the ??? domain?
 
 \section{Introduction}
 %\tableofcontents
+
+\subsection{Existing Work}
+http://en.wikipedia.org/wiki/Stationary_process
+http://en.wikipedia.org/wiki/Ergodicity
+http://en.wikipedia.org/wiki/Mixing_(mathematics)
+http://en.wikipedia.org/wiki/Lyapunov_exponent
+http://en.wikipedia.org/wiki/Recurrence_quantification_analysis
+http://en.wikipedia.org/wiki/Recurrence_plot
+http://en.wikipedia.org/wiki/Autoregressive_fractionally_integrated_moving_average
+http://en.wikipedia.org/wiki/Autocorrelation
+
+\subsubsection{Hidden Marhov Model}
+% cannot account for future states - only capable of prediction
+% weak, short-term memory
+
+\subsubsection{Box-Jenkins}
+% intended for simplistic processes with well-understood stationarity and periodicity
+http://en.wikipedia.org/wiki/Box-Jenkins
+
+\subsubsection{Spectral Analysis}
+% assumes some type of frequency-domain decomposition.  Frequency-domain signal representations do not do a very good job predicting time-domain values. 
+
+\subsubsection{Shrinking-\epsilon SVM Regression}
+% theoretical foundation weak; only compensates for the relevance of recent data.  See Markhov problem
+
 
 \subsection{General Overview}
 The goal is to create a method of statistical inference capable of processing timeseries data which is both multi-variate and exhibits different behaviors at different times.  This type of data is common, and developing a robust method of analysis has applications in many domains.  The general approach is to create a series of estimates using subsets of the observed data, and to then combine these estimates in an intelligent manner which captures the relevance of each estimate to the current prediction task.  By using a set of 'typical' estimates, we are able to reduce the computational demands of the system, as each estimate is a condensed representation of the data from which it was derived.  This approach also allows us to reduce data redundancy by only using distinct estimates.
@@ -49,17 +77,6 @@ The goal of correlating estimates is to determine the relationships between esti
 
 \subsection{Making Pedictions}
 Once the estimates have been correlated, we are able to generate predictions.  For simplicity, we'll assume that the first two phases occur on as set of 'training' data which is representative of the underlying data, while prediction takes place continuously using new sets of observations which occur in some time window.  We make predictions for a given source by combining the existing estimates we have for that source based on their accuracy at predicting the given observations.  Because we have determined the correlation between estimate accuracy of different sources, we can use other sources to refine our confidence in each estimate of the given source; the influence of estimates of the given source which do not correspond to a likely 'point' in the correlation density are suppressed while the influence of estimates which correspond to likely points in the correlation density are enhanced.
-
-\subsection{Existing Work}
-http://en.wikipedia.org/wiki/Stationary_process
-http://en.wikipedia.org/wiki/Ergodicity
-http://en.wikipedia.org/wiki/Mixing_(mathematics)
-http://en.wikipedia.org/wiki/Box-Jenkins
-http://en.wikipedia.org/wiki/Lyapunov_exponent
-http://en.wikipedia.org/wiki/Recurrence_quantification_analysis
-http://en.wikipedia.org/wiki/Recurrence_plot
-http://en.wikipedia.org/wiki/Autoregressive_fractionally_integrated_moving_average
-http://en.wikipedia.org/wiki/Autocorrelation
 
 \section{Formal Description}
 \subsection{Problem Setting}
@@ -318,7 +335,7 @@ The architecture has been tested against several data sets.  In all cases the sy
 
 
 \section{Further Research}
-The system as described thus far makes several assumptions for simplicity which would lead to unnecessary computational demands.  We now spend some time discussion methods of reducing the computational demands of the system.  We will look at each component of the system in turn.
+The system as described thus far makes several assumptions for simplicity which would lead to unnecessary computational demands.  We now spend some time discussion methods of reducing the computational demands of the system.  
 
 \subsection{Data Retention}
 % this can probably be worked into the other 3 sections, but for now I'll put it here
@@ -346,9 +363,17 @@ For prediction, it is not necessary to actually use each of the estimates in gen
 % a flat distribution) should equal low probability of influence.
 
 \subsection{Ensemble System}
+% more analysis of recent data, some type of transfer from short to long-term 'memory'
+
 % heirarchical system?
 
 % what parameters change?
+
+\subsection{Prediction with Heterogenous Time Windows}
+% Look into extending the prediction algorithm to the case where each estimate is being evaluated for its own
+% window - this allows estimates to be evaluated online and then 'applied' to correct offsets
+% The biggest benefit of this is that we don't duplicate portions of a given pattern to compensate
+% for offsets - allows a sliding match
 
 \section{Conclusion}
 Eat it, bitches
