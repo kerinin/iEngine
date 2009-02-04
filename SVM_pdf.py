@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-import sys, getopt, math, datetime, os
+import sys, getopt, math, datetime, os, cmath
 from random import gauss
 
 import numpy
@@ -40,7 +40,7 @@ class svm:
 		t = ( ( self.data.T > self.data ).sum(1,dtype=float) / len(self.data) ).reshape( len(self.data), 1)	# Since F is an estimate of the target value t, i'm simply renaming it
 		
 		# Set learning rate \rho and randomly set w_i
-		rho = .01
+		rho = 1e-3
 		W = numpy.random.rand( len(self.data), 1)
 		
 		# Calculate covariance matrix K and let \sigma_i^2 = K_{ii}
@@ -63,11 +63,12 @@ class svm:
 			#	* ( 1 - erf( ( yXi - t_i + \epsilon + C \sigma_i^2 ) / sqrt( 2 \sigma_i^2 ) )
 			#	- C/2 exp( C/2 ( -2yXi + 2 t_i + 2 \epsilon + C \sigma_i^2 ) )
 			#	* ( 1 - erf( -C/2 ( 2yXi - 2t_i + 2\epsilon + C \sigma_i^2 ) )
+
 			Fi = (
-				C/2 * exp( C/2 * ( 2 * yXi - 2 * t + 2 * epsilon + C * sigma2 ) ) 
-				* ( 1 - scipy.special.erf( ( yXi - t + epsilon + C * sigma2 ) / sqrt( 2 * sigma2 ) ) )
-				- C/2 * exp( C/2 * ( -2 * yXi + 2 * t + 2 * epsilon + sigma2 ) )
-				* ( 1 - scipy.special.erf( -C / 2 * ( 2 * yXi - 2 * t + 2 * epsilon + C * sigma2 ) ) )
+				C/2. * exp( (C/2.) * ( ( 2. * yXi ) - ( 2. * t ) + ( 2. * epsilon ) + ( C * sigma2 ) ) ) 
+				* ( 1. - scipy.special.erf( ( yXi - t + epsilon + ( C * sigma2 ) ) / sqrt( 2. * sigma2 ) ) )
+				- C/2. * exp( (C/2.) * ( ( -2. * yXi ) + ( 2. * t ) + ( 2. * epsilon ) + sigma2 ) )
+				* ( 1. - scipy.special.erf( ( -C / 2. ) * ( ( 2. * yXi ) - ( 2. * t ) + ( 2. * epsilon ) + ( C * sigma2 ) ) ) )
 				)
 				
 			# Gi = 1/2 erf( ( t_i - yXi + \epsilon ) / sqrt( s \sigma_i^2 ) )
@@ -77,23 +78,21 @@ class svm:
 			#	+ 1/2 exp( C/2 ( -2 yXi - 2 t_i + 2 \epsilon + C \sigma_i^2 ) )
 			#	* ( 1 - erf( ( yXi - t_i + \epsilon + \C \sigma_i^2 ) / sqrt( 2 \sigma_i^2 ) )
 			Gi = (
-				1/2 * scipy.special.erf( ( t - yXi + epsilon ) / sqrt( 2 * sigma2 ) )
-				- 1/2 * scipy.special.erf( ( t - yXi - epsilon ) / sqrt( 2 * sigma2 ) )
-				+ 1/2 * exp( C/2 * ( 2 * yXi - 2 * t + 2 * epsilon + C * sigma2 ) )
-				* ( 1 - scipy.special.erf( ( yXi - t + epsilon + C * sigma2 ) / sqrt( 2 * sigma2 ) ) )
-				+ 1/2 * exp( C/2 * ( -2 * yXi - 2 * t + 2 * epsilon + C * sigma2 ) )
-				* ( 1 - scipy.special.erf( ( yXi - t + epsilon + C * sigma2 ) / sqrt( 2 * sigma2 ) ) )
+				.5 * scipy.special.erf( ( t - yXi + epsilon ) / sqrt( 2. * sigma2 ) )
+				- .5 * scipy.special.erf( ( t - yXi - epsilon ) / sqrt( 2. * sigma2 ) )
+				+ .5 * exp( (C/2.) * ( ( 2. * yXi ) - ( 2. * t ) + ( 2. * epsilon ) + ( C * sigma2 ) ) )
+				* ( 1. - scipy.special.erf( ( yXi - t + epsilon + ( C * sigma2 ) ) / sqrt( 2. * sigma2 ) ) )
+				+ .5 * exp( (C/2.) * ( ( -2. * yXi ) - ( 2. * t ) + ( 2. * epsilon ) + ( C * sigma2 ) ) )
+				* ( 1. - scipy.special.erf( ( yXi - t + epsilon + ( C * sigma2 ) ) / sqrt( 2. * sigma2 ) ) )
 				)
-			
+
 			# erf(x) = 2/sqrt(\pi) \sum_0^x e^{-t^2} dt (see scipy.special.erf)
 			# w_i = w_i + \rho ( ( F_i / G_i ) - w_i )
 			W_delta = rho * ( Fi / Gi - W )
-			if W_delta.sum() and count :
+			if W_delta.sum() < 1e-20 and count :
 				W += W_delta
 				print "iteration %s" % count
 				inner(K=K,W=W,C=C,epsilon=epsilon,sigma2=sigma2,count=count-1)
-			else:
-				print W_delta
 				
 		inner(K=K,W=W,C=C,epsilon=epsilon,sigma2=sigma2)
 		
