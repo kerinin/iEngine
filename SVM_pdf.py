@@ -8,7 +8,7 @@ import scipy
 import scipy.special
 
 from numpy import *
-from pylab import *
+#from pylab import *
 
 _Functions = ['run']
 	
@@ -40,7 +40,7 @@ class svm:
 		t = ( ( self.data.T > self.data ).sum(1,dtype=float) / len(self.data) ).reshape( len(self.data), 1)	# Since F is an estimate of the target value t, i'm simply renaming it
 		
 		# Set learning rate \rho and randomly set w_i
-		rho = 1e-3
+		rho = 1e-4
 		W = numpy.random.rand( len(self.data), 1)
 		
 		# Calculate covariance matrix K and let \sigma_i^2 = K_{ii}
@@ -51,10 +51,10 @@ class svm:
 		K = 1 / ( sqrt( 2 * Lambda ) )* exp( -.5 * ( self.data - self.data.T ) * ( self.data-self.data.T).T / Lambda ) 
 		sigma2 = K.diagonal().reshape( len(self.data), 1)
 		
-		def inner(K,W,C,epsilon,sigma2,count = 100):
+		def inner(K,W,C,epsilon,sigma2):
 			# Inner Loop
 			# yX = \langle y(x) \rangle = \sum_{i=1}^N w_i K(x, x_i )
-			yX = dot(K[0].reshape(1,10),W)[0][0]
+			yX = dot(K[0].reshape( 1,len(self.data) ),W)[0][0]
 			
 			# yXi = \langle y(s) \rangle_i = yX - \sigma_i^2 w_i
 			yXi = yX - sigma2 * W
@@ -88,16 +88,24 @@ class svm:
 
 			# erf(x) = 2/sqrt(\pi) \sum_0^x e^{-t^2} dt (see scipy.special.erf)
 			# w_i = w_i + \rho ( ( F_i / G_i ) - w_i )
-			W_delta = rho * ( Fi / Gi - W )
-			if W_delta.sum() < 1e-20 and count :
-				W += W_delta
-				print "iteration %s" % count
-				inner(K=K,W=W,C=C,epsilon=epsilon,sigma2=sigma2,count=count-1)
+			return rho * ( Fi / Gi - W )
 				
-		inner(K=K,W=W,C=C,epsilon=epsilon,sigma2=sigma2)
+		start = datetime.datetime.now()
+		while True:
+			for i in range(1000):
+				W += inner(K=K,W=W,C=C,epsilon=epsilon,sigma2=sigma2)
+			W_delta = inner(K=K,W=W,C=C,epsilon=epsilon,sigma2=sigma2)
+			if absolute(W_delta).sum() < 1e-6:
+				break
+			else:
+				print "Cumulative adjustment of Coefficients: %s" % absolute(W_delta).sum()
+				W += W_delta
+				
+		print "*** Optimization completed in %ss" % (datetime.datetime.now() - start).seconds
+		print W
 		
 def run():
-	mod = svm( numpy.random.rand(10,1) )
+	mod = svm( array([[gauss(1.,.5)] for i in range(40) ]).reshape([40,1]) )
 	
 
 def help():
