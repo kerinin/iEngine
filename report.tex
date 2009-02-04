@@ -36,6 +36,7 @@ Decomposed into the ??? domain?
 %\tableofcontents
 
 \subsection{Existing Work}
+http://en.wikipedia.org/wiki/Expectation-maximization_algorithm
 http://en.wikipedia.org/wiki/Stationary_process
 http://en.wikipedia.org/wiki/Ergodicity
 http://en.wikipedia.org/wiki/Mixing_(mathematics)
@@ -45,18 +46,18 @@ http://en.wikipedia.org/wiki/Recurrence_plot
 http://en.wikipedia.org/wiki/Autoregressive_fractionally_integrated_moving_average
 http://en.wikipedia.org/wiki/Autocorrelation
 
-\subsubsection{Hidden Marhov Model}
+% \subsubsection{Hidden Markov Model}
 % cannot account for future states - only capable of prediction
 % weak, short-term memory
 
-\subsubsection{Box-Jenkins}
+% \subsubsection{Box-Jenkins}
 % intended for simplistic processes with well-understood stationarity and periodicity
-http://en.wikipedia.org/wiki/Box-Jenkins
+% http://en.wikipedia.org/wiki/Box-Jenkins
 
-\subsubsection{Spectral Analysis}
+% \subsubsection{Spectral Analysis}
 % assumes some type of frequency-domain decomposition.  Frequency-domain signal representations do not do a very good job predicting time-domain values. 
 
-\subsubsection{Shrinking-\epsilon SVM Regression}
+% \subsubsection{Shrinking-\epsilon SVM Regression}
 % theoretical foundation weak; only compensates for the relevance of recent data.  See Markhov problem
 
 
@@ -121,6 +122,8 @@ The estimation algorithm \(\psi_{E} \) produces an estimate \(\phi_n \) of the p
 
 \subsection{Single Channel Correlation}
 % Make it clear that we're using a new set if time windows
+
+% Add a function for determining time windows, possibly in conjunction with creating estimates
 
 Given a set of estimations, we need a method to relate each estimate's relevance to observations in different time windows.  We use the Shannon entropy of the set of observations in a given time window with respect to a given estimation as a measure of the estimate's relevance to the observed data.  A set of data points which conform to the predicted values of an estimate will have lower entropy than a set of data points which diverge to teh same estimate.
 
@@ -375,12 +378,21 @@ For prediction, it is not necessary to actually use each of the estimates in gen
 % The biggest benefit of this is that we don't duplicate portions of a given pattern to compensate
 % for offsets - allows a sliding match
 
+% Doing this will require conditional probability estimation across time windows :0
+
+
 \section{Conclusion}
 Eat it, bitches
 
 \end{document}
 
 \begin{thebibliography}{9}
+ 
+\bibitem{ruping}
+  Stefan Ruping
+  \emph{SVM Kernels for Time Series Analysis}
+  2001
+ http://www-ai.cs.uni-dortmund.de/EVENTS/FGML2001/FGML2001-Paper-Rueping.pdf
  
 \bibitem{lamport94}
   Leslie Lamport,
