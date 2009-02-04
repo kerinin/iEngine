@@ -37,7 +37,7 @@ class svm:
 		# (x_1,F_N(x_1)),...,(x_N,F_N(x_N))
 		# F_N = 1/N \sum_{k=1}^N I(x-x_k)
 		# I = Indicator function (0 if negative, 1 otherwise)
-		t = ( ( self.data > self.data.T ).sum(0) / len(self.data) ).reshape( len(self.data), 1)	# Since F is an estimate of the target value t, i'm simply renaming it
+		t = ( ( self.data.T > self.data ).sum(1,dtype=float) / len(self.data) ).reshape( len(self.data), 1)	# Since F is an estimate of the target value t, i'm simply renaming it
 		
 		# Set learning rate \rho and randomly set w_i
 		rho = .01
@@ -49,44 +49,53 @@ class svm:
 		# \sigma = K_{ii}
 		Lambda = .5
 		K = 1 / ( sqrt( 2 * Lambda ) )* exp( -.5 * ( self.data - self.data.T ) * ( self.data-self.data.T).T / Lambda ) 
-		sigma2 = K[0][0]
+		sigma2 = K.diagonal().reshape( len(self.data), 1)
 		
-		# Inner Loop
-		# yX = \langle y(x) \rangle = \sum_{i=1}^N w_i K(x, x_i )
-		yX = dot(K[0].reshape(1,10),W)[0][0]
-		
-		# yXi = \langle y(s) \rangle_i = yX - \sigma_i^2 w_i
-		yXi = yX - sigma2 * W
-		
-		# Fi = C/2 exp( C/2 ( 2yXi - 2t_i + 2\epsilon + C \sigma_i^2 ) )
-		#	* ( 1 - erf( ( yXi - t_i + \epsilon + C \sigma_i^2 ) / sqrt( 2 \sigma_i^2 ) )
-		#	- C/2 exp( C/2 ( -2yXi + 2 t_i + 2 \epsilon + C \sigma_i^2 ) )
-		#	* ( 1 - erf( -C/2 ( 2yXi - 2t_i + 2\epsilon + C \sigma_i^2 ) )
-		Fi = (
-			C/2 * exp( C/2 * ( 2 * yXi - 2 * t + 2 * epsilon + C * sigma2 ) ) 
-			* ( 1 - scipy.special.erf( ( yXi - t + epsilon + C * sigma2 ) / sqrt( 2 * sigma2 ) ) )
-			- C/2 * exp( C/2 * ( -2 * yXi + 2 * t + 2 * epsilon + sigma2 ) )
-			* ( 1 - scipy.special.erf( -C / 2 * ( 2 * yXi - 2 * t + 2 * epsilon + C * sigma2 ) ) )
-			)
+		def inner(K,W,C,epsilon,sigma2,count = 100):
+			# Inner Loop
+			# yX = \langle y(x) \rangle = \sum_{i=1}^N w_i K(x, x_i )
+			yX = dot(K[0].reshape(1,10),W)[0][0]
 			
-		# Gi = 1/2 erf( ( t_i - yXi + \epsilon ) / sqrt( s \sigma_i^2 ) )
-		#	- 1/2 erf( ( t_i - yXi - \epsilon ) / sqrt( s \sigma_i^2 ) )
-		#	+ 1/2 exp( C/2 ( 2 yXi - 2 t_i + 2 \epsilon + C \sigma_i^2 ) )
-		#	* ( 1 - erf( ( yXi - t_i + \epsilon + \C \sigma_i^2 ) / sqrt( 2 \sigma_i^2 ) )
-		#	+ 1/2 exp( C/2 ( -2 yXi - 2 t_i + 2 \epsilon + C \sigma_i^2 ) )
-		#	* ( 1 - erf( ( yXi - t_i + \epsilon + \C \sigma_i^2 ) / sqrt( 2 \sigma_i^2 ) )
-		Gi = (
-			1/2 * scipy.special.erf( ( t - yXi + epsilon ) / sqrt( 2 * sigma2 ) )
-			- 1/2 * scipy.special.erf( ( t - yXi - epsilon ) / sqrt( 2 * sigma2 ) )
-			+ 1/2 * exp( C/2 * ( 2 * yXi - 2 * t + 2 * epsilon + C * sigma2 ) )
-			* ( 1 - scipy.special.erf( ( yXi - t + epsilon + C * sigma2 ) / sqrt( 2 * sigma2 ) ) )
-			+ 1/2 * exp( C/2 * ( -2 * yXi - 2 * t + 2 * epsilon + C * sigma2 ) )
-			* ( 1 - scipy.special.erf( ( yXi - t + epsilon + C * sigma2 ) / sqrt( 2 * sigma2 ) ) )
-			)
-		
-		# erf(x) = 2/sqrt(\pi) \sum_0^x e^{-t^2} dt (see scipy.special.erf)
-		# w_i = w_i + \rho ( ( F_i / G_i ) - w_i )
-		W += rho * ( Fi / Gi - W )
+			# yXi = \langle y(s) \rangle_i = yX - \sigma_i^2 w_i
+			yXi = yX - sigma2 * W
+			
+			# Fi = C/2 exp( C/2 ( 2yXi - 2t_i + 2\epsilon + C \sigma_i^2 ) )
+			#	* ( 1 - erf( ( yXi - t_i + \epsilon + C \sigma_i^2 ) / sqrt( 2 \sigma_i^2 ) )
+			#	- C/2 exp( C/2 ( -2yXi + 2 t_i + 2 \epsilon + C \sigma_i^2 ) )
+			#	* ( 1 - erf( -C/2 ( 2yXi - 2t_i + 2\epsilon + C \sigma_i^2 ) )
+			Fi = (
+				C/2 * exp( C/2 * ( 2 * yXi - 2 * t + 2 * epsilon + C * sigma2 ) ) 
+				* ( 1 - scipy.special.erf( ( yXi - t + epsilon + C * sigma2 ) / sqrt( 2 * sigma2 ) ) )
+				- C/2 * exp( C/2 * ( -2 * yXi + 2 * t + 2 * epsilon + sigma2 ) )
+				* ( 1 - scipy.special.erf( -C / 2 * ( 2 * yXi - 2 * t + 2 * epsilon + C * sigma2 ) ) )
+				)
+				
+			# Gi = 1/2 erf( ( t_i - yXi + \epsilon ) / sqrt( s \sigma_i^2 ) )
+			#	- 1/2 erf( ( t_i - yXi - \epsilon ) / sqrt( s \sigma_i^2 ) )
+			#	+ 1/2 exp( C/2 ( 2 yXi - 2 t_i + 2 \epsilon + C \sigma_i^2 ) )
+			#	* ( 1 - erf( ( yXi - t_i + \epsilon + \C \sigma_i^2 ) / sqrt( 2 \sigma_i^2 ) )
+			#	+ 1/2 exp( C/2 ( -2 yXi - 2 t_i + 2 \epsilon + C \sigma_i^2 ) )
+			#	* ( 1 - erf( ( yXi - t_i + \epsilon + \C \sigma_i^2 ) / sqrt( 2 \sigma_i^2 ) )
+			Gi = (
+				1/2 * scipy.special.erf( ( t - yXi + epsilon ) / sqrt( 2 * sigma2 ) )
+				- 1/2 * scipy.special.erf( ( t - yXi - epsilon ) / sqrt( 2 * sigma2 ) )
+				+ 1/2 * exp( C/2 * ( 2 * yXi - 2 * t + 2 * epsilon + C * sigma2 ) )
+				* ( 1 - scipy.special.erf( ( yXi - t + epsilon + C * sigma2 ) / sqrt( 2 * sigma2 ) ) )
+				+ 1/2 * exp( C/2 * ( -2 * yXi - 2 * t + 2 * epsilon + C * sigma2 ) )
+				* ( 1 - scipy.special.erf( ( yXi - t + epsilon + C * sigma2 ) / sqrt( 2 * sigma2 ) ) )
+				)
+			
+			# erf(x) = 2/sqrt(\pi) \sum_0^x e^{-t^2} dt (see scipy.special.erf)
+			# w_i = w_i + \rho ( ( F_i / G_i ) - w_i )
+			W_delta = rho * ( Fi / Gi - W )
+			if W_delta.sum() and count :
+				W += W_delta
+				print "iteration %s" % count
+				inner(K=K,W=W,C=C,epsilon=epsilon,sigma2=sigma2,count=count-1)
+			else:
+				print W_delta
+				
+		inner(K=K,W=W,C=C,epsilon=epsilon,sigma2=sigma2)
 		
 def run():
 	mod = svm( numpy.random.rand(10,1) )
