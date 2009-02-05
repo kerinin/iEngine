@@ -103,7 +103,7 @@ class svm:
 			(t,yXi,Gi,W_delta) = inner()
 			
 			# IG_i = 1/2 erf( ( t_i - \leftangle y(x_i) \rightangle_i + \epsilon ) / sqrt( 2 \sigma_i^2 ) ) - 1/2 erf( ( t_i - \leftangle y(x_i) \rightangle_i - \epsilon ) )
-			IG = .5 * scipy.special.erf( ( t - yXi + self.epsilon ) / sqrt( 2* sigma2 ) ) - .5 * scipy.special.erf( ( t - yXi - self.epsilon ) / sqrt( 2 * sigma2 ) )
+			IG = .5 * scipy.special.erf( ( t - yXi + self.epsilon ) / sqrt( 2 * sigma2 ) ) - .5 * scipy.special.erf( ( t - yXi - self.epsilon ) / sqrt( 2 * sigma2 ) )
 			print IG.shape
 			
 			# Z = C^2 - w_i^2 - \frac{ w_i \leftangle y(x_i) \rightangle_i  + \sigma_i^2 C^2 + IG_i }{ \sigma_i^2 G( \leftangle y(x_i) \rightangle_i, \sigma_i^2 ) }
@@ -111,15 +111,15 @@ class svm:
 			print Z.shape
 			
 			# \Sigma_i = - \sigma_i^2 - ( Z )^{-1}
-			Sigma_i = -sigma2 - linalg.inv(Z)
+			Sigma_i = -sigma2 - ( 1 / Z )
 			print Sigma_i.shape
 			
 			# \Sigma = diag( \Sigma_1,...,\Sigma_N )
-			Sigma = Sigma_i.diagonal()
+			Sigma = diag( Sigma_i.reshape(len(self.data) ) )
 			print Sigma.shape
 			
 			# sigma_i^2 = \frac{ 1 } { [ ( \Sigma + K ) ^{-1} ]_{ii} } - \Sigma_i
-			sigma2 = ( linalg.inv( Sigma + K ) ).diagonal() - Sigma_i
+			sigma2 = ( 1 / ( 1 / ( Sigma + K ) ).diagonal().reshape([len(self.data),1]) ) - Sigma_i
 			print sigma2.shape
 			
 			break
