@@ -25,7 +25,7 @@ class svm:
 		self._compute()
 	
 	def p(self,x):
-		
+		pass
 	
 	def __iadd__(self, points):
 		# overloaded '+=', used for adding a vector list to the module's data
@@ -54,9 +54,13 @@ class svm:
 		Lambda = .5
 		K = 1 / ( sqrt( 2 * Lambda ) )* exp( -.5 * ( self.data - self.data.T ) * ( self.data-self.data.T).T / Lambda ) 
 		sigma2 = K.diagonal().reshape( len(self.data), 1)
+		yX = None
+		yXi = None
+		Fi = None
+		Gi = None
 		
 		# Inner Loop
-		def inner(K,W,C,epsilon,sigma2):
+		def inner():
 			# Inner Loop
 			# yX = \langle y(x) \rangle = \sum_{i=1}^N w_i K(x, x_i )
 			yX = dot(K[0].reshape( 1,len(self.data) ),W)[0][0]
@@ -100,13 +104,30 @@ class svm:
 		# Outer Loop
 		while True:
 			for i in range(10):
-				W += inner(K=K,W=W,C=C,epsilon=epsilon,sigma2=sigma2)
-			W_delta = inner(K=K,W=W,C=C,epsilon=epsilon,sigma2=sigma2)
+				W += inner()
+			W_delta = inner()
 			
 			# IG_i = 1/2 erf( ( t_i - \leftangle y(x_i) \rightangle_i + \epsilon ) / sqrt( 2 \sigma_i^2 ) ) - 1/2 erf( ( t_i - \leftangle y(x_i) \rightangle_i - \epsilon ) )
-			# sigma_i^2 = C^2 - w_i^2 - \frac{ w_i \leftangle y(x_i) \rightangle_i  + \sigma_i^2 C^2 + IG_i }{ \sigma_i^2 G( \leftangle y(x_i) \rightangle_i, \sigma_i^2 ) }
 			IG = .5 * scipy.special.erf( ( t - yXi + epsilon ) / sqrt( 2* sigma2 ) ) - .5 * scipy.special.erf( ( t - yXi - epsilon ) / sqrt( 2 * sigma2 ) )
-			sigma2 = ( C * 2 ) - ( W ** 2 ) - ( ( ( W * yXi ) + ( sigma2 * ( C ** 2 ) ) + IG ) / ( sigma2 * Gi ) )
+			print IG.shape
+			
+			# Z = C^2 - w_i^2 - \frac{ w_i \leftangle y(x_i) \rightangle_i  + \sigma_i^2 C^2 + IG_i }{ \sigma_i^2 G( \leftangle y(x_i) \rightangle_i, \sigma_i^2 ) }
+			Z = ( C * 2 ) - ( W ** 2 ) - ( ( ( W * yXi ) + ( sigma2 * ( C ** 2 ) ) + IG ) / ( sigma2 * Gi ) )
+			print Z.shape
+			
+			# \Sigma_i = - \sigma_i^2 - ( Z )^{-1}
+			Sigma_i = -sigma2 - linalg.inv(Z)
+			print Sigma_i.shape
+			
+			# \Sigma = diag( \Sigma_1,...,\Sigma_N )
+			Sigma = Sigma_i.diagonal()
+			print Sigma.shape
+			
+			# sigma_i^2 = \frac{ 1 } { [ ( \Sigma + K ) ^{-1} ]_{ii} } - \Sigma_i
+			sigma2 = ( linalg.inv( Sigma + K ) ).diagonal() - Sigma_i
+			print sigma2.shape
+			
+			break
 			
 			if absolute(W_delta).sum() < 1e-6:
 				break
