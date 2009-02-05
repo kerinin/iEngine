@@ -17,11 +17,15 @@ class svm:
 		self.data = data
 		self.SV = list()
 		self.gamma = gamma
+		self.W = None
 
 		if gamma:
 			self.param.gamma = gamma
 		
 		self._compute()
+	
+	def p(self,x):
+		
 	
 	def __iadd__(self, points):
 		# overloaded '+=', used for adding a vector list to the module's data
@@ -51,6 +55,7 @@ class svm:
 		K = 1 / ( sqrt( 2 * Lambda ) )* exp( -.5 * ( self.data - self.data.T ) * ( self.data-self.data.T).T / Lambda ) 
 		sigma2 = K.diagonal().reshape( len(self.data), 1)
 		
+		# Inner Loop
 		def inner(K,W,C,epsilon,sigma2):
 			# Inner Loop
 			# yX = \langle y(x) \rangle = \sum_{i=1}^N w_i K(x, x_i )
@@ -91,10 +96,18 @@ class svm:
 			return rho * ( Fi / Gi - W )
 				
 		start = datetime.datetime.now()
+		
+		# Outer Loop
 		while True:
-			for i in range(1000):
+			for i in range(10):
 				W += inner(K=K,W=W,C=C,epsilon=epsilon,sigma2=sigma2)
 			W_delta = inner(K=K,W=W,C=C,epsilon=epsilon,sigma2=sigma2)
+			
+			# IG_i = 1/2 erf( ( t_i - \leftangle y(x_i) \rightangle_i + \epsilon ) / sqrt( 2 \sigma_i^2 ) ) - 1/2 erf( ( t_i - \leftangle y(x_i) \rightangle_i - \epsilon ) )
+			# sigma_i^2 = C^2 - w_i^2 - \frac{ w_i \leftangle y(x_i) \rightangle_i  + \sigma_i^2 C^2 + IG_i }{ \sigma_i^2 G( \leftangle y(x_i) \rightangle_i, \sigma_i^2 ) }
+			IG = .5 * scipy.special.erf( ( t - yXi + epsilon ) / sqrt( 2* sigma2 ) ) - .5 * scipy.special.erf( ( t - yXi - epsilon ) / sqrt( 2 * sigma2 ) )
+			sigma2 = ( C * 2 ) - ( W ** 2 ) - ( ( ( W * yXi ) + ( sigma2 * ( C ** 2 ) ) + IG ) / ( sigma2 * Gi ) )
+			
 			if absolute(W_delta).sum() < 1e-6:
 				break
 			else:
@@ -103,6 +116,7 @@ class svm:
 				
 		print "*** Optimization completed in %ss" % (datetime.datetime.now() - start).seconds
 		print W
+		self.W = W
 		
 def run():
 	mod = svm( array([[gauss(1.,.5)] for i in range(40) ]).reshape([40,1]) )
