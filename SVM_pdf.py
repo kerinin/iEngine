@@ -13,19 +13,24 @@ from numpy import *
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),gamma=None):
+	def __init__(self,data=list(),C = 1, epsilon = .5, rho = 1e-4, L = .5):
 		self.data = data
-		self.SV = list()
-		self.gamma = gamma
 		self.W = None
-
-		if gamma:
-			self.param.gamma = gamma
+		
+		self.C = C
+		self.epsilon = epsilon
+		self.rho = rho
+		self.L = L
 		
 		self._compute()
 	
-	def p(self,x):
-		pass
+	def _K(self,X,Y):
+		# K(x_i,x_j) = 1/(\sqrt(2 \pi det( \Lambda ) ) ) exp( -.5(x_i - x_j) \Lambda^-1 (x_i - x_j)^T
+		return 1. / ( sqrt( 2. * self.L ) )* exp( -.5 * ( X - Y ) * ( X - Y ).T / self.L ) 
+		
+	def Pr(self,x):
+		# \langle y(x) \rangle = \sum_{i=1}{N} w_i K(x,x_i)
+		return ( self.W * self._K(x,self.data) ).sum()
 	
 	def __iadd__(self, points):
 		# overloaded '+=', used for adding a vector list to the module's data
@@ -34,9 +39,6 @@ class svm:
 		self.data += points
 	
 	def _compute(self):
-		C = 1
-		epsilon = .5
-		
 		# Set the training pairs
 		# (x_1,F_N(x_1)),...,(x_N,F_N(x_N))
 		# F_N = 1/N \sum_{k=1}^N I(x-x_k)
@@ -44,20 +46,13 @@ class svm:
 		t = ( ( self.data.T > self.data ).sum(1,dtype=float) / len(self.data) ).reshape( len(self.data), 1)	# Since F is an estimate of the target value t, i'm simply renaming it
 		
 		# Set learning rate \rho and randomly set w_i
-		rho = 1e-4
 		W = numpy.random.rand( len(self.data), 1)
 		
 		# Calculate covariance matrix K and let \sigma_i^2 = K_{ii}
-		# K(x_i,x_j) = 1/(\sqrt(2 \pi det( \Lambda ) ) ) exp( -.5(x_i - x_j) \Lambda^-1 (x_i - x_j)^T
 		# \Lambda = variable (gamma)
 		# \sigma = K_{ii}
-		Lambda = .5
-		K = 1 / ( sqrt( 2 * Lambda ) )* exp( -.5 * ( self.data - self.data.T ) * ( self.data-self.data.T).T / Lambda ) 
+		K = self._K(self.data, self.data.T)
 		sigma2 = K.diagonal().reshape( len(self.data), 1)
-		yX = None
-		yXi = None
-		Fi = None
-		Gi = None
 		
 		# Inner Loop
 		def inner():
@@ -74,10 +69,10 @@ class svm:
 			#	* ( 1 - erf( -C/2 ( 2yXi - 2t_i + 2\epsilon + C \sigma_i^2 ) )
 
 			Fi = (
-				C/2. * exp( (C/2.) * ( ( 2. * yXi ) - ( 2. * t ) + ( 2. * epsilon ) + ( C * sigma2 ) ) ) 
-				* ( 1. - scipy.special.erf( ( yXi - t + epsilon + ( C * sigma2 ) ) / sqrt( 2. * sigma2 ) ) )
-				- C/2. * exp( (C/2.) * ( ( -2. * yXi ) + ( 2. * t ) + ( 2. * epsilon ) + sigma2 ) )
-				* ( 1. - scipy.special.erf( ( -C / 2. ) * ( ( 2. * yXi ) - ( 2. * t ) + ( 2. * epsilon ) + ( C * sigma2 ) ) ) )
+				self.C/2. * exp( (self.C/2.) * ( ( 2. * yXi ) - ( 2. * t ) + ( 2. * self.epsilon ) + ( self.C * sigma2 ) ) ) 
+				* ( 1. - scipy.special.erf( ( yXi - t + self.epsilon + ( self.C * sigma2 ) ) / sqrt( 2. * sigma2 ) ) )
+				- self.C/2. * exp( (self.C/2.) * ( ( -2. * yXi ) + ( 2. * t ) + ( 2. * self.epsilon ) + sigma2 ) )
+				* ( 1. - scipy.special.erf( ( -self.C / 2. ) * ( ( 2. * yXi ) - ( 2. * t ) + ( 2. * self.epsilon ) + ( self.C * sigma2 ) ) ) )
 				)
 				
 			# Gi = 1/2 erf( ( t_i - yXi + \epsilon ) / sqrt( s \sigma_i^2 ) )
@@ -87,32 +82,32 @@ class svm:
 			#	+ 1/2 exp( C/2 ( -2 yXi - 2 t_i + 2 \epsilon + C \sigma_i^2 ) )
 			#	* ( 1 - erf( ( yXi - t_i + \epsilon + \C \sigma_i^2 ) / sqrt( 2 \sigma_i^2 ) )
 			Gi = (
-				.5 * scipy.special.erf( ( t - yXi + epsilon ) / sqrt( 2. * sigma2 ) )
-				- .5 * scipy.special.erf( ( t - yXi - epsilon ) / sqrt( 2. * sigma2 ) )
-				+ .5 * exp( (C/2.) * ( ( 2. * yXi ) - ( 2. * t ) + ( 2. * epsilon ) + ( C * sigma2 ) ) )
-				* ( 1. - scipy.special.erf( ( yXi - t + epsilon + ( C * sigma2 ) ) / sqrt( 2. * sigma2 ) ) )
-				+ .5 * exp( (C/2.) * ( ( -2. * yXi ) - ( 2. * t ) + ( 2. * epsilon ) + ( C * sigma2 ) ) )
-				* ( 1. - scipy.special.erf( ( yXi - t + epsilon + ( C * sigma2 ) ) / sqrt( 2. * sigma2 ) ) )
+				.5 * scipy.special.erf( ( t - yXi + self.epsilon ) / sqrt( 2. * sigma2 ) )
+				- .5 * scipy.special.erf( ( t - yXi - self.epsilon ) / sqrt( 2. * sigma2 ) )
+				+ .5 * exp( (self.C/2.) * ( ( 2. * yXi ) - ( 2. * t ) + ( 2. * self.epsilon ) + ( self.C * sigma2 ) ) )
+				* ( 1. - scipy.special.erf( ( yXi - t + self.epsilon + ( self.C * sigma2 ) ) / sqrt( 2. * sigma2 ) ) )
+				+ .5 * exp( (self.C/2.) * ( ( -2. * yXi ) - ( 2. * t ) + ( 2. * self.epsilon ) + ( self.C * sigma2 ) ) )
+				* ( 1. - scipy.special.erf( ( yXi - t + self.epsilon + ( self.C * sigma2 ) ) / sqrt( 2. * sigma2 ) ) )
 				)
 
 			# erf(x) = 2/sqrt(\pi) \sum_0^x e^{-t^2} dt (see scipy.special.erf)
 			# w_i = w_i + \rho ( ( F_i / G_i ) - w_i )
-			return rho * ( Fi / Gi - W )
+			return ( t, yXi, Gi, self.rho * ( Fi / Gi - W ) )
 				
 		start = datetime.datetime.now()
 		
 		# Outer Loop
 		while True:
 			for i in range(10):
-				W += inner()
-			W_delta = inner()
+				W += inner()[3]
+			(t,yXi,Gi,W_delta) = inner()
 			
 			# IG_i = 1/2 erf( ( t_i - \leftangle y(x_i) \rightangle_i + \epsilon ) / sqrt( 2 \sigma_i^2 ) ) - 1/2 erf( ( t_i - \leftangle y(x_i) \rightangle_i - \epsilon ) )
-			IG = .5 * scipy.special.erf( ( t - yXi + epsilon ) / sqrt( 2* sigma2 ) ) - .5 * scipy.special.erf( ( t - yXi - epsilon ) / sqrt( 2 * sigma2 ) )
+			IG = .5 * scipy.special.erf( ( t - yXi + self.epsilon ) / sqrt( 2* sigma2 ) ) - .5 * scipy.special.erf( ( t - yXi - self.epsilon ) / sqrt( 2 * sigma2 ) )
 			print IG.shape
 			
 			# Z = C^2 - w_i^2 - \frac{ w_i \leftangle y(x_i) \rightangle_i  + \sigma_i^2 C^2 + IG_i }{ \sigma_i^2 G( \leftangle y(x_i) \rightangle_i, \sigma_i^2 ) }
-			Z = ( C * 2 ) - ( W ** 2 ) - ( ( ( W * yXi ) + ( sigma2 * ( C ** 2 ) ) + IG ) / ( sigma2 * Gi ) )
+			Z = ( self.C * 2 ) - ( W ** 2 ) - ( ( ( W * yXi ) + ( sigma2 * ( self.C ** 2 ) ) + IG ) / ( sigma2 * Gi ) )
 			print Z.shape
 			
 			# \Sigma_i = - \sigma_i^2 - ( Z )^{-1}
@@ -130,6 +125,7 @@ class svm:
 			break
 			
 			if absolute(W_delta).sum() < 1e-6:
+				self.W = W + W_delta
 				break
 			else:
 				print "Cumulative adjustment of Coefficients: %s" % absolute(W_delta).sum()
