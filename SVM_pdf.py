@@ -27,7 +27,7 @@ class svm:
 	
 	def _K(self,X,Y):
 		# K(x_i,x_j) = 1/(\sqrt(2 \pi det( \Lambda ) ) ) exp( -.5(x_i - x_j) \Lambda^-1 (x_i - x_j)^T
-		return 1. / ( sqrt( 2. * self.L ) )* exp( -.5 * ( X - Y ) * ( X - Y ).T / self.L ) 
+		return 1. / ( sqrt( 2. * math.pi * self.L ) )* exp( -.5 * ( X - Y ) * ( 1. / self.L ) * ( X - Y ).T )  
 		
 	def Pr(self,x):
 		# \langle y(x) \rangle = \sum_{i=1}{N} w_i K(x,x_i)
@@ -47,7 +47,7 @@ class svm:
 		t = ( ( self.data.T > self.data ).sum(1,dtype=float) / len(self.data) ).reshape( len(self.data), 1)	# Since F is an estimate of the target value t, i'm simply renaming it
 		
 		# Set learning rate \rho and randomly set w_i
-		W = numpy.random.rand( len(self.data), 1) * .9 + .1
+		self.W = numpy.random.rand( len(self.data), 1) * .9 + .1
 		
 		# Calculate covariance matrix K and let \sigma_i^2 = K_{ii}
 		# \Lambda = variable (gamma)
@@ -60,10 +60,11 @@ class svm:
 
 			# Inner Loop
 			# yX = \langle y(x) \rangle = \sum_{i=1}^N w_i K(x, x_i )
-			yX = array( [ [ self.Pr(x) for x in self.data], 1] )
+			#yX = self.Pr(self.data).reshape([len(self.data),1])
+			yX = array( [ self.Pr(x) for x in self.data ] ).reshape([len(self.data),1])
 			
 			# yXi = \langle y(s) \rangle_i = yX - \sigma_i^2 w_i
-			yXi = yX - sigma2 * W
+			yXi = yX - ( sigma2 * self.W )
 
 			# Fi = C/2 exp( C/2 ( 2yXi - 2t_i + 2\epsilon + C \sigma_i^2 ) )
 			#	* ( 1 - erf( ( yXi - t_i + \epsilon + C \sigma_i^2 ) / sqrt( 2 \sigma_i^2 ) )
@@ -90,9 +91,12 @@ class svm:
 				+ .5 * exp( (self.C/2.) * ( ( -2. * yXi ) + ( 2. * t ) + ( 2. * self.epsilon ) + ( self.C * sigma2 ) ) )
 				* ( 1. - scipy.special.erf( ( -yXi + t + self.epsilon + ( self.C * sigma2 ) ) / sqrt( 2. * sigma2 ) ) )
 				)
-
+				
 			# w_i = w_i + \rho ( ( F_i / G_i ) - w_i )
-			return ( t, yXi, Gi, nan_to_num( self.rho * ( Fi / Gi - W ) ) )
+			W_delta = nan_to_num( self.rho * ( Fi / Gi - self.W ) )
+
+			self.W += W_delta
+			return ( t, yXi, Gi, W_delta )
 				
 		start = datetime.datetime.now()
 		
@@ -100,8 +104,7 @@ class svm:
 		while True:
 			
 			for i in range(10):
-				W += inner()[3]
-				W *= W > 0
+				inner()
 			
 			(t,yXi,Gi,W_delta) = inner()
 			
@@ -109,7 +112,7 @@ class svm:
 			IG = .5 * scipy.special.erf( ( t - yXi + self.epsilon ) / sqrt( 2 * sigma2 ) ) - .5 * scipy.special.erf( ( t - yXi - self.epsilon ) / sqrt( 2 * sigma2 ) )
 			
 			# Z = C^2 - w_i^2 - \frac{ w_i \leftangle y(x_i) \rightangle_i  + \sigma_i^2 C^2 + IG_i }{ \sigma_i^2 G( \leftangle y(x_i) \rightangle_i, \sigma_i^2 ) }
-			Z = ( self.C * 2 ) - ( W ** 2 ) - ( ( ( W * yXi ) + ( sigma2 * ( self.C ** 2 ) ) + IG ) / ( sigma2 * Gi ) )
+			Z = ( self.C * 2 ) - ( self.W ** 2 ) - ( ( ( self.W * yXi ) + ( sigma2 * ( self.C ** 2 ) ) + IG ) / ( sigma2 * Gi ) )
 			
 			# \Sigma_i = - \sigma_i^2 - ( Z )^{-1}
 			Sigma_i = -sigma2 - ( 1 / Z )
@@ -121,24 +124,21 @@ class svm:
 			sigma2 = ( 1 / ( 1 / ( Sigma + K ) ).diagonal().reshape([len(self.data),1]) ) - Sigma_i
 			
 			if W_delta. max() < .0005:
-				self.W = W + W_delta
 				break
 			else:
 				print "Cumulative adjustment of Coefficients: %s" % absolute(W_delta).sum()
-				W += W_delta
 				
 		#print "*** Optimization completed in %ss" % (datetime.datetime.now() - start).seconds
-		print "%s Support Vectors of %s" % ( (W > 0).sum(), len(self.data) )
-		self.W = W
+		print "%s Support Vectors of %s" % ( (self.W > 0).sum(), len(self.data) )
 		
 def run():
 	mod = svm( array([[gauss(0,1)] for i in range(100) ]).reshape([100,1]) )
 
-	X = frange(-5.,5.,.1)
+	X = frange(-5.,5.,.25)
+	
 	Y_cmp = [ mod.Pr(x) for x in X ]
 	Y_act = [ scipy.stats.norm.pdf(x) for x in X ]
 	
-	print Y_cmp
 	plot(X,Y_act,label="normal distribution")
 	plot(X,Y_cmp,label="computed distribution")
 	legend()
