@@ -43,6 +43,8 @@ class svm:
 	def _compute(self):
 		start = datetime.datetime.now()
 		#UNKNOWN: what are \alpha^*, \xi ???   check Vapnik regression
+		# I think that \xi is the loss amount, and that \xi^* is for points below the estimate (rather than above)
+		# \alpha appears to be the weights, which become \beta if nonzero
 		
 		# Given data
 		# ( (x_1,F_\ell(x_1),\epsilon_1),...,(x_\ell),F_\ell(x_\ell),\epsilon_\ell) )
