@@ -14,7 +14,7 @@ from pylab import *
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C = .01, epsilon = .5, rho = 1e-4, L = .5):
+	def __init__(self,data=list(),C = .01, epsilon = .5, rho = 1e-4, L = 1):
 		self.data = data
 		self.W = None
 		
@@ -28,9 +28,11 @@ class svm:
 	def _K(self,X,Y):
 		# K(x_i,x_j) = 1/(\sqrt(2 \pi det( \Lambda ) ) ) exp( -.5(x_i - x_j) \Lambda^-1 (x_i - x_j)^T
 		#return ( 1. / ( sqrt( 2. * math.pi * self.L ) ) )* exp( -.5 * ( X - Y ) * self.L * ( X - Y ).T )  
-		return exp( ( -1.*(X-Y)**2 ) / ( 2*self.L*self.L ) )
+		#return exp( ( -1.*(X-Y)**2 ) / ( 2*self.L*self.L ) )
+		return ( 1. / ( sqrt( 2. * math.pi * self.L ) ) )* exp( -( X-Y )**2/self.L )
 		
 	def Pr(self,x):
+		# x = [N,d]
 		# \langle y(x) \rangle = \sum_{i=1}{N} w_i K(x,x_i)
 		return ( self.W * self._K(x.T,self.data) ).sum(0)
 	
@@ -58,7 +60,6 @@ class svm:
 		
 		# Inner Loop
 		def inner():
-
 			# Inner Loop
 			# yX = \langle y(x) \rangle = \sum_{i=1}^N w_i K(x, x_i )
 			yX = self.Pr(self.data).reshape([len(self.data),1])
@@ -125,7 +126,7 @@ class svm:
 			# sigma_i^2 = \frac{ 1 } { [ ( \Sigma + K ) ^{-1} ]_{ii} } - \Sigma_i
 			sigma2 = ( 1 / ( 1 / ( Sigma + K ) ).diagonal().reshape([len(self.data),1]) ) - Sigma_i
 			
-			if W_delta. max() < .0005:
+			if W_delta.max() < .001:
 				break
 			else:
 				print "Cumulative adjustment of Coefficients: %s" % absolute(W_delta).sum()
