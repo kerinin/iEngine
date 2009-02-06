@@ -91,7 +91,7 @@ class svm:
 				+ .5 * exp( (self.C/2.) * ( ( -2. * yXi ) + ( 2. * t ) + ( 2. * self.epsilon ) + ( self.C * sigma2 ) ) )
 				* ( 1. - scipy.special.erf( ( -yXi + t + self.epsilon + ( self.C * sigma2 ) ) / sqrt( 2. * sigma2 ) ) )
 				)
-				
+
 			# w_i = w_i + \rho ( ( F_i / G_i ) - w_i )
 			W_delta = nan_to_num( self.rho * ( Fi / Gi - self.W ) )
 
