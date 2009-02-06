@@ -14,7 +14,7 @@ from pylab import *
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C = .01, epsilon = .5, rho = 1e-4, L = 1):
+	def __init__(self,data=list(),C = .01, epsilon =.01, rho = 1e-2, L = 1):
 		self.data = data
 		self.W = None
 		
@@ -96,7 +96,7 @@ class svm:
 				)
 
 			# w_i = w_i + \rho ( ( F_i / G_i ) - w_i )
-			W_delta = nan_to_num( self.rho * ( Fi / Gi - self.W ) )
+			W_delta = self.rho * ( Fi / Gi - self.W )
 
 			self.W += W_delta
 			return ( t, yXi, Gi, W_delta )
@@ -106,7 +106,7 @@ class svm:
 		# Outer Loop
 		while True:
 			
-			for i in range(10):
+			for i in range(2):
 				inner()
 			
 			(t,yXi,Gi,W_delta) = inner()
@@ -115,7 +115,7 @@ class svm:
 			IG = .5 * scipy.special.erf( ( t - yXi + self.epsilon ) / sqrt( 2 * sigma2 ) ) - .5 * scipy.special.erf( ( t - yXi - self.epsilon ) / sqrt( 2 * sigma2 ) )
 			
 			# Z = C^2 - w_i^2 - \frac{ w_i \leftangle y(x_i) \rightangle_i  + \sigma_i^2 C^2 + IG_i }{ \sigma_i^2 G( \leftangle y(x_i) \rightangle_i, \sigma_i^2 ) }
-			Z = ( self.C * 2 ) - ( self.W ** 2 ) - ( ( ( self.W * yXi ) + ( sigma2 * ( self.C ** 2 ) ) + IG ) / ( sigma2 * Gi ) )
+			Z = ( self.C ** 2 ) - ( self.W ** 2 ) - ( ( ( self.W * yXi ) + ( sigma2 * ( self.C ** 2 ) ) + IG ) / ( sigma2 * Gi ) )
 			
 			# \Sigma_i = - \sigma_i^2 - ( Z )^{-1}
 			Sigma_i = -sigma2 - ( 1 / Z )
@@ -126,12 +126,13 @@ class svm:
 			# sigma_i^2 = \frac{ 1 } { [ ( \Sigma + K ) ^{-1} ]_{ii} } - \Sigma_i
 			sigma2 = ( 1 / ( 1 / ( Sigma + K ) ).diagonal().reshape([len(self.data),1]) ) - Sigma_i
 			
-			if W_delta.max() < .001:
+			if absolute(W_delta.max()) < .0005:
 				break
 			else:
 				print "Cumulative adjustment of Coefficients: %s" % absolute(W_delta).sum()
 				
 		#print "*** Optimization completed in %ss" % (datetime.datetime.now() - start).seconds
+		print self.W
 		print "%s Support Vectors of %s" % ( (self.W > 0).sum(), len(self.data) )
 		
 def run():
