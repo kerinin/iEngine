@@ -14,7 +14,7 @@ from pylab import *
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C = .01, epsilon = .5, rho = 1e-4, L = .05):
+	def __init__(self,data=list(),C = .01, epsilon = .5, rho = 1e-4, L = .5):
 		self.data = data
 		self.W = None
 		
@@ -27,11 +27,12 @@ class svm:
 	
 	def _K(self,X,Y):
 		# K(x_i,x_j) = 1/(\sqrt(2 \pi det( \Lambda ) ) ) exp( -.5(x_i - x_j) \Lambda^-1 (x_i - x_j)^T
-		return 1. / ( sqrt( 2. * math.pi * self.L ) )* exp( -.5 * ( X - Y ) * ( 1. / self.L ) * ( X - Y ).T )  
+		#return ( 1. / ( sqrt( 2. * math.pi * self.L ) ) )* exp( -.5 * ( X - Y ) * self.L * ( X - Y ).T )  
+		return exp( ( -1.*(X-Y)**2 ) / ( 2*self.L*self.L ) )
 		
 	def Pr(self,x):
 		# \langle y(x) \rangle = \sum_{i=1}{N} w_i K(x,x_i)
-		return ( self.W * self._K(x,self.data) ).sum()
+		return ( self.W * self._K(x.T,self.data) ).sum(0)
 	
 	def __iadd__(self, points):
 		# overloaded '+=', used for adding a vector list to the module's data
@@ -47,7 +48,7 @@ class svm:
 		t = ( ( self.data.T > self.data ).sum(1,dtype=float) / len(self.data) ).reshape( len(self.data), 1)	# Since F is an estimate of the target value t, i'm simply renaming it
 		
 		# Set learning rate \rho and randomly set w_i
-		self.W = numpy.random.rand( len(self.data), 1) * .9 + .1
+		self.W = ( numpy.random.rand( len(self.data), 1) * .9 ) + .1
 		
 		# Calculate covariance matrix K and let \sigma_i^2 = K_{ii}
 		# \Lambda = variable (gamma)
@@ -60,8 +61,9 @@ class svm:
 
 			# Inner Loop
 			# yX = \langle y(x) \rangle = \sum_{i=1}^N w_i K(x, x_i )
-			#yX = self.Pr(self.data).reshape([len(self.data),1])
-			yX = array( [ self.Pr(x) for x in self.data ] ).reshape([len(self.data),1])
+			yX = self.Pr(self.data).reshape([len(self.data),1])
+			
+			#yX = array( [ self.Pr(x) for x in self.data ] ).reshape([len(self.data),1])
 			
 			# yXi = \langle y(s) \rangle_i = yX - \sigma_i^2 w_i
 			yXi = yX - ( sigma2 * self.W )
@@ -133,10 +135,11 @@ class svm:
 		
 def run():
 	mod = svm( array([[gauss(0,1)] for i in range(100) ]).reshape([100,1]) )
-
+	
 	X = frange(-5.,5.,.25)
 	
-	Y_cmp = [ mod.Pr(x) for x in X ]
+	Y_cmp = mod.Pr(array(X).reshape([len(X),1]))
+	
 	Y_act = [ scipy.stats.norm.pdf(x) for x in X ]
 	
 	plot(X,Y_act,label="normal distribution")
