@@ -60,7 +60,7 @@ class svm:
 
 			# Inner Loop
 			# yX = \langle y(x) \rangle = \sum_{i=1}^N w_i K(x, x_i )
-			yX = K[0].reshape( [ len(self.data), 1] ) * W
+			yX = array( [ [ self.Pr(x) for x in self.data], 1] )
 			
 			# yXi = \langle y(s) \rangle_i = yX - \sigma_i^2 w_i
 			yXi = yX - sigma2 * W
@@ -68,12 +68,12 @@ class svm:
 			# Fi = C/2 exp( C/2 ( 2yXi - 2t_i + 2\epsilon + C \sigma_i^2 ) )
 			#	* ( 1 - erf( ( yXi - t_i + \epsilon + C \sigma_i^2 ) / sqrt( 2 \sigma_i^2 ) )
 			#	- C/2 exp( C/2 ( -2yXi + 2 t_i + 2 \epsilon + C \sigma_i^2 ) )
-			#	* ( 1 - erf( -C/2 ( 2yXi - 2t_i + 2\epsilon + C \sigma_i^2 ) )
+			#	* ( 1 - erf( ( - yXi + t_i + \epsilon + C \sigma_i^2 ) / sqrt( 2 \sigma_i^2 ) )
 			Fi = (
 				self.C/2. * exp( (self.C/2.) * ( ( 2. * yXi ) - ( 2. * t ) + ( 2. * self.epsilon ) + ( self.C * sigma2 ) ) ) 
 				* ( 1. - scipy.special.erf( ( yXi - t + self.epsilon + ( self.C * sigma2 ) ) / sqrt( 2. * sigma2 ) ) )
-				- self.C/2. * exp( (self.C/2.) * ( ( -2. * yXi ) + ( 2. * t ) + ( 2. * self.epsilon ) + sigma2 ) )
-				* ( 1. - scipy.special.erf( ( -self.C / 2. ) * ( ( 2. * yXi ) - ( 2. * t ) + ( 2. * self.epsilon ) + ( self.C * sigma2 ) ) ) )
+				- self.C/2. * exp( (self.C/2.) * ( ( -2. * yXi ) + ( 2. * t ) + ( 2. * self.epsilon ) + ( self.C * sigma2 ) ) )
+				* ( 1. - scipy.special.erf( ( -yXi + t + self.epsilon + ( self.C * sigma2 ) ) / sqrt(2. * sigma2 ) ) )
 				)
 				
 			# Gi = 1/2 erf( ( t_i - yXi + \epsilon ) / sqrt( s \sigma_i^2 ) )
@@ -87,11 +87,10 @@ class svm:
 				- .5 * scipy.special.erf( ( t - yXi - self.epsilon ) / sqrt( 2. * sigma2 ) )
 				+ .5 * exp( (self.C/2.) * ( ( 2. * yXi ) - ( 2. * t ) + ( 2. * self.epsilon ) + ( self.C * sigma2 ) ) )
 				* ( 1. - scipy.special.erf( ( yXi - t + self.epsilon + ( self.C * sigma2 ) ) / sqrt( 2. * sigma2 ) ) )
-				+ .5 * exp( (self.C/2.) * ( ( -2. * yXi ) - ( 2. * t ) + ( 2. * self.epsilon ) + ( self.C * sigma2 ) ) )
-				* ( 1. - scipy.special.erf( ( yXi - t + self.epsilon + ( self.C * sigma2 ) ) / sqrt( 2. * sigma2 ) ) )
+				+ .5 * exp( (self.C/2.) * ( ( -2. * yXi ) + ( 2. * t ) + ( 2. * self.epsilon ) + ( self.C * sigma2 ) ) )
+				* ( 1. - scipy.special.erf( ( -yXi + t + self.epsilon + ( self.C * sigma2 ) ) / sqrt( 2. * sigma2 ) ) )
 				)
 
-			# erf(x) = 2/sqrt(\pi) \sum_0^x e^{-t^2} dt (see scipy.special.erf)
 			# w_i = w_i + \rho ( ( F_i / G_i ) - w_i )
 			return ( t, yXi, Gi, nan_to_num( self.rho * ( Fi / Gi - W ) ) )
 				
@@ -138,7 +137,8 @@ def run():
 	X = frange(-5.,5.,.1)
 	Y_cmp = [ mod.Pr(x) for x in X ]
 	Y_act = [ scipy.stats.norm.pdf(x) for x in X ]
-		
+	
+	print Y_cmp
 	plot(X,Y_act,label="normal distribution")
 	plot(X,Y_cmp,label="computed distribution")
 	legend()
