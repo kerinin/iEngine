@@ -6,14 +6,15 @@ from random import gauss
 import numpy
 import scipy
 import scipy.special
+import scipy.stats
 
 from numpy import *
-#from pylab import *
+from pylab import *
 
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C = .01, epsilon = .5, rho = 1e-4, L = .5):
+	def __init__(self,data=list(),C = .01, epsilon = .5, rho = 1e-4, L = .05):
 		self.data = data
 		self.W = None
 		
@@ -56,6 +57,7 @@ class svm:
 		
 		# Inner Loop
 		def inner():
+
 			# Inner Loop
 			# yX = \langle y(x) \rangle = \sum_{i=1}^N w_i K(x, x_i )
 			yX = K[0].reshape( [ len(self.data), 1] ) * W
@@ -91,9 +93,7 @@ class svm:
 
 			# erf(x) = 2/sqrt(\pi) \sum_0^x e^{-t^2} dt (see scipy.special.erf)
 			# w_i = w_i + \rho ( ( F_i / G_i ) - w_i )
-			F_safe = Fi * ( Gi > 0 )
-			G_safe = Gi + ( Gi == 0 )
-			return ( t, yXi, Gi, self.rho * ( F_safe / G_safe - W ) )
+			return ( t, yXi, Gi, nan_to_num( self.rho * ( Fi / Gi - W ) ) )
 				
 		start = datetime.datetime.now()
 		
@@ -121,7 +121,7 @@ class svm:
 			# sigma_i^2 = \frac{ 1 } { [ ( \Sigma + K ) ^{-1} ]_{ii} } - \Sigma_i
 			sigma2 = ( 1 / ( 1 / ( Sigma + K ) ).diagonal().reshape([len(self.data),1]) ) - Sigma_i
 			
-			if absolute(W_delta).sum() < 1e-4:
+			if W_delta. max() < .0005:
 				self.W = W + W_delta
 				break
 			else:
@@ -129,13 +129,21 @@ class svm:
 				W += W_delta
 				
 		#print "*** Optimization completed in %ss" % (datetime.datetime.now() - start).seconds
-		print W.T
+		print "%s Support Vectors of %s" % ( (W > 0).sum(), len(self.data) )
 		self.W = W
 		
 def run():
-	mod = svm( array([[gauss(1.,.5)] for i in range(40) ]).reshape([40,1]) )
-	
+	mod = svm( array([[gauss(0,1)] for i in range(100) ]).reshape([100,1]) )
 
+	X = frange(-5.,5.,.1)
+	Y_cmp = [ mod.Pr(x) for x in X ]
+	Y_act = [ scipy.stats.norm.pdf(x) for x in X ]
+		
+	plot(X,Y_act,label="normal distribution")
+	plot(X,Y_cmp,label="computed distribution")
+	legend()
+	show()
+	
 def help():
 	print __doc__
 	return 0
