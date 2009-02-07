@@ -7,7 +7,7 @@ import numpy
 import scipy
 import scipy.special
 import scipy.stats
-import cvxmod
+import cvxopt.solvers
 
 from numpy import *
 from pylab import *
@@ -24,11 +24,12 @@ class svm:
 		
 		self._compute()
 	
-	def _K(self,X,Y):
+	def _K(self,X,Y,gamma):
 		# K(x_i,x_j) = 1/(\sqrt(2 \pi det( \Lambda ) ) ) exp( -.5(x_i - x_j) \Lambda^-1 (x_i - x_j)^T
 		#return ( 1. / ( sqrt( 2. * math.pi * self.L ) ) )* exp( -.5 * ( X - Y ) * self.L * ( X - Y ).T )  
 		#return exp( ( -1.*(X-Y)**2 ) / ( 2*self.L*self.L ) )
-		return ( 1. / ( sqrt( 2. * math.pi * self.L ) ) )* exp( -( X-Y )**2/self.L )
+		#return ( 1. / ( sqrt( 2. * math.pi * self.L ) ) )* exp( -( X-Y )**2/self.L )
+		return ( 1 / ( 1+ exp( gamma * ( X - Y ) ) ) ).prod(2) 
 		
 	def Pr(self,x):
 		# x = [N,d]
@@ -52,12 +53,15 @@ class svm:
 		# F_\ell(x) = \frac{1}{\ell} \sum_{i=1}^{\ell} \theta(x - x_i)		NOTE: if d>1, \theta returns 0 if any dimension less than 0
 		# \epsilon = \lambda \sigma_i = \lambda \sqrt{ \frac{1}{\ell} F_\ell(x_i)(1-F_\ell(x_i) ) }
 		
+		Kcount = 1
+		C = 10
 		Lambda = 1.01
+		gamma = .5
 		(N,d) = self.data.shape
 		
-		X = self.data																			# N x d.  Observations
-		Fl = (X.reshape(N,1,d) > transpose(X.reshape(N,1,d),[1,0,2])).prod(2).sum(1,dtype=float) / N			# N x 1.  Empirical distribution
-		e = Lambda * sqrt( ( Fl * (1-Fl) ) / len(X) )
+		X = self.data																					# N x d.  Observations
+		Fl = ( (X.reshape(N,1,d) > transpose(X.reshape(N,1,d),[1,0,2])).prod(2).sum(1,dtype=float) / N ).reshape([N,1])	# N x 1.  Empirical distribution
+		e = Lambda * sqrt( ( Fl * (1-Fl) ) / len(X) ).reshape([N,1])
 		
 		# K(x,y) = \frac{1}{ 1 + e^{\gamma(x-y) } }
 		# \mathcal{K}(x,y) = \frac{ \gamma }{ 2 + e^{\gamma (x - y) } + e^{-\gamma(x-y) } }
@@ -70,47 +74,57 @@ class svm:
 		# He mentions "The kernel that defines the inner product in the n-dimensional basis is the product of one-dimensional kernels"
 		# I'm not sure if this applies in this case, since we're using the L1 norm, and this may not constitude an inner product
 		
-		K = (1 / ( 1+ exp( gamma * ( X.reshape(N,1,d) - transpose( X.reshape(N,1,d), [1,0,2] ) ) ) ) ).prod(2)
+		K = [ self._K( X.reshape(N,1,d), transpose( X.reshape(N,1,d), [1,0,2] ), gamma ), ]
+		K1 =  self._K( X.reshape(N,1,d), ones([1,N,d]) , gamma )
 		
 		# Solve for
 		# p(x) = \sum_{i=1}^N \alpha_i \mathcal(K)(x_i,x)		(N is the number of SV)
 		
 		# Minimize
 		# \sum_{i=1}^\ell \alpha_i + C \sum_{i=1}^\ell \xi_i + C \sum_{i=1}^\ell \xi_i^*
-		alpha = cvxmod.optvar( 'alpha', N )
-		xip = cvxmod.param( 'xi+', N )
-		xin = cvxmod.param( 'xi-', N )
-		p = cvxmod.problem()
-		
-		p.objective = sum( alpha ) + C * sum( xip ) + C * sum( xin )
 		
 		# (Alternate - kernel mixture)
 		# \sum_{i=1}^\ell \sum{n=1}^K w_n \alpha_i^n + C \sum_{i=1}^\ell \xi_i + C \sum_{i=1}^\ell \xi_i^*
 		# Note: w_n = n, if kernels are sequenced small to large width
+		
+		c = vstack( [ ones( [N] ) * i for i in range(Kcount) ] + [ones([N*2])*C] )
 		
 		# Subject To
 		# y_i - \epsilon - \xi \le \sum_{j=1}^\ell \alpha_j K(x_i,x_j) \le y_i + \epsilon + \xi_i^*
 		# \sum_{i=1}^\ell \alpha_i K(x_i,0) = 0
 		# \sum_{i=1}^\ell \alpha_i k(x_i,1) = 1
 		# \alpha_i, \xi_i, \xi_i^*  \ge 0
-		p.constr += Fl - e - xip <= sum( alpha * K )
-		p.constr += sum( alpha * K ) <= Fl + e + xin
-		alpha.pos = True
-		xip.pos = True
-		xin.pos = True
 		
 		# (Alternate - kernel mixture)
 		# y_i - \epsilon - \xi \le \sum_{j=1}^\ell \sum_{n=1}^k \alpha_j^n K(x_i,x_j) \le y_i + \epsilon + \xi_i^*
 		# \sum_{i=1}^\ell \sum_{n=1}^k \alpha_i^n k(x_i,1) = 1
-		# \alpha_i, \xi_i, \xi_i^*  \ge 0		
+		# \alpha_i, \xi_i, \xi_i^*  \ge 0			
+		
+		G = vstack( [ 
+			hstack( [ K[i] for i in range(Kcount) ] + [ zeros([N,N]), -identity(N) ] ),	# sum le
+			hstack( [ K[i] for i in range(Kcount) ] + [ -identity(N), zeros([N,N]) ] ),	# sum ge
+			hstack( [ -identity(N) for i in range(Kcount+2 ) ] )					# variables
+		] )
+		h = vstack( [ Fl + e, e - Fl, zeros([N,1]) ] )
+		
+		A = hstack( [ K1 for i in range(Kcount)] + [ zeros([N,N]), zeros([N,N]) ] )
+		b = ones([N,1])
 				
-		print "*** Optimization completed in %ss" % (datetime.datetime.now() - start).seconds
-		print self.W
-		print "%s Support Vectors of %s" % ( (self.W > 0).sum(), len(self.data) )
+		print c.shape
+		print G.shape
+		print h.shape
+		print A.shape
+		print b.shape
+		
+		sol = cvxopt.solvers.lp(c, G, h, A, b)
+		
+		print sol['x']
+		
 		
 def run():
 	mod = svm( array([[gauss(0,1)] for i in range(100) ]).reshape([100,1]) )
 	
+	'''
 	X = frange(-5.,5.,.25)
 	
 	Y_cmp = mod.Pr(array(X).reshape([len(X),1]))
@@ -121,6 +135,7 @@ def run():
 	plot(X,Y_cmp,label="computed distribution")
 	legend()
 	show()
+	'''
 	
 def help():
 	print __doc__
