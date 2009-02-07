@@ -43,28 +43,47 @@ class svm:
 	def _compute(self):
 		start = datetime.datetime.now()
 		#UNKNOWN: what are \alpha^*, \xi ???   check Vapnik regression
-		# I think that \xi is the loss amount, and that \xi^* is for points below the estimate (rather than above)
-		# \alpha appears to be the weights, which become \beta if nonzero
+		# * used to designate negative values
 		
 		# Given data
 		# ( (x_1,F_\ell(x_1),\epsilon_1),...,(x_\ell),F_\ell(x_\ell),\epsilon_\ell) )
 		
 		# Solve for
-		# p(x) = \sum_{i=1}^\ell \beta_i \mathcal(K)(x_i,x)
+		# p(x) = \sum_{i=1}^N \alpha_i \mathcal(K)(x_i,x)		(N is the number of SV)
 		
 		# Minimize
-		# \sum_{i=1}^\ell \alpha_i + \sum_{i=1}^\ell \alpha_i^* + C \sum_{i=1}^\ell \xi_i + \sum_{i=1}^\ell \xi_i^*
+		# \sum_{i=1}^\ell \alpha_i + C \sum_{i=1}^\ell \xi_i + \sum_{i=1}^\ell \xi_i^*
+		
+		# (Alternate - kernel mixture)
+		# \sum_{i=1}^\ell \sum{n=1}^K w_n \alpha_i^n + C \sum_{i=1}^\ell \xi_i + \sum_{i=1}^\ell \xi_i^*
+		# Note: w_n = n, if kernels are sequenced small to large width
 		
 		# Subject To
-		# y_i - \epsilon - \xi \le ( \sum_{j=1}^\ell (\alpha_j^* - \alpha_j) k(x_i,x_j) ) + b \le y_i + \epsilon + \xi_i^*
-		# \alpha_i, \xi_i, \alpha_i^*, \xi_i^*  \ge 0
+		# y_i - \epsilon - \xi \le \sum_{j=1}^\ell \alpha_j K(x_i,x_j) \le y_i + \epsilon + \xi_i^*
+		# \sum_{i=1}^\ell \alpha_i K(x_i,0) = 0
+		# \sum_{i=1}^\ell \alpha_i k(x_i,1) = 1
+		# \alpha_i, \xi_i, \xi_i^*  \ge 0
+		
+		# (Alternate - kernel mixture)
+		# y_i - \epsilon - \xi \le \sum_{j=1}^\ell \sum_{n=1}^k \alpha_j^n K(x_i,x_j) \le y_i + \epsilon + \xi_i^*
+		# \sum_{i=1}^\ell \sum_{n=1}^k \alpha_i^n k(x_i,1) = 1
+		# \alpha_i, \xi_i, \xi_i^*  \ge 0		
 		
 		# Where
 		# \theta(x) = indicator function; 1 if positive, 0 otherwise
-		# F_\ell(x) = \frac{1}{\ell} \sum_{i=1}^{\ell} \theta(x - x_i)
+		# F_\ell(x) = \frac{1}{\ell} \sum_{i=1}^{\ell} \theta(x - x_i)		NOTE: if d>1, \theta returns 0 if any dimension less than 0
 		# \epsilon = \lambda \sigma_i = \lambda \sqrt{ \frac{1}{\ell} F_\ell(x_i)(1-F_\ell(x_i) ) }
-		# k(x,x') = \frac{1}{ 1 + e^{-\gamma(x-x') } }			!!NOTE: this is the L1 norm, not the L2
-		# \mathcal{K}(x,x') = \frac{ \gamma }{ 2 + e^{\gamma (x - x') } + e^{-\gamma(x-x') } }
+		
+		# K(x,y) = \frac{1}{ 1 + e^{\gamma(x-y) } }
+		# \mathcal{K}(x,y) = \frac{ \gamma }{ 2 + e^{\gamma (x - y) } + e^{-\gamma(x-y) } }
+		
+		# (Alternate - Multi-dimensional case)
+		# K(x,y) = \prod{i=1}^d \frac{1}{ 1 + e^{\gamma(x^i-y^i) } }			!!NOTE: this is the L1 norm, not the L2
+		# \mathcal{K}(x,y) = \prod_{i=1]^d \frac{ \gamma }{ 2 + e^{\gamma (x^i - y^i) } + e^{-\gamma(x^i-y^i) } }	
+		# NOTE: this is highly suspect, based on "Multi-dimensional kernels can be chosen to be tensor products of one-dimensional kernels"
+		# See Vapnik p.193 for discussion
+		# He mentions "The kernel that defines the inner product in the n-dimensional basis is the product of one-dimensional kernels"
+		# I'm not sure if this applies in this case, since we're using the L1 norm, and this may not constitude an inner product
 				
 		print "*** Optimization completed in %ss" % (datetime.datetime.now() - start).seconds
 		print self.W
