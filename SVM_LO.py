@@ -89,8 +89,7 @@ class svm:
 		# \sum_{i=1}^\ell \sum{n=1}^K w_n \alpha_i^n + C \sum_{i=1}^\ell \xi_i + C \sum_{i=1}^\ell \xi_i^*
 		# Note: w_n = n, if kernels are sequenced small to large width
 		
-		##c = cvxopt.matrix( append( ones([d*N,]), ones([N*2],dtype=float)*C ), ((d+2)*N,1), 'd')
-		c = cvxopt.matrix( 1.0, (N,1), 'd' )
+		c = append( ones([d*N,],dtype=float), ones([N*2],dtype=float)*C )
 		
 		# Subject To
 		# y_i - \epsilon - \xi \le \sum_{j=1}^\ell \alpha_j K(x_i,x_j) \le y_i + \epsilon + \xi_i^*
@@ -103,22 +102,16 @@ class svm:
 		# \sum_{i=1}^\ell \sum_{n=1}^k \alpha_i^n k(x_i,1) = 1
 		# \alpha_i, \xi_i, \xi_i^*  \ge 0			
 		
-		##G = cvxopt.matrix( vstack( [ 
-		##	hstack( [ K[i] for i in range(Kcount) ] + [ zeros([N,N],dtype=float), -identity(N,dtype=float) ] ),	# sum le
-		##	hstack( [ K[i] for i in range(Kcount) ] + [ -identity(N,dtype=float), zeros([N,N],dtype=float) ] ),	# sum ge
-		##	hstack( [ -identity(N,dtype=float) for i in range(Kcount+2 ) ] )					# variables
-		##] ), (3*N, (2+d)*N), 'd' )
+		G = vstack( [ 
+			hstack( [ K[i] for i in range(Kcount) ] + [ zeros([N,N],dtype=float), -identity(N,dtype=float) ] ),	# sum le
+			hstack( [ K[i] for i in range(Kcount) ] + [ -identity(N,dtype=float), zeros([N,N],dtype=float) ] ),	# sum ge
+			hstack( [ -identity(N,dtype=float) for i in range(Kcount+2 ) ] )							# variables
+		] )
+		h = vstack( [ Fl + e, e - Fl, zeros([N,1],dtype=float) ] )
 		
-		G = cvxopt.matrix( vstack( [ K[0], -K[0], -identity(N,dtype=float) ] ) )
-		h = cvxopt.matrix( vstack( [ Fl + e, e - Fl, zeros([N,1]) ] ) )
+		A = hstack( [ K1 for i in range(Kcount)] + [ zeros([N,N],dtype=float), zeros([N,N],dtype=float) ] )
+		b = ones( [N,1], dtype=float )
 		
-		##A = cvxopt.matrix( hstack( [ K1 for i in range(Kcount)] + [ zeros([N,N]), zeros([N,N]) ] ) )
-		A = cvxopt.matrix( K1 )
-		b = cvxopt.matrix( 1.0, (N,1) )
-		
-		sol = solvers.lp(c, G, h, A, b)
-		
-		print sol['x']
 		
 		
 def run():
