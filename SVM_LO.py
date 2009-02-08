@@ -7,7 +7,9 @@ import numpy
 import scipy
 import scipy.special
 import scipy.stats
-import cvxopt.solvers
+import cvxopt
+from cvxopt import *
+
 
 from numpy import *
 from pylab import *
@@ -87,7 +89,8 @@ class svm:
 		# \sum_{i=1}^\ell \sum{n=1}^K w_n \alpha_i^n + C \sum_{i=1}^\ell \xi_i + C \sum_{i=1}^\ell \xi_i^*
 		# Note: w_n = n, if kernels are sequenced small to large width
 		
-		c = vstack( [ ones( [N] ) * i for i in range(Kcount) ] + [ones([N*2])*C] )
+		##c = cvxopt.matrix( append( ones([d*N,]), ones([N*2],dtype=float)*C ), ((d+2)*N,1), 'd')
+		c = cvxopt.matrix( 1.0, (N,1), 'd' )
 		
 		# Subject To
 		# y_i - \epsilon - \xi \le \sum_{j=1}^\ell \alpha_j K(x_i,x_j) \le y_i + \epsilon + \xi_i^*
@@ -100,29 +103,26 @@ class svm:
 		# \sum_{i=1}^\ell \sum_{n=1}^k \alpha_i^n k(x_i,1) = 1
 		# \alpha_i, \xi_i, \xi_i^*  \ge 0			
 		
-		G = vstack( [ 
-			hstack( [ K[i] for i in range(Kcount) ] + [ zeros([N,N]), -identity(N) ] ),	# sum le
-			hstack( [ K[i] for i in range(Kcount) ] + [ -identity(N), zeros([N,N]) ] ),	# sum ge
-			hstack( [ -identity(N) for i in range(Kcount+2 ) ] )					# variables
-		] )
-		h = vstack( [ Fl + e, e - Fl, zeros([N,1]) ] )
+		##G = cvxopt.matrix( vstack( [ 
+		##	hstack( [ K[i] for i in range(Kcount) ] + [ zeros([N,N],dtype=float), -identity(N,dtype=float) ] ),	# sum le
+		##	hstack( [ K[i] for i in range(Kcount) ] + [ -identity(N,dtype=float), zeros([N,N],dtype=float) ] ),	# sum ge
+		##	hstack( [ -identity(N,dtype=float) for i in range(Kcount+2 ) ] )					# variables
+		##] ), (3*N, (2+d)*N), 'd' )
 		
-		A = hstack( [ K1 for i in range(Kcount)] + [ zeros([N,N]), zeros([N,N]) ] )
-		b = ones([N,1])
-				
-		print c.shape
-		print G.shape
-		print h.shape
-		print A.shape
-		print b.shape
+		G = cvxopt.matrix( vstack( [ K[0], -K[0], -identity(N,dtype=float) ] ) )
+		h = cvxopt.matrix( vstack( [ Fl + e, e - Fl, zeros([N,1]) ] ) )
 		
-		sol = cvxopt.solvers.lp(c, G, h, A, b)
+		##A = cvxopt.matrix( hstack( [ K1 for i in range(Kcount)] + [ zeros([N,N]), zeros([N,N]) ] ) )
+		A = cvxopt.matrix( K1 )
+		b = cvxopt.matrix( 1.0, (N,1) )
+		
+		sol = solvers.lp(c, G, h, A, b)
 		
 		print sol['x']
 		
 		
 def run():
-	mod = svm( array([[gauss(0,1)] for i in range(100) ]).reshape([100,1]) )
+	mod = svm( array([[gauss(0,1)] for i in range(10) ]).reshape([10,1]) )
 	
 	'''
 	X = frange(-5.,5.,.25)
