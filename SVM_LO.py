@@ -90,8 +90,13 @@ class svm:
 		# (Alternate - kernel mixture)
 		# \sum_{i=1}^\ell \sum{n=1}^K w_n \alpha_i^n + C \sum_{i=1}^\ell \xi_i + C \sum_{i=1}^\ell \xi_i^*
 		# Note: w_n = n, if kernels are sequenced small to large width
-		
-		c = cvxopt.matrix(ones([N,1], dtype=float))
+		alpha = cvxmod.optvar( 'alpha',N,1)
+		alpha.pos = True
+		xipos = cvxmod.optvar( 'xi+',N,1)
+		xipos.pos = True
+		xineg = cvxmod.optvar( 'xi-',N,1)
+		xineg.pos = True
+		objective = cvxmod.minimize( cvxmod.sum(alpha) + C*cvxmod.sum(xipos) + C*cvxmod.sum(xineg) )
 		
 		# Subject To
 		# y_i - \epsilon - \xi \le \sum_{j=1}^\ell \alpha_j K(x_i,x_j) \le y_i + \epsilon + \xi_i^*
@@ -103,26 +108,23 @@ class svm:
 		# y_i - \epsilon - \xi \le \sum_{j=1}^\ell \sum_{n=1}^k \alpha_j^n K(x_i,x_j) \le y_i + \epsilon + \xi_i^*
 		# \sum_{i=1}^\ell \sum_{n=1}^k \alpha_i^n k(x_i,1) = 1
 		# \alpha_i, \xi_i, \xi_i^*  \ge 0			
+		ineq1 = cvxopt.matrix( K ) * alpha <= cvxopt.matrix( Fl + e ) + xineg
+		ineq2 = cvxopt.matrix( K ) * alpha >= cvxopt.matrix( Fl - e ) - xipos
+		eq = cvxopt.matrix( K1, (1,N) ) * alpha == cvxopt.matrix(1.0)
 		
-		G = cvxopt.matrix(vstack( [ K, K ] ) )
-		h = cvxopt.matrix(vstack( [ Fl + e, e - Fl ] ) )
+		# Solve!
+		p = cvxmod.problem( objective = objective, constr = [ineq1,ineq2,eq] )
 		
-		A = cvxopt.matrix( K1, (1,N) )
-		b = cvxopt.matrix(1.0, (1,1) )
-		
-		alpha = cvxmod.optvar( 'alpha',N,1)
-		alpha.pos = True
-		ineq = G*alpha <= h
-		eq = A*alpha == b
-		objective = cvxmod.minimize( cvxmod.transpose(c) * alpha )
-		
-		p = cvxmod.problem( objective = objective, constr = [ineq,eq] )
+		start = datetime.datetime.now()
 		p.solve()
+		duration = datetime.datetime.now() - start
+		print "optimized in %ss" % (float(duration.microseconds)/1000000)
 		
 		print alpha.value
 		
+		
 def run():
-	mod = svm( array([[gauss(0,1)] for i in range(10) ]).reshape([10,1]) )
+	mod = svm( array([[gauss(0,1)] for i in range(100) ]).reshape([100,1]) )
 	
 	'''
 	X = frange(-5.,5.,.25)
