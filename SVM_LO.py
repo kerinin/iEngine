@@ -8,6 +8,7 @@ import scipy
 import scipy.special
 import scipy.stats
 import cvxopt
+import cvxmod
 from cvxopt import *
 
 
@@ -31,6 +32,7 @@ class svm:
 		#return ( 1. / ( sqrt( 2. * math.pi * self.L ) ) )* exp( -.5 * ( X - Y ) * self.L * ( X - Y ).T )  
 		#return exp( ( -1.*(X-Y)**2 ) / ( 2*self.L*self.L ) )
 		#return ( 1. / ( sqrt( 2. * math.pi * self.L ) ) )* exp( -( X-Y )**2/self.L )
+		
 		return ( 1 / ( 1+ exp( gamma * ( X - Y ) ) ) ).prod(2) 
 		
 	def Pr(self,x):
@@ -76,8 +78,8 @@ class svm:
 		# He mentions "The kernel that defines the inner product in the n-dimensional basis is the product of one-dimensional kernels"
 		# I'm not sure if this applies in this case, since we're using the L1 norm, and this may not constitude an inner product
 		
-		K = [ self._K( X.reshape(N,1,d), transpose( X.reshape(N,1,d), [1,0,2] ), gamma ), ]
-		K1 =  self._K( X.reshape(N,1,d), ones([1,N,d]) , gamma )
+		K = self._K( X.reshape(N,1,d), transpose(X.reshape(N,1,d), [1,0,2]), gamma )
+		K1 =  self._K( X.reshape(N,1,d), 1.0 , gamma ).reshape([1,N])
 		
 		# Solve for
 		# p(x) = \sum_{i=1}^N \alpha_i \mathcal(K)(x_i,x)		(N is the number of SV)
@@ -89,7 +91,7 @@ class svm:
 		# \sum_{i=1}^\ell \sum{n=1}^K w_n \alpha_i^n + C \sum_{i=1}^\ell \xi_i + C \sum_{i=1}^\ell \xi_i^*
 		# Note: w_n = n, if kernels are sequenced small to large width
 		
-		c = append( ones([d*N,],dtype=float), ones([N*2],dtype=float)*C )
+		c = cvxopt.matrix(ones([N,1], dtype=float))
 		
 		# Subject To
 		# y_i - \epsilon - \xi \le \sum_{j=1}^\ell \alpha_j K(x_i,x_j) \le y_i + \epsilon + \xi_i^*
@@ -102,17 +104,22 @@ class svm:
 		# \sum_{i=1}^\ell \sum_{n=1}^k \alpha_i^n k(x_i,1) = 1
 		# \alpha_i, \xi_i, \xi_i^*  \ge 0			
 		
-		G = vstack( [ 
-			hstack( [ K[i] for i in range(Kcount) ] + [ zeros([N,N],dtype=float), -identity(N,dtype=float) ] ),	# sum le
-			hstack( [ K[i] for i in range(Kcount) ] + [ -identity(N,dtype=float), zeros([N,N],dtype=float) ] ),	# sum ge
-			hstack( [ -identity(N,dtype=float) for i in range(Kcount+2 ) ] )							# variables
-		] )
-		h = vstack( [ Fl + e, e - Fl, zeros([N,1],dtype=float) ] )
+		G = cvxopt.matrix(vstack( [ K, K ] ) )
+		h = cvxopt.matrix(vstack( [ Fl + e, e - Fl ] ) )
 		
-		A = hstack( [ K1 for i in range(Kcount)] + [ zeros([N,N],dtype=float), zeros([N,N],dtype=float) ] )
-		b = ones( [N,1], dtype=float )
+		A = cvxopt.matrix( K1, (1,N) )
+		b = cvxopt.matrix(1.0, (1,1) )
 		
+		alpha = cvxmod.optvar( 'alpha',N,1)
+		alpha.pos = True
+		ineq = G*alpha <= h
+		eq = A*alpha == b
+		objective = cvxmod.minimize( cvxmod.transpose(c) * alpha )
 		
+		p = cvxmod.problem( objective = objective, constr = [ineq,eq] )
+		p.solve()
+		
+		print alpha.value
 		
 def run():
 	mod = svm( array([[gauss(0,1)] for i in range(10) ]).reshape([10,1]) )
