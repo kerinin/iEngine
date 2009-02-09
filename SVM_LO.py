@@ -18,8 +18,9 @@ import matplotlib.pyplot as plt
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C =100, Lambda = 1.0, gamma =10.):
+	def __init__(self,data=list(),C =1., Lambda = 1.0, gamma =.5):
 		self.data = data
+		self.Fl = None
 		self.SV = None
 		self.beta = None
 		
@@ -37,7 +38,8 @@ class svm:
 		# f(x) = \sum_{i=1}^N \beta_i \mathcal{K}(x_i, x)
 		# \mathcal{K}(x,y) = \frac{ \gamma }{ 2 + e^{\gamma (x-y)} + e^{-\gamma (x-y)} }
 		# NOTE: extend this to multiple dimensions...
-		return ( self.beta * ( self.gamma / ( 2 + exp( self.gamma * ( self.SV - x ) ) + exp( -self.gamma * ( self.SV - x ) ) ) ) ).sum()
+		#return ( self.beta * ( self.gamma / ( 2 + exp( self.gamma * ( self.SV - x ) ) + exp( -self.gamma * ( self.SV - x ) ) ) ) ).sum()
+		return ( self.beta * self._K( self.SV.reshape(len(self.SV),1,1), x.reshape(1,1,1), self.gamma ) ).sum()
 	
 	def __iadd__(self, points):
 		# overloaded '+=', used for adding a vector list to the module's data
@@ -64,7 +66,9 @@ class svm:
 		X = self.data
 
 		Fl = ( (X.reshape(N,1,d) > transpose(X.reshape(N,1,d),[1,0,2])).prod(2).sum(1,dtype=float) / N ).reshape([N,1])
-		e = Lambda * sqrt( ( Fl * (1-Fl) ) / N ).reshape([N,1])
+		e = Lambda * sqrt( (1/N) * ( Fl ) * (1-Fl) ).reshape([N,1])
+		
+		self.Fl = Fl
 		
 		# K(x,y) = \frac{1}{ 1 + e^{\gamma(x-y) } }
 		# \mathcal{K}(x,y) = \frac{ \gamma }{ 2 + e^{\gamma (x - y) } + e^{-\gamma(x-y) } }
@@ -78,7 +82,8 @@ class svm:
 		# I'm not sure if this applies in this case, since we're using the L1 norm, and this may not constitude an inner product
 		
 		K = self._K( X.reshape(N,1,d), transpose(X.reshape(N,1,d), [1,0,2]), gamma )
-		K1 =  self._K( X.reshape(N,1,d), 1.0 , gamma ).reshape([1,N])
+		K1 = self._K( X.reshape(N,1,d), 1.0 , gamma ).reshape([1,N])
+		K0 = self._K( X.reshape(N,1,d), 0.0 , gamma ).reshape([1,N])
 		
 		# Solve for
 		# p(x) = \sum_{i=1}^N \alpha_i \mathcal(K)(x_i,x)		(N is the number of SV)
@@ -109,10 +114,11 @@ class svm:
 		# \alpha_i, \xi_i, \xi_i^*  \ge 0			
 		ineq1 = cvxopt.matrix( K ) * alpha <= cvxopt.matrix( Fl + e ) + xineg
 		ineq2 = cvxopt.matrix( K ) * alpha >= cvxopt.matrix( Fl - e ) - xipos
-		eq = cvxopt.matrix( K1, (1,N) ) * alpha == cvxopt.matrix(1.0)
+		eq1 = cvxopt.matrix( K1, (1,N) ) * alpha == cvxopt.matrix(1.0)
+		eq2 = cvxopt.matrix( K0, (1,N) ) * alpha == cvxopt.matrix(0.0)
 		
 		# Solve!
-		p = cvxmod.problem( objective = objective, constr = [ineq1,ineq2,eq] )
+		p = cvxmod.problem( objective = objective, constr = [ineq1,ineq2,eq1,eq2] )
 		
 		start = datetime.datetime.now()
 		p.solve()
@@ -133,15 +139,15 @@ def run():
 	X = arange(-5.,5.,.05)
 	Y_cmp = [ mod.Pr(x) for x in X ]
 	
-	#Y_act = [ scipy.stats.norm.pdf(x) for x in X ]
-
-	n, bins, patches = plt.hist(mod.data, 40, normed=1, facecolor='green', alpha=0.5)
-	bincenters = 0.5*(bins[1:]+bins[:-1])
+	#n, bins, patches = plt.hist(mod.data, 40, normed=1, facecolor='green', alpha=0.5)
+	#bincenters = 0.5*(bins[1:]+bins[:-1])
 	#plt.plot(bincenters, n, 'r', linewidth=1)
 	
-	plt.plot(X,Y_cmp,'r--')
+	#plt.plot(X,Y_cmp,'r--')
 	
-	plt.plot( mod.SV, [ mod.Pr(x ) for x in  mod.SV ], 'o' )
+	#plt.plot( mod.SV, [ mod.Pr(x ) for x in  mod.SV ], 'o' )
+	plt.plot(mod.data,mod.Fl, 'o' )
+	plt.plot(X,Y_cmp, 'r--')
 	plt.show()
 	
 	
