@@ -72,9 +72,9 @@ class svm:
 		# CURRENT THEORY: I'm using x where I should be using Ax somewhere (or vica versa).
 		# I'm computing a linear operator, so i may have fucked up the context of my 
 		# variables somewhere.  This would explain the scaling issues...
-		K = self._K( X.reshape(N,1,d), transpose(X.reshape(N,1,d), [1,0,2]), gamma )
-		K1 = self._K( X.reshape(N,1,d), 1.0 , gamma ).reshape([1,N])
-		K0 = self._K( X.reshape(N,1,d), 0.0 , gamma ).reshape([1,N])
+		K = self._K( Xcmf.reshape(N,1,d), transpose(Xcmf.reshape(N,1,d), [1,0,2]), gamma )
+		K1 = self._K( Xcmf.reshape(N,1,d), 1.0 , gamma ).reshape([1,N])
+		K0 = self._K( Xcmf.reshape(N,1,d), 0.0 , gamma ).reshape([1,N])
 
 		alpha = cvxmod.optvar( 'alpha',N,1)
 		alpha.pos = True
@@ -92,7 +92,7 @@ class svm:
 
 		
 		# Solve!
-		p = cvxmod.problem( objective = objective, constr = [ineq1,ineq2,eq1,eq2] )
+		p = cvxmod.problem( objective = objective, constr = [ineq1,ineq2,eq1] )
 		
 		start = datetime.datetime.now()
 		p.solve()
