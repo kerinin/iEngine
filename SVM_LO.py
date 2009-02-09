@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C =1., Lambda = 1.0, gamma =.5):
+	def __init__(self,data=list(),C =1., Lambda = 10., gamma =.25):
 		self.data = data
 		self.Fl = None
 		self.SV = None
@@ -58,7 +58,7 @@ class svm:
 		# F_\ell(x) = \frac{1}{\ell} \sum_{i=1}^{\ell} \theta(x - x_i)		NOTE: if d>1, \theta returns 0 if any dimension less than 0
 		# \epsilon = \lambda \sigma_i = \lambda \sqrt{ \frac{1}{\ell} F_\ell(x_i)(1-F_\ell(x_i) ) }
 		
-		Kcount = 1
+		Kcount = 1.
 		C = self.C
 		Lambda = self.Lambda
 		gamma = self.gamma
@@ -66,7 +66,7 @@ class svm:
 		X = self.data
 
 		Fl = ( (X.reshape(N,1,d) > transpose(X.reshape(N,1,d),[1,0,2])).prod(2).sum(1,dtype=float) / N ).reshape([N,1])
-		e = Lambda * sqrt( (1/N) * ( Fl ) * (1-Fl) ).reshape([N,1])
+		e = Lambda * sqrt( (1./N) * ( Fl ) * (1.-Fl) ).reshape([N,1])
 		
 		self.Fl = Fl
 		
