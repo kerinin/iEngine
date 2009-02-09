@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C =1., Lambda = 10., gamma =.25):
+	def __init__(self,data=list(),C =1., Lambda = 1., gamma =.25):
 		self.data = data
 		self.Fl = None
 		self.SV = None
@@ -65,35 +65,17 @@ class svm:
 		(N,d) = self.data.shape
 		X = self.data
 
-		Fl = ( (X.reshape(N,1,d) > transpose(X.reshape(N,1,d),[1,0,2])).prod(2).sum(1,dtype=float) / N ).reshape([N,1])
-		e = Lambda * sqrt( (1./N) * ( Fl ) * (1.-Fl) ).reshape([N,1])
+		Xcmf = ( (X.reshape(N,1,d) > transpose(X.reshape(N,1,d),[1,0,2])).prod(2).sum(1,dtype=float) / N ).reshape([N,1])
+		e = Lambda * sqrt( (1./N) * ( Xcmf ) * (1.-Xcmf) ).reshape([N,1])
 		
-		self.Fl = Fl
-		
-		# K(x,y) = \frac{1}{ 1 + e^{\gamma(x-y) } }
-		# \mathcal{K}(x,y) = \frac{ \gamma }{ 2 + e^{\gamma (x - y) } + e^{-\gamma(x-y) } }
-
-		# (Alternate - Multi-dimensional case)
-		# K(x,y) = \prod{i=1}^d \frac{1}{ 1 + e^{\gamma(x^i-y^i) } }			!!NOTE: this is the L1 norm, not the L2
-		# \mathcal{K}(x,y) = \prod_{i=1]^d \frac{ \gamma }{ 2 + e^{\gamma (x^i - y^i) } + e^{-\gamma(x^i-y^i) } }	
-		# NOTE: this is highly suspect, based on "Multi-dimensional kernels can be chosen to be tensor products of one-dimensional kernels"
-		# See Vapnik p.193 for discussion
-		# He mentions "The kernel that defines the inner product in the n-dimensional basis is the product of one-dimensional kernels"
-		# I'm not sure if this applies in this case, since we're using the L1 norm, and this may not constitude an inner product
-		
+		# Xcmf???
+		# CURRENT THEORY: I'm using x where I should be using Ax somewhere (or vica versa).
+		# I'm computing a linear operator, so i may have fucked up the context of my 
+		# variables somewhere.  This would explain the scaling issues...
 		K = self._K( X.reshape(N,1,d), transpose(X.reshape(N,1,d), [1,0,2]), gamma )
 		K1 = self._K( X.reshape(N,1,d), 1.0 , gamma ).reshape([1,N])
 		K0 = self._K( X.reshape(N,1,d), 0.0 , gamma ).reshape([1,N])
-		
-		# Solve for
-		# p(x) = \sum_{i=1}^N \alpha_i \mathcal(K)(x_i,x)		(N is the number of SV)
-		
-		# Minimize
-		# \sum_{i=1}^\ell \alpha_i + C \sum_{i=1}^\ell \xi_i + C \sum_{i=1}^\ell \xi_i^*
-		
-		# (Alternate - kernel mixture)
-		# \sum_{i=1}^\ell \sum{n=1}^K w_n \alpha_i^n + C \sum_{i=1}^\ell \xi_i + C \sum_{i=1}^\ell \xi_i^*
-		# Note: w_n = n, if kernels are sequenced small to large width
+
 		alpha = cvxmod.optvar( 'alpha',N,1)
 		alpha.pos = True
 		xipos = cvxmod.optvar( 'xi+',N,1)
@@ -101,21 +83,13 @@ class svm:
 		xineg = cvxmod.optvar( 'xi-',N,1)
 		xineg.pos = True
 		objective = cvxmod.minimize( cvxmod.sum(alpha) + C*cvxmod.sum(xipos) + C*cvxmod.sum(xineg) )
-		
-		# Subject To
-		# y_i - \epsilon - \xi \le \sum_{j=1}^\ell \alpha_j K(x_i,x_j) \le y_i + \epsilon + \xi_i^*
-		# \sum_{i=1}^\ell \alpha_i K(x_i,0) = 0
-		# \sum_{i=1}^\ell \alpha_i k(x_i,1) = 1
-		# \alpha_i, \xi_i, \xi_i^*  \ge 0
-		
-		# (Alternate - kernel mixture)
-		# y_i - \epsilon - \xi \le \sum_{j=1}^\ell \sum_{n=1}^k \alpha_j^n K(x_i,x_j) \le y_i + \epsilon + \xi_i^*
-		# \sum_{i=1}^\ell \sum_{n=1}^k \alpha_i^n k(x_i,1) = 1
-		# \alpha_i, \xi_i, \xi_i^*  \ge 0			
-		ineq1 = cvxopt.matrix( K ) * alpha <= cvxopt.matrix( Fl + e ) + xineg
-		ineq2 = cvxopt.matrix( K ) * alpha >= cvxopt.matrix( Fl - e ) - xipos
+	
+		ineq1 = cvxopt.matrix( K ) * alpha <= cvxopt.matrix( Xcmf + e ) + xineg
+		ineq2 = cvxopt.matrix( K ) * alpha >= cvxopt.matrix( Xcmf - e ) - xipos
 		eq1 = cvxopt.matrix( K1, (1,N) ) * alpha == cvxopt.matrix(1.0)
 		eq2 = cvxopt.matrix( K0, (1,N) ) * alpha == cvxopt.matrix(0.0)
+		
+
 		
 		# Solve!
 		p = cvxmod.problem( objective = objective, constr = [ineq1,ineq2,eq1,eq2] )
@@ -129,6 +103,7 @@ class svm:
 		mask = ma.getmask( beta )
 		data = ma.array(X,mask=mask)
 		
+		self.Fl = Xcmf
 		self.beta = beta.compressed()
 		self.SV = data.compressed()
 		print "%s SV's found" % len(self.SV)
@@ -143,12 +118,11 @@ def run():
 	#bincenters = 0.5*(bins[1:]+bins[:-1])
 	#plt.plot(bincenters, n, 'r', linewidth=1)
 	
-	#plt.plot(X,Y_cmp,'r--')
-	
 	#plt.plot( mod.SV, [ mod.Pr(x ) for x in  mod.SV ], 'o' )
+	
 	plt.plot(mod.data,mod.Fl, 'o' )
 	plt.plot(X,Y_cmp, 'r--')
-	plt.show()
+	#plt.show()
 	
 	
 def help():
