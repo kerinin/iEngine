@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C = .25, Lambda = 1.01, gamma =.5):
+	def __init__(self,data=list(),C =100, Lambda = 1.0, gamma =10.):
 		self.data = data
 		self.SV = None
 		self.beta = None
@@ -140,6 +140,8 @@ def run():
 	#plt.plot(bincenters, n, 'r', linewidth=1)
 	
 	plt.plot(X,Y_cmp,'r--')
+	
+	plt.plot( mod.SV, [ mod.Pr(x ) for x in  mod.SV ], 'o' )
 	plt.show()
 	
 	
