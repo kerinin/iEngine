@@ -11,14 +11,14 @@ import cvxopt
 import cvxmod
 from cvxopt import *
 
-
 from numpy import *
-from pylab import *
+
+import matplotlib.pyplot as plt
 
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C = 10, Lambda = 1.01, gamma =.5):
+	def __init__(self,data=list(),C = .25, Lambda = 1.01, gamma =.5):
 		self.data = data
 		self.SV = None
 		self.beta = None
@@ -37,7 +37,7 @@ class svm:
 		# f(x) = \sum_{i=1}^N \beta_i \mathcal{K}(x_i, x)
 		# \mathcal{K}(x,y) = \frac{ \gamma }{ 2 + e^{\gamma (x-y)} + e^{-\gamma (x-y)} }
 		# NOTE: extend this to multiple dimensions...
-		return ( self.beta * ( self.gamma / 2 + exp( self.gamma * ( self.SV - x ) ) + exp( -self.gamma * ( self.SV - x ) ) ) ).sum()
+		return ( self.beta * ( self.gamma / ( 2 + exp( self.gamma * ( self.SV - x ) ) + exp( -self.gamma * ( self.SV - x ) ) ) ) ).sum()
 	
 	def __iadd__(self, points):
 		# overloaded '+=', used for adding a vector list to the module's data
@@ -64,7 +64,7 @@ class svm:
 		X = self.data
 
 		Fl = ( (X.reshape(N,1,d) > transpose(X.reshape(N,1,d),[1,0,2])).prod(2).sum(1,dtype=float) / N ).reshape([N,1])
-		e = Lambda * sqrt( ( Fl * (1-Fl) ) / len(X) ).reshape([N,1])
+		e = Lambda * sqrt( ( Fl * (1-Fl) ) / N ).reshape([N,1])
 		
 		# K(x,y) = \frac{1}{ 1 + e^{\gamma(x-y) } }
 		# \mathcal{K}(x,y) = \frac{ \gamma }{ 2 + e^{\gamma (x - y) } + e^{-\gamma(x-y) } }
@@ -125,20 +125,23 @@ class svm:
 		
 		self.beta = beta.compressed()
 		self.SV = data.compressed()
+		print "%s SV's found" % len(self.SV)
 		
 def run():
 	mod = svm( array([[gauss(0,1)] for i in range(100) ]).reshape([100,1]) )
 	
-	X = frange(-5.,5.,.25)
-	
+	X = arange(-5.,5.,.05)
 	Y_cmp = [ mod.Pr(x) for x in X ]
 	
-	Y_act = [ scipy.stats.norm.pdf(x) for x in X ]
+	#Y_act = [ scipy.stats.norm.pdf(x) for x in X ]
+
+	n, bins, patches = plt.hist(mod.data, 40, normed=1, facecolor='green', alpha=0.5)
+	bincenters = 0.5*(bins[1:]+bins[:-1])
+	#plt.plot(bincenters, n, 'r', linewidth=1)
 	
-	plot(X,Y_act,label="normal distribution")
-	plot(X,Y_cmp,label="computed distribution")
-	legend()
-	show()
+	plt.plot(X,Y_cmp,'r--')
+	plt.show()
+	
 	
 def help():
 	print __doc__
