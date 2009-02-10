@@ -66,28 +66,19 @@ class svm:
 		X = self.data
 
 		Xcmf = ( (X.reshape(N,1,d) > transpose(X.reshape(N,1,d),[1,0,2])).prod(2).sum(1,dtype=float) / N ).reshape([N,1])
-		e = Lambda * sqrt( (1./N) * ( Xcmf ) * (1.-Xcmf) ).reshape([N,1])
+		sigma = None # q / sqrt(N) - q is 'an appropriate quantile of this distribution', which I think means the value of X for which Xcmf = .5
 		
 		# Xcmf???
 		# CURRENT THEORY: I'm using x where I should be using Ax somewhere (or vica versa).
 		# I'm computing a linear operator, so i may have fucked up the context of my 
 		# variables somewhere.  This would explain the scaling issues...
 		K = self._K( Xcmf.reshape(N,1,d), transpose(Xcmf.reshape(N,1,d), [1,0,2]), gamma )
-		K1 = self._K( Xcmf.reshape(N,1,d), 1.0 , gamma ).reshape([1,N])
-		K0 = self._K( Xcmf.reshape(N,1,d), 0.0 , gamma ).reshape([1,N])
+		Kint = None # (1,N)  This should probably be the the integral of the kernel function 
 
 		alpha = cvxmod.optvar( 'alpha',N,1)
-		alpha.pos = True
-		xipos = cvxmod.optvar( 'xi+',N,1)
-		xipos.pos = True
-		xineg = cvxmod.optvar( 'xi-',N,1)
-		xineg.pos = True
-		objective = cvxmod.minimize( cvxmod.sum(alpha) + C*cvxmod.sum(xipos) + C*cvxmod.sum(xineg) )
+		objective = cvxmod.minimize( cvxopt.transpose(alpha) * K * alpha )
 	
-		ineq1 = cvxopt.matrix( K ) * alpha <= cvxopt.matrix( Xcmf + e ) + xineg
-		ineq2 = cvxopt.matrix( K ) * alpha >= cvxopt.matrix( Xcmf - e ) - xipos
-		eq1 = cvxopt.matrix( K1, (1,N) ) * alpha == cvxopt.matrix(1.0)
-		eq2 = cvxopt.matrix( K0, (1,N) ) * alpha == cvxopt.matrix(0.0)
+		eq1 = cvxmod.max( Xcmf - ( Kint * alpha ) ) = sigma
 		
 
 		
