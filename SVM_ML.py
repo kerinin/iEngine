@@ -29,11 +29,15 @@ class svm:
 		# K(x_i,x_j) = 1/(\sqrt(2 \pi det( \Lambda ) ) ) exp( -.5(x_i - x_j) \Lambda^-1 (x_i - x_j)^T
 		#return ( 1. / ( sqrt( 2. * math.pi * self.L ) ) )* exp( -.5 * ( X - Y ) * self.L * ( X - Y ).T )  
 		#return exp( ( -1.*(X-Y)**2 ) / ( 2*self.L*self.L ) )
+		
+		#NOTE: copy kernel from QP2
 		return ( 1. / ( sqrt( 2. * math.pi * self.L ) ) )* exp( -( X-Y )**2/self.L )
 		
 	def Pr(self,x):
 		# x = [N,d]
 		# \langle y(x) \rangle = \sum_{i=1}{N} w_i K(x,x_i)
+		
+		#NOTE: copy Pr from QP2
 		return ( self.W * self._K(x.T,self.data) ).sum(0)
 	
 	def __iadd__(self, points):
@@ -47,6 +51,8 @@ class svm:
 		# (x_1,F_N(x_1)),...,(x_N,F_N(x_N))
 		# F_N = 1/N \sum_{k=1}^N I(x-x_k)
 		# I = Indicator function (0 if negative, 1 otherwise)
+		
+		#NOTE: copy Xcmf from QP2
 		t = ( ( self.data.T > self.data ).sum(1,dtype=float) / len(self.data) ).reshape( len(self.data), 1)	# Since F is an estimate of the target value t, i'm simply renaming it
 		
 		# Set learning rate \rho and randomly set w_i

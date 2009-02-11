@@ -32,6 +32,8 @@ class svm:
 	
 	def _K(self,X,Y,gamma):
 		# K(x_i,x_j) = 1/(\sqrt(2 \pi det( \Lambda ) ) ) exp( -.5(x_i - x_j) \Lambda^-1 (x_i - x_j)^T
+		
+		#NOTE: copy the kernel from QP2
 		return ( 1 / ( 1+ exp( gamma * ( X - Y ) ) ) ).prod(2) 
 		
 	def Pr(self,x):
@@ -39,6 +41,8 @@ class svm:
 		# \mathcal{K}(x,y) = \frac{ \gamma }{ 2 + e^{\gamma (x-y)} + e^{-\gamma (x-y)} }
 		# NOTE: extend this to multiple dimensions...
 		#return ( self.beta * ( self.gamma / ( 2 + exp( self.gamma * ( self.SV - x ) ) + exp( -self.gamma * ( self.SV - x ) ) ) ) ).sum()
+		
+		#NOTE: copy the Pr from QP2
 		return ( self.beta * self._K( self.SV.reshape(len(self.SV),1,1), x.reshape(1,1,1), self.gamma ) ).sum()
 	
 	def __iadd__(self, points):
