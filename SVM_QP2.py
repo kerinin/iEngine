@@ -46,8 +46,6 @@ class svm:
 		self.data += points
 	
 	def _compute(self):
-		start = datetime.datetime.now()
-		
 		C = self.C
 		gamma = self.gamma
 		(N,d) = self.data.shape
@@ -76,17 +74,12 @@ class svm:
 		
 		# Solve!
 		p = cvxmod.problem( objective = objective, constr = [eq1, eq2] )
-		
-		start = datetime.datetime.now()
 		p.solve()
-		duration = datetime.datetime.now() - start
-		print "optimized in %ss" % (float(duration.microseconds)/1000000)
 		
 		beta = ma.masked_less( alpha.value, 1e-7 )
 		mask = ma.getmask( beta )
 		data = ma.array(X,mask=mask)
 		
-		self.Fl = Xcmf
 		self.beta = beta.compressed().reshape([ 1, len(beta.compressed()) ])
 		self.SV = data.compressed().reshape([len(beta.compressed()),1])
 		print "%s SV's found" % len(self.SV)
