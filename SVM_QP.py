@@ -60,13 +60,27 @@ class svm:
 		K = self._K( X.reshape(N,1,d), transpose(X.reshape(N,1,d), [1,0,2]), gamma ).reshape([N,N])
 		#NOTE: this integral depends on K being the gaussian kernel
 		Kint =  ( (1.0/gamma)*scipy.special.ndtr( (X-X.T)/gamma ) )
-
+		
 		alpha = cvxmod.optvar( 'alpha',N,1)
-		alpha.psd = True
-		objective = cvxmod.minimize( cvxmod.transpose(alpha) * cvxopt.matrix(K, (N,N) ) * alpha )
-	
-		eq1 = cvxmod.max( cvxopt.matrix(Xcmf, (N,1)) - ( cvxopt.matrix(Kint, (N,N)) * alpha ) ) == sigma
+		alpha.pos = True
+		pK = cvxmod.param( 'K',N,N )
+		pK.psd = True
+		pK.value = cvxopt.matrix(K,(N,N) )
+		pKint = cvxmod.param( 'Kint',N,N )
+		pKint.value = cvxopt.matrix(Kint,(N,N))
+		pKint.pos = True
+		pXcmf = cvxmod.param( 'Xcmf',N,1)
+		pXcmf.value = cvxopt.matrix(Xcmf, (N,1))
+		pXcmf.pos = True
+		
+		objective = cvxmod.minimize( cvxmod.atoms.quadform(alpha, pK) )
+		eq1 = pXcmf - ( pKint * alpha ) <= sigma
 		eq2 = cvxmod.sum( alpha ) == 1.0
+		
+		print K
+		print Kint
+		print Xcmf
+		print sigma
 		
 		# Solve!
 		p = cvxmod.problem( objective = objective, constr = [eq1, eq2] )
