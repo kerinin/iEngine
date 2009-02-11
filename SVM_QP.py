@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),gamma =.005):
+	def __init__(self,data=list(),gamma =.025):
 		self.data = data
 		self.Fl = None
 		self.SV = None
@@ -50,7 +50,7 @@ class svm:
 		X = self.data
 
 		Xcmf = ( (X.reshape(N,1,d) > transpose(X.reshape(N,1,d),[1,0,2])).prod(2).sum(1,dtype=float) / N ).reshape([N,1])
-		sigma = median(X) / sqrt(N)
+		sigma = .5 / sqrt(N)
 		
 		K = self._K( X.reshape(N,1,d), transpose(X.reshape(N,1,d), [1,0,2]), gamma ).reshape([N,N])
 		#NOTE: this integral depends on K being the gaussian kernel
@@ -69,9 +69,10 @@ class svm:
 		#pXcmf.pos = True
 		
 		objective = cvxmod.minimize( cvxmod.atoms.quadform(alpha, pK) )
-		eq1 = pXcmf - ( pKint * alpha ) <= sigma
+		eq1 = cvxmod.abs( pXcmf - ( pKint * alpha ) ) <= sigma
 		eq2 = cvxmod.sum( alpha ) == 1.0
 		
+		print K
 		# Solve!
 		p = cvxmod.problem( objective = objective, constr = [eq1, eq2] )
 		
@@ -90,12 +91,12 @@ class svm:
 		print "%s SV's found" % len(self.SV)
 		
 def run():
-	mod = svm( array([[gauss(0,1)] for i in range(100) ]).reshape([100,1]) )
+	mod = svm( array([[gauss(0,1)] for i in range(20) ]).reshape([20,1]) )
 	
 	X = arange(-5.,5.,.05)
 	Y_cmp = [ mod.Pr(x) for x in X ]
 	
-	n, bins, patches = plt.hist(mod.data, 5, normed=1, facecolor='green', alpha=0.5, label='empirical distribution')
+	n, bins, patches = plt.hist(mod.data, 10, normed=1, facecolor='green', alpha=0.5, label='empirical distribution')
 	#bincenters = 0.5*(bins[1:]+bins[:-1])
 	#plt.plot(bincenters, n, 'r', linewidth=1)
 	
