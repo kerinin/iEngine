@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),gamma =.025):
+	def __init__(self,data=list(),gamma =.5):
 		self.data = data
 		self.Fl = None
 		self.SV = None
@@ -50,7 +50,7 @@ class svm:
 		X = self.data
 
 		Xcmf = ( (X.reshape(N,1,d) > transpose(X.reshape(N,1,d),[1,0,2])).prod(2).sum(1,dtype=float) / N ).reshape([N,1])
-		sigma = .5 / sqrt(N)
+		sigma = .75 / sqrt(N)
 		
 		K = self._K( X.reshape(N,1,d), transpose(X.reshape(N,1,d), [1,0,2]), gamma ).reshape([N,N])
 		#NOTE: this integral depends on K being the gaussian kernel
@@ -72,7 +72,6 @@ class svm:
 		eq1 = cvxmod.abs( pXcmf - ( pKint * alpha ) ) <= sigma
 		eq2 = cvxmod.sum( alpha ) == 1.0
 		
-		print K
 		# Solve!
 		p = cvxmod.problem( objective = objective, constr = [eq1, eq2] )
 		
