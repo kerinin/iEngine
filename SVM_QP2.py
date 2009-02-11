@@ -92,9 +92,9 @@ class svm:
 		print "%s SV's found" % len(self.SV)
 		
 def run():
-	mod = svm( array([[gauss(0,1)] for i in range(100) ]).reshape([100,1]) )
+	mod = svm( array([[gauss(0,1)] for i in range(100) ] + [[gauss(8,1)] for i in range(100) ]).reshape([200,1]) )
 	
-	X = arange(-5.,5.,.05)
+	X = arange(-5.,11.,.05)
 	Y_cmp = [ mod.Pr(x) for x in X ]
 	
 	n, bins, patches = plt.hist(mod.data, 10, normed=1, facecolor='green', alpha=0.5, label='empirical distribution')
