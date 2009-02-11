@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),gamma =.5, C=1e10):
+	def __init__(self,data=list(),gamma =1.2, C=1e1):
 		self.data = data
 		self.Fl = None
 		self.SV = None
@@ -92,7 +92,7 @@ class svm:
 		print "%s SV's found" % len(self.SV)
 		
 def run():
-	mod = svm( array([[gauss(0,1)] for i in range(20) ]).reshape([20,1]) )
+	mod = svm( array([[gauss(0,1)] for i in range(100) ]).reshape([100,1]) )
 	
 	X = arange(-5.,5.,.05)
 	Y_cmp = [ mod.Pr(x) for x in X ]
