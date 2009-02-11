@@ -20,13 +20,14 @@ import matplotlib.pyplot as plt
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),gamma =.5):
+	def __init__(self,data=list(),gamma =.5, C=1e10):
 		self.data = data
 		self.Fl = None
 		self.SV = None
 		self.beta = None
 
 		self.gamma = gamma
+		self.C = C
 		
 		self._compute()
 	
@@ -46,7 +47,8 @@ class svm:
 	
 	def _compute(self):
 		start = datetime.datetime.now()
-
+		
+		C = self.C
 		gamma = self.gamma
 		(N,d) = self.data.shape
 		X = self.data
@@ -56,20 +58,20 @@ class svm:
 		
 		K = self._K( X.reshape(N,1,d), transpose(X.reshape(N,1,d), [1,0,2]), gamma ).reshape([N,N])
 		#NOTE: this integral depends on K being the gaussian kernel
-		#NOTE: does this work?  why the X-X.T?
 		Kint =  ( (1.0/gamma)*scipy.special.ndtr( (X-X.T)/gamma ) )
 		
 		alpha = cvxmod.optvar( 'alpha',N,1)
 		alpha.pos = True
 		xi = cvxmod.optvar( 'xi', N,1 )
 		xi.pos = True
+		pXcmf = cvxmod.param( 'Xcmf', N, 1 )
+		pXcmf.pos = True
+		pXcmf.value = cvxopt.matrix( Xcmf, (N,1) )
+		pKint = cvxmod.param( 'Kint', N, N )
+		pKint.value = cvxopt.matrix( Kint, (N,N) )
 		
-		# F(X) = \int_{-\infty}^X \sum_{i=1}^\ell \alpha_i K(t,x_i) dt
-		# F(X) =? \sum_{i=1}^\ell alpha_i \cdot \int_{-\infty}^X K(t,X) dt
-		# F(X) =? alpha.T * Kint
-		
-		objective = cvxmod.minimize( ( alpha ** 2 ) + ( C * cvxmod.sum( xi ) ) )
-		eq1 = cvxmod.abs( ( alpha * Kint ) - pXcmf ) <= sigma + xi
+		objective = cvxmod.minimize( cvxmod.sum( cvxmod.atoms.power(alpha, 2 ) ) + ( C * cvxmod.sum( xi ) ) )
+		eq1 = cvxmod.abs( ( pKint * alpha ) - pXcmf ) <= sigma + xi
 		eq2 = cvxmod.sum( alpha ) == 1.0
 		
 		# Solve!
