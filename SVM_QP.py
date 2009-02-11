@@ -31,15 +31,12 @@ class svm:
 		self._compute()
 	
 	def _K(self,X,Y,gamma):
-		# K(x_i,x_j) = 1/(\sqrt(2 \pi det( \Lambda ) ) ) exp( -.5(x_i - x_j) \Lambda^-1 (x_i - x_j)^T
-		return ( 1 / ( 1+ exp( gamma * ( X - Y ) ) ) ).prod(2) 
+		# Gaussian kernel w/ width gamma
+		# NOTE: this is only applicable to 1d data points
+		return ( 1/( gamma * sqrt( 2*pi ) ) ) * exp( -( ( X - Y )**2 ) / (2 * ( gamma**2 ) ) )
 		
 	def Pr(self,x):
-		# f(x) = \sum_{i=1}^N \beta_i \mathcal{K}(x_i, x)
-		# \mathcal{K}(x,y) = \frac{ \gamma }{ 2 + e^{\gamma (x-y)} + e^{-\gamma (x-y)} }
-		# NOTE: extend this to multiple dimensions...
-		#return ( self.beta * ( self.gamma / ( 2 + exp( self.gamma * ( self.SV - x ) ) + exp( -self.gamma * ( self.SV - x ) ) ) ) ).sum()
-		return ( self.beta * self._K( self.SV.reshape(len(self.SV),1,1), x.reshape(1,1,1), self.gamma ) ).sum()
+		return self.beta.reshape( [1, len(self.beta) ] ) * self._K( self.SV.reshape(len(self.SV),1,1), x.reshape(1,1,1), self.gamma ) 
 	
 	def __iadd__(self, points):
 		# overloaded '+=', used for adding a vector list to the module's data
@@ -49,15 +46,7 @@ class svm:
 	
 	def _compute(self):
 		start = datetime.datetime.now()
-		#UNKNOWN: what are \alpha^*, \xi ???   check Vapnik regression
-		# * used to designate negative values
-		
-		# Given
-		# ( (x_1,F_\ell(x_1),\epsilon_1),...,(x_\ell),F_\ell(x_\ell),\epsilon_\ell) )
-		# \theta(x) = indicator function; 1 if positive, 0 otherwise
-		# F_\ell(x) = \frac{1}{\ell} \sum_{i=1}^{\ell} \theta(x - x_i)		NOTE: if d>1, \theta returns 0 if any dimension less than 0
-		# \epsilon = \lambda \sigma_i = \lambda \sqrt{ \frac{1}{\ell} F_\ell(x_i)(1-F_\ell(x_i) ) }
-		
+
 		Kcount = 1.
 		C = self.C
 		Lambda = self.Lambda
@@ -66,24 +55,21 @@ class svm:
 		X = self.data
 
 		Xcmf = ( (X.reshape(N,1,d) > transpose(X.reshape(N,1,d),[1,0,2])).prod(2).sum(1,dtype=float) / N ).reshape([N,1])
-		sigma = None # q / sqrt(N) - q is 'an appropriate quantile of this distribution', which I think means the value of X for which Xcmf = .5
+		sigma = median(X) / sqrt(N)
 		
-		# Xcmf???
-		# CURRENT THEORY: I'm using x where I should be using Ax somewhere (or vica versa).
-		# I'm computing a linear operator, so i may have fucked up the context of my 
-		# variables somewhere.  This would explain the scaling issues...
-		K = self._K( Xcmf.reshape(N,1,d), transpose(Xcmf.reshape(N,1,d), [1,0,2]), gamma )
-		Kint = None # (1,N)  This should probably be the the integral of the kernel function 
+		K = self._K( X.reshape(N,1,d), transpose(X.reshape(N,1,d), [1,0,2]), gamma ).reshape([N,N])
+		#NOTE: this integral depends on K being the gaussian kernel
+		Kint =  ( (1.0/gamma)*scipy.special.ndtr( (X-X.T)/gamma ) )
 
 		alpha = cvxmod.optvar( 'alpha',N,1)
-		objective = cvxmod.minimize( cvxopt.transpose(alpha) * K * alpha )
+		alpha.psd = True
+		objective = cvxmod.minimize( cvxmod.transpose(alpha) * cvxopt.matrix(K, (N,N) ) * alpha )
 	
-		eq1 = cvxmod.max( Xcmf - ( Kint * alpha ) ) = sigma
-		
-
+		eq1 = cvxmod.max( cvxopt.matrix(Xcmf, (N,1)) - ( cvxopt.matrix(Kint, (N,N)) * alpha ) ) == sigma
+		eq2 = cvxmod.sum( alpha ) == 1.0
 		
 		# Solve!
-		p = cvxmod.problem( objective = objective, constr = [ineq1,ineq2,eq1] )
+		p = cvxmod.problem( objective = objective, constr = [eq1, eq2] )
 		
 		start = datetime.datetime.now()
 		p.solve()
@@ -100,7 +86,7 @@ class svm:
 		print "%s SV's found" % len(self.SV)
 		
 def run():
-	mod = svm( array([[gauss(0,1)] for i in range(100) ]).reshape([100,1]) )
+	mod = svm( array([[gauss(0,1)] for i in range(10) ]).reshape([10,1]) )
 	
 	X = arange(-5.,5.,.05)
 	Y_cmp = [ mod.Pr(x) for x in X ]
