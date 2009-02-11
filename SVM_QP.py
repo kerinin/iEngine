@@ -36,7 +36,7 @@ class svm:
 		return ( 1/( gamma * sqrt( 2*pi ) ) ) * exp( -( ( X - Y )**2 ) / (2 * ( gamma**2 ) ) )
 		
 	def Pr(self,x):
-		return self.beta.reshape( [1, len(self.beta) ] ) * self._K( self.SV.reshape(len(self.SV),1,1), x.reshape(1,1,1), self.gamma ) 
+		return numpy.dot(self.beta,self.SV)[0][0]
 	
 	def __iadd__(self, points):
 		# overloaded '+=', used for adding a vector list to the module's data
@@ -77,11 +77,6 @@ class svm:
 		eq1 = pXcmf - ( pKint * alpha ) <= sigma
 		eq2 = cvxmod.sum( alpha ) == 1.0
 		
-		print K
-		print Kint
-		print Xcmf
-		print sigma
-		
 		# Solve!
 		p = cvxmod.problem( objective = objective, constr = [eq1, eq2] )
 		
@@ -95,9 +90,10 @@ class svm:
 		data = ma.array(X,mask=mask)
 		
 		self.Fl = Xcmf
-		self.beta = beta.compressed()
-		self.SV = data.compressed()
+		self.beta = beta.compressed().reshape([ 1, len(beta.compressed()) ])
+		self.SV = data.compressed().reshape([len(beta.compressed()),1])
 		print "%s SV's found" % len(self.SV)
+		print self.SV
 		
 def run():
 	mod = svm( array([[gauss(0,1)] for i in range(10) ]).reshape([10,1]) )
@@ -110,10 +106,10 @@ def run():
 	#plt.plot(bincenters, n, 'r', linewidth=1)
 	
 	#plt.plot( mod.SV, [ mod.Pr(x ) for x in  mod.SV ], 'o' )
-	
+	#print Y_cmp
 	plt.plot(mod.data,mod.Fl, 'o' )
 	plt.plot(X,Y_cmp, 'r--')
-	#plt.show()
+	plt.show()
 	
 	
 def help():
