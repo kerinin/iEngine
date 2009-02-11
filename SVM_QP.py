@@ -18,14 +18,12 @@ import matplotlib.pyplot as plt
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C =1., Lambda = 1., gamma =.25):
+	def __init__(self,data=list(),gamma =.005):
 		self.data = data
 		self.Fl = None
 		self.SV = None
 		self.beta = None
-		
-		self.C = C
-		self.Lambda = Lambda
+
 		self.gamma = gamma
 		
 		self._compute()
@@ -36,7 +34,7 @@ class svm:
 		return ( 1/( gamma * sqrt( 2*pi ) ) ) * exp( -( ( X - Y )**2 ) / (2 * ( gamma**2 ) ) )
 		
 	def Pr(self,x):
-		return numpy.dot(self.beta,self.SV)[0][0]
+		return numpy.dot(self.beta, self._K(self.SV,x,self.gamma) )[0][0]
 	
 	def __iadd__(self, points):
 		# overloaded '+=', used for adding a vector list to the module's data
@@ -47,9 +45,6 @@ class svm:
 	def _compute(self):
 		start = datetime.datetime.now()
 
-		Kcount = 1.
-		C = self.C
-		Lambda = self.Lambda
 		gamma = self.gamma
 		(N,d) = self.data.shape
 		X = self.data
@@ -68,10 +63,10 @@ class svm:
 		pK.value = cvxopt.matrix(K,(N,N) )
 		pKint = cvxmod.param( 'Kint',N,N )
 		pKint.value = cvxopt.matrix(Kint,(N,N))
-		pKint.pos = True
+		#pKint.pos = True
 		pXcmf = cvxmod.param( 'Xcmf',N,1)
 		pXcmf.value = cvxopt.matrix(Xcmf, (N,1))
-		pXcmf.pos = True
+		#pXcmf.pos = True
 		
 		objective = cvxmod.minimize( cvxmod.atoms.quadform(alpha, pK) )
 		eq1 = pXcmf - ( pKint * alpha ) <= sigma
@@ -93,22 +88,21 @@ class svm:
 		self.beta = beta.compressed().reshape([ 1, len(beta.compressed()) ])
 		self.SV = data.compressed().reshape([len(beta.compressed()),1])
 		print "%s SV's found" % len(self.SV)
-		print self.SV
 		
 def run():
-	mod = svm( array([[gauss(0,1)] for i in range(10) ]).reshape([10,1]) )
+	mod = svm( array([[gauss(0,1)] for i in range(100) ]).reshape([100,1]) )
 	
 	X = arange(-5.,5.,.05)
 	Y_cmp = [ mod.Pr(x) for x in X ]
 	
-	#n, bins, patches = plt.hist(mod.data, 40, normed=1, facecolor='green', alpha=0.5)
+	n, bins, patches = plt.hist(mod.data, 5, normed=1, facecolor='green', alpha=0.5, label='empirical distribution')
 	#bincenters = 0.5*(bins[1:]+bins[:-1])
 	#plt.plot(bincenters, n, 'r', linewidth=1)
 	
-	#plt.plot( mod.SV, [ mod.Pr(x ) for x in  mod.SV ], 'o' )
-	#print Y_cmp
-	plt.plot(mod.data,mod.Fl, 'o' )
-	plt.plot(X,Y_cmp, 'r--')
+	plt.plot( mod.SV, [ mod.Pr(x ) for x in  mod.SV ], 'o', label="SV's" )
+	#plt.plot(mod.data,mod.Fl, 'o',label='empirical CDF')
+	plt.plot(X,Y_cmp, 'r--', label='computed PDF')
+	plt.legend()
 	plt.show()
 	
 	
