@@ -56,6 +56,7 @@ class svm:
 		
 		K = self._K( X.reshape(N,1,d), transpose(X.reshape(N,1,d), [1,0,2]), gamma ).reshape([N,N])
 		#NOTE: this integral depends on K being the gaussian kernel
+		#NOTE: does this work?  why the X-X.T?
 		Kint =  ( (1.0/gamma)*scipy.special.ndtr( (X-X.T)/gamma ) )
 		
 		alpha = cvxmod.optvar( 'alpha',N,1)
@@ -63,8 +64,12 @@ class svm:
 		xi = cvxmod.optvar( 'xi', N,1 )
 		xi.pos = True
 		
+		# F(X) = \int_{-\infty}^X \sum_{i=1}^\ell \alpha_i K(t,x_i) dt
+		# F(X) =? \sum_{i=1}^\ell alpha_i \cdot \int_{-\infty}^X K(t,X) dt
+		# F(X) =? alpha.T * Kint
+		
 		objective = cvxmod.minimize( ( alpha ** 2 ) + ( C * cvxmod.sum( xi ) ) )
-		eq1 = cvxmod.abs( F(X) - pXcmf ) <= sigma + xi
+		eq1 = cvxmod.abs( ( alpha * Kint ) - pXcmf ) <= sigma + xi
 		eq2 = cvxmod.sum( alpha ) == 1.0
 		
 		# Solve!
