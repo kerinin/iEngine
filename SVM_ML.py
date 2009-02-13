@@ -1,5 +1,7 @@
 #! /usr/bin/env python
 
+# This is based on "Mean Field Theory for Density Estimation Using Support Vector Machines"
+
 import sys, getopt, math, datetime, os, cmath
 from random import gauss
 
@@ -14,7 +16,15 @@ from pylab import *
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C = .01, epsilon =.01, rho = 1e-2, L = 1):
+	def __init__(self,data=list(),C = .01, epsilon =.01, rho = 1e-2, L = 1, M = 10):
+	# create SVM algorithm
+	#
+	# @param C		??
+	# @param epsilon	Loss function width - controls sparsity of solution.  (Relative to input covariance values)
+	# @param rho		Learning step multiplier
+	# @param L		Kernel width parameter
+	# @param M		Number of 'inner loop' iterations per 'outer loop' iteration
+	
 		self.data = data
 		self.W = None
 		self.SV = None
@@ -23,6 +33,11 @@ class svm:
 		self.epsilon = epsilon
 		self.rho = rho
 		self.L = L
+		self.M = 10
+		
+		self.K = None
+		self.sigma2 = None
+		self.t = None
 		
 		self._compute()
 	
@@ -30,9 +45,12 @@ class svm:
 		# kernel from QP2
 		return ( 1. /( self.L * sqrt( 2. *pi ) ) ) * exp( -( ( X - Y )**2 ) / (2. * ( self.L**2 ) ) )
 		
-	def Pr(self,x):
+	def Pr(self,x=None):
 		# Pr from QP2
-		return numpy.dot(self.W.T, self._K(self.SV,x) )
+		if x != None:
+			return numpy.ma.dot(self._K(self.data.T.compressed(),x),self.W.T.compressed() )
+		else:
+			return numpy.ma.dot(self.W.T, self.K )
 	
 	def __iadd__(self, points):
 		# overloaded '+=', used for adding a vector list to the module's data
@@ -46,53 +64,53 @@ class svm:
 		# F_N = 1/N \sum_{k=1}^N I(x-x_k)
 		# I = Indicator function (0 if negative, 1 otherwise)
 		
-		X = self.data
-		self.SV = self.data
+		X = numpy.ma.array(self.data)
 		(N,d) = self.data.shape
 		
 		#NOTE: copy Xcmf from QP2
-		t = ( (X.reshape(N,1,d) > transpose(X.reshape(N,1,d),[1,0,2])).prod(2).sum(1,dtype=float) / N ).reshape([N,1])
+		self.t = ( (X.reshape(N,1,d) > transpose(X.reshape(N,1,d),[1,0,2])).prod(2).sum(1,dtype=float) / N ).reshape([N,1])
 		
 		# Set learning rate \rho and randomly set w_i
-		self.W = ( numpy.random.rand( len(self.data), 1) * .9 ) + .1
+		self.W = ( numpy.ma.array( numpy.random.rand( len(self.data), 1) * .9 ) ) + .1
 		
 		# Calculate covariance matrix K and let \sigma_i^2 = K_{ii}
 		# \Lambda = variable (gamma)
 		# \sigma = K_{ii}
-		K = self._K(self.data, self.data.T)
-		sigma2 = K.diagonal().reshape( len(self.data), 1)
+		self.K = self._K(self.data, self.data.T)
+		self.sigma2 = self.K.diagonal().reshape( len(self.data), 1)
 
 		# Solve!
-		self.optimize(K)
+		self.optimize()
 		
 		# Cleanup from QP2
-		W = ma.masked_less( self.W, 1e-7 )
-		mask = ma.getmask( W )
-		data = ma.array(X,mask=mask)
+		self.W = numpy.ma.masked_less( self.W, 1e-7 )
+		mask = numpy.ma.getmask( self.W )
+		self.data = numpy.ma.array(X,mask=mask)
 		
-		self.W = W.compressed().reshape([ 1, len(W.compressed()) ])
-		self.SV = data.compressed().reshape([len(W.compressed()),1])
-		print "%s SV's found" % len(self.SV)
+		print "%s SV's found" % self.data.count()
 		
 	def inner(self):
 		# Inner Loop
+		t = self.t
+		sigma2 = self.sigma2
+		
 		# yX = \langle y(x) \rangle = \sum_{i=1}^N w_i K(x, x_i )
-		yX = self.Pr(self.data).reshape([len(self.data),1])
+		yX = self.Pr().reshape([len(self.data),1])
 		
 		#yX = array( [ self.Pr(x) for x in self.data ] ).reshape([len(self.data),1])
 		
 		# yXi = \langle y(s) \rangle_i = yX - \sigma_i^2 w_i
-		yXi = yX - ( sigma2 * self.W )
+		yXi = yX - ( self.sigma2 * self.W )
 	
 		# Fi = C/2 exp( C/2 ( 2yXi - 2t_i + 2\epsilon + C \sigma_i^2 ) )
 		#	* ( 1 - erf( ( yXi - t_i + \epsilon + C \sigma_i^2 ) / sqrt( 2 \sigma_i^2 ) )
 		#	- C/2 exp( C/2 ( -2yXi + 2 t_i + 2 \epsilon + C \sigma_i^2 ) )
 		#	* ( 1 - erf( ( - yXi + t_i + \epsilon + C \sigma_i^2 ) / sqrt( 2 \sigma_i^2 ) )
 		Fi = (
-			self.C/2. * exp( (self.C/2.) * ( ( 2. * yXi ) - ( 2. * t ) + ( 2. * self.epsilon ) + ( self.C * sigma2 ) ) ) 
-			* ( 1. - scipy.special.erf( ( yXi - t + self.epsilon + ( self.C * sigma2 ) ) / sqrt( 2. * sigma2 ) ) )
-			- self.C/2. * exp( (self.C/2.) * ( ( -2. * yXi ) + ( 2. * t ) + ( 2. * self.epsilon ) + ( self.C * sigma2 ) ) )
-			* ( 1. - scipy.special.erf( ( -yXi + t + self.epsilon + ( self.C * sigma2 ) ) / sqrt(2. * sigma2 ) ) )
+			( ( self.C/2. ) * exp( (self.C/2.) * ( ( 2. * yXi ) - ( 2. * t ) + ( 2. * self.epsilon ) + ( self.C * sigma2 ) ) ) 
+			* ( 1. - scipy.special.erf( ( yXi - t + self.epsilon + ( self.C * sigma2 ) ) / sqrt( 2. * sigma2 ) ) ) )
+			- ( ( self.C/2. ) * exp( (self.C/2.) * ( ( -2. * yXi ) + ( 2. * t ) + ( 2. * self.epsilon ) + ( self.C * sigma2 ) ) )
+			* ( 1. - scipy.special.erf( ( -yXi + t + self.epsilon + ( self.C * sigma2 ) ) / sqrt(2. * sigma2 ) ) ) )
 			)
 			
 		# Gi = 1/2 erf( ( t_i - yXi + \epsilon ) / sqrt( s \sigma_i^2 ) )
@@ -102,12 +120,12 @@ class svm:
 		#	+ 1/2 exp( C/2 ( -2 yXi - 2 t_i + 2 \epsilon + C \sigma_i^2 ) )
 		#	* ( 1 - erf( ( yXi - t_i + \epsilon + \C \sigma_i^2 ) / sqrt( 2 \sigma_i^2 ) )
 		Gi = (
-			.5 * scipy.special.erf( ( t - yXi + self.epsilon ) / sqrt( 2. * sigma2 ) )
-			- .5 * scipy.special.erf( ( t - yXi - self.epsilon ) / sqrt( 2. * sigma2 ) )
-			+ .5 * exp( (self.C/2.) * ( ( 2. * yXi ) - ( 2. * t ) + ( 2. * self.epsilon ) + ( self.C * sigma2 ) ) )
-			* ( 1. - scipy.special.erf( ( yXi - t + self.epsilon + ( self.C * sigma2 ) ) / sqrt( 2. * sigma2 ) ) )
-			+ .5 * exp( (self.C/2.) * ( ( -2. * yXi ) + ( 2. * t ) + ( 2. * self.epsilon ) + ( self.C * sigma2 ) ) )
-			* ( 1. - scipy.special.erf( ( -yXi + t + self.epsilon + ( self.C * sigma2 ) ) / sqrt( 2. * sigma2 ) ) )
+			( .5 * scipy.special.erf( ( t - yXi + self.epsilon ) / sqrt( 2. * sigma2 ) ) )
+			- ( .5 * scipy.special.erf( ( t - yXi - self.epsilon ) / sqrt( 2. * sigma2 ) ) )
+			+ ( ( .5 * exp( (self.C/2.) * ( ( 2. * yXi ) - ( 2. * t ) + ( 2. * self.epsilon ) + ( self.C * sigma2 ) ) ) )
+			* ( 1. - scipy.special.erf( ( yXi - t + self.epsilon + ( self.C * sigma2 ) ) / sqrt( 2. * sigma2 ) ) ) )
+			+ ( ( .5 * exp( (self.C/2.) * ( ( -2. * yXi ) + ( 2. * t ) + ( 2. * self.epsilon ) + ( self.C * sigma2 ) ) ) )
+			* ( 1. - scipy.special.erf( ( -yXi + t + self.epsilon + ( self.C * sigma2 ) ) / sqrt( 2. * sigma2 ) ) ) )
 			)
 	
 		# w_i = w_i + \rho ( ( F_i / G_i ) - w_i )
@@ -116,17 +134,18 @@ class svm:
 		self.W += W_delta
 		return ( t, yXi, Gi, W_delta )
 	
-	def optimize(self,K):
+	def optimize(self):
 		# Outer Loop
 		while True:
+			sigma2 = self.sigma2
 			
-			for i in range(2):
+			for i in range(self.M):
 				self.inner()
 			
 			(t,yXi,Gi,W_delta) = self.inner()
 			
 			# IG_i = 1/2 erf( ( t_i - \leftangle y(x_i) \rightangle_i + \epsilon ) / sqrt( 2 \sigma_i^2 ) ) - 1/2 erf( ( t_i - \leftangle y(x_i) \rightangle_i - \epsilon ) )
-			IG = .5 * scipy.special.erf( ( t - yXi + self.epsilon ) / sqrt( 2 * sigma2 ) ) - .5 * scipy.special.erf( ( t - yXi - self.epsilon ) / sqrt( 2 * sigma2 ) )
+			IG = ( .5 * scipy.special.erf( ( t - yXi + self.epsilon ) / sqrt( 2 * sigma2 ) ) ) - ( .5 * scipy.special.erf( ( t - yXi - self.epsilon ) / sqrt( 2 * sigma2 ) ) )
 			
 			# Z = C^2 - w_i^2 - \frac{ w_i \leftangle y(x_i) \rightangle_i  + \sigma_i^2 C^2 + IG_i }{ \sigma_i^2 G( \leftangle y(x_i) \rightangle_i, \sigma_i^2 ) }
 			Z = ( self.C ** 2 ) - ( self.W ** 2 ) - ( ( ( self.W * yXi ) + ( sigma2 * ( self.C ** 2 ) ) + IG ) / ( sigma2 * Gi ) )
@@ -135,12 +154,12 @@ class svm:
 			Sigma_i = -sigma2 - ( 1 / Z )
 			
 			# \Sigma = diag( \Sigma_1,...,\Sigma_N )
-			Sigma = diag( Sigma_i.reshape([len(self.data),] ) )
+			Sigma = numpy.ma.array( numpy.diag( Sigma_i.reshape([len(self.data),] ) ) )
 			
 			# sigma_i^2 = \frac{ 1 } { [ ( \Sigma + K ) ^{-1} ]_{ii} } - \Sigma_i
-			sigma2 = ( 1 / ( 1 / ( Sigma + K ) ).diagonal().reshape([len(self.data),1]) ) - Sigma_i
+			self.sigma2 = ( 1 / ( 1 / ( Sigma + self.K ) ).diagonal().reshape([len(self.data),1]) ) - Sigma_i
 			
-			if absolute(W_delta.max()) < .0005:
+			if absolute(W_delta.max()) < 1e-5:
 				break
 			else:
 				print "Cumulative adjustment of Coefficients: %s" % absolute(W_delta).sum()
@@ -148,16 +167,16 @@ class svm:
 def run():
 	mod = svm( array([[gauss(0,1)] for i in range(100) ]).reshape([100,1]) )
 	
-	X = frange(-5.,5.,.25)
+	X = arange(-5.,5.,.25)
 	
-	Y_cmp = mod.Pr(array(X).reshape([len(X),1]))
+	Y_cmp = mod.Pr(numpy.ma.array(X).reshape([len(X),1]))
 	
 	Y_act = [ scipy.stats.norm.pdf(x) for x in X ]
 	
 	plot(X,Y_act,label="normal distribution")
 	plot(X,Y_cmp,label="computed distribution")
 	legend()
-	#show()
+	show()
 	
 def help():
 	print __doc__
