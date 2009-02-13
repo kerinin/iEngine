@@ -44,8 +44,8 @@ class svm:
 		# K(x_i,x_j) = 1/(\sqrt(2 \pi det( \Lambda ) ) ) exp( -.5(x_i - x_j) \Lambda^-1 (x_i - x_j)^T
 		
 		#NOTE: copy the kernel from QP2
-		#NOTE: this needs to treat gamma as a list
-		return ( 1 / ( 1+ exp( gamma * ( X - Y ) ) ) ).prod(2) 
+		diff = X - Y
+		return [ ( ( 1/( gi * sqrt( 2*pi ) ) ) * exp( -( ( diff )**2 ) / (2 * ( gi**2 ) ) ) ).prod(2) for gi in list(gamma) ]
 		
 	def Pr(self,x):
 		# f(x) = \sum_{i=1}^N \beta_i \mathcal{K}(x_i, x)
@@ -73,15 +73,16 @@ class svm:
 		# F_\ell(x) = \frac{1}{\ell} \sum_{i=1}^{\ell} \theta(x - x_i)		NOTE: if d>1, \theta returns 0 if any dimension less than 0
 		# \epsilon = \lambda \sigma_i = \lambda \sqrt{ \frac{1}{\ell} F_\ell(x_i)(1-F_\ell(x_i) ) }
 		
-		Kcount = 1.
 		C = self.C
 		Lambda = self.Lambda
 		gamma = self.gamma
+		Kcount = len( gamma )
 		(N,d) = self.data.shape
 		X = self.data
 		
 		#Constructs an array of gammas, correlated for alphas of different widths
-		gamma = array( [ gamma[i] * N for i in range(N) ] ).reshape([N,1])
+		gamma = array( [ [gamma[i],] * N for i in range( Kcount ) ] ).reshape([ N * Kcount, 1] )
+		print gamma.shape
 		
 		# CMF of observations X
 		Xcmf = ( (X.reshape(N,1,d) > transpose(X.reshape(N,1,d),[1,0,2])).prod(2).sum(1,dtype=float) / N ).reshape([N,1])
@@ -91,20 +92,30 @@ class svm:
 		
 		K = self._K( Xcmf.reshape(N,1,d), transpose(Xcmf.reshape(N,1,d), [1,0,2]), gamma )
 
-		alpha = cvxmod.optvar( 'alpha',N,1)
-		alpha.pos = True
-		xipos = cvxmod.optvar( 'xi+',N,1)
+
+		xipos = cvxmod.optvar( 'xi+', N,1)
 		xipos.pos = True
-		xineg = cvxmod.optvar( 'xi-',N,1)
+		xineg = cvxmod.optvar( 'xi-', N,1)
 		xineg.pos = True
-		pGamma = cvxmod.param( 'gamma',N,1 )
-		pGamma.value = cvxopt.matrix(gamma, (N,1) )
+			
+		alphas = list()
+		expr = ( C*cvxmod.sum(xipos) ) + ( C*cvxmod.sum(xineg) )
+		ineq = cvxmod.expression()
+		eq = cvxmod.expression()
+		for i in range( Kcount ):
+			alpha = cvxmod.optvar( 'alpha(%s)' % i, N,1)
+			alpha.pos = True
+			
+			alphas.append( alpha )
+			expr += ( (1/gamma[i]) * cvxmod.sum( alpha ) )
+			ineq += ( cvxpot.matrix( K[i] ) * alpha )
+			eq += cvxmod.sum( alpha )
+			
+		objective = cvxmod.minimize( expr )
 		
-		objective = cvxmod.minimize( cvxmod.sum( (1/pGamma) * alpha) + ( C*cvxmod.sum(xipos) ) + ( C*cvxmod.sum(xineg) ) )
-	
-		ineq1 = cvxopt.matrix( K ) * alpha <= cvxopt.matrix( Xcmf + e ) + xineg
-		ineq2 = cvxopt.matrix( K ) * alpha >= cvxopt.matrix( Xcmf - e ) - xipos
-		eq1 = cvxmod.sum( pAlpha ) == cvxopt.matrix( 1.0 )
+		ineq1 = ineq <= cvxopt.matrix( numpy.vstack( [ Xcmf + e for i in range(Kcount) ] ) ) + xineg
+		ineq2 = ineq >= cvxopt.matrix( numpy.vstack( [ Xcmf + e for i in range(Kcount) ] ) ) - xipos
+		eq1 = eq == cvxopt.matrix( 1.0 )
 		
 
 		# Solve!
@@ -125,7 +136,7 @@ class svm:
 		print "%s SV's found" % len(self.SV)
 		
 def run():
-	mod = svm( array([[gauss(0,1)] for i in range(100) ]).reshape([100,1]) )
+	mod = svm( array([[gauss(0,1)] for i in range(10) ]).reshape([10,1]) )
 	
 	X = arange(-5.,5.,.05)
 	Y_cmp = [ mod.Pr(x) for x in X ]
