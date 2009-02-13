@@ -47,7 +47,7 @@ class svm:
 		
 	def Pr(self,x):
 		diff = self.SV - x
-		return array( [ ( self.beta * ( self.gi / ( 2 + exp( self.gi * diff ) + exp( -self.gi * diff ) ) ) ).sum() for gi in gamma ] ).sum()
+		return array( [ ( self.beta * ( -gi / ( 2 + exp( gi * diff ) + exp( -gi * diff ) ) ) ).sum() for gi in self.gamma ] ).sum()
 		
 	def __iadd__(self, points):
 		# overloaded '+=', used for adding a vector list to the module's data
@@ -80,7 +80,11 @@ class svm:
 		e = Lambda * sqrt( (1./N) * ( Xcmf ) * (1.-Xcmf) ).reshape([N,1])
 		
 		K = self._K( Xcmf.reshape(N,1,d), transpose(Xcmf.reshape(N,1,d), [1,0,2]), gamma )
-
+		
+		print K[0].shape
+		print e.shape
+		print Xcmf.shape
+		print X.shape
 
 		xipos = cvxmod.optvar( 'xi+', N,1)
 		xipos.pos = True
@@ -91,14 +95,14 @@ class svm:
 		expr = ( C*cvxmod.sum(xipos) ) + ( C*cvxmod.sum(xineg) )
 		ineq = 0
 		eq = 0
-		print K[0].shape
+		
 		for i in range( Kcount ):
 			alpha = cvxmod.optvar( 'alpha(%s)' % i, N,1)
 			alpha.pos = True
 			
 			alphas.append( alpha )
 			expr += ( float(1./gamma[i]) * cvxmod.sum( alpha ) )
-			ineq += ( cvxopt.matrix( K[i], (N,1) ) * alpha )
+			ineq += ( cvxopt.matrix( K[i], (N,N) ) * alpha )
 			eq += cvxmod.sum( alpha )
 			
 		objective = cvxmod.minimize( expr )
