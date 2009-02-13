@@ -16,14 +16,16 @@ from pylab import *
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C = .01, epsilon =.01, rho = 1e-2, L = 1, M = 10):
+	def __init__(self,data=list(),C = .2, epsilon =1e-4,L = .5,  rho = 5e-3, M = 20, term = 1e-6):
 	# create SVM algorithm
 	#
-	# @param C		??
-	# @param epsilon	Loss function width - controls sparsity of solution.  (Relative to input covariance values)
+	# @param C		SV tradeoff (higher for less SV, less accuracy)
+	# @param epsilon	??
+	# @param L		Solution Smoothness, in std deviation (Kernel width parameter)
+	
 	# @param rho		Learning step multiplier
-	# @param L		Kernel width parameter
 	# @param M		Number of 'inner loop' iterations per 'outer loop' iteration
+	# @param term	Maximum adjustment of W before termination
 	
 		self.data = data
 		self.W = None
@@ -34,10 +36,13 @@ class svm:
 		self.rho = rho
 		self.L = L
 		self.M = 10
+		self.term = term
 		
 		self.K = None
 		self.sigma2 = None
 		self.t = None
+		
+		self.optstep = list()
 		
 		self._compute()
 	
@@ -83,7 +88,6 @@ class svm:
 		self.optimize()
 		
 		# Cleanup from QP2
-		self.W = numpy.ma.masked_less( self.W, 1e-7 )
 		mask = numpy.ma.getmask( self.W )
 		self.data = numpy.ma.array(X,mask=mask)
 		
@@ -130,8 +134,8 @@ class svm:
 	
 		# w_i = w_i + \rho ( ( F_i / G_i ) - w_i )
 		W_delta = self.rho * ( Fi / Gi - self.W )
-	
-		self.W += W_delta
+		self.W = numpy.ma.masked_less( self.W + W_delta, 1e-8 )
+
 		return ( t, yXi, Gi, W_delta )
 	
 	def optimize(self):
@@ -159,24 +163,37 @@ class svm:
 			# sigma_i^2 = \frac{ 1 } { [ ( \Sigma + K ) ^{-1} ]_{ii} } - \Sigma_i
 			self.sigma2 = ( 1 / ( 1 / ( Sigma + self.K ) ).diagonal().reshape([len(self.data),1]) ) - Sigma_i
 			
-			if absolute(W_delta.max()) < 1e-5:
+			max = absolute(W_delta.max())
+			if max < self.term:
 				break
 			else:
-				print "Cumulative adjustment of Coefficients: %s" % absolute(W_delta).sum()
+				print "Max adjustment of Coefficients: %s" % max
+				self.optstep.append( max )
 				
 		self.W /= self.W.sum()
 
 def run():
-	mod = svm( array([[gauss(0,1)] for i in range(800) ]).reshape([800,1]) )
-	
-	X = arange(-5.,5.,.25)
-	
-	n, bins, patches = plt.hist(mod.data, 10, normed=1, facecolor='green', alpha=0.5, label='empirical distribution')
-	Y_cmp = mod.Pr(numpy.ma.array(X).reshape([len(X),1]))
-	
-	plot(X,Y_cmp, 'r--', label="computed distribution")
+	mod = svm( array([[gauss(0,1)] for i in range(50) ] + [[gauss(8,1)] for i in range(50) ]).reshape([100,1]) )
 		
-	legend()
+	fig = plt.figure()
+	a = fig.add_subplot(2,2,1)
+	
+	start = -5.
+	end = 12.
+	X = arange(start,end,.25)
+	n, bins, patches = a.hist(mod.data, 20, normed=1, facecolor='green', alpha=0.5, label='empirical distribution')
+	Y_cmp = mod.Pr(numpy.ma.array(X).reshape([len(X),1]))
+	a.plot(X,Y_cmp, 'r--', label="computed distribution")
+	a.set_title("Computed vs empirical distribution")
+		
+	b = fig.add_subplot(2,2,2)
+	b.hist(mod.W.compressed(), 20, normed=1, facecolor='red', alpha=0.5, label='Weight distribution')
+	b.set_title("Weight distribution of %s SV's" % mod.W.count() )
+	
+	c = fig.add_subplot(2,2,3)
+	c.plot(mod.optstep)
+	c.set_title("optimization steps")
+	
 	show()
 	
 def help():
