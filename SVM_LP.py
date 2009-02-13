@@ -32,7 +32,7 @@ class svm:
 		self.data = data
 		self.Fl = None
 		self.SV = None
-		self.beta = None
+		self.betas = None
 		
 		self.C = C
 		self.Lambda = Lambda
@@ -46,8 +46,8 @@ class svm:
 		return [ ( 1 / ( 1 + exp( -gi * diff ) ) ).reshape(N,N) for gi in gamma ]
 		
 	def Pr(self,x):
-		diff = self.SV - x
-		return array( [ ( self.beta * ( -gi / ( 2 + exp( gi * diff ) + exp( -gi * diff ) ) ) ).sum() for gi in self.gamma ] ).sum()
+		diff = self.data - x
+		return array( [ ( self.betas[i] * ( -self.gamma[i] / ( 2 + exp( self.gamma[i] * diff ) + exp( -self.gamma[i] * diff ) ) ) ).sum() for i in range(len(self.gamma)) ] ).sum()
 		
 	def __iadd__(self, points):
 		# overloaded '+=', used for adding a vector list to the module's data
@@ -80,11 +80,6 @@ class svm:
 		e = Lambda * sqrt( (1./N) * ( Xcmf ) * (1.-Xcmf) ).reshape([N,1])
 		
 		K = self._K( Xcmf.reshape(N,1,d), transpose(Xcmf.reshape(N,1,d), [1,0,2]), gamma )
-		
-		print K[0].shape
-		print e.shape
-		print Xcmf.shape
-		print X.shape
 
 		xipos = cvxmod.optvar( 'xi+', N,1)
 		xipos.pos = True
@@ -123,14 +118,11 @@ class svm:
 		#betas = [ ma.masked_less( alpha.value, 1e-7 ) for alpha in alphas ]
 		#masks = [ ma.getmask( beta ) for beta in betas ]
 		#data = ma.array(X,mask=mask)
+			
+		self.Fl = Xcmf
+		self.betas = [ ma.masked_less( alpha.value, 1e-7) for alpha in alphas ]
 		
-		for alpha in alphas:
-			print len( ma.masked_less( alpha.value, 1e-7 ).compressed() )
-		
-		#self.Fl = Xcmf
-		#self.beta = beta.compressed()
-		#self.SV = data.compressed()
-		#print "%s SV's found" % len(self.SV)
+		print "SV's found: %s" % [ len( beta.compressed()) for beta in self.betas ]
 		
 def run():
 	mod = svm( array([[gauss(0,1)] for i in range(10) ]).reshape([10,1]) )
