@@ -28,7 +28,7 @@ import matplotlib.pyplot as plt
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C =1., Lambda = 1., gamma =[1./2, 1./4, 1./8, 1./16] ):
+	def __init__(self,data=list(),C=1., Lambda = 1., gamma =[1./2, 1./4, 1./8, 1./16] ):
 		self.data = data
 		self.Fl = None
 		self.SV = None
@@ -120,14 +120,17 @@ class svm:
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % (float(duration.microseconds)/1000000)
 		
-		beta = ma.masked_less( alpha.value, 1e-7 )
-		mask = ma.getmask( beta )
-		data = ma.array(X,mask=mask)
+		#betas = [ ma.masked_less( alpha.value, 1e-7 ) for alpha in alphas ]
+		#masks = [ ma.getmask( beta ) for beta in betas ]
+		#data = ma.array(X,mask=mask)
 		
-		self.Fl = Xcmf
-		self.beta = beta.compressed()
-		self.SV = data.compressed()
-		print "%s SV's found" % len(self.SV)
+		for alpha in alphas:
+			print len( ma.masked_less( alpha.value, 1e-7 ).compressed() )
+		
+		#self.Fl = Xcmf
+		#self.beta = beta.compressed()
+		#self.SV = data.compressed()
+		#print "%s SV's found" % len(self.SV)
 		
 def run():
 	mod = svm( array([[gauss(0,1)] for i in range(10) ]).reshape([10,1]) )
