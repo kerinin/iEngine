@@ -41,21 +41,14 @@ class svm:
 		self._compute()
 	
 	def _K(self,X,Y,gamma):
-		# K(x_i,x_j) = 1/(\sqrt(2 \pi det( \Lambda ) ) ) exp( -.5(x_i - x_j) \Lambda^-1 (x_i - x_j)^T
-		
-		#NOTE: copy the kernel from QP2
 		diff = X - Y
-		return [ ( ( 1/( gi * sqrt( 2*pi ) ) ) * exp( -( ( diff )**2 ) / (2 * ( gi**2 ) ) ) ).prod(2) for gi in list(gamma) ]
+		N = len(X)
+		return [ ( 1 / ( 1 + exp( -gi * diff ) ) ).reshape(N,N) for gi in gamma ]
 		
 	def Pr(self,x):
-		# f(x) = \sum_{i=1}^N \beta_i \mathcal{K}(x_i, x)
-		# \mathcal{K}(x,y) = \frac{ \gamma }{ 2 + e^{\gamma (x-y)} + e^{-\gamma (x-y)} }
-		# NOTE: extend this to multiple dimensions...
-		#return ( self.beta * ( self.gamma / ( 2 + exp( self.gamma * ( self.SV - x ) ) + exp( -self.gamma * ( self.SV - x ) ) ) ) ).sum()
+		diff = self.SV - x
+		return array( [ ( self.beta * ( self.gi / ( 2 + exp( self.gi * diff ) + exp( -self.gi * diff ) ) ) ).sum() for gi in gamma ] ).sum()
 		
-		#NOTE: copy the Pr from QP2
-		return ( self.beta * self._K( self.SV.reshape(len(self.SV),1,1), x.reshape(1,1,1), self.gamma ) ).sum()
-	
 	def __iadd__(self, points):
 		# overloaded '+=', used for adding a vector list to the module's data
 		# 
@@ -80,10 +73,6 @@ class svm:
 		(N,d) = self.data.shape
 		X = self.data
 		
-		#Constructs an array of gammas, correlated for alphas of different widths
-		gamma = array( [ [gamma[i],] * N for i in range( Kcount ) ] ).reshape([ N * Kcount, 1] )
-		print gamma.shape
-		
 		# CMF of observations X
 		Xcmf = ( (X.reshape(N,1,d) > transpose(X.reshape(N,1,d),[1,0,2])).prod(2).sum(1,dtype=float) / N ).reshape([N,1])
 		
@@ -100,21 +89,22 @@ class svm:
 			
 		alphas = list()
 		expr = ( C*cvxmod.sum(xipos) ) + ( C*cvxmod.sum(xineg) )
-		ineq = cvxmod.expression()
-		eq = cvxmod.expression()
+		ineq = 0
+		eq = 0
+		print K[0].shape
 		for i in range( Kcount ):
 			alpha = cvxmod.optvar( 'alpha(%s)' % i, N,1)
 			alpha.pos = True
 			
 			alphas.append( alpha )
-			expr += ( (1/gamma[i]) * cvxmod.sum( alpha ) )
-			ineq += ( cvxpot.matrix( K[i] ) * alpha )
+			expr += ( float(1./gamma[i]) * cvxmod.sum( alpha ) )
+			ineq += ( cvxopt.matrix( K[i], (N,1) ) * alpha )
 			eq += cvxmod.sum( alpha )
 			
 		objective = cvxmod.minimize( expr )
 		
-		ineq1 = ineq <= cvxopt.matrix( numpy.vstack( [ Xcmf + e for i in range(Kcount) ] ) ) + xineg
-		ineq2 = ineq >= cvxopt.matrix( numpy.vstack( [ Xcmf + e for i in range(Kcount) ] ) ) - xipos
+		ineq1 = ineq <= cvxopt.matrix( Xcmf + e ) + xineg
+		ineq2 = ineq >= cvxopt.matrix( Xcmf - e ) - xipos
 		eq1 = eq == cvxopt.matrix( 1.0 )
 		
 
