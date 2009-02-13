@@ -2,6 +2,24 @@
 
 # This is based on "Mean Field Theory for Density Estimation Using Support Vector Machines"
 
+# STATUS:
+# This version solves the performance problems of QP2, but the output is slightly odd.  
+# It is very hard to control the number of SV's, and as the value of C (which i believe
+# is intended to control #SV) decreases, the computed distribution starts to distort
+# in strange ways - shifting to the right.  The system is also *highly* sensitive to input
+# parameters.
+#
+# I may still have problems with the equations - I'm having to normalize the weights to 
+# get them to sum to 1, and I'm also having to floor the weight values to keep them 
+# positive.  It's possible that sice I'm normalizing anyway, I can floor at the 50% quantile
+# of weights (or whatever % of the points I want to use as SV) and adjust the weights
+# to produce the correct sum.  If this works, we can set C to as small a value as the 
+# computation will allow (C seems to affect the number of iterations required).
+#
+# This is only formulated for the single-variate case - to move up in dimension I'll need
+# to change how the kernel is formulated to allow correct transposes and to add a product
+# operator.  This will also apply to the CMF calculation
+
 import sys, getopt, math, datetime, os, cmath
 from random import gauss
 

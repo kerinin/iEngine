@@ -2,6 +2,19 @@
 
 # This is based on "multivariate density estimation - a support vector approach"
 
+# STATUS:
+# The algorithm appears to be working correctly, however it is very sensitive to the
+# input parameters, and the computational cost increases exponentially with the
+# number of observations - I get unacceptable performance with under 1000 points.
+#
+# One thing to look into is how cvxmod is formulating the problem, it says it is using
+# the 'nonlinear' solver, which may indicate it's doing some unnecessarily complicated
+# stuff.  
+#
+# This is only formulated for the single-variate case - to move up in dimension I'll need
+# to change how the kernel is formulated to allow correct transposes and to add a product
+# operator.  This will also apply to the CMF calculation
+
 import sys, getopt, math, datetime, os, cmath
 from random import gauss
 

@@ -1,5 +1,15 @@
 #! /usr/bin/env python
 
+# Based on two papers:
+# (1) Support Vector Density Estimation, and
+# (2) Density Estimation using Support Vector Machines
+# Both by Weston et. all, the first from '99 and the second from '98
+# They seem to be reprints of the same paper
+
+# NOTE: the technique in (1)-1.9 is described as a faster way to compute the
+# same thing on large datasets - if the LP performance is bad, you might try
+# implementing the other version
+
 import sys, getopt, math, datetime, os, cmath
 from random import gauss
 
@@ -18,7 +28,7 @@ import matplotlib.pyplot as plt
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C =1., Lambda = 1., gamma =.25):
+	def __init__(self,data=list(),C =1., Lambda = 1., gamma =[1./2, 1./4, 1./8, 1./16] ):
 		self.data = data
 		self.Fl = None
 		self.SV = None
@@ -34,6 +44,7 @@ class svm:
 		# K(x_i,x_j) = 1/(\sqrt(2 \pi det( \Lambda ) ) ) exp( -.5(x_i - x_j) \Lambda^-1 (x_i - x_j)^T
 		
 		#NOTE: copy the kernel from QP2
+		#NOTE: this needs to treat gamma as a list
 		return ( 1 / ( 1+ exp( gamma * ( X - Y ) ) ) ).prod(2) 
 		
 	def Pr(self,x):
@@ -68,17 +79,17 @@ class svm:
 		gamma = self.gamma
 		(N,d) = self.data.shape
 		X = self.data
-
+		
+		#Constructs an array of gammas, correlated for alphas of different widths
+		gamma = array( [ gamma[i] * N for i in range(N) ] ).reshape([N,1])
+		
+		# CMF of observations X
 		Xcmf = ( (X.reshape(N,1,d) > transpose(X.reshape(N,1,d),[1,0,2])).prod(2).sum(1,dtype=float) / N ).reshape([N,1])
+		
+		# epsilon of observations X
 		e = Lambda * sqrt( (1./N) * ( Xcmf ) * (1.-Xcmf) ).reshape([N,1])
 		
-		# Xcmf???
-		# CURRENT THEORY: I'm using x where I should be using Ax somewhere (or vica versa).
-		# I'm computing a linear operator, so i may have fucked up the context of my 
-		# variables somewhere.  This would explain the scaling issues...
 		K = self._K( Xcmf.reshape(N,1,d), transpose(Xcmf.reshape(N,1,d), [1,0,2]), gamma )
-		K1 = self._K( Xcmf.reshape(N,1,d), 1.0 , gamma ).reshape([1,N])
-		K0 = self._K( Xcmf.reshape(N,1,d), 0.0 , gamma ).reshape([1,N])
 
 		alpha = cvxmod.optvar( 'alpha',N,1)
 		alpha.pos = True
@@ -86,15 +97,16 @@ class svm:
 		xipos.pos = True
 		xineg = cvxmod.optvar( 'xi-',N,1)
 		xineg.pos = True
-		objective = cvxmod.minimize( cvxmod.sum(alpha) + C*cvxmod.sum(xipos) + C*cvxmod.sum(xineg) )
+		pGamma = cvxmod.param( 'gamma',N,1 )
+		pGamma.value = cvxopt.matrix(gamma, (N,1) )
+		
+		objective = cvxmod.minimize( cvxmod.sum( (1/pGamma) * alpha) + ( C*cvxmod.sum(xipos) ) + ( C*cvxmod.sum(xineg) ) )
 	
 		ineq1 = cvxopt.matrix( K ) * alpha <= cvxopt.matrix( Xcmf + e ) + xineg
 		ineq2 = cvxopt.matrix( K ) * alpha >= cvxopt.matrix( Xcmf - e ) - xipos
-		eq1 = cvxopt.matrix( K1, (1,N) ) * alpha == cvxopt.matrix(1.0)
-		eq2 = cvxopt.matrix( K0, (1,N) ) * alpha == cvxopt.matrix(0.0)
+		eq1 = cvxmod.sum( pAlpha ) == cvxopt.matrix( 1.0 )
 		
 
-		
 		# Solve!
 		p = cvxmod.problem( objective = objective, constr = [ineq1,ineq2,eq1] )
 		
