@@ -85,7 +85,7 @@ class svm:
 		print "%s SV's found" % len(self.SV)
 		
 def run():
-	mod = svm( array([[gauss(0,1)] for i in range(100) ] + [[gauss(8,1)] for i in range(100) ]).reshape([200,1]) )
+	mod = svm( array([[gauss(0,1)] for i in range(400) ] + [[gauss(8,1)] for i in range(400) ]).reshape([800,1]) )
 	
 	X = arange(-5.,11.,.05)
 	Y_cmp = [ mod.Pr(x) for x in X ]

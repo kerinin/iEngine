@@ -163,18 +163,19 @@ class svm:
 				break
 			else:
 				print "Cumulative adjustment of Coefficients: %s" % absolute(W_delta).sum()
+				
+		self.W /= self.W.sum()
 
 def run():
-	mod = svm( array([[gauss(0,1)] for i in range(100) ]).reshape([100,1]) )
+	mod = svm( array([[gauss(0,1)] for i in range(800) ]).reshape([800,1]) )
 	
 	X = arange(-5.,5.,.25)
 	
+	n, bins, patches = plt.hist(mod.data, 10, normed=1, facecolor='green', alpha=0.5, label='empirical distribution')
 	Y_cmp = mod.Pr(numpy.ma.array(X).reshape([len(X),1]))
 	
-	Y_act = [ scipy.stats.norm.pdf(x) for x in X ]
-	
-	plot(X,Y_act,label="normal distribution")
-	plot(X,Y_cmp,label="computed distribution")
+	plot(X,Y_cmp, 'r--', label="computed distribution")
+		
 	legend()
 	show()
 	
