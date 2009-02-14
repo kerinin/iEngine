@@ -28,14 +28,13 @@ import matplotlib.pyplot as plt
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C=.1, Lambda = 1., gamma =[(2./3.)**i for i in range(1,3)] ):
+	def __init__(self,data=list(),C=.1, gamma =[(2./3.)**i for i in range(1,3)] ):
 		self.data = data
 		self.Fl = None
 		self.SV = None
 		self.betas = None
 		
 		self.C = C
-		self.Lambda = Lambda
 		self.gamma = gamma
 		
 		self._compute()
@@ -91,7 +90,6 @@ class svm:
 		# \epsilon = \lambda \sigma_i = \lambda \sqrt{ \frac{1}{\ell} F_\ell(x_i)(1-F_\ell(x_i) ) }
 		
 		C = self.C
-		Lambda = self.Lambda
 		gamma = self.gamma
 		Kcount = len( gamma )
 		(N,d) = self.data.shape
@@ -101,7 +99,7 @@ class svm:
 		Xcmf = ( (X.reshape(N,1,d) > transpose(X.reshape(N,1,d),[1,0,2])).prod(2).sum(1,dtype=float) / N ).reshape([N,1])
 		
 		# epsilon of observations X
-		e = Lambda * sqrt( (1./N) * ( Xcmf ) * (1.-Xcmf) ).reshape([N,1])
+		e = sqrt( (1./N) * ( Xcmf ) * (1.-Xcmf) ).reshape([N,1])
 		
 		K = self._K( Xcmf.reshape(N,1,d), transpose(Xcmf.reshape(N,1,d), [1,0,2]), gamma )
 
