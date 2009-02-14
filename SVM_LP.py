@@ -67,7 +67,8 @@ class svm:
 			gamma = self.gamma[i]
 			beta = self.betas[i].compressed()
 			data = numpy.ma.array(self.data, mask=numpy.ma.getmask(self.betas[i])).compressed()
-			diff = numpy.abs( data.reshape([len(data),1]) - x )
+			diff = data.reshape([len(data),1]) - x
+			
 			ret += numpy.dot( beta.T, ( -gamma / ( 2 + exp( gamma * diff ) + exp( -gamma * diff ) ) ) )
 			
 		return ret
