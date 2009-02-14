@@ -41,7 +41,7 @@ class svm:
 		self._compute()
 	
 	def _K(self,X,Y,gamma):
-		diff = X - Y
+		diff = numpy.abs( X - Y )
 		N = X.size
 		M = Y.size
 		return [ ( 1 / ( 1 + exp( -gi * diff ) ) ).reshape(N,M) for gi in gamma ]
@@ -67,7 +67,7 @@ class svm:
 			gamma = self.gamma[i]
 			beta = self.betas[i].compressed()
 			data = numpy.ma.array(self.data, mask=numpy.ma.getmask(self.betas[i])).compressed()
-			diff = data.reshape([len(data),1]) - x
+			diff = numpy.abs( data.reshape([len(data),1]) - x )
 			ret += numpy.dot( beta.T, ( -gamma / ( 2 + exp( gamma * diff ) + exp( -gamma * diff ) ) ) )
 			
 		return ret
@@ -162,7 +162,7 @@ def run():
 	b.set_title("Weight distribution of %s SV's" % mod.betas[0].count() )
 	
 	c = fig.add_subplot(2,2,2)
-	c.plot(numpy.sort(mod.data), numpy.sort(mod.Fl), 'green', alpha=0.5 )
+	c.plot(numpy.sort(mod.data,0), numpy.sort(mod.Fl,0), 'green', alpha=0.5 )
 	c.plot(X, mod.cdf(X), 'r--' )
 	c.set_title("Computed vs emprical CDF")
 	
