@@ -42,8 +42,22 @@ class svm:
 	
 	def _K(self,X,Y,gamma):
 		diff = X - Y
-		N = len(X)
-		return [ ( 1 / ( 1 + exp( -gi * diff ) ) ).reshape(N,N) for gi in gamma ]
+		N = X.size
+		M = Y.size
+		return [ ( 1 / ( 1 + exp( -gi * diff ) ) ).reshape(N,M) for gi in gamma ]
+
+	def cdf(self,x):
+		ret = zeros(x.shape)
+		
+		# Inelegant I know, but for now...
+		for i in range( len(self.gamma) ):
+			gamma = self.gamma[i]
+			beta = self.betas[i].compressed()
+			data = numpy.ma.array(self.data, mask=numpy.ma.getmask(self.betas[i])).compressed()
+			
+			ret += numpy.dot( beta.T, self._K(data.reshape([len(data),1]),x,[gamma,])[0] )
+			
+		return ret
 		
 	def Pr(self,x):
 		ret = zeros(x.shape)
@@ -124,30 +138,35 @@ class svm:
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % (float(duration.microseconds)/1000000)
 		
-		#betas = [ ma.masked_less( alpha.value, 1e-7 ) for alpha in alphas ]
-		#masks = [ ma.getmask( beta ) for beta in betas ]
-		#data = ma.array(X,mask=mask)
-			
 		self.Fl = Xcmf
 		self.betas = [ ma.masked_less( alpha.value, 1e-7) for alpha in alphas ]
 		
 		print "SV's found: %s" % [ len( beta.compressed()) for beta in self.betas ]
 		
 def run():
-	mod = svm( array([[gauss(0,1)] for i in range(10) ]).reshape([10,1]) )
+	mod = svm( array([[gauss(0,1)] for i in range(5) ] + [[gauss(8,1)] for i in range(5) ]).reshape([10,1]) )
+		
+	fig = plt.figure()
 	
-	X = arange(-5.,5.,.05)
-	Y_cmp = mod.Pr(X)
+	start = -5.
+	end = 12.
+	X = arange(start,end,.25)
 	
-	#n, bins, patches = plt.hist(mod.data, 40, normed=1, facecolor='green', alpha=0.5)
-	#bincenters = 0.5*(bins[1:]+bins[:-1])
-	#plt.plot(bincenters, n, 'r', linewidth=1)
+	a = fig.add_subplot(2,2,1)
+	n, bins, patches = a.hist(mod.data, 20, normed=1, facecolor='green', alpha=0.5, label='empirical distribution')
+	a.plot(X,mod.Pr(X), 'r--', label="computed distribution")
+	a.set_title("Computed vs empirical PDF")
+		
+	b = fig.add_subplot(2,2,3)
+	b.hist(mod.betas[0].compressed(), 20, normed=1, facecolor='red', alpha=0.5, label='Weight distribution')
+	b.set_title("Weight distribution of %s SV's" % mod.betas[0].count() )
 	
-	#plt.plot( mod.SV, [ mod.Pr(x ) for x in  mod.SV ], 'o' )
+	c = fig.add_subplot(2,2,2)
+	c.plot(numpy.sort(mod.data), numpy.sort(mod.Fl), 'green', alpha=0.5 )
+	c.plot(X, mod.cdf(X), 'r--' )
+	c.set_title("Computed vs emprical CDF")
 	
-	plt.plot(mod.data,mod.Fl, 'o' )
-	plt.plot(X,Y_cmp, 'r--')
-	#plt.show()
+	plt.show()
 	
 	
 def help():
