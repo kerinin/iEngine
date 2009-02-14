@@ -46,8 +46,17 @@ class svm:
 		return [ ( 1 / ( 1 + exp( -gi * diff ) ) ).reshape(N,N) for gi in gamma ]
 		
 	def Pr(self,x):
-		diff = self.data - x
-		return array( [ ( self.betas[i] * ( -self.gamma[i] / ( 2 + exp( self.gamma[i] * diff ) + exp( -self.gamma[i] * diff ) ) ) ).sum() for i in range(len(self.gamma)) ] ).sum()
+		ret = zeros(x.shape)
+		
+		# Inelegant I know, but for now...
+		for i in range( len(self.gamma) ):
+			gamma = self.gamma[i]
+			beta = self.betas[i].compressed()
+			data = numpy.ma.array(self.data, mask=numpy.ma.getmask(self.betas[i])).compressed()
+			diff = data.reshape([len(data),1]) - x
+			ret += numpy.dot( beta.T, ( -gamma / ( 2 + exp( gamma * diff ) + exp( -gamma * diff ) ) ) )
+			
+		return ret
 		
 	def __iadd__(self, points):
 		# overloaded '+=', used for adding a vector list to the module's data
@@ -128,7 +137,7 @@ def run():
 	mod = svm( array([[gauss(0,1)] for i in range(10) ]).reshape([10,1]) )
 	
 	X = arange(-5.,5.,.05)
-	Y_cmp = [ mod.Pr(x) for x in X ]
+	Y_cmp = mod.Pr(X)
 	
 	#n, bins, patches = plt.hist(mod.data, 40, normed=1, facecolor='green', alpha=0.5)
 	#bincenters = 0.5*(bins[1:]+bins[:-1])
