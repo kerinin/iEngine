@@ -28,7 +28,7 @@ import matplotlib.pyplot as plt
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C=.1, gamma =[(2./3.)**i for i in range(1,3)] ):
+	def __init__(self,data=list(),C=15., gamma =[(2./3.)**i for i in range(1,3)] ):
 		self.data = data
 		self.Fl = None
 		self.SV = None
