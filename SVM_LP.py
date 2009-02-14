@@ -28,7 +28,7 @@ import matplotlib.pyplot as plt
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C=.5, Lambda = 1., gamma =[(2./3.)**i for i in range(-2,2)] ):
+	def __init__(self,data=list(),C=.1, Lambda = 1., gamma =[(2./3.)**i for i in range(1,3)] ):
 		self.data = data
 		self.Fl = None
 		self.SV = None
@@ -140,12 +140,12 @@ class svm:
 		print "optimized in %ss" % (float(duration.microseconds)/1000000)
 		
 		self.Fl = Xcmf
-		self.betas = [ ma.masked_less( alpha.value, 1e-7) for alpha in alphas ]
+		self.betas = [ ma.masked_less( alpha.value, 1e-4) for alpha in alphas ]
 		
 		print "SV's found: %s" % [ len( beta.compressed()) for beta in self.betas ]
 		
 def run():
-	mod = svm( array([[gauss(0,1)] for i in range(400) ] + [[gauss(8,1)] for i in range(400) ]).reshape([800,1]) )
+	mod = svm( array([[gauss(0,1)] for i in range(100) ] + [[gauss(8,1)] for i in range(100) ]).reshape([200,1]) )
 		
 	fig = plt.figure()
 	
