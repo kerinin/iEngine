@@ -41,35 +41,36 @@ class svm:
 		self._compute()
 	
 	def _K(self,X,Y,gamma):
-		diff = numpy.abs( X - Y )
+		diff = X - Y
 		N = X.size
 		M = Y.size
-		return [ ( 1 / ( 1 + exp( -gi * diff ) ) ).reshape(N,M) for gi in gamma ]
+		return [ ( 1 / ( 1 + exp( gi * diff ) ) ).reshape(N,M) for gi in gamma ]
 
 	def cdf(self,x):
 		ret = zeros(x.shape)
 		
 		# Inelegant I know, but for now...
-		for i in range( len(self.gamma) ):
+		#for i in range( len(self.gamma) ):
+		for i in [0,]:
 			gamma = self.gamma[i]
 			beta = self.betas[i].compressed()
 			data = numpy.ma.array(self.data, mask=numpy.ma.getmask(self.betas[i])).compressed()
 			
-			ret += numpy.dot( beta.T, self._K(data.reshape([len(data),1]),x,[gamma,])[0] )
-			
+			ret += numpy.dot( self._K( data.reshape([len(data),1]), x, [gamma,] )[0].T, beta )
 		return ret
 		
 	def Pr(self,x):
 		ret = zeros(x.shape)
 		
 		# Inelegant I know, but for now...
+		#for i in range( len(self.gamma) ):
 		for i in range( len(self.gamma) ):
 			gamma = self.gamma[i]
 			beta = self.betas[i].compressed()
 			data = numpy.ma.array(self.data, mask=numpy.ma.getmask(self.betas[i])).compressed()
 			diff = data.reshape([len(data),1]) - x
 			
-			ret += numpy.dot( beta.T, ( -gamma / ( 2 + exp( gamma * diff ) + exp( -gamma * diff ) ) ) )
+			ret += numpy.dot( beta.T, ( gamma / ( 2 + exp( gamma * diff ) + exp( -gamma * diff ) ) ) )
 			
 		return ret
 		
@@ -163,9 +164,15 @@ def run():
 	b.set_title("Weight distribution of %s SV's" % mod.betas[0].count() )
 	
 	c = fig.add_subplot(2,2,2)
-	c.plot(numpy.sort(mod.data,0), numpy.sort(mod.Fl,0), 'green', alpha=0.5 )
+	c.plot(numpy.sort(mod.data,0), numpy.sort(mod.Fl,0), 'green' )
 	c.plot(X, mod.cdf(X), 'r--' )
 	c.set_title("Computed vs emprical CDF")
+	
+	d = fig.add_subplot(2,2,4)
+	for i in range(len(mod.data) ):
+		if mod.betas[0][i]:
+			d.plot( X, mod.betas[0][i] * mod._K(mod.data[i], X, [mod.gamma[0],])[0].reshape([len(X),1]) )
+	d.set_title("SV Contributions")
 	
 	plt.show()
 	
