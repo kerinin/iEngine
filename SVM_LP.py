@@ -28,7 +28,7 @@ import matplotlib.pyplot as plt
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C=1., Lambda = 1., gamma =[1./2, 1./4, 1./8, 1./16] ):
+	def __init__(self,data=list(),C=.5, Lambda = 1., gamma =[(2./3.)**i for i in range(-2,2)] ):
 		self.data = data
 		self.Fl = None
 		self.SV = None
@@ -50,8 +50,7 @@ class svm:
 		ret = zeros(x.shape)
 		
 		# Inelegant I know, but for now...
-		#for i in range( len(self.gamma) ):
-		for i in [0,]:
+		for i in range( len(self.gamma) ):
 			gamma = self.gamma[i]
 			beta = self.betas[i].compressed()
 			data = numpy.ma.array(self.data, mask=numpy.ma.getmask(self.betas[i])).compressed()
@@ -146,7 +145,7 @@ class svm:
 		print "SV's found: %s" % [ len( beta.compressed()) for beta in self.betas ]
 		
 def run():
-	mod = svm( array([[gauss(0,1)] for i in range(5) ] + [[gauss(8,1)] for i in range(5) ]).reshape([10,1]) )
+	mod = svm( array([[gauss(0,1)] for i in range(400) ] + [[gauss(8,1)] for i in range(400) ]).reshape([800,1]) )
 		
 	fig = plt.figure()
 	
@@ -160,7 +159,9 @@ def run():
 	a.set_title("Computed vs empirical PDF")
 		
 	b = fig.add_subplot(2,2,3)
-	b.hist(mod.betas[0].compressed(), 20, normed=1, facecolor='red', alpha=0.5, label='Weight distribution')
+	for beta in mod.betas:
+		if beta.compressed().size:
+			b.hist(beta.compressed(), 20, normed=1, alpha=0.5)
 	b.set_title("Weight distribution of %s SV's" % mod.betas[0].count() )
 	
 	c = fig.add_subplot(2,2,2)
@@ -169,9 +170,12 @@ def run():
 	c.set_title("Computed vs emprical CDF")
 	
 	d = fig.add_subplot(2,2,4)
-	for i in range(len(mod.data) ):
-		if mod.betas[0][i]:
-			d.plot( X, mod.betas[0][i] * mod._K(mod.data[i], X, [mod.gamma[0],])[0].reshape([len(X),1]) )
+	for i in range(len(mod.betas) ):
+		beta = mod.betas[i]
+		
+		for j in range(len(mod.data) ):
+			if beta[j][0]:
+				d.plot( X, beta[j][0] * mod._K(mod.data[j], X, [mod.gamma[i],])[0].reshape([len(X),1]) )
 	d.set_title("SV Contributions")
 	
 	plt.show()
