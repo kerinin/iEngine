@@ -32,7 +32,7 @@ import matplotlib.pyplot as plt
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C=1e-8, gamma =[ (2./3.)**i for i in range(-6,6) ] ):
+	def __init__(self,data=list(),C=1e0, gamma =[ (2./3.)**i for i in range(-4,4) ] ):
 		self.data = data
 		self.Fl = None
 		self.SV = None
@@ -109,7 +109,7 @@ class svm:
 		
 		K = self._K( Xcmf.reshape(N,1,d), transpose(Xcmf.reshape(N,1,d), [1,0,2]), gamma )
 
-		pY = cvxmod.param("Y", value=cvxopt.matrix( Xcmf, ( N, 1 ) ) )
+		pY = cvxmod.param("Y", value=cvxopt.matrix( Xcmf, ( 1, N ) ) )
 		pY.pos = True
 			
 		alphas = list()
@@ -118,24 +118,23 @@ class svm:
 		eq = 0
 
 		for i in range( Kcount ):
-			alpha = cvxmod.optvar( 'alpha(%s)' % i, N,1)
+			alpha = cvxmod.optvar( 'alpha(%s)' % i, 1,N)
 			alpha.pos = True
 			pK = cvxmod.param('K(%s)' % i, value=cvxopt.matrix( K[i], ( N, N ) ) )
 			pK.pos = True
 			
 			alphas.append( alpha )
-			expr1 += pK * alpha
+			expr1 += alpha * pK
 			expr2 += gamma[i] * alpha
 			eq += cvxmod.sum( alpha )
 			
-		#objective = cvxmod.minimize( cvxmod.sum( cvxmod.atoms.square( pY - expr1 ) ) + ( C * cvxmod.sum( expr2 ) ) )
-		objective = cvxmod.minimize( cvxmod.sum( cvxmod.atoms.square( pY - expr1 ) ) )
+		objective = cvxmod.minimize( cvxmod.sum( cvxmod.atoms.square( pY - expr1 ) ) + ( C * cvxmod.sum( expr2 ) ) )
+		#objective = cvxmod.minimize( cvxmod.sum( cvxmod.atoms.square( pY - expr1 ) ) )
 		
 		eq1 = eq == cvxopt.matrix( 1.0 )
 		
 		# Solve!
 		p = cvxmod.problem( objective = objective, constr = [eq1,] )
-		cvxmod.classify( p )
 		
 		start = datetime.datetime.now()
 		p.solve()
@@ -143,7 +142,7 @@ class svm:
 		print "optimized in %ss" % (float(duration.microseconds)/1000000)
 		
 		self.Fl = Xcmf
-		self.betas = [ ma.masked_less( alpha.value, 1e-4) for alpha in alphas ]
+		self.betas = [ ma.masked_less( alpha.value, 1e-4).T for alpha in alphas ]
 		
 		print "SV's found: %s" % [ len( beta.compressed()) for beta in self.betas ]
 		
