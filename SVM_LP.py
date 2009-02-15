@@ -157,6 +157,7 @@ def run():
 	c = fig.add_subplot(2,2,2)
 	c.plot(numpy.sort(mod.data,0), numpy.sort(mod.Fl,0), 'green' )
 	c.plot(X, mod.cdf(X), 'r--' )
+	c.plot( mod.data, (mod.Fl.reshape( [len(mod.data),]) - mod.cdf( mod.data.reshape( [len(mod.data),]) ) ) ** 2, '+' )
 	c.set_title("Computed vs emprical CDF")
 	
 	d = fig.add_subplot(2,2,4)
