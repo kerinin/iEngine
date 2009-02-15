@@ -80,14 +80,6 @@ class svm:
 	
 	def _compute(self):
 		start = datetime.datetime.now()
-		#UNKNOWN: what are \alpha^*, \xi ???   check Vapnik regression
-		# * used to designate negative values
-		
-		# Given
-		# ( (x_1,F_\ell(x_1),\epsilon_1),...,(x_\ell),F_\ell(x_\ell),\epsilon_\ell) )
-		# \theta(x) = indicator function; 1 if positive, 0 otherwise
-		# F_\ell(x) = \frac{1}{\ell} \sum_{i=1}^{\ell} \theta(x - x_i)		NOTE: if d>1, \theta returns 0 if any dimension less than 0
-		# \epsilon = \lambda \sigma_i = \lambda \sqrt{ \frac{1}{\ell} F_\ell(x_i)(1-F_\ell(x_i) ) }
 		
 		C = self.C
 		gamma = self.gamma
