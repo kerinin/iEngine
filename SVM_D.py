@@ -32,7 +32,7 @@ import matplotlib.pyplot as plt
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C=1e0, gamma =[ (2./3.)**i for i in range(-4,4) ] ):
+	def __init__(self,data=list(),C=1e-1, gamma =[ (2./3.)**i for i in range(-2,-1) ] ):
 		self.data = data
 		self.Fl = None
 		self.SV = None
@@ -108,11 +108,12 @@ class svm:
 		Xcmf = ( (X.reshape(N,1,d) > transpose(X.reshape(N,1,d),[1,0,2])).prod(2).sum(1,dtype=float) / N ).reshape([N,1])
 		
 		K = self._K( Xcmf.reshape(N,1,d), transpose(Xcmf.reshape(N,1,d), [1,0,2]), gamma )
-
+		
 		pY = cvxmod.param("Y", value=cvxopt.matrix( Xcmf, ( 1, N ) ) )
 		pY.pos = True
 			
 		alphas = list()
+		Ks = list()
 		expr1 = 0
 		expr2 = 0
 		eq = 0
@@ -124,12 +125,13 @@ class svm:
 			pK.pos = True
 			
 			alphas.append( alpha )
+			Ks.append(pK)
 			expr1 += alpha * pK
 			expr2 += gamma[i] * alpha
 			eq += cvxmod.sum( alpha )
 			
-		objective = cvxmod.minimize( cvxmod.sum( cvxmod.atoms.square( pY - expr1 ) ) + ( C * cvxmod.sum( expr2 ) ) )
-		#objective = cvxmod.minimize( cvxmod.sum( cvxmod.atoms.square( pY - expr1 ) ) )
+		#objective = cvxmod.minimize( cvxmod.sum( cvxmod.atoms.square( pY - expr1 ) ) + ( C * cvxmod.sum( expr2 ) ) )
+		objective = cvxmod.minimize( cvxmod.sum( cvxmod.atoms.square( pY - expr1 ) ) )
 		
 		eq1 = eq == cvxopt.matrix( 1.0 )
 		
@@ -138,6 +140,8 @@ class svm:
 		
 		start = datetime.datetime.now()
 		p.solve()
+		p.classify()
+		
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % (float(duration.microseconds)/1000000)
 		
@@ -145,10 +149,17 @@ class svm:
 		self.betas = [ ma.masked_less( alpha.value, 1e-4).T for alpha in alphas ]
 		
 		print "SV's found: %s" % [ len( beta.compressed()) for beta in self.betas ]
+			
+		for i in range(len(self.betas)):
+			beta = self.betas[i]
+			if beta.count():
+				print "SV @ gamma=%s: %s" % (self.gamma[i], str(ma.sort( ma.array(self.data, mask=ma.getmask(beta) ).compressed() ) ) )
 		
 def run():
 	mod = svm( array([[gauss(0,1)] for i in range(20) ] + [[gauss(8,1)] for i in range(20) ]).reshape([40,1]) )
 		
+	print "Total Loss: %s" % sum( (mod.Fl.reshape( [len(mod.data),]) - mod.cdf( mod.data.reshape( [len(mod.data),]) ) ) ** 2)
+	
 	fig = plt.figure()
 	
 	start = -5.
@@ -159,16 +170,11 @@ def run():
 	n, bins, patches = a.hist(mod.data, 20, normed=1, facecolor='green', alpha=0.5, label='empirical distribution')
 	a.plot(X,mod.Pr(X), 'r--', label="computed distribution")
 	a.set_title("Computed vs empirical PDF")
-		
-	b = fig.add_subplot(2,2,3)
-	for beta in mod.betas:
-		if beta.compressed().size:
-			b.hist(beta.compressed(), 20, normed=1, alpha=0.5)
-	b.set_title("Weight distribution of %s SV's" % mod.betas[0].count() )
 	
 	c = fig.add_subplot(2,2,2)
 	c.plot(numpy.sort(mod.data,0), numpy.sort(mod.Fl,0), 'green' )
 	c.plot(X, mod.cdf(X), 'r--' )
+	c.plot( mod.data, (mod.Fl.reshape( [len(mod.data),]) - mod.cdf( mod.data.reshape( [len(mod.data),]) ) ) ** 2, '+' )
 	c.set_title("Computed vs emprical CDF")
 	
 	d = fig.add_subplot(2,2,4)
