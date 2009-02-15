@@ -32,7 +32,7 @@ import matplotlib.pyplot as plt
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C=15., gamma =[(2./3.)**i for i in range(1,3)] ):
+	def __init__(self,data=list(),C=15., gamma =[.5,] ):
 		self.data = data
 		self.Fl = None
 		self.SV = None
@@ -107,39 +107,30 @@ class svm:
 		# CMF of observations X
 		Xcmf = ( (X.reshape(N,1,d) > transpose(X.reshape(N,1,d),[1,0,2])).prod(2).sum(1,dtype=float) / N ).reshape([N,1])
 		
-		# epsilon of observations X
-		e = sqrt( (1./N) * ( Xcmf ) * (1.-Xcmf) ).reshape([N,1])
-		
 		K = self._K( Xcmf.reshape(N,1,d), transpose(Xcmf.reshape(N,1,d), [1,0,2]), gamma )
 
-		xipos = cvxmod.optvar( 'xi+', N,1)
-		xipos.pos = True
-		xineg = cvxmod.optvar( 'xi-', N,1)
-		xineg.pos = True
+		pY = cvxmod.param("Y", value=cvxopt.matrix( Xcmf, ( N, 1 ) ) )
+		pY.pos = True
 			
 		alphas = list()
-		expr = ( C*cvxmod.sum(xipos) ) + ( C*cvxmod.sum(xineg) )
-		ineq = 0
-		eq = 0
+		expr1 = pY
+		expr2 = 0
 		
 		for i in range( Kcount ):
 			alpha = cvxmod.optvar( 'alpha(%s)' % i, N,1)
 			alpha.pos = True
+			pK = cvxmod.param('K(%s)' % i, value=cvxopt.matrix( K[i], ( N, N ) ) )
+			pK.pos = True
 			
 			alphas.append( alpha )
-			expr += ( float(1./gamma[i]) * cvxmod.sum( alpha ) )
-			ineq += ( cvxopt.matrix( K[i], (N,N) ) * alpha )
-			eq += cvxmod.sum( alpha )
+			expr1 -= pK * alpha
+			expr2 += gamma[i] * alpha
 			
-		objective = cvxmod.minimize( expr )
+		objective = cvxmod.minimize( cvxmod.sum( cvxmod.atoms.square( expr1 ) ) + cvxmod.sum( expr2 ) )
 		
-		ineq1 = ineq <= cvxopt.matrix( Xcmf + e ) + xineg
-		ineq2 = ineq >= cvxopt.matrix( Xcmf - e ) - xipos
-		eq1 = eq == cvxopt.matrix( 1.0 )
-		
-
 		# Solve!
-		p = cvxmod.problem( objective = objective, constr = [ineq1,ineq2,eq1] )
+		p = cvxmod.problem( objective = objective, constr = [] )
+		cvxmod.classify( p )
 		
 		start = datetime.datetime.now()
 		p.solve()
@@ -152,7 +143,7 @@ class svm:
 		print "SV's found: %s" % [ len( beta.compressed()) for beta in self.betas ]
 		
 def run():
-	mod = svm( array([[gauss(0,1)] for i in range(100) ] + [[gauss(8,1)] for i in range(100) ]).reshape([200,1]) )
+	mod = svm( array([[gauss(0,1)] for i in range(50) ] + [[gauss(8,1)] for i in range(50) ]).reshape([100,1]) )
 		
 	fig = plt.figure()
 	
