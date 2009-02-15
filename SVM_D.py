@@ -32,7 +32,7 @@ import matplotlib.pyplot as plt
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C=15., gamma =[.5,] ):
+	def __init__(self,data=list(),C=1e-8, gamma =[ (2./3.)**i for i in range(-6,6) ] ):
 		self.data = data
 		self.Fl = None
 		self.SV = None
@@ -113,9 +113,10 @@ class svm:
 		pY.pos = True
 			
 		alphas = list()
-		expr1 = pY
+		expr1 = 0
 		expr2 = 0
-		
+		eq = 0
+
 		for i in range( Kcount ):
 			alpha = cvxmod.optvar( 'alpha(%s)' % i, N,1)
 			alpha.pos = True
@@ -123,13 +124,17 @@ class svm:
 			pK.pos = True
 			
 			alphas.append( alpha )
-			expr1 -= pK * alpha
+			expr1 += pK * alpha
 			expr2 += gamma[i] * alpha
+			eq += cvxmod.sum( alpha )
 			
-		objective = cvxmod.minimize( cvxmod.sum( cvxmod.atoms.square( expr1 ) ) + cvxmod.sum( expr2 ) )
+		#objective = cvxmod.minimize( cvxmod.sum( cvxmod.atoms.square( pY - expr1 ) ) + ( C * cvxmod.sum( expr2 ) ) )
+		objective = cvxmod.minimize( cvxmod.sum( cvxmod.atoms.square( pY - expr1 ) ) )
+		
+		eq1 = eq == cvxopt.matrix( 1.0 )
 		
 		# Solve!
-		p = cvxmod.problem( objective = objective, constr = [] )
+		p = cvxmod.problem( objective = objective, constr = [eq1,] )
 		cvxmod.classify( p )
 		
 		start = datetime.datetime.now()
@@ -143,7 +148,7 @@ class svm:
 		print "SV's found: %s" % [ len( beta.compressed()) for beta in self.betas ]
 		
 def run():
-	mod = svm( array([[gauss(0,1)] for i in range(50) ] + [[gauss(8,1)] for i in range(50) ]).reshape([100,1]) )
+	mod = svm( array([[gauss(0,1)] for i in range(20) ] + [[gauss(8,1)] for i in range(20) ]).reshape([40,1]) )
 		
 	fig = plt.figure()
 	
