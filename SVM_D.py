@@ -48,7 +48,11 @@ class svm:
 		N = X.size
 		M = Y.size
 		
+		# Sigmoid
 		return [ ( 1 / ( 1 + exp( gi * diff ) ) ).reshape(N,M) for gi in gamma ]
+		
+		# RBF
+		#return [ ( exp( -(diff**2) / gi ) ).reshape(N,M) for gi in gamma ]
 
 	def cdf(self,x):
 		ret = zeros(x.shape)
@@ -136,7 +140,7 @@ class svm:
 		eq1 = eq == cvxopt.matrix( 1.0 )
 		
 		# Solve!
-		p = cvxmod.problem( objective = objective, constr = [eq1,] )
+		p = cvxmod.problem( objective = objective, constr = [] )
 		
 		start = datetime.datetime.now()
 		p.solve()
