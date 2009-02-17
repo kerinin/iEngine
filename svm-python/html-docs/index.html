@@ -1,0 +1,395 @@
+<html>
+  <head>
+    <title>SVM-python</title>
+    <link href="style.css" rel="stylesheet" type="text/css">
+  </head>
+  <body>
+
+<h1>SVM<sup><i>python</i></sup></h1>
+
+<ul>
+<li>High Level View
+<ul>
+<li><a href="#overview">Introduction</a></li>
+<li><a href="#building">Building</a></li>
+<li><a href="#using">Using</a></li>
+<li><a href="#learning">Overview of <code>svm_python_learn</code>
+<li><a href="#classification">Overview of <code>svm_python_classify</code></a>
+</ul>
+<li>Low Level Reference
+<ul>
+<li><a href="#objects">Objects</a></li>
+<li><a href="#details">Details of User Functions</a></li>
+<li><a href="#svmlight"><code>svmlight</code> Extension Module</a>
+<li><a href="#parameters">Special Parameters</a>
+<li><a href="#example">Example Module <code>multiclass</code></a>
+</ul></ul>
+
+<a class="bookmark" name="overview"><h2>Introduction</h2></a>
+
+<p>Put simply, SVM<sup><i>python</i></sup> is <a href="http://svmlight.joachims.org/svm_struct.html">SVM<sup><i>struct</i></sup></a>, except that all of the C API functions that the user normally has to implement (except those dealing with C specific problems, most notably memory management) instead call a function of the same name in a <a href="http://www.python.org/">Python</a> module.  You can write an SVM<sup><i>struct</i></sup> instance in Python without having to author any C code.  SVM<sup><i>python</i></sup> tries to stay close to SVM<sup><i>struct</i></sup> in naming conventions and other behavior, but knowledge of SVM<sup><i>struct</i></sup>'s original C implementation is not required.</p>
+
+<p>This document contains a general overview in the first few sections as well as a more detailed reference in later sections for SVM<sup><i>python</i></sup>.  If you're already familiar with SVM<sup><i>struct</i></sup> and Python, it's possible to get a pretty good idea of how to use the package merely by browsing through <code>svmstruct.py</code> and <code>multiclass.py</code>.  This document provides a more in depth view of how to use the package.</p>
+
+<p>Note that this is not a conversion of SVM<sup><i>struct</i></sup> to Python.  It is merely an <a href="http://docs.python.org/ext/embedding.html">embedding of Python</a> in existing C code.  All code other than the user implemented API functions is still in C, including optimization.</p>
+
+<p>SVM<sup><i>light</i></sup> is the basic underlying SVM learner, SVM<sup><i>struct</i></sup> a general framework to learn complex output spaces built upon SVM<sup><i>light</i></sup> for which one would write instantiations to learn in a particular setting, and SVM<sup><i>python</i></sup> extends SVM<sup><i>struct</i></sup> to allow such instantiations to be written in Python instead of in C.  In SVM<sup><i>struct</i></sup>, the user implement various functions in the <code>svm_struct_api.c</code> file, which the underlying SVM<sup><i>struct</i></sup> code calls in order to learn a task.  The intention of SVM<sup><i>struct</i></sup> is that the underlying code is constant, and all that a user needs to change is within <code>svm_struct_api.c</code> and <code>svm_struct_api_type.h</code>.  SVM<sup><i>python</i></sup> works the same way, except all the functions that are to be implemented are instead implemented in a Python module (a <code>.py</code> file), and all these functions in <code>svm_struct_api.c</code> are instead glue code to call their embedded Python equivalents from the module, and all the types in <code>svm_struct_api_type.h</code> contain Python objects.  The intention of SVM<sup><i>python</i></sup> is that is that the C code stays constant and the user writes new and modifies Python modules to implement specific tasks.
+
+<p>The primary advantages are that Python tends to be easier and faster to code than C, less resistant to change and code reorganization, tends to be <em>many</em> times more compact, there's no explicit memory management, and Python's object oriented-ness means that some tedious tasks in SVM<sup><i>struct</i></sup> can be easily replaced with default built in behavior.</p>
+
+<p>My favorite example of this last point is that, since Python objects can be assigned any attribute, and since many Python objects are easily serializable with the <a href="http://docs.python.org/lib/module-pickle.html"><code>pickle</code></a> module, adding a field to the struct-model in Python code consists of a simple assignment like <code>sm.foo = 5</code> at some point, and that's it.  If one were to use C code in SVM<sup><i>struct</i></sup>, one would add a field to the relevant struct, add an assignment, add code to write it to a model file, add code to parse it from a model file, and then test it to make sure all these little changes work well with each other.</p>
+
+<p>The primary disadvantage to using SVM<sup><i>python</i></sup> is that it is slower than equivalent C code.  For example, considering the time outside of SVM optimization, the Python implementation of multiclass classification takes 9 times the time as <a href="http://svmlight.joachims.org/svm_multiclass.html">SVM<sup><i>multiclass</i></sup></a>.  However, on this task SVM optimization takes about 99.5% of the time anyway, so the increase is often negligible.</p>
+
+<a class="bookmark" name="building"><h2>Building</h2></a>
+
+To build this, a simple <code>make</code> should do it, <em>unless</em> the Python library you want to use is not the library corresponding to the Python interpreter you get when you just type <code>python</code>.
+
+<p>You might want to modify the <code>Makefile</code> to modify the <code>PYTHON</code> variable to the path of the desired interpreter.  When you install Python, you install a library and an interpreter.  This interpreter is able to output where its corresponding library is stored.  The <code>Makefile</code> calls the Python interpreter to get this information, as well as other important information relevant to building a C application with embedded Python.  You can specify the path of your desired interpreter by setting <code>PYTHON</code> to something other than <code>python</code>.</p>
+
+<p>When you build, the program will produce two executables, <code>svm_python_learn</code> for learning a model and <code>svm_python_classify</code> for classification with a learned model.</p>
+
+<p>I have tried building SVM<sup><i>python</i></sup> with both Python 2.3 and 2.4 on OS X and Linux.  Obviously, if the Python module you want to use usess features specific to Python 2.4 (like generator expressions or the long overdue <code>sorted</code>) you wouldn't be able to use the module with an SVM<sup><i>python</i></sup> built against the Python 2.3 library.
+
+<a class="bookmark" name="using"><h2>Using</h2></a>
+
+<p>One annoying detail of embedded Python is that your <code>PYTHONPATH</code> environment variable has to contain "<code>.</code>" so the executable knows where to look for the module to load.</p>
+
+<p>The file <code>svmstruct.py</code> is a Python module, and also contains documentation on all the functions which the C code may attempt to call.  This is a good place to start reading if you are already familiar with SVM<sup><i>struct</i></sup> and want to get familiar with how to build a SVM<sup><i>python</i></sup> Python module.  This describes what each function should do and, for non-required functions, describes the default behavior that happens if you <em>don't</em> implement them. The <code>multiclass.py</code> file is an example implementation of multiclass classification in Python.</p>
+
+<p>Once you've written a Python module in the file <code>foo.py</code> based on <code>svmstruct.py</code> and you want to use SVM<sup><i>python</i></sup> with this module, you would use the following command line commands to learn a model and classify with a model respectively.</p>
+
+<blockquote><code>./svm_python_learn    --m foo [options] &lt;train&gt; &lt;model&gt;<br>
+./svm_python_classify --m foo [options] &lt;test&gt;  &lt;model&gt; &lt;output&gt;</code></blockquote>
+
+<p>Note that SVM<sup><i>python</i></sup> accepts the same arguments as SVM<sup><i>struct</i></sup> plus this extra <code>--m</code> option.  If the <code>--m</code> option is omitted it is equivalent to including the command line arguments <code>--m svmstruct</code>.  Note that though we put this command line option first, the <code>--m</code> option may occur anywhere in the option list.
+
+<a class="bookmark" name="learning"><h2>Overview of <code>svm_python_learn</code></h2></a>
+
+<map name="learningmap">
+<area shape="rect" coords="39,116,175,161" href="#detail-print_struct_help">
+<area shape="rect" coords="13,330,200,374" href="#detail-find_most_violated_constraint">
+<area shape="rect" coords="14,397,201,439" href="#detail-psi">
+<area shape="rect" coords="30,462,187,505" href="#detail-loss">
+<area shape="rect" coords="276,58,449,100" href="#detail-parse_struct_parameters">
+<area shape="rect" coords="289,175,437,219" href="#detail-read_struct_examples">
+<area shape="rect" coords="307,242,419,286" href="#detail-init_struct_model">
+<area shape="rect" coords="292,308,433,350" href="#detail-init_struct_constraints">
+<area shape="rect" coords="280,491,446,536" href="#detail-print_struct_learning_stats">
+<area shape="rect" coords="301,558,425,600" href="#detail-write_struct_model">
+</map>
+
+<img src="learning-tree.gif" alt="Flow Chart of the Learning Program" width="454" height="643" align="right" usemap="#learningmap">
+
+<p>Pictured is a diagram illustrating the flow of execution within <code>svm_python_learn</code>.  This diagram also describes the SVM<sup><i>struct</i></sup> learning program pretty well, excepting the stuff particular to loading the Python module, and how structure parameters are <i>always</i> parsed to enable the program to load the Python module, and how everything is in C and all functions are required.</p>
+
+<p>The <font color="red">red boxes</font> indicate things that are done wihin the underlying C code.  The other boxes indicate functions to be implemented in the Python module.  The <font color="blue">blue boxes</font> indicate functions that absolutely must be implemented or the program won't be able to execute.  The <font color="green">green boxes</font> indicate functions that are not required, strictly speaking, because they have some default behavior.  The <font color="#999900">yellow boxes</font> indicate functions that in the vast majority of cases are probably unnecessary to implement since the default behavior is probably acceptable.</p>
+
+<p>The <code>svm_python_learn</code> program first checks whether the command line arguments are structured completely correctly.  Whether they are or are not, it checks if a <code>--m</code> module is loaded and loads the Python module.  If the arguments were not structured correctly, the Python module's help function is called to print out information to standard output, at which point the program exits.  If, on the other hand, the arguments check out, the pattern-label example pairs are read from the indicated example file, some parameters for the learning model are set, some preliminary constraints are initialized, the learning model's structures are defined, and then the learning process begins.</p>
+
+<p>This learning process repeatedly iterates over all training examples.  For each example, the label associated with the most violated constraint for the pattern is found, the feature vector &Psi; describing the relationship between the pattern and the label is computed, and the loss &Delta; is computed.  From the &Psi; and &Delta;, the program determines if the most violated constraint is violated <em>enough</em> to justify adding it to the model.  If it is, then the constraint is added, and the program moves on to the next example.  In the event that no constraints were added in an iteration, the algorithm either lowers its tolerance or, if minimum tolerance has been reached, ends the learning process.</p>
+
+<p>Once learning has finished, statistics related to learning may be printed out, the model is written to a file, and the program exits.</p>
+
+<a class="bookmark" name="classification"><h2>Overview of <code>svm_python_classify</code></h2></a>
+
+<map name="classificationmap">
+<area shape="rect" coords="33,136,183,179" href="#detail-classify_struct_example">
+<area shape="rect" coords="49,201,169,246" href="#detail-write_label">
+<area shape="rect" coords="31,267,188,312" href="#detail-loss">
+<area shape="rect" coords="30,334,187,378" href="#detail-eval_prediction">
+<area shape="rect" coords="296,110,415,153" href="#detail-read_struct_model">
+<area shape="rect" coords="284,175,429,219" href="#detail-read_struct_examples">
+<area shape="rect" coords="275,293,437,337" href="#detail-print_struct_testing_stats">
+</map>
+
+<img src="testing-tree.gif" alt="Flow Chart of the Classification Program" width="442" height="381" align="right" usemap="#classificationmap">
+
+<p>Pictured is a diagram illustrating the flow of execution within <code>svm_python_classify</code>.  The color coding of the boxes is the same as that in the high level description of the <a href="#learning">learning program</a>.</p>
+
+<p>The <code>svm_python_classify</code> program first checks whether the command line arguments are fine, and if they are not it exits.  Otherwise, the indicated Python module is loaded.  Then, the learned model is read and the testing pattern-label example pairs are loaded from the indicated example file.  Then, it iterates over all the testing examples, classifies each example, writes the label to a file, finding the loss of this example, and then may evaluate the prediction and accumulate statistics.  Once each example is processed, some summary statistics are printed out and the program exits.</p>
+
+<a class="bookmark" name="objects"><h2>Objects</h2></a>
+
+<p>The functions a user writes for the Python module will accept some objects as arguments, and return other objects.  These objects correspond more or less like structures in C code: their intended use is that they only contain data.  Though knowledge of SVM<sup><i>struct</i></sup>'s peculiarities is not strictly required to know how to use SVM<sup><i>python</i></sup>, attention was given to make SVM<sup><i>python</i></sup> resemble SVM<sup><i>struct</i></sup> to as great a degree as seemed sensible, including the names of functions and how different types of objects are structured.</p>
+
+<p>In this section we go over the types of these objects that a user needs to be aware of in order to interface successfully with SVM<sup><i>python</i></sup>.  Note that if you change a value in the Python object this does not copy over to the corresponding C structure, except in the case where you initialize <code>size_psi</code>, and during classification where you read the model and synchronize the Python object to the C structures.  This disparity between the two may change in future releases if the performance hit for copying everything over becomes too offensive.</p>
+
+<h3>Structure Model (sm)</h3>
+
+<img src="object-sm.gif" alt="Diagram Showing SM" width="152" height="360" align="left">
+
+<p>Many of the module functions get the structure model as input.  In the documentation, the structure model argument is called <code>sm</code> in a functions argument list.  This type of corresponds to the C data type <code>STRUCTMODEL</code> that is passed into many functions.  In nearly every case, the only necessary attributes to know about are the <font color="red">red ones</font>, but we describe the others as well.</p>
+
+<p>The <font color="red">red attributes</font> correspond to those that appear within a <code>STRUCTMODEL</code> C structure.  If we are learning or classification with a linear kernel, <code>w</code> is the linear weight vector of length <code>size_psi+1</code>, indexed from 1 through <code>size_psi</code> inclusive.  <code>size_psi</code> contains the maximum feature index for out examples, which in the linear case is also equal to the number of weights we are learning.</p>
+
+<p>The <font color="green">green attributes</font> correspond to those that appear within a <code>STRUCTMODEL</code> C structure's <code>svm_model</code> field.  <code>sv_num</code> holds the number of support vectors plus one.  <code>supvec</code> is a sequence of document objects (described later) that encode every document, while <code>alpha</code> is the multiplier associated with each support vector, where entry <code>alpha[i]</code> corresponds to entry <code>supvec[i-1]</code>.  The <code>b</code> parameter is the linear weight you get if you use the <code>svmlight.classify_example</code> function.  I am less familiar with the role some of the rest of these play with SVM<sup><i>python</i></sup>'s learning model as many of them never seem to be set to anything but a default value, but they are copied to the structure model anyway.
+
+<p>The <font color="blue">blue attributes</font> correspond to those that appear within a <code>STRUCTMODEL</code> C structure's <code>svm_model.kernel_parm</code> field, holding attributes relating to the kernel.  The <code>kernel_type</code> parameter is an integer holding the type of kernel, either linear (0), polynomial (1), RBF (2), sigmoid (3), or user defined (4).  For the polynomial kernel, <code>coef_lin</code> and <code>coef_const</code> hold the coefficient for the inner product of the two vectors and the constant term, while <code>poly_degree</code> holds the polynomial degree to which the sum of the inner product and constant coefficent is taken.  For the RBF kernel, <code>rbf_gamma</code> holds the gamma parameter.  The <code>custom</code> parameter is a string holding information that may be of use for a user defined kernel.</p>
+
+<p>Finally, the <code>cobj</code> object is an object that holds the C <code>STRUCTMODEL</code> structure corresponding to the Python structure model object.  This is of no use within Python, and is used in the event that you call some function of the <code>svmlight</code> package that requires a structure model.</p>
+
+<p>Note that, while learning, anything you store in the structure model will eventually be written out to the model so it can be restored to the classifier, excepting entries that are deleted or overwritten.  So, if you want to pass any information from the learner to the classifier, store it in the structure model.  For example, if you at some point set <code>sm.foo = 10</code> while learning, then during classification <code>sm.foo</code> will evaluate to the integer 10.</p>
+
+<p>The Python code never needs to create structure model objects.</p>
+
+<h3>Structure Learning Parameters (sparm)</h3>
+
+<img src="object-sparm.gif" alt="Diagram Showing Sparm" width="151" height="150" align="left">
+
+<p>Many of the module functions for learning get a structure learning parameter object, identified as <code>sparm</code> in a function's argument list, which holds many attributes related to structured learning.
+
+<p>Some attributes control how the program optimizes.  Recall that the learning process adds a constraint if the constraint is sufficiently violated; The <code>epsilon</code> attribute controls how much a constraint can be violated before it is added to the model.  In the learning process, constriants are added, but the quadratic program is not reoptimized after <em>every</em> constraint is added, but may wait till as many as <code>newconstretrain</code> constraints are added before it reoptimizes.</p>
+
+<p>For attributes relating directly to the quadratic program, the <code>C</code> attribute is the usual SVM regularization parameter that controls the tradeoff between low slack (high C) and a simple model (low C).  The <code>slack_norm</code> is 1 or 2 depending on what norm is used on the slack vector in the quadratic program.  The <code>loss_type</code> is an integer indicating whether loss is introduced into constraints by multiplying by the slack term (<code>loss_type=1</code>) or by dividing by the margin term (<code>loss_type=2</code>).</p>
+
+<p>Other attributes are more for the benefit of the user code, including <code>loss_function</code>, an integer indicating which loss function to use.  The <code>custom_argv</code> and <code>custom_argd</code> attributes hold the custom command line arguments.  In SVM<sup><i>python</i></sup>, as in SVM<sup><i>struct</i></sup>, custom command line argument flags are prefixed with two dashes, while the universal command line argument flags are prefixed with one dash.  The <code>custom_argv</code> holds the list of all the custom arguments, while <code>custom_argd</code> is a dictionary holding a mapping of each "<code>--key</code>" argument to the "<code>value</code>" argument following it.  For example, if the command line arguments "<code>--foo bar --biz bam</code>" are processed, <code>custom_argv</code> would hold the Python sequence <code>['--foo', 'bar', '--biz', 'bam']</code>, while <code>custom_argd</code> would hold the Python dictionary <code>{'foo':'bar', 'biz':'bam'}</code>.</p>
+
+<p>The Python code never needs to create structure learning parameter objects.</p>
+
+<h3>Word Sequences (words)</h3>
+
+<p>In SVM<sup><i>light</i></sup> and SVM<sup><i>struct</i></sup>, the basic feature vector is represented as an array of <code>WORD</code> objects, each of which encodes the feature index number (an integer counting from 1 and higher), and the feature value for this index (a floating point number for the value of the feature).  In the Python code of SVM<sup><i>python</i></sup>, a structure corresponding to these word arrays is a sequence of tuples.  Each tuple has two elements, where the first is the index of the feature, and the second is the value of the feature as described earlier.  So, a sequence <code>[(1,2.3), (5,-6.1), (8,0.5)]</code> has features 1, 5, and 8 with values 2.3, -6.1, and 0.5 respectively; all other features implicitly have value 0.  Note that, as in SVM<sup><i>light</i></sup>, word arrays start counting feature indices from 1, and the features must be listed in increasing feature index order, so if a tuple <var>(a,b)</var> occurs before a tuple <var>(c,d)</var>, it must be that <var>a &lt; c</var>.</p>
+
+<h3>Support Vector (sv)</h3>
+
+<img src="object-sv.gif" alt="Diagram Showing SV" width="152" height="80" align="left">
+
+<p>A support vector structure corresponds to the <code>SVECTOR</code> C structure, which holds information relevant to a support vector, but it is used more generally simply as a feature vector.  The <code>words</code> attribute holds a word sequence as described earlier to encode the feature values.  The <code>userdefined</code> attribute holds a string presumably relevant to user defined kernels, but in most cases it is the empty string.  The <code>kernel_id</code> is an attribute relevant to kernels, as only vectors with the same <code>kernel_id</code> have their kernel product taken.  The <code>factor</code> attribute is the coefficient for the term in the sum of kernel function evaluations.</p>
+
+<p>The <code>SVECTOR</code> C structure also holds a <code>next</code> field, allowing for linked list of kernel functions.  To get this functionality in the Python code, whenever a support vector object is expected or asked for, you can instead pass in or return a sequence of support vector objects, and all the structures that say that an attribute holds a support vector instead has an attribute that holds a sequence of support vectors.</p>
+
+<p>You can create support vector objects through the use of the <code>svmlight.create_svector</code> function.  Support vectors are useful for <code>svmlight.classify_example</code> function, returned from the <code>psi</code> user function, and contained within document objects, described below.</p>
+
+<h3>Document (doc)</h3>
+
+<img src="object-doc.gif" alt="Diagram Showing Doc" width="151" height="80" align="left">
+
+<p>A document vector structure corresponds to the <code>DOC</code> C structure, which holds information relevant to a document example in SVM<sup><i>light</i></sup>, but within SVM<sup><i>struct</i></sup> and SVM<sup><i>python</i></sup> is used for encoding constraints.  The <code>fvec</code> attribute holds sequence of support vector objects.  The <code>costfactor</code> attribute indicates how important it is not to misclassify this example; I'm unclear on the importance of this attribute to SVM<sup><i>struct</i></sup>.</p>  The <code>slackid</code> attribute indicates which slack ID is associated with this constraint; if two constraints have the same slack ID, then they share the same slack variable.  Finally, SVM<sup><i>struct</i></sup> appears to use <code>docnum</code> as the position of the constraint in the constraint set.
+
+<p>You can create support vector objects through the use of the <code>svmlight.create_doc</code> function.  Examples of uses of document objects include the return list from the <code>init_struct_constraints</code> user function to encode initial constraints, the <code>sm.supvec</code> list consists of document objects, and the <code>print_struct_learning_stats</code> has an argument for a list of constraints encoded as document objects.</p>
+
+<h3>Patterns and Labels (x, y)</h3>
+
+<p>In SVM<sup><i>struct</i></sup>'s C API, patterns and labels must be declared as structures.  In SVM<sup><i>python</i></sup>, because patterns and labels only interact with the code in the Python module, the underlying code does not need to know anything about these, so these may be any Python objects.  Their types do not have to be explicitly created, and they do not have to have any particular attributes beyond what is used by the user created Python module.</p>
+
+<a class="bookmark" name="details"><h2>Details of User Functions</h2></a>
+
+<p>In this part, detailed descriptions of each of the user functions is listed.  The expectation that SVM<sup><i>python</i></sup> has of each function is </p>
+
+<dl>
+    <dt><a class="bookmark" name="detail-classify_struct_example"><code><b>classify_struct_example</b></code></a>(<i>x, sm, sparm</i>)</dt>
+<dd>Given a pattern <var>x</var>, return the predicted label.</dd>
+    
+    <dt><a class="bookmark" name="detail-eval_prediction"><code><b>eval_prediction</b></code></a>(<i>exnum, x, y, ypred, sm, sparm, teststats</i>)</dt>
+<dd>Accumulate statistics about a single training example.<p>
+
+Allows accumulated statistics regarding how well the predicted label <var>ypred</var> for pattern <var>x</var> matches the true label <var>y</var>.  The first time this function is called teststats is <code>None</code>.  This function's return value will be passed along to the next call to <code>eval_prediction</code>.  After all test predictions are made, the last value returned will be passed along to <code>print_testing_stats</code>.<p>
+
+If this function is not implemented, the default behavior is equivalent to initialize teststats as an empty list on the first example, and thence for each prediction appending the loss between y and ypred to teststats, and returning teststats.</dd>
+    
+    <dt><a class="bookmark" name="detail-find_most_violated_constraint"><code><b>find_most_violated_constraint</b></code></a>(<i>x, y, sm, sparm</i>)</dt>
+<dd>Return <var>ybar</var> associated with <var>x</var>'s most violated constraint.<p>
+
+Returns the label <var>ybar</var> for pattern <var>x</var> corresponding to the most violated constraint according to SVM<sup><i>struct</i></sup> cost function.  To find which cost function you should use, check sparm.loss_type for whether this is slack or margin rescaling (1 or 2 respectively), and check sparm.slack_norm for whether the slack vector is in an L1-norm or L2-norm in the QP (1 or 2 respectively).  If there's no incorrect label, then return <code>None</code>.<p>
+
+If this function is not implemented, this function is equivalent to <code>classify</code>(<i>x, sm, sparm</i>).  The guarantees of optimality of Tsochantaridis et al. no longer hold since this doesn't take the loss into account at all, but it isn't always a terrible approximation, and indeed impiracally speaking on many clustering problems I have looked at it doesn't yield a statistically significant difference in performance on a test set.</dd>
+    
+    <dt><a class="bookmark" name="detail-init_struct_constraints"><code><b>init_struct_constraints</b></code></a>(<i>sample, sm, sparm</i>)</dt>
+<dd>Initializes special constraints.
+        
+Returns a sequence of initial constraints.  Each constraint in the returned sequence is itself a sequence with two items (the intention is to be a tuple).  The first item of the tuple is a document object, with at least its <var>fvec</var> attribute set to a support vector object, or list of support vector objects.  The second item is a number, indicating that the inner product of the feature vector of the document object with the linear weights must be greater than or equal to the number (or, in the nonlinear case, the evaluation of the kernel on the feature vector with the current model must be greater).  This initializes the optimization problem by allowing the introduction of special constraints.  Typically no special constraints are necessary.<p>
+
+Note that the <var>docnum</var> attribute of each document returned by the user is ignored.  These have to have particular values anyway.  Also, regarding the <var>slackid</var> of each document, the slack IDs 0 through <code>len</code>(<var>sample</var>)-<var>1</var> inclusive are reserved for each training example in the sample.  Note that if you leave the slackid of a document as <code>None</code>, which is the default for <code>svmlight.create_doc</code>, that the document encoded as a constraint will get <var>slackid</var>=<code>len</code>(<var>sample</var>)+<var>i</var>, where <var>i</var> is the position of the constraint within the returned list.<p>
+
+If this function is not implemented, it is equivalent to returning an empty list, i.e., no constraints.</dd>
+    
+    <dt><a class="bookmark" name="detail-init_struct_model"><code><b>init_struct_model</b></code></a>(<i>sample, sm, sparm</i>)</dt>
+<dd>Initializes the learning model.<p>
+
+Initialize the structure model <var>sm</var>.  The major intention is that we set <var>sm.size_psi</var> to the maximum feature index we return from <code>psi</code>.  The ancillary purpose is to add any information to <var>sm</var> that is necessary from the user code perspective.  This function returns nothing.</dd>
+    
+    <dt><a class="bookmark" name="detail-loss"><code><b>loss</b></code></a>(<i>y, ybar, sparm</i>)</dt>
+<dd>Return the loss of <var>ybar</var> relative to the true labeling <var>y</var>.<p>
+
+Returns the loss for the correct label <var>y</var> and the predicted label <var>ybar</var>.  In the event that <var>y</var> and <var>ybar</var> are identical loss must be 0. Presumably as <var>y</var> and <var>ybar</var> grow more and more dissimilar the returned value will increase from that point.  <var>sparm.loss_function</var> holds the loss function option specified on the command line via the <code>-l</code> option.<p>
+
+If this function is not implemented, the default behavior is to perform 0/1 loss based on the truth of <code>y==ybar</code>.</dd>
+    
+    <dt><a class="bookmark" name="detail-parse_struct_parameters"><code><b>parse_struct_parameters</b></code></a>(<i>sparm</i>)</dt>
+<dd>Sets attributes of sparm based on command line arguments.<p>
+
+This gives the user code a chance to change <var>sparm</var> based on the custom command line arguments.  The command line arguments are stored in <var>sparm.argv</var> as a list of strings.  The command line arguments have also been preliminarily processed as <var>sparm.argd</var> as a dictionary.  For example, if the custom command line arguments were <code>--key1 value1 --key2 value2</code> then sparm.argd would equal <code>{'key1':'value1', 'key2':'value2'}</code>.  This function returns nothing.  It is called only during learning, not classification.<p>
+
+If this function is not implemented, any custom command line arguments (aside from <code>--m</code>, of course) are ignored and sparm remains unchanged.</dd>
+    
+    <dt><a class="bookmark" name="detail-print_struct_help"><code><b>print_struct_help</b></code></a>(<i></i>)</dt>
+<dd>Prints help for badly formed CL-arguments when learning.<p>
+
+If this function is not implemented, the program prints the default SVM<sup><i>struct</i></sup> help string as well as a note about the use of the <code>--m</code> option to load a Python module.</dd>
+    
+    <dt><a class="bookmark" name="detail-print_struct_learning_stats"><code><b>print_struct_learning_stats</b></code></a>(<i>sample, sm, cset, alpha, sparm</i>)</dt>
+<dd>Print statistics once learning has finished.<p>
+
+This is called after training primarily to compute and print any statistics regarding the learning (e.g., training error) of the model on the training sample.  You may also use it to make final changes to <var>sm</var> before it is written out to a file.  For example, if you defined any non-pickle-able attributes in <var>sm</var>, this is a good time to turn them into a pickle-able object before it is written out.  Also passed in is the set of constraints cset as a sequence of (left-hand-side, right-hand-side) two-element tuples, and an alpha of the same length holding the Lagrange multipliers for each constraint.<p>
+
+If this function is not implemented, the default behavior is equivalent to <code>print [loss(e[1], classify(e.[0], sm, sparm)) for e in sample]</code>.</dd>
+    
+    <dt><a class="bookmark" name="detail-print_struct_testing_stats"><code><b>print_struct_testing_stats</b></code></a>(<i>sample, sm, sparm, teststats</i>)</dt>
+<dd>Print statistics once classification has finished.<p>
+
+This is called after all test predictions are made to allow the display of any summary statistics that have been accumulated in the teststats object through use of the eval_prediction function.<p>
+
+If this function is not implemented, the default behavior is equivalent to <code>print teststats</code>.</dd>
+    
+    <dt><a class="bookmark" name="detail-psi"><code><b>psi</b></code></a>(<i>x, y, sm, sparm</i>)</dt>
+<dd>Return a feature vector describing pattern x and label y.<p>
+
+This returns a sequence representing the feature vector describing the relationship between a pattern <var>x</var> and label <var>y</var>.  What <var>psi</var> returns depends on the problem.  Its particulars are described in the Tsochantaridis paper.  The return value should be either a support vector object of the type returned by <code>svmlight.create_svector</code>, or a list of support vector objects.</dd>
+    
+    <dt><a class="bookmark" name="detail-read_struct_examples"><code><b>read_struct_examples</b></code></a>(<i>filename, sparm</i>)</dt>
+<dd>Reads and returns <var>x</var>,<var>y</var> example pairs from a file.<p>
+
+This reads the examples contained at the file at path <var>filename</var> and returns them as a sequence.  Each element of the sequence should be an object <var>e</var> where <var>e[0]</var> and <var>e[1]</var> is the pattern <var>x</var> and label <var>y</var> respectively.  Specifically, the intention is that the element be a two-element tuple containing an <var>x</var>-<var>y</var> pair.</dd>
+    
+    <dt><a class="bookmark" name="detail-read_struct_model"><code><b>read_struct_model</b></code></a>(<i>filename, sparm</i>)</dt>
+<dd>Load the structure model from a file.<p>
+
+Return the structmodel stored in the file at path filename, or None if the file could not be read for some reason.<p>
+
+If this function is not implemented, the default behavior is equivalent to <code>return pickle.load(file(filename))</code>.</dd>
+    
+    <dt><a class="bookmark" name="detail-write_label"><code><b>write_label</b></code></a>(<i>fileptr, y</i>)</dt>
+<dd>Write a predicted label to an open file.<p>
+
+Called during classification, the idea is to write a string representation of y to the file fileptr.  Note that unlike other functions, fileptr an actual open file, not a filename.  It is not to be closed by this function.  Any attempt to close it is ignored.<p>
+
+If this function is not implemented, the default behavior is equivalent to <code>fileptr.write(repr(y)+'\n')</code>.</dd>
+    
+    <dt><a class="bookmark" name="detail-write_struct_model"><code><b>write_struct_model</b></code></a>(<i>filename, sm, sparm</i>)</dt>
+<dd>Dump the structmodel <var>sm</var> to a file.<p>
+
+Write the structmodel <var>sm</var> to a file at path filename.<p>
+
+If this function is not implemented, the default behavior is equivalent to <code>pickle.dump(sm, file(filename,'w'))</code>.</dd>
+</dl>
+
+<a class="bookmark" name="svmlight"><h2><code>svmlight</code> Extension Module</h2></a>
+
+There are some functions within the basic SVM<sup><i>light</i></sup> package that a C implementation of SVM<sup><i>struct</i></sup> can use.  While in Python, these functions are, of course, inaccessible.  For this reason, the SVM<sup><i>python</i></sup> provides an extension <code>svmlight</code> module that the Python instantiation modules can import and use to get access to the following sometimes useful functions.
+
+<dl>
+    <dt><code><b>classify_example</b></code>(<i>sm, sv</i>)</dt>
+<dd>Classify a feature vector with the model's kernel function.<p>
+
+Given a feature vector <var>sv</var>, classify it according to the kernel and learned support vectors in the structure model <var>sm</var>.  This is equivalent to the C function <code>classify_example(sm.svm_model, doc)</code>, where <var>doc.fvec</var> holds the vector contained as <var>sv</var>.</dd>
+
+    <dt><code><b>create_doc</b></code>(<i>sv, [costfactor=1.0, [slackid=None, [docnum=None]]]</i>)</dt>
+<dd>Create a Python document object.<p>
+
+This is the rough analogy to the C function <code>create_example</code>, except since the function arguments have been rearranged considerably it has been renamed to avoid confusion.  All arguments except the first one are optional.  The first argument specifies what the document's <var>fvec</var> attribute will hold, and should be a support vector object.  The rest of the arguments are named according to the attributes they set in the document.</dd>
+
+    <dt><code><b>create_svector</b></code>(<i>words, [userdefined=<code>''</code>, [factor=1.0, [kernel_id=0]]]</i>)</dt>
+<dd>Create a Python support vector object.<p>
+
+Given a feature list of words <var>words</var>, create a Python support vector object.  (Note that, unlike other places, this is actually a support vector object and not a list of support vector objects.)  All arguments except the first one are optional.
+
+    <dt><code><b>kernel</b></code>(<i>kp, sv1, sv2</i>)</dt>
+<dd>Evaluate a kernel function on two feature vectors.<p>
+
+The kernel function <var>K</var> is defined by <var>kp</var>, which may have attributes corresponding to the kernel attributes defined for structure models.  The associated default values are provided in case the object passed in does not have these attributes: <var>kp.kernel_type</var>=0, <var>kp.poly_degree</var>=3, <var>kp.rbf_gamma</var>=1.0, <var>kp.coef_lin</var>=1.0, <var>kp.coef_const</var>=1.0, <var>kp.custom</var>=<code>'empty'</code>.  Note that since a structure model contains these attributes, you can just pass in the structure model to use the kernel function for the model.  The float value for the evaluation of the kernel on the two feature vectors <var>sv1</var> and <var>sv2</var> is returned.</dd>
+</dl>
+
+<a class="bookmark" name="parameters"><h2>Special Parameters</h2></a>
+
+It is possible to define some special parameters that control how SVM<sup><i>python</i></sup> interacts with the Python module.  The parameters are defined in a dictionary <var>svmpython_parameters</var> defined at the top level of the Python module.  Parameters in this map are strings that map to values.  If they are not defined, the parameters have some default values as indicated in this list.  If <var>svmpython_parameters</var> is completely absent, none of the parameters are changed from their default values.
+
+<dl>
+<dt><code><b>index_from_one</b></code> = <code>True</code></dt>
+<dd>Normally, as in the C code, the first feature word index is assumed to start at 1, and the first useful value of <var>sm.w</var> is 1 (so the first 0-th entry is useless).  This parameter controls how the <var>sm.w</var> and feature words vectors are indexed.  If this parameter is instead set to <code>False</code>, then all these values are instead indexed from 0, which may be a more natural setting for some applications.</dd>
+</dl>
+
+<a class="bookmark" name="example"><h2>Example Module <code>multiclass</code></h2></a>
+
+What follows is the listing for a Python module "multiclass" contained in the file <code>multiclass.py</code>.  This code run under SVM<sup><i>python</i></sup> is more or less equivalent to SVM<sup><i>multiclass</i></sup>.
+
+<pre>
+"""<font class="cstring">A module for SVM^python for multiclass learning.</font>"""
+
+<font class="ccomment"># The svmlight package lets us use some useful portions of the C code.</font>
+<font class="creserved">import</font> svmlight
+
+<font class="ccomment"># These parameters are set to their default values so this declaration</font>
+<font class="ccomment"># is technically unnecessary.</font>
+svmpython_parameters = {"<font class="cstring">index_from_one</font>":True}
+
+<font class="creserved">def</font> <font class="creserved">read_struct_examples</font>(filename, sparm):
+    <font class="ccomment"># This reads example files of the type read by SVM^multiclass.</font>
+    examples = []
+    sparm.num_features = sparm.num_classes = 0
+    <font class="ccomment"># Open the file and read each example.</font>
+    <font class="creserved">for</font> line <font class="creserved">in</font> <font class="creserved">file</font>(filename):
+        <font class="ccomment"># Get rid of comments.</font>
+        <font class="creserved">if</font> line.find("<font class="cstring">#</font>"): line = line[:line.find("<font class="cstring">#</font>")]
+        tokens = line.split()
+        <font class="ccomment"># If the line is empty, who cares?</font>
+        <font class="creserved">if</font> <font class="creserved">not</font> tokens: continue
+        <font class="ccomment"># Get the target.</font>
+        target = <font class="creserved">int</font>(tokens[0])
+        sparm.num_classes = <font class="creserved">max</font>(target, sparm.num_classes)
+        <font class="ccomment"># Get the features.</font>
+        tokens = [<font class="creserved">tuple</font>(t.split("<font class="cstring">:</font>")) <font class="creserved">for</font> t <font class="creserved">in</font> tokens[1:]]
+        features = [(<font class="creserved">int</font>(k),<font class="creserved">float</font>(v)) <font class="creserved">for</font> k,v <font class="creserved">in</font> tokens]
+        if features:
+            sparm.num_features = <font class="creserved">max</font>(features[-1][0], sparm.num_features)
+        <font class="ccomment"># Add the example to the list</font>
+        examples.append((features, target))
+    <font class="ccomment"># Print out some very useful statistics.</font>
+    <font class="creserved">print</font> <font class="creserved">len</font>(examples),"<font class="cstring">examples read with</font>",sparm.num_features,
+    <font class="creserved">print</font> "<font class="cstring">features and</font>",sparm.num_classes,"<font class="cstring">classes</font>"
+    <font class="creserved">return</font> examples
+
+<font class="creserved">def</font> <font class="creserved">loss</font>(y, ybar, sparm):
+    <font class="ccomment"># We use zero-one loss.</font>
+    <font class="creserved">if</font> y==ybar: <font class="creserved">return</font> 0
+    <font class="creserved">return</font> 1
+
+<font class="creserved">def</font> <font class="creserved">init_struct_model</font>(sample, sm, sparm):
+    <font class="ccomment"># In the corresponding C code, the counting of features and</font>
+    <font class="ccomment"># classes was done in the model initialization, not here.</font>
+    sm.size_psi = sparm.num_features * sparm.num_classes
+    <font class="creserved">print</font> "<font class="cstring">size_psi set to</font>",sm.size_psi
+
+<font class="creserved">def</font> <font class="creserved">classify_struct_example</font>(x, sm, sparm):
+    <font class="ccomment"># I am a very bad man.  There is no class 0, of course.</font>
+    <font class="creserved">return</font> find_most_violated_constraint(x, 0, sm, sparm)
+
+<font class="creserved">def</font> <font class="creserved">find_most_violated_constraint</font>(x, y, sm, sparm):
+    <font class="ccomment"># Get all the wrong classes.</font>
+    classes = [c+1 <font class="creserved">for</font> c <font class="creserved">in</font> <font class="creserved">range</font>(sparm.num_classes) <font class="creserved">if</font> c+1 <font class="creserved">is</font> <font class="creserved">not</font> y]
+    <font class="ccomment"># Get the psi vectors for each example in each class.</font>
+    vectors = [(psi(x,c,sm,sparm),c) <font class="creserved">for</font> c <font class="creserved">in</font> classes]
+    <font class="ccomment"># Get the predictions for each psi vector.</font>
+    predictions = [(svmlight.classify_example(sm, p),c) <font class="creserved">for</font> p,c <font class="creserved">in</font> vectors]
+    <font class="ccomment"># Return the class associated with the maximum prediction!</font>
+    <font class="creserved">return</font> <font class="creserved">max</font>(predictions)[1]
+
+<font class="creserved">def</font> <font class="creserved">psi</font>(x, y, sm, sparm):
+    <font class="ccomment"># Just increment the feature index to the appropriate stack position.</font>
+    <font class="creserved">return</font> svmlight.create_svector([(f+(y-1)*sparm.num_features,v)
+                                    <font class="creserved">for</font> f,v <font class="creserved">in</font> x])
+
+<font class="ccomment"># The default action of printing out all the losses or labels is</font>
+<font class="ccomment"># irritating for the 300 training examples and 2200 testing examples</font>
+<font class="ccomment"># in the sample task.</font>
+<font class="creserved">def</font> <font class="creserved">print_struct_learning_stats</font>(sample, sm, cset, alpha, sparm):
+    predictions = [classify_struct_example(x,sm,sparm) <font class="creserved">for</font> x,y <font class="creserved">in</font> sample]
+    losses = [loss(y,ybar,sparm) <font class="creserved">for</font> (x,y),ybar <font class="creserved">in</font> <font class="creserved">zip</font>(sample,predictions)]
+    <font class="creserved">print</font> "<font class="cstring">Average loss:</font>",<font class="creserved">float</font>(<font class="creserved">sum</font>(losses))/<font class="creserved">len</font>(losses)
+
+<font class="creserved">def</font> <font class="creserved">print_struct_testing_stats</font>(sample, sm, sparm, teststats): <font class="creserved">pass</font>
+</pre>
+
+<hr>
+Thomas Finley, 2005
+</body></html>
