@@ -30,7 +30,7 @@ import matplotlib.pyplot as plt
 _Functions = ['run']
 		
 class svm:
-	def __init__(self,X=list(),nu=.5, gamma =0.5 ):
+	def __init__(self,X=list(),nu=.5, gamma =5. ):
 		self.X = X
 		self.Y = None
 		self.SV = None
@@ -42,11 +42,17 @@ class svm:
 		
 		self._compute()
 
+	def _K(self,X,Y):
+		diff = X - Y
+		N = X.size
+		M = Y.size
+		return ( 1 / ( 1 + exp( -self.gamma * diff ) ) ).reshape(N,M)
+			
 	def cdf(self,x):
-		return self.mod.predict_values(x)
+		return numpy.dot( self._K( self.SV, x ).T, self.beta )
 		
 	def Pr(self,x):
-		return x
+		return numpy.dot(self.beta, self._K(self.SV,x) )[0][0]
 		
 	def __iadd__(self, points):
 		# overloaded '+=', used for adding a vector list to the module's data
@@ -76,16 +82,24 @@ class svm:
 		Y = ( (X.reshape(N,1,d) > transpose(X.reshape(N,1,d),[1,0,2])).prod(2).sum(1,dtype=float) / N )
 		self.Y = Y
 		
-		print X.shape
-		print Y.shape
+		#For precomputed kernels, the first element of each instance must be
+		#the ID. For example,
+		#
+		#samples = [[1, 0, 0, 0, 0], [2, 0, 1, 0, 1], [3, 0, 0, 1, 1], [4, 0, 1, 1, 2]]
+		#problem = svm_problem(labels, samples);
+		#
+		# In other words, instead of giving it the data, give it the kernel matrix, + 1 (for the ID)
 		
-		self.param = svm_parameter(svm_type=NU_SVR, kernel_type = SIGMOID, nu = self.nu, gamma = self.gamma, cache_size = 500)
-		self.mod = svm_model(svm_problem( list(Y), list(X) ),self.param)
+
+		K = numpy.hstack( [array( range(N) ).reshape([N,1]), self._K( Y.reshape(N,1,d), transpose(Y.reshape(N,1,d), [1,0,2])) ] )
+			
+		self.param = svm_parameter(svm_type=NU_SVR, kernel_type = PRECOMPUTED, nu = self.nu, gamma = self.gamma, cache_size = 500)
+		self.mod = svm_model(svm_problem( list(Y), [ list(k) for k in K ] ),self.param)
 		self.mod.save(path)
 		
 		parse_file = file(path,'r')
 		lines = parse_file.readlines()
-		self.rho = float( lines[5].split(' ')[1] )
+		#self.rho = float( lines[5].split(' ')[1] )
 		
 		SV = list()
 		betas = list()
@@ -106,14 +120,15 @@ class svm:
 			
 		self.SV = array(SV)
 		self.beta = array(betas)
-		#self.pdf = self.mod.get_svr_pdf()
+		self.beta /= self.beta.sum()
+		print self.beta.sum()
 
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % (float(duration.microseconds)/1000000)
 		print "SV's found: %s" % len(SV)
 					
 def run():
-	mod = svm( array([[gauss(0,1)] for i in range(20) ] + [[gauss(8,1)] for i in range(20) ]).reshape([40,1]) )
+	mod = svm( array([[gauss(0,1)] for i in range(50) ] + [[gauss(8,1)] for i in range(50) ]).reshape([100,1]) )
 	
 	print "Total Loss: %s" % sum( (mod.Y.reshape( [len(mod.X),]) - mod.cdf( mod.X.reshape( [len(mod.X),]) ) ) ** 2)
 	
@@ -130,7 +145,7 @@ def run():
 	
 	c = fig.add_subplot(2,2,2)
 	c.plot(numpy.sort(mod.X,0), numpy.sort(mod.Y,0), 'green' )
-	c.plot(X, [ mod.cdf((x,)) for x in X ], 'r--' )
+	c.plot(X, mod.cdf(X), 'r--' )
 	c.plot( mod.X, (mod.Y.reshape( [len(mod.X),]) - mod.cdf( mod.X.reshape( [len(mod.X),]) ) ) ** 2, '+' )
 	c.set_title("Computed vs emprical CDF")
 	
