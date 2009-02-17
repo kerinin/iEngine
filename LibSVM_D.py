@@ -151,14 +151,11 @@ def run():
 	
 	#d = fig.add_subplot(2,2,4)
 	#for i in range(len(mod.beta) ):
-	#	beta = mod.beta[i]
-		
-	#	for j in range(len(mod.X) ):
-	#		if beta[j][0]:
-	#			d.plot( X, beta[j][0] * mod._K(mod.X[j], X, [mod.gamma[i],])[0].reshape([len(X),1]) )
+	#	d.plot( X, mod.beta[i] * mod._K( mod.SV[i], X ) )
 	#d.set_title("SV Contributions")
 	
-	plt.show()
+	#print mod.beta
+	#plt.show()
 	
 	
 def help():
