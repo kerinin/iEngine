@@ -109,39 +109,32 @@ class svm:
 		X = self.data
 		
 		# CMF of observations X
-		Y = ( (X.reshape(N,1,d) > transpose(X.reshape(N,1,d),[1,0,2])).prod(2).sum(1,dtype=float) / N ).reshape([N,1])
+		Y = ( (X.reshape(N,1,d) > transpose(X.reshape(N,1,d),[1,0,2])).prod(2).sum(1,dtype=float) / N ).reshape([N,])
 
-		Z = zeros([N,N])
-		K = ma.masked_greater( vstack(
+		Z = numpy.zeros([N,N])
+		K = numpy.ma.masked_greater( vstack(
 			[ 
-				hstack( ( [Z,] * i ) + [self._K( Y.reshape(N,1,d), transpose(Y.reshape(N,1,d), [1,0,2]), gamma[i] ),] + ( [Z,]*(kappa-i-1 ) ) )
+				numpy.hstack( ( [Z,] * i ) + [self._K( Y.reshape(N,1,d), transpose(Y.reshape(N,1,d), [1,0,2]), gamma[i] ),] + ( [Z,]*(kappa-i-1 ) ) )
 				for i in range( kappa ) 
 			]
 		), 1e-10 )
 		
-		Gamma = 1/array( [ tile(g,N) for g in gamma ] )
+		Gamma = 1/numpy.hstack( [ numpy.tile(g,N) for g in gamma ] )
 		
-		P = cvxopt.matrix( dot(K,K), (N*kappa,N*kappa) )
-		
-		q = cvxopt.matrix( ( C*Gamma ) - ( 2* dot( tile(Y,kappa) ,K) ), (N*kappa,1) )
+		P = cvxopt.matrix( numpy.dot(K,K), (N*kappa,N*kappa) )
+
+		q = cvxopt.matrix( ( ( C * Gamma ) - ( 2 * numpy.ma.dot( tile(Y,kappa) ,K) ) ), (N*kappa,1) )
 		
 		G = cvxopt.matrix( identity(N*kappa), (N*kappa,N*kappa) )
 		
 		h = cvxopt.matrix( 0.0, (N*kappa,1) )
 		
-		A = cvxopt.matrix( 1.0, (N*kappa,1) )
+		A = cvxopt.matrix( 1.0, (1,N*kappa) )
 		
 		b = cvxopt.matrix( 1.0, (1,1) )
 		
-		print P.size
-		print q.size
-		print G.size
-		print h.size
-		print A.size
-		print b.size
-		
 		# Solve!
-		#p = cvxopt.qp( P=P, q=q, G=G, h=h, A=A, b=b )
+		p = solvers.qp( P=P, q=q, G=G, h=h, A=A, b=b )
 		
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % (float(duration.microseconds)/1000000)
