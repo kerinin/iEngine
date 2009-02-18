@@ -32,7 +32,7 @@ import matplotlib.pyplot as plt
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C=1e-1, gamma =[ (2./3.)**i for i in range(-2,2) ] ):
+	def __init__(self,data=list(),C=1e-1, gamma =[ (2./3.)**i for i in range(-1,1) ] ):
 		self.data = data
 		self.Fl = None
 		self.SV = None
@@ -112,7 +112,7 @@ class svm:
 		Y = ( (X.reshape(N,1,d) > transpose(X.reshape(N,1,d),[1,0,2])).prod(2).sum(1,dtype=float) / N ).reshape([N,])
 
 		Z = numpy.zeros([N,N])
-		K = numpy.ma.masked_greater( vstack(
+		K = numpy.ma.masked_less( vstack(
 			[ 
 				numpy.hstack( ( [Z,] * i ) + [self._K( Y.reshape(N,1,d), transpose(Y.reshape(N,1,d), [1,0,2]), gamma[i] ),] + ( [Z,]*(kappa-i-1 ) ) )
 				for i in range( kappa ) 
@@ -134,6 +134,8 @@ class svm:
 		b = cvxopt.matrix( 1.0, (1,1) )
 		
 		print "P: %s, q: %s, G: %s, h: %s, A: %s, b: %s" % (P.size,q.size,G.size,h.size,A.size,b.size)
+		print P
+		print K == K.T
 		
 		# Solve!
 		p = solvers.qp( P=P, q=q, G=G, h=h, A=A, b=b )
@@ -143,7 +145,7 @@ class svm:
 		
 		
 def run():
-	mod = svm( array([[gauss(0,1)] for i in range(20) ] + [[gauss(8,1)] for i in range(20) ]).reshape([40,1]) )
+	mod = svm( array([[gauss(0,1)] for i in range(2) ] + [[gauss(8,1)] for i in range(2) ]).reshape([4,1]) )
 		
 	print "Total Loss: %s" % sum( (mod.Fl.reshape( [len(mod.data),]) - mod.cdf( mod.data.reshape( [len(mod.data),]) ) ) ** 2)
 	
