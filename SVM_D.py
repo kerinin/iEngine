@@ -32,7 +32,7 @@ import matplotlib.pyplot as plt
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C=1e-1, gamma =[ (2./3.)**i for i in range(-2,-1) ] ):
+	def __init__(self,data=list(),C=1e-1, gamma =[ (2./3.)**i for i in range(-2,2) ] ):
 		self.data = data
 		self.Fl = None
 		self.SV = None
@@ -44,12 +44,11 @@ class svm:
 		self._compute()
 	
 	def _K(self,X,Y,gamma):
-		diff = X - Y
 		N = X.size
 		M = Y.size
 		
 		# Sigmoid
-		return [ ( 1 / ( 1 + exp( gi * diff ) ) ).reshape(N,M) for gi in gamma ]
+		return ( 1 / ( 1 + exp( gamma * (X-Y) ) ) ).reshape(N,M)
 		
 		# RBF
 		#return [ ( exp( -(diff**2) / gi ) ).reshape(N,M) for gi in gamma ]
@@ -103,9 +102,6 @@ class svm:
 		# there you can start working on decomposition.
 		
 		
-		
-		
-		
 		C = self.C
 		gamma = self.gamma
 		kappa = len( gamma )
@@ -113,23 +109,21 @@ class svm:
 		X = self.data
 		
 		# CMF of observations X
-		Y = tile( (X.reshape(N,1,d) > transpose(X.reshape(N,1,d),[1,0,2])).prod(2).sum(1,dtype=float) / N ).reshape([N,1]), kappa )
-		
+		Y = ( (X.reshape(N,1,d) > transpose(X.reshape(N,1,d),[1,0,2])).prod(2).sum(1,dtype=float) / N ).reshape([N,1])
+
 		Z = zeros([N,N])
 		K = ma.masked_greater( vstack(
-			[ hstack( [ 
-				tile( zeros, i-1),
-				self._K( Y.reshape(N,1,d), transpose(Y.reshape(N,1,d), [1,0,2]), gamma[i] ),
-				tile( zeros, kappa-i )
-			] )				
-			for i in range( kappa ) ]
+			[ 
+				hstack( ( [Z,] * i ) + [self._K( Y.reshape(N,1,d), transpose(Y.reshape(N,1,d), [1,0,2]), gamma[i] ),] + ( [Z,]*(kappa-i-1 ) ) )
+				for i in range( kappa ) 
+			]
 		), 1e-10 )
 		
-		Gamma = 1/array( tile(g,N), for g in gamma )
+		Gamma = 1/array( [ tile(g,N) for g in gamma ] )
 		
 		P = cvxopt.matrix( dot(K,K), (N*kappa,N*kappa) )
 		
-		q = cvxopt.matrix( ( C*gamma ) - ( 2* dot(Y,K) ), (N*kappa,1) )
+		q = cvxopt.matrix( ( C*Gamma ) - ( 2* dot( tile(Y,kappa) ,K) ), (N*kappa,1) )
 		
 		G = cvxopt.matrix( identity(N*kappa), (N*kappa,N*kappa) )
 		
@@ -139,21 +133,19 @@ class svm:
 		
 		b = cvxopt.matrix( 1.0, (1,1) )
 		
+		print P.size
+		print q.size
+		print G.size
+		print h.size
+		print A.size
+		print b.size
+		
 		# Solve!
-		p = cvxopt.qp( P=P, q=q, G=G, h=h, A=A, b=b )
+		#p = cvxopt.qp( P=P, q=q, G=G, h=h, A=A, b=b )
 		
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % (float(duration.microseconds)/1000000)
 		
-		self.Fl = Xcmf
-		self.betas = [ ma.masked_less( alpha.value, 1e-4).T for alpha in alphas ]
-		
-		print "SV's found: %s" % [ len( beta.compressed()) for beta in self.betas ]
-			
-		for i in range(len(self.betas)):
-			beta = self.betas[i]
-			if beta.count():
-				print "SV @ gamma=%s: %s" % (self.gamma[i], str(ma.sort( ma.array(self.data, mask=ma.getmask(beta) ).compressed() ) ) )
 		
 def run():
 	mod = svm( array([[gauss(0,1)] for i in range(20) ] + [[gauss(8,1)] for i in range(20) ]).reshape([40,1]) )
@@ -186,7 +178,7 @@ def run():
 				d.plot( X, beta[j][0] * mod._K(mod.data[j], X, [mod.gamma[i],])[0].reshape([len(X),1]) )
 	d.set_title("SV Contributions")
 	
-	plt.show()
+	#plt.show()
 	
 	
 def help():
