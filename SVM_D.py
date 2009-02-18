@@ -101,50 +101,35 @@ class svm:
 		# Gameplan: implement this minimization problem - if it works figure out what the matrix
 		# definitions will be for the optimization problem and re-implement it in CVXOPT.  From
 		# there you can start working on decomposition.
-
+		
+		
+		
+		
+		
 		C = self.C
 		gamma = self.gamma
-		Kcount = len( gamma )
+		kappa = len( gamma )
 		(N,d) = self.data.shape
 		X = self.data
 		
 		# CMF of observations X
-		Xcmf = ( (X.reshape(N,1,d) > transpose(X.reshape(N,1,d),[1,0,2])).prod(2).sum(1,dtype=float) / N ).reshape([N,1])
+		Y = tile( (X.reshape(N,1,d) > transpose(X.reshape(N,1,d),[1,0,2])).prod(2).sum(1,dtype=float) / N ).reshape([N,1]), kappa )
 		
-		K = self._K( Xcmf.reshape(N,1,d), transpose(Xcmf.reshape(N,1,d), [1,0,2]), gamma )
+		#NOTE: this isn't how diag is actually used...
+		K = ma.masked_greater( diag( [ self._K( Y.reshape(N,1,d), transpose(Y.reshape(N,1,d), [1,0,2]), gamma ) for gamma in self.gammas ], N*kappa, N*kappa ), 1e-10 )
 		
-		pY = cvxmod.param("Y", value=cvxopt.matrix( Xcmf, ( 1, N ) ) )
-		pY.pos = True
-			
-		alphas = list()
-		Ks = list()
-		expr1 = 0
-		expr2 = 0
-		eq = 0
-
-		for i in range( Kcount ):
-			alpha = cvxmod.optvar( 'alpha(%s)' % i, 1,N)
-			alpha.pos = True
-			pK = cvxmod.param('K(%s)' % i, value=cvxopt.matrix( K[i], ( N, N ) ) )
-			pK.pos = True
-			
-			alphas.append( alpha )
-			Ks.append(pK)
-			expr1 += alpha * pK
-			expr2 += gamma[i] * alpha
-			eq += cvxmod.sum( alpha )
-			
-		#objective = cvxmod.minimize( cvxmod.sum( cvxmod.atoms.square( pY - expr1 ) ) + ( C * cvxmod.sum( expr2 ) ) )
-		objective = cvxmod.minimize( cvxmod.sum( cvxmod.atoms.square( pY - expr1 ) ) )
+		Gamma = 1/array( tile(g,N), for g in gamma )
 		
-		eq1 = eq == cvxopt.matrix( 1.0 )
+		Q1 = 2 * ma.array( dot(K.sum(0),K.sum(1)), tri(N*kappa, k=-1) )
+		
+		Q2 = ma.diag( K.sum(0) ** 2 )
+		
+		c1 = -2 * dot(Y,K)
+		
+		c2 = C * Gamma
 		
 		# Solve!
-		p = cvxmod.problem( objective = objective, constr = [] )
-		
-		start = datetime.datetime.now()
-		p.solve()
-		p.classify()
+		p = cvxopt.qp( Q=Q1+Q2, c=c1+c2, A=ones(N*kappa,1), b=1.0 )
 		
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % (float(duration.microseconds)/1000000)
