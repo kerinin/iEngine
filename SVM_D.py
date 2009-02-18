@@ -115,21 +115,32 @@ class svm:
 		# CMF of observations X
 		Y = tile( (X.reshape(N,1,d) > transpose(X.reshape(N,1,d),[1,0,2])).prod(2).sum(1,dtype=float) / N ).reshape([N,1]), kappa )
 		
-		#NOTE: this isn't how diag is actually used...
-		K = ma.masked_greater( diag( [ self._K( Y.reshape(N,1,d), transpose(Y.reshape(N,1,d), [1,0,2]), gamma ) for gamma in self.gammas ], N*kappa, N*kappa ), 1e-10 )
+		Z = zeros([N,N])
+		K = ma.masked_greater( vstack(
+			[ hstack( [ 
+				tile( zeros, i-1),
+				self._K( Y.reshape(N,1,d), transpose(Y.reshape(N,1,d), [1,0,2]), gamma[i] ),
+				tile( zeros, kappa-i )
+			] )				
+			for i in range( kappa ) ]
+		), 1e-10 )
 		
 		Gamma = 1/array( tile(g,N), for g in gamma )
 		
-		Q1 = 2 * ma.array( dot(K.sum(0),K.sum(1)), tri(N*kappa, k=-1) )
+		P = cvxopt.matrix( dot(K,K), (N*kappa,N*kappa) )
 		
-		Q2 = ma.diag( K.sum(0) ** 2 )
+		q = cvxopt.matrix( ( C*gamma ) - ( 2* dot(Y,K) ), (N*kappa,1) )
 		
-		c1 = -2 * dot(Y,K)
+		G = cvxopt.matrix( identity(N*kappa), (N*kappa,N*kappa) )
 		
-		c2 = C * Gamma
+		h = cvxopt.matrix( 0.0, (N*kappa,1) )
+		
+		A = cvxopt.matrix( 1.0, (N*kappa,1) )
+		
+		b = cvxopt.matrix( 1.0, (1,1) )
 		
 		# Solve!
-		p = cvxopt.qp( Q=Q1+Q2, c=c1+c2, A=ones(N*kappa,1), b=1.0 )
+		p = cvxopt.qp( P=P, q=q, G=G, h=h, A=A, b=b )
 		
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % (float(duration.microseconds)/1000000)
