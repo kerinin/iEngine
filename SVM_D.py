@@ -133,6 +133,8 @@ class svm:
 		
 		b = cvxopt.matrix( 1.0, (1,1) )
 		
+		print "P: %s, q: %s, G: %s, h: %s, A: %s, b: %s" % (P.size,q.size,G.size,h.size,A.size,b.size)
+		
 		# Solve!
 		p = solvers.qp( P=P, q=q, G=G, h=h, A=A, b=b )
 		
