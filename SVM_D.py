@@ -32,7 +32,7 @@ import matplotlib.pyplot as plt
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C=1e-1, gamma =[ (2./3.)**i for i in range(-5,5) ] ):
+	def __init__(self,data=list(),C=1e-1, gamma =[ (2./3.)**i for i in range(0,1) ] ):
 		self.data = data
 		self.Y = None
 		self.SV = None
