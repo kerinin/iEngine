@@ -38,6 +38,7 @@ class svm:
 		self.SV = None
 		self.betas = None
 		self.d = None
+		self.K = None
 		
 		self.C = C
 		self.gamma = gamma
@@ -45,6 +46,7 @@ class svm:
 		self._compute()
 	
 	def _Omega(self,Gamma):
+		return 0
 		return self.C / Gamma
 		
 	def _K(self,X,Y,gamma):
@@ -123,6 +125,7 @@ class svm:
 		self.beta = numpy.atleast_2d( numpy.ma.array( alpha, mask=mask ).compressed() )
 		self.SV = numpy.atleast_2d( numpy.ma.array( numpy.tile(X,kappa), mask=mask).compressed() )
 		self.gamma = numpy.atleast_2d( numpy.ma.array( Gamma, mask=mask ).compressed() )
+		self.K = K
 		
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % (float(duration.microseconds)/1000000)
@@ -131,7 +134,7 @@ class svm:
 		
 		
 def run():
-	mod = svm( array([[gauss(0,1)] for i in range(50) ] + [[gauss(8,1)] for i in range(50) ]).reshape([100,1]) )
+	mod = svm( array([[gauss(0,1)] for i in range(20) ] + [[gauss(8,1)] for i in range(20) ]).reshape([40,1]) )
 	
 	print "Total Loss: %s" % sum( (mod.Y.reshape( [len(mod.data),]) - mod.cdf( mod.data.reshape( [len(mod.data),]) ) ) ** 2)
 	
@@ -142,9 +145,12 @@ def run():
 	X = arange(start,end,.25)
 	
 	a = fig.add_subplot(2,2,1)
-	n, bins, patches = a.hist(mod.data, 20, normed=1, facecolor='green', alpha=0.5, label='empirical distribution')
-	a.plot(X,mod.pdf(X), 'r--', label="computed distribution")
-	a.set_title("Computed vs empirical PDF")
+	#n, bins, patches = a.hist(mod.data, 20, normed=1, facecolor='green', alpha=0.5, label='empirical distribution')
+	#a.plot(X,mod.pdf(X), 'r--', label="computed distribution")
+	#a.set_title("Computed vs empirical PDF")
+	
+	a.hist(mod.K.compressed().flatten(), 20, normed=1)
+	a.set_title("K distribution")
 	
 	b = fig.add_subplot(2,2,3)
 	b.plot(mod.gamma, mod.beta,  'o')
@@ -159,7 +165,6 @@ def run():
 	d = fig.add_subplot(2,2,4)
 	for i in range( len(mod.beta) ):
 		d.plot( X, numpy.dot( mod._K( atleast_2d(X).T, mod.SV[i], mod.gamma[i] ), mod.beta[i].T ) )
-		print i
 		#d.plot( X, numpy.dot( mod._K( X, mod.SV[i], mod.gamma[i] ), mod.beta[i] ) )
 	d.set_title("SV Contributions")
 	
