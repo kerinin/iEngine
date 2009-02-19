@@ -32,7 +32,7 @@ import matplotlib.pyplot as plt
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C=1e-20, gamma =[ (2./3.)**i for i in range(-5,5) ] ):
+	def __init__(self,data=list(),C=1e-1, gamma =[ (2./3.)**i for i in range(-5,5) ] ):
 		self.data = data
 		self.Y = None
 		self.SV = None
@@ -44,6 +44,9 @@ class svm:
 		
 		self._compute()
 	
+	def _Omega(self,Gamma):
+		return self.C / Gamma
+		
 	def _K(self,X,Y,gamma):
 		N = X.size
 		M = Y.size
@@ -62,11 +65,11 @@ class svm:
 		return ( gamma / ( 2.0 + numpy.exp( gamma * diff ) + numpy.exp( -gamma * diff ) ) ).reshape(N,M)
 		
 	def cdf(self,x):
-		print 'cdf: %s' % repr(x.shape)
+		#print 'cdf: %s' % repr(x.shape)
 		return numpy.dot( self._K( atleast_2d(x).T, self.SV, self.gamma ), self.beta.T )
 		
 	def pdf(self,x):
-		print 'pdf: %s' % repr(x.shape)
+		#print 'pdf: %s' % repr(x.shape)
 		return numpy.dot( self._k( atleast_2d(x).T, self.SV, self.gamma ), self.beta.T )
 		
 	def __iadd__(self, points):
@@ -100,16 +103,16 @@ class svm:
 				for i in range( kappa ) 
 			]
 		), 1e-10 )
-		Gamma = 1/numpy.hstack( [ numpy.tile(g,N) for g in gamma ] )
+		Gamma = numpy.hstack( [ numpy.tile(g,N) for g in gamma ] )
 			
 		P = cvxopt.matrix( numpy.dot(K.T,K), (N*kappa,N*kappa) )
-		q = cvxopt.matrix( ( ( C * Gamma ) - ( 2.0 * numpy.ma.dot( tile(Y,kappa), K ) ) ), (N*kappa,1) )
+		q = cvxopt.matrix( ( self._Omega(Gamma) - ( 2.0 * numpy.ma.dot( tile(Y,kappa), K ) ) ), (N*kappa,1) )
 		G = cvxopt.matrix( -identity(N*kappa), (N*kappa,N*kappa) )
 		h = cvxopt.matrix( 0.0, (N*kappa,1) )
 		A = cvxopt.matrix( 1., (1,N*kappa) )
 		b = cvxopt.matrix( 1., (1,1) )
 		#print "P: %s, q: %s, G: %s, h: %s, A: %s, b: %s" % (P.size,q.size,G.size,h.size,A.size,b.size)
-		print q
+		
 		# Solve!
 		p = solvers.qp( P, q, G, h, A, b )
 		
@@ -128,7 +131,7 @@ class svm:
 		
 		
 def run():
-	mod = svm( array([[gauss(0,1)] for i in range(5) ] + [[gauss(8,1)] for i in range(5) ]).reshape([10,1]) )
+	mod = svm( array([[gauss(0,1)] for i in range(50) ] + [[gauss(8,1)] for i in range(50) ]).reshape([100,1]) )
 	
 	print "Total Loss: %s" % sum( (mod.Y.reshape( [len(mod.data),]) - mod.cdf( mod.data.reshape( [len(mod.data),]) ) ) ** 2)
 	
@@ -153,10 +156,12 @@ def run():
 	#c.plot( mod.data, (mod.Y.reshape( [len(mod.data),]) - mod.cdf( mod.data.reshape( [len(mod.data),]) ) ) ** 2, '+' )
 	c.set_title("Computed vs emprical CDF")
 	
-	#d = fig.add_subplot(2,2,4)
-	#for i in range(len(mod.beta) ):
-	#	d.plot( X, numpy.dot( mod._K( X, mod.SV[i], mod.gamma[i] ), mod.beta[i] ) )
-	#d.set_title("SV Contributions")
+	d = fig.add_subplot(2,2,4)
+	for i in range( len(mod.beta) ):
+		d.plot( X, numpy.dot( mod._K( atleast_2d(X).T, mod.SV[i], mod.gamma[i] ), mod.beta[i].T ) )
+		print i
+		#d.plot( X, numpy.dot( mod._K( X, mod.SV[i], mod.gamma[i] ), mod.beta[i] ) )
+	d.set_title("SV Contributions")
 	
 	plt.show()
 	
