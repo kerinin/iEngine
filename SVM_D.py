@@ -32,11 +32,12 @@ import matplotlib.pyplot as plt
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C=1e2, gamma =[ (2./3.)**i for i in range(-1,1) ] ):
+	def __init__(self,data=list(),C=1e0, gamma =[ (2./3.)**i for i in range(-1,1) ] ):
 		self.data = data
-		self.Fl = None
+		self.Y = None
 		self.SV = None
 		self.betas = None
+		self.d = None
 		
 		self.C = C
 		self.gamma = gamma
@@ -53,32 +54,18 @@ class svm:
 		# RBF
 		# return ( exp( -((X-Y)**2.0) / gamma ) ).reshape(N,M)
 
+	def _k(self,X,Y,gamma):
+		diff = X-Y
+		N = X.size
+		M = Y.size
+		
+		return gamma / ( 2 + exp( gamma * diff ) + exp( -gamma * diff ) )
+		
 	def cdf(self,x):
-		ret = zeros(x.shape)
+		return numpy.dot( self._K( self.SV, x, self.gamma ).T, self.beta )
 		
-		# Inelegant I know, but for now...
-		for i in range( len(self.gamma) ):
-			gamma = self.gamma[i]
-			beta = self.betas[i].compressed()
-			data = numpy.ma.array(self.data, mask=numpy.ma.getmask(self.betas[i])).compressed()
-			
-			ret += numpy.dot( self._K( data.reshape([len(data),1]), x, [gamma,] )[0].T, beta )
-		return ret
-		
-	def Pr(self,x):
-		ret = zeros(x.shape)
-		
-		# Inelegant I know, but for now...
-		#for i in range( len(self.gamma) ):
-		for i in range( len(self.gamma) ):
-			gamma = self.gamma[i]
-			beta = self.betas[i].compressed()
-			data = numpy.ma.array(self.data, mask=numpy.ma.getmask(self.betas[i])).compressed()
-			diff = data.reshape([len(data),1]) - x
-			
-			ret += numpy.dot( beta.T, ( gamma / ( 2 + exp( gamma * diff ) + exp( -gamma * diff ) ) ) )
-			
-		return ret
+	def pdf(self,x):
+		return numpy.dot( self._k(self.SV, x, self.gamma ).T, self.beta )
 		
 	def __iadd__(self, points):
 		# overloaded '+=', used for adding a vector list to the module's data
@@ -103,10 +90,7 @@ class svm:
 		kappa = len( gamma )
 		(N,d) = self.data.shape
 		X = self.data
-		
-		# CMF of observations X
 		Y = ( (X.reshape(N,1,d) > transpose(X.reshape(N,1,d),[1,0,2])).prod(2).sum(1,dtype=float) / N ).reshape([N,])
-
 		Z = numpy.zeros([N,N])
 		K = numpy.ma.masked_less( vstack(
 			[ 
@@ -114,36 +98,36 @@ class svm:
 				for i in range( kappa ) 
 			]
 		), 1e-10 )
-		
 		Gamma = 1/numpy.hstack( [ numpy.tile(g,N) for g in gamma ] )
-		
+			
 		P = cvxopt.matrix( numpy.dot(K,K.T), (N*kappa,N*kappa) )
-
 		q = cvxopt.matrix( ( ( C * Gamma ) - ( 2.0 * numpy.ma.dot( tile(Y,kappa) ,K) ) ), (N*kappa,1) )
-		
 		G = cvxopt.matrix( -identity(N*kappa), (N*kappa,N*kappa) )
-		
 		h = cvxopt.matrix( 0.0, (N*kappa,1) )
-		
 		A = cvxopt.matrix( 1., (1,N*kappa) )
-		
 		b = cvxopt.matrix( 1., (1,1) )
-		
-		print "P: %s, q: %s, G: %s, h: %s, A: %s, b: %s" % (P.size,q.size,G.size,h.size,A.size,b.size)
+		#print "P: %s, q: %s, G: %s, h: %s, A: %s, b: %s" % (P.size,q.size,G.size,h.size,A.size,b.size)
 		
 		# Solve!
 		p = solvers.qp( P, q, G, h, A, b )
 		
-		print p['x']
+		alpha = array(p['x'])
+		mask = ma.make_mask( alpha < 1e-5 )
+		self.Y = Y
+		self.d = d
+		self.beta = numpy.ma.array( alpha, mask=mask ).compressed()
+		self.SV = numpy.ma.array( numpy.tile(X,kappa), mask=mask).compressed().reshape([len(self.beta),1])
+		self.gamma = numpy.ma.array( Gamma, mask=mask ).compressed().reshape([len(self.beta),1])
 		
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % (float(duration.microseconds)/1000000)
+		print "%s SV found" % len(self.SV)
 		
 		
 def run():
-	mod = svm( array([[gauss(0,1)] for i in range(2) ] + [[gauss(8,1)] for i in range(2) ]).reshape([4,1]) )
-	return True	
-	print "Total Loss: %s" % sum( (mod.Fl.reshape( [len(mod.data),]) - mod.cdf( mod.data.reshape( [len(mod.data),]) ) ) ** 2)
+	mod = svm( array([[gauss(0,1)] for i in range(20) ] + [[gauss(8,1)] for i in range(20) ]).reshape([40,1]) )
+	
+	print "Total Loss: %s" % sum( (mod.Y.reshape( [len(mod.data),]) - mod.cdf( mod.data.reshape( [len(mod.data),]) ) ) ** 2)
 	
 	fig = plt.figure()
 	
@@ -153,25 +137,21 @@ def run():
 	
 	a = fig.add_subplot(2,2,1)
 	n, bins, patches = a.hist(mod.data, 20, normed=1, facecolor='green', alpha=0.5, label='empirical distribution')
-	a.plot(X,mod.Pr(X), 'r--', label="computed distribution")
+	a.plot(X,mod.pdf(X), 'r--', label="computed distribution")
 	a.set_title("Computed vs empirical PDF")
 	
 	c = fig.add_subplot(2,2,2)
-	c.plot(numpy.sort(mod.data,0), numpy.sort(mod.Fl,0), 'green' )
+	c.plot(numpy.sort(mod.data,0), numpy.sort(mod.Y,0), 'green' )
 	c.plot(X, mod.cdf(X), 'r--' )
-	c.plot( mod.data, (mod.Fl.reshape( [len(mod.data),]) - mod.cdf( mod.data.reshape( [len(mod.data),]) ) ) ** 2, '+' )
+	c.plot( mod.data, (mod.Y.reshape( [len(mod.data),]) - mod.cdf( mod.data.reshape( [len(mod.data),]) ) ) ** 2, '+' )
 	c.set_title("Computed vs emprical CDF")
 	
 	d = fig.add_subplot(2,2,4)
-	for i in range(len(mod.betas) ):
-		beta = mod.betas[i]
-		
-		for j in range(len(mod.data) ):
-			if beta[j][0]:
-				d.plot( X, beta[j][0] * mod._K(mod.data[j], X, [mod.gamma[i],])[0].reshape([len(X),1]) )
+	for i in range(len(mod.beta) ):
+		d.plot( X, numpy.dot( mod._K( mod.SV[i], X, mod.gamma[i] ).T, mod.beta[i] ) )
 	d.set_title("SV Contributions")
 	
-	#plt.show()
+	plt.show()
 	
 	
 def help():
