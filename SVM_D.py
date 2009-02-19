@@ -32,7 +32,7 @@ import matplotlib.pyplot as plt
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C=1e0, gamma =[ (2./3.)**i for i in range(-1,1) ] ):
+	def __init__(self,data=list(),C=1e-1, gamma =[ (2./3.)**i for i in range(-2,2) ] ):
 		self.data = data
 		self.Y = None
 		self.SV = None
@@ -49,7 +49,7 @@ class svm:
 		M = Y.size
 		
 		# Sigmoid
-		return ( 1 / ( 1 + exp( gamma * (X-Y) ) ) ).reshape(N,M)
+		return ( 1.0 / ( 1.0 + exp( gamma * (X-Y) ) ) ).reshape(N,M)
 		
 		# RBF
 		# return ( exp( -((X-Y)**2.0) / gamma ) ).reshape(N,M)
@@ -59,7 +59,7 @@ class svm:
 		N = X.size
 		M = Y.size
 		
-		return gamma / ( 2 + exp( gamma * diff ) + exp( -gamma * diff ) )
+		return gamma / ( 2.0 + exp( gamma * diff ) + exp( -gamma * diff ) )
 		
 	def cdf(self,x):
 		return numpy.dot( self._K( self.SV, x, self.gamma ).T, self.beta )
@@ -125,7 +125,7 @@ class svm:
 		
 		
 def run():
-	mod = svm( array([[gauss(0,1)] for i in range(20) ] + [[gauss(8,1)] for i in range(20) ]).reshape([40,1]) )
+	mod = svm( array([[gauss(0,1)] for i in range(100) ] + [[gauss(8,1)] for i in range(100) ]).reshape([200,1]) )
 	
 	print "Total Loss: %s" % sum( (mod.Y.reshape( [len(mod.data),]) - mod.cdf( mod.data.reshape( [len(mod.data),]) ) ) ** 2)
 	
