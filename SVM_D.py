@@ -36,11 +36,12 @@ cvxopt.solvers.options['abstol'] = 1e-10
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C=1e-1, gamma =[ (2./3.)**i for i in range(-4,4) ] ):
-		self.data = data
+	def __init__(self,data=list(),C=1e-1, gamma =[ (2./3.)**i for i in range(-4,-3) ] ):
+		self.X = data
 		self.Y = None
 		self.SV = None
 		self.betas = None
+		self.N = None
 		self.d = None
 		self.K = None
 		
@@ -79,14 +80,14 @@ class svm:
 		
 	def cdf_res(self,X=None):
 		if X==None:
-			X = self.data
+			X = self.X
 		return ( self.Y.flatten() - self.cdf( X.flatten() ).flatten() )**2
 	
 	def __iadd__(self, points):
 		# overloaded '+=', used for adding a vector list to the module's data
 		# 
 		# @param points		A LIST of observation vectors (not a single ovservation)
-		self.data += points
+		self.X += points
 	
 	def _compute(self):
 		start = datetime.datetime.now()
@@ -100,23 +101,20 @@ class svm:
 		# there you can start working on decomposition.
 		
 		
-		C = self.C
-		gamma = self.gamma
-		kappa = len( gamma )
-		(N,d) = self.data.shape
-		X = self.data
-		Y = ( (X.reshape(N,1,d) > transpose(X.reshape(N,1,d),[1,0,2])).prod(2).sum(1,dtype=float) / N ).reshape([N,])
+		kappa = len( self.gamma )
+		(N,self.d) = self.X.shape
+		self.Y = ( (self.X.reshape(N,1,self.d) > transpose(self.X.reshape(N,1,self.d),[1,0,2])).prod(2).sum(1,dtype=float) / N ).reshape([N,])
 		Z = numpy.zeros([N,N])
-		K = numpy.ma.masked_less( vstack(
+		self.K = numpy.ma.masked_less( vstack(
 			[ 
-				numpy.hstack( ( [Z,] * i ) + [self._K( Y.reshape(N,1,d), transpose(Y.reshape(N,1,d), [1,0,2]), gamma[i] ),] + ( [Z,]*(kappa-i-1 ) ) )
+				numpy.hstack( ( [Z,] * i ) + [self._K( self.Y.reshape(N,1,self.d), transpose(self.Y.reshape(N,1,self.d), [1,0,2]), self.gamma[i] ),] + ( [Z,]*(kappa-i-1 ) ) )
 				for i in range( kappa ) 
 			]
 		), 1e-10 )
-		Gamma = numpy.hstack( [ numpy.tile(g,N) for g in gamma ] )
+		Gamma = numpy.hstack( [ numpy.tile(g,N) for g in self.gamma ] )
 			
-		P = cvxopt.matrix( numpy.dot(K.T,K), (N*kappa,N*kappa) )
-		q = cvxopt.matrix( ( self._Omega(Gamma) - ( 2.0 * numpy.ma.dot( tile(Y,kappa), K ) ) ), (N*kappa,1) )
+		P = cvxopt.matrix( numpy.dot(self.K.T,self.K), (N*kappa,N*kappa) )
+		q = cvxopt.matrix( ( self._Omega(Gamma) - ( 2.0 * numpy.ma.dot( tile(self.Y,kappa), self.K ) ) ), (N*kappa,1) )
 		G = cvxopt.matrix( -identity(N*kappa), (N*kappa,N*kappa) )
 		h = cvxopt.matrix( 0.0, (N*kappa,1) )
 		A = cvxopt.matrix( 1., (1,N*kappa) )
@@ -126,14 +124,10 @@ class svm:
 		# Solve!
 		p = solvers.qp( P=P, q=q, G=G, h=h, A=A, b=b )
 		
-		alpha = array(p['x'])
-		mask = ma.make_mask( alpha < 1e-5 )
-		self.Y = Y
-		self.d = d
-		self.beta = numpy.atleast_2d( numpy.ma.array( alpha, mask=mask ).compressed() )
-		self.SV = numpy.atleast_2d( numpy.ma.array( numpy.tile(X,kappa), mask=mask).compressed() )
+		mask = ma.make_mask( array(p['x']) < 1e-5 )
+		self.beta = numpy.atleast_2d( numpy.ma.array( array(p['x']), mask=mask ).compressed() )
+		self.SV = numpy.atleast_2d( numpy.ma.array( numpy.tile(self.X,kappa), mask=mask).compressed() )
 		self.gamma = numpy.atleast_2d( numpy.ma.array( Gamma, mask=mask ).compressed() )
-		self.K = K
 		
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % (float(duration.microseconds)/1000000)
@@ -176,11 +170,11 @@ def run():
 	b.set_title('gamma vs weight')
 	
 	c = fig.add_subplot(2,2,2)
-	c.plot(numpy.sort(mod.data,0), numpy.sort(mod.Y,0), 'green' )
+	c.plot(numpy.sort(mod.X,0), numpy.sort(mod.Y,0), 'green' )
 	c.plot(X, mod.cdf(X), 'r--' )
-	c.plot( mod.data, mod.cdf_res(mod.data), '+' )
+	c.plot( mod.X, mod.cdf_res(mod.X), '+' )
 	
-	#c.plot( mod.data, (mod.Y.reshape( [len(mod.data),]) - mod.cdf( mod.data.reshape( [len(mod.data),]) ) ) ** 2, '+' )
+	#c.plot( mod.X, (mod.Y.reshape( [len(mod.X),]) - mod.cdf( mod.X.reshape( [len(mod.X),]) ) ) ** 2, '+' )
 	c.set_title("Computed vs emprical CDF")
 	
 	d = fig.add_subplot(2,2,4)
