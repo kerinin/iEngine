@@ -32,7 +32,7 @@ import matplotlib.pyplot as plt
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C=1e-1, gamma =[ (2./3.)**i for i in range(-2,2) ] ):
+	def __init__(self,data=list(),C=1e-8, gamma =[ (2./3.)**i for i in range(1,5) ] ):
 		self.data = data
 		self.Y = None
 		self.SV = None
@@ -139,6 +139,10 @@ def run():
 	n, bins, patches = a.hist(mod.data, 20, normed=1, facecolor='green', alpha=0.5, label='empirical distribution')
 	a.plot(X,mod.pdf(X), 'r--', label="computed distribution")
 	a.set_title("Computed vs empirical PDF")
+	
+	b = fig.add_subplot(2,2,3)
+	b.plot(mod.gamma, mod.beta,  'o')
+	b.set_title('gamma vs weight')
 	
 	c = fig.add_subplot(2,2,2)
 	c.plot(numpy.sort(mod.data,0), numpy.sort(mod.Y,0), 'green' )
