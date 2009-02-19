@@ -32,7 +32,7 @@ import matplotlib.pyplot as plt
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C=1e-8, gamma =[ (2./3.)**i for i in range(1,5) ] ):
+	def __init__(self,data=list(),C=1e-20, gamma =[ (2./3.)**i for i in range(-5,5) ] ):
 		self.data = data
 		self.Y = None
 		self.SV = None
@@ -49,7 +49,7 @@ class svm:
 		M = Y.size
 		
 		# Sigmoid
-		return ( 1.0 / ( 1.0 + exp( gamma * (X-Y) ) ) ).reshape(N,M)
+		return ( 1.0 / ( 1.0 + numpy.exp( -gamma * (X-Y) ) ) ).reshape(N,M)
 		
 		# RBF
 		# return ( exp( -((X-Y)**2.0) / gamma ) ).reshape(N,M)
@@ -59,13 +59,15 @@ class svm:
 		N = X.size
 		M = Y.size
 		
-		return gamma / ( 2.0 + exp( gamma * diff ) + exp( -gamma * diff ) )
+		return ( gamma / ( 2.0 + numpy.exp( gamma * diff ) + numpy.exp( -gamma * diff ) ) ).reshape(N,M)
 		
 	def cdf(self,x):
-		return numpy.dot( self._K( self.SV, x, self.gamma ).T, self.beta )
+		print 'cdf: %s' % repr(x.shape)
+		return numpy.dot( self._K( atleast_2d(x).T, self.SV, self.gamma ), self.beta.T )
 		
 	def pdf(self,x):
-		return numpy.dot( self._k(self.SV, x, self.gamma ).T, self.beta )
+		print 'pdf: %s' % repr(x.shape)
+		return numpy.dot( self._k( atleast_2d(x).T, self.SV, self.gamma ), self.beta.T )
 		
 	def __iadd__(self, points):
 		# overloaded '+=', used for adding a vector list to the module's data
@@ -100,14 +102,14 @@ class svm:
 		), 1e-10 )
 		Gamma = 1/numpy.hstack( [ numpy.tile(g,N) for g in gamma ] )
 			
-		P = cvxopt.matrix( numpy.dot(K,K.T), (N*kappa,N*kappa) )
-		q = cvxopt.matrix( ( ( C * Gamma ) - ( 2.0 * numpy.ma.dot( tile(Y,kappa) ,K) ) ), (N*kappa,1) )
+		P = cvxopt.matrix( numpy.dot(K.T,K), (N*kappa,N*kappa) )
+		q = cvxopt.matrix( ( ( C * Gamma ) - ( 2.0 * numpy.ma.dot( tile(Y,kappa), K ) ) ), (N*kappa,1) )
 		G = cvxopt.matrix( -identity(N*kappa), (N*kappa,N*kappa) )
 		h = cvxopt.matrix( 0.0, (N*kappa,1) )
 		A = cvxopt.matrix( 1., (1,N*kappa) )
 		b = cvxopt.matrix( 1., (1,1) )
 		#print "P: %s, q: %s, G: %s, h: %s, A: %s, b: %s" % (P.size,q.size,G.size,h.size,A.size,b.size)
-		
+		print q
 		# Solve!
 		p = solvers.qp( P, q, G, h, A, b )
 		
@@ -115,17 +117,18 @@ class svm:
 		mask = ma.make_mask( alpha < 1e-5 )
 		self.Y = Y
 		self.d = d
-		self.beta = numpy.ma.array( alpha, mask=mask ).compressed()
-		self.SV = numpy.ma.array( numpy.tile(X,kappa), mask=mask).compressed().reshape([len(self.beta),1])
-		self.gamma = numpy.ma.array( Gamma, mask=mask ).compressed().reshape([len(self.beta),1])
+		self.beta = numpy.atleast_2d( numpy.ma.array( alpha, mask=mask ).compressed() )
+		self.SV = numpy.atleast_2d( numpy.ma.array( numpy.tile(X,kappa), mask=mask).compressed() )
+		self.gamma = numpy.atleast_2d( numpy.ma.array( Gamma, mask=mask ).compressed() )
 		
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % (float(duration.microseconds)/1000000)
 		print "%s SV found" % len(self.SV)
+		print p
 		
 		
 def run():
-	mod = svm( array([[gauss(0,1)] for i in range(100) ] + [[gauss(8,1)] for i in range(100) ]).reshape([200,1]) )
+	mod = svm( array([[gauss(0,1)] for i in range(5) ] + [[gauss(8,1)] for i in range(5) ]).reshape([10,1]) )
 	
 	print "Total Loss: %s" % sum( (mod.Y.reshape( [len(mod.data),]) - mod.cdf( mod.data.reshape( [len(mod.data),]) ) ) ** 2)
 	
@@ -147,13 +150,13 @@ def run():
 	c = fig.add_subplot(2,2,2)
 	c.plot(numpy.sort(mod.data,0), numpy.sort(mod.Y,0), 'green' )
 	c.plot(X, mod.cdf(X), 'r--' )
-	c.plot( mod.data, (mod.Y.reshape( [len(mod.data),]) - mod.cdf( mod.data.reshape( [len(mod.data),]) ) ) ** 2, '+' )
+	#c.plot( mod.data, (mod.Y.reshape( [len(mod.data),]) - mod.cdf( mod.data.reshape( [len(mod.data),]) ) ) ** 2, '+' )
 	c.set_title("Computed vs emprical CDF")
 	
-	d = fig.add_subplot(2,2,4)
-	for i in range(len(mod.beta) ):
-		d.plot( X, numpy.dot( mod._K( mod.SV[i], X, mod.gamma[i] ).T, mod.beta[i] ) )
-	d.set_title("SV Contributions")
+	#d = fig.add_subplot(2,2,4)
+	#for i in range(len(mod.beta) ):
+	#	d.plot( X, numpy.dot( mod._K( X, mod.SV[i], mod.gamma[i] ), mod.beta[i] ) )
+	#d.set_title("SV Contributions")
 	
 	plt.show()
 	
