@@ -48,10 +48,10 @@ class svm:
 		M = Y.size
 		
 		# Sigmoid
-		# return ( 1 / ( 1 + exp( gamma * (X-Y) ) ) ).reshape(N,M)
+		return ( 1 / ( 1 + exp( gamma * (X-Y) ) ) ).reshape(N,M)
 		
 		# RBF
-		return ( exp( -((X-Y)**2.0) / gamma ) ).reshape(N,M)
+		# return ( exp( -((X-Y)**2.0) / gamma ) ).reshape(N,M)
 
 	def cdf(self,x):
 		ret = zeros(x.shape)
@@ -121,18 +121,20 @@ class svm:
 
 		q = cvxopt.matrix( ( ( C * Gamma ) - ( 2.0 * numpy.ma.dot( tile(Y,kappa) ,K) ) ), (N*kappa,1) )
 		
-		G = cvxopt.matrix( identity(N*kappa), (N*kappa,N*kappa) )
+		G = cvxopt.matrix( -identity(N*kappa), (N*kappa,N*kappa) )
 		
 		h = cvxopt.matrix( 0.0, (N*kappa,1) )
 		
-		A = cvxopt.matrix( 1.0, (1,N*kappa) )
+		A = cvxopt.matrix( 1., (1,N*kappa) )
 		
-		b = cvxopt.matrix( 1.0, (1,1) )
+		b = cvxopt.matrix( 1., (1,1) )
 		
 		print "P: %s, q: %s, G: %s, h: %s, A: %s, b: %s" % (P.size,q.size,G.size,h.size,A.size,b.size)
-		print P
+		
 		# Solve!
-		p = solvers.coneqp( P, q, G, h,None, A, b )
+		p = solvers.qp( P, q, G, h, A, b )
+		
+		print p['x']
 		
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % (float(duration.microseconds)/1000000)
@@ -140,7 +142,7 @@ class svm:
 		
 def run():
 	mod = svm( array([[gauss(0,1)] for i in range(2) ] + [[gauss(8,1)] for i in range(2) ]).reshape([4,1]) )
-		
+	return True	
 	print "Total Loss: %s" % sum( (mod.Fl.reshape( [len(mod.data),]) - mod.cdf( mod.data.reshape( [len(mod.data),]) ) ) ** 2)
 	
 	fig = plt.figure()
