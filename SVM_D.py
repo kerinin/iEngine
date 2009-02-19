@@ -36,7 +36,7 @@ cvxopt.solvers.options['abstol'] = 1e-10
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C=1e-1, gamma =[ (2./3.)**i for i in range(-4,-1) ] ):
+	def __init__(self,data=list(),C=1e-1, gamma =[ (2./3.)**i for i in range(-4,4) ] ):
 		self.data = data
 		self.Y = None
 		self.SV = None
@@ -142,15 +142,16 @@ class svm:
 
 		
 def run():
-	samples = array([[gauss(0,1)] for i in range(20) ] + [[gauss(8,1)] for i in range(20) ]).reshape([40,1]) 
+	#samples = array([[gauss(0,1)] for i in range(20) ] + [[gauss(8,1)] for i in range(20) ]).reshape([40,1]) 
+	samples = array([[gauss(0,1)] for i in range(40) ] ).reshape([40,1]) 
 	C = [1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2]
 	
-	res = [ svm( samples, C=c ) for c in C ]
+	#res = [ svm( samples, C=c ) for c in C ]
 	
-	plt.plot( C, [ m.cdf_res().sum() for m in res ], 'o--' )
-	plt.show()
+	#plt.plot( C, [ m.cdf_res().sum() for m in res ], 'o--' )
+	#plt.show()
 	
-	return True
+	#return True
 	
 	mod = svm( samples,C=1e-1 )
 	
