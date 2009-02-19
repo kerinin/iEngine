@@ -36,15 +36,18 @@ cvxopt.solvers.options['abstol'] = 1e-10
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C=1e-1, gamma =[.1,] ):
+	def __init__(self,data=list(),C=0., gamma =[1e5,] ):
 		self.X = data
+		self.N = len(data)
 		
 		self.C = C
 		self.gamma = gamma
 		
+		self.Gamma = None
 		self.Y = None
 		self.SV = None
-		self.betas = None
+		self.NSV = None
+		self.beta = None
 		self.d = None
 		self.K = None
 		
@@ -52,10 +55,10 @@ class svm:
 		
 	def __str__(self):
 		ret = "SVM Instance\n"
-		ret += "X: (%s x %sd)\n" % (len(self.X), self.d)
+		ret += "X: (%s x %sd)\n" % (self.N, self.d)
 		ret += "C: %s\n" % self.C
 		ret += "gamma: %s\n" % str(self.gamma)
-		ret += "SV: %s (%s percent)\n" % ( len(self.beta),100. * float(len(self.SV)) / float(len(self.X) ) )
+		ret += "SV: %s (%s percent)\n" % ( self.NSV,100. * float(self.NSV) / float(self.N ) )
 		ret += "Loss: %s\n" % self.cdf_res().sum()
 		return ret
 	
@@ -81,11 +84,11 @@ class svm:
 		
 	def cdf(self,x):
 		#print 'cdf: %s' % repr(x.shape)
-		return numpy.dot( self._K( atleast_2d(x).T, self.SV, self.gamma ), self.beta.T )
+		return numpy.dot( self._K( atleast_2d(x).T, self.SV, self.Gamma ), self.beta.T )
 		
 	def pdf(self,x):
 		#print 'pdf: %s' % repr(x.shape)
-		return numpy.dot( self._k( atleast_2d(x).T, self.SV, self.gamma ), self.beta.T )
+		return numpy.dot( self._k( atleast_2d(x).T, self.SV, self.Gamma ), self.beta.T )
 		
 	def cdf_res(self,X=None):
 		if X==None:
@@ -120,10 +123,10 @@ class svm:
 				for i in range( kappa ) 
 			]
 		), 1e-10 )
-		Gamma = numpy.hstack( [ numpy.tile(g,N) for g in self.gamma ] )
+		self.Gamma = numpy.hstack( [ numpy.tile(g,N) for g in self.gamma ] )
 			
 		P = cvxopt.matrix( numpy.dot(self.K.T,self.K), (N*kappa,N*kappa) )
-		q = cvxopt.matrix( ( self._Omega(Gamma) - ( 2.0 * numpy.ma.dot( tile(self.Y,kappa), self.K ) ) ), (N*kappa,1) )
+		q = cvxopt.matrix( ( self._Omega(self.Gamma) - ( 2.0 * numpy.ma.dot( tile(self.Y,kappa), self.K ) ) ), (N*kappa,1) )
 		G = cvxopt.matrix( -identity(N*kappa), (N*kappa,N*kappa) )
 		h = cvxopt.matrix( 0.0, (N*kappa,1) )
 		A = cvxopt.matrix( 1., (1,N*kappa) )
@@ -133,27 +136,27 @@ class svm:
 		# Solve!
 		p = solvers.qp( P=P, q=q, G=G, h=h, A=A, b=b )
 		
-		mask = ma.make_mask( array(p['x']) < 1e-5 )
-		self.beta = numpy.atleast_2d( numpy.ma.array( array(p['x']), mask=mask ).compressed() )
+		beta = ma.masked_less( p['x'], 1e-5 )
+		mask = ma.getmask(beta)
+		self.beta = numpy.atleast_2d( beta.compressed() )
 		self.SV = numpy.atleast_2d( numpy.ma.array( numpy.tile(self.X,kappa), mask=mask).compressed() )
-		self.gamma = numpy.atleast_2d( numpy.ma.array( Gamma, mask=mask ).compressed() )
-		
+		self.Gamma = numpy.atleast_2d( numpy.ma.array( self.Gamma, mask=mask ).compressed() )
+		self.NSV = self.beta.size
+				
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % (float(duration.microseconds)/1000000)
 		
 def run():
 	#samples = array([[gauss(0,1)] for i in range(20) ] + [[gauss(8,1)] for i in range(20) ]).reshape([40,1]) 
 	samples = array([[gauss(0,1)] for i in range(40) ] ).reshape([40,1]) 
-	C = [1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2]
 	
+	#C = [1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2]
 	#res = [ svm( samples, C=c ) for c in C ]
-	
 	#plt.plot( C, [ m.cdf_res().sum() for m in res ], 'o--' )
 	#plt.show()
-	
 	#return True
 	
-	mod = svm( samples,C=1e-1 )
+	mod = svm( samples,C=0 )
 	print mod
 	
 	fig = plt.figure()
@@ -188,7 +191,7 @@ def run():
 		#d.plot( X, numpy.dot( mod._K( X, mod.SV[i], mod.gamma[i] ), mod.beta[i] ) )
 	d.set_title("SV Contributions")
 	
-	#plt.show()
+	plt.show()
 	
 	
 def help():
