@@ -29,10 +29,14 @@ from numpy import *
 
 import matplotlib.pyplot as plt
 
+
+cvxopt.solvers.options['show_progress'] = False
+cvxopt.solvers.options['abstol'] = 1e-10
+
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C=1e-1, gamma =[ (2./3.)**i for i in range(0,1) ] ):
+	def __init__(self,data=list(),C=1e-1, gamma =[ (2./3.)**i for i in range(-4,-1) ] ):
 		self.data = data
 		self.Y = None
 		self.SV = None
@@ -46,7 +50,6 @@ class svm:
 		self._compute()
 	
 	def _Omega(self,Gamma):
-		return 0
 		return self.C / Gamma
 		
 	def _K(self,X,Y,gamma):
@@ -74,6 +77,11 @@ class svm:
 		#print 'pdf: %s' % repr(x.shape)
 		return numpy.dot( self._k( atleast_2d(x).T, self.SV, self.gamma ), self.beta.T )
 		
+	def cdf_res(self,X=None):
+		if X==None:
+			X = self.data
+		return ( self.Y.flatten() - self.cdf( X.flatten() ).flatten() )**2
+	
 	def __iadd__(self, points):
 		# overloaded '+=', used for adding a vector list to the module's data
 		# 
@@ -116,7 +124,7 @@ class svm:
 		#print "P: %s, q: %s, G: %s, h: %s, A: %s, b: %s" % (P.size,q.size,G.size,h.size,A.size,b.size)
 		
 		# Solve!
-		p = solvers.qp( P, q, G, h, A, b )
+		p = solvers.qp( P=P, q=q, G=G, h=h, A=A, b=b )
 		
 		alpha = array(p['x'])
 		mask = ma.make_mask( alpha < 1e-5 )
@@ -130,13 +138,23 @@ class svm:
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % (float(duration.microseconds)/1000000)
 		print "%s SV found" % len(self.SV)
-		print p
-		
+		print "Total Loss: %s" % self.cdf_res().sum()
+
 		
 def run():
-	mod = svm( array([[gauss(0,1)] for i in range(20) ] + [[gauss(8,1)] for i in range(20) ]).reshape([40,1]) )
+	samples = array([[gauss(0,1)] for i in range(20) ] + [[gauss(8,1)] for i in range(20) ]).reshape([40,1]) 
+	C = [1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2]
 	
-	print "Total Loss: %s" % sum( (mod.Y.reshape( [len(mod.data),]) - mod.cdf( mod.data.reshape( [len(mod.data),]) ) ) ** 2)
+	res = [ svm( samples, C=c ) for c in C ]
+	
+	plt.plot( C, [ m.cdf_res().sum() for m in res ], 'o--' )
+	plt.show()
+	
+	return True
+	
+	mod = svm( samples,C=1e-1 )
+	
+	print "Total Loss: %s" % mod.cdf_res().sum()
 	
 	fig = plt.figure()
 	
@@ -159,6 +177,8 @@ def run():
 	c = fig.add_subplot(2,2,2)
 	c.plot(numpy.sort(mod.data,0), numpy.sort(mod.Y,0), 'green' )
 	c.plot(X, mod.cdf(X), 'r--' )
+	c.plot( mod.data, mod.cdf_res(mod.data), '+' )
+	
 	#c.plot( mod.data, (mod.Y.reshape( [len(mod.data),]) - mod.cdf( mod.data.reshape( [len(mod.data),]) ) ) ** 2, '+' )
 	c.set_title("Computed vs emprical CDF")
 	
