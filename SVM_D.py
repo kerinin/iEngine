@@ -32,7 +32,7 @@ import matplotlib.pyplot as plt
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C=1e-1, gamma =[ (2./3.)**i for i in range(-1,1) ] ):
+	def __init__(self,data=list(),C=1e1, gamma =[ (2./3.)**i for i in range(-1,1) ] ):
 		self.data = data
 		self.Fl = None
 		self.SV = None
@@ -48,10 +48,10 @@ class svm:
 		M = Y.size
 		
 		# Sigmoid
-		return ( 1 / ( 1 + exp( gamma * (X-Y) ) ) ).reshape(N,M)
+		#return ( 1 / ( 1 + exp( gamma * (X-Y) ) ) ).reshape(N,M)
 		
 		# RBF
-		#return [ ( exp( -(diff**2) / gi ) ).reshape(N,M) for gi in gamma ]
+		return ( exp( -((X-Y)**2) / gamma ) ).reshape(N,M)
 
 	def cdf(self,x):
 		ret = zeros(x.shape)
@@ -93,10 +93,6 @@ class svm:
 		# min ( \sum_{i=1}^\ell ( y_i - \sum_{j=1}^\ell \sum_{n=1}^k \alpha_j^n k_n(x_i,x_j) )^2 + \lambda \sum_{i=1}^\ell \sum_{n=1}^k \frac{1}{\gamma_n} \alpha_i^n )
 		# sjt \alpha_i \ge 0, i = 1,...,\ell
 		
-		# Which means we don't need to calculate epsilon and we can eliminate the xi varaibles
-		# In this case y_i = Xcmf_i and (I think) lambda is the same as described earlier, and
-		# can be set to 1 for now
-		
 		# Gameplan: implement this minimization problem - if it works figure out what the matrix
 		# definitions will be for the optimization problem and re-implement it in CVXOPT.  From
 		# there you can start working on decomposition.
@@ -134,18 +130,16 @@ class svm:
 		b = cvxopt.matrix( 1.0, (1,1) )
 		
 		print "P: %s, q: %s, G: %s, h: %s, A: %s, b: %s" % (P.size,q.size,G.size,h.size,A.size,b.size)
-		print P
-		print K == K.T
 		
 		# Solve!
-		p = solvers.qp( P=P, q=q, G=G, h=h, A=A, b=b )
+		p = solvers.coneqp( P=P, q=q, G=G, h=h, A=A, b=b )
 		
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % (float(duration.microseconds)/1000000)
 		
 		
 def run():
-	mod = svm( array([[gauss(0,1)] for i in range(2) ] + [[gauss(8,1)] for i in range(2) ]).reshape([4,1]) )
+	mod = svm( array([[gauss(0,1)] for i in range(10) ] + [[gauss(8,1)] for i in range(10) ]).reshape([20,1]) )
 		
 	print "Total Loss: %s" % sum( (mod.Fl.reshape( [len(mod.data),]) - mod.cdf( mod.data.reshape( [len(mod.data),]) ) ) ** 2)
 	
