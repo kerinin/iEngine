@@ -36,19 +36,28 @@ cvxopt.solvers.options['abstol'] = 1e-10
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C=1e-1, gamma =[ (2./3.)**i for i in range(-4,-3) ] ):
+	def __init__(self,data=list(),C=1e-1, gamma =[.1,] ):
 		self.X = data
-		self.Y = None
-		self.SV = None
-		self.betas = None
-		self.N = None
-		self.d = None
-		self.K = None
 		
 		self.C = C
 		self.gamma = gamma
 		
+		self.Y = None
+		self.SV = None
+		self.betas = None
+		self.d = None
+		self.K = None
+		
 		self._compute()
+		
+	def __str__(self):
+		ret = "SVM Instance\n"
+		ret += "X: (%s x %sd)\n" % (len(self.X), self.d)
+		ret += "C: %s\n" % self.C
+		ret += "gamma: %s\n" % str(self.gamma)
+		ret += "SV: %s (%s percent)\n" % ( len(self.beta),100. * float(len(self.SV)) / float(len(self.X) ) )
+		ret += "Loss: %s\n" % self.cdf_res().sum()
+		return ret
 	
 	def _Omega(self,Gamma):
 		return self.C / Gamma
@@ -131,9 +140,6 @@ class svm:
 		
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % (float(duration.microseconds)/1000000)
-		print "%s SV found" % len(self.SV)
-		print "Total Loss: %s" % self.cdf_res().sum()
-
 		
 def run():
 	#samples = array([[gauss(0,1)] for i in range(20) ] + [[gauss(8,1)] for i in range(20) ]).reshape([40,1]) 
@@ -148,8 +154,7 @@ def run():
 	#return True
 	
 	mod = svm( samples,C=1e-1 )
-	
-	print "Total Loss: %s" % mod.cdf_res().sum()
+	print mod
 	
 	fig = plt.figure()
 	
@@ -183,7 +188,7 @@ def run():
 		#d.plot( X, numpy.dot( mod._K( X, mod.SV[i], mod.gamma[i] ), mod.beta[i] ) )
 	d.set_title("SV Contributions")
 	
-	plt.show()
+	#plt.show()
 	
 	
 def help():
