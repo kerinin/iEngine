@@ -143,7 +143,7 @@ class svm:
 		mask = ma.getmask(beta)
 		self.alpha = beta
 		self.beta = numpy.atleast_2d( beta.compressed() )
-		self.SV = numpy.atleast_2d( numpy.ma.array( numpy.tile(self.X,kappa), mask=mask).compressed() )
+		self.SV = numpy.atleast_2d( numpy.ma.array( numpy.tile(self.X.T,kappa).T, mask=mask).compressed() )
 		self.Gamma = numpy.atleast_2d( numpy.ma.array( self.Gamma, mask=mask ).compressed() )
 		self.NSV = self.beta.size
 				
@@ -153,8 +153,8 @@ class svm:
 		print "Y argmax: %s" % numpy.argmax(self.Y)
 		
 def run():
-	samples = array([[gauss(0,1)] for i in range(20) ] + [[gauss(8,1)] for i in range(20) ]).reshape([40,1]) 
-	#samples = array([[gauss(0,1)] for i in range(4) ] ).reshape([4,1]) 
+	#samples = array([[gauss(0,1)] for i in range(20) ] + [[gauss(8,1)] for i in range(20) ]).reshape([40,1]) 
+	samples = array([[gauss(0,1)] for i in range(10) ] ).reshape([10,1]) 
 	
 	#C = [1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2]
 	#res = [ svm( samples, C=c ) for c in C ]
@@ -162,7 +162,7 @@ def run():
 	#plt.show()
 	#return True
 	
-	mod = svm( samples,C=.01, gamma=[.1, 1.,10.] )
+	mod = svm( samples,C=.01, gamma=[1.,10] )
 	print mod
 	
 	fig = plt.figure()
