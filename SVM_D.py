@@ -36,7 +36,7 @@ cvxopt.solvers.options['abstol'] = 1e-10
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C=.1, gamma =[9e1,] ):
+	def __init__(self,data=list(),C=.1, gamma =arange(1,10,1) ):
 		self.X = data
 		self.N = len(data)
 		
@@ -47,6 +47,7 @@ class svm:
 		self.Y = None
 		self.SV = None
 		self.NSV = None
+		self.alpha = None
 		self.beta = None
 		self.d = None
 		self.K = None
@@ -63,7 +64,7 @@ class svm:
 		return ret
 	
 	def _Omega(self,Gamma):
-		return self.C / Gamma
+		return self.C * (Gamma ** .2)
 		
 	def _K(self,X,Y,gamma):
 		N = X.size
@@ -138,6 +139,7 @@ class svm:
 		
 		beta = ma.masked_less( p['x'], 1e-5 )
 		mask = ma.getmask(beta)
+		self.alpha = beta
 		self.beta = numpy.atleast_2d( beta.compressed() )
 		self.SV = numpy.atleast_2d( numpy.ma.array( numpy.tile(self.X,kappa), mask=mask).compressed() )
 		self.Gamma = numpy.atleast_2d( numpy.ma.array( self.Gamma, mask=mask ).compressed() )
@@ -156,7 +158,7 @@ def run():
 	#plt.show()
 	#return True
 	
-	mod = svm( samples,C=0 )
+	mod = svm( samples,C=10. )
 	print mod
 	
 	fig = plt.figure()
@@ -170,11 +172,13 @@ def run():
 	#a.plot(X,mod.pdf(X), 'r--', label="computed distribution")
 	#a.set_title("Computed vs empirical PDF")
 	
-	a.hist(mod.K.compressed().flatten(), 20, normed=1)
-	a.set_title("K distribution")
+	#a.hist(mod.K.compressed().flatten(), 20, normed=1)
+	#a.set_title("K distribution")
+	a.plot( [ i % mod.N for i in range( mod.N * len(mod.gamma) ) ], mod.alpha, 'o' )
+	a.set_title("weights (x=ell)")
 	
 	b = fig.add_subplot(2,2,3)
-	b.plot(mod.gamma, mod.beta,  'o')
+	b.plot(mod.Gamma, mod.beta,  'o')
 	b.set_title('gamma vs weight')
 	
 	c = fig.add_subplot(2,2,2)
