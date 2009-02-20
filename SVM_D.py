@@ -71,10 +71,10 @@ class svm:
 		M = Y.size
 		
 		# Sigmoid
-		return ( 1.0 / ( 1.0 + numpy.exp( -gamma * (X-Y) ) ) ).reshape(N,M)
+		# return ( 1.0 / ( 1.0 + numpy.exp( -gamma * (X-Y) ) ) ).reshape(N,M)
 		
 		# RBF
-		# return ( exp( -((X-Y)**2.0) / gamma ) ).reshape(N,M)
+		return ( exp( -((X-Y)**2.0) / gamma ) ).reshape(N,M)
 
 	def _k(self,X,Y,gamma):
 		diff = X-Y
@@ -147,14 +147,11 @@ class svm:
 				
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % (float(duration.microseconds)/1000000)
-		print P
-		print q
-		print p['x']
-		print self.Y
+		print "Y argmin: %s" % numpy.argmin(self.Y)
 		
 def run():
 	#samples = array([[gauss(0,1)] for i in range(20) ] + [[gauss(8,1)] for i in range(20) ]).reshape([40,1]) 
-	samples = array([[gauss(0,1)] for i in range(4) ] ).reshape([4,1]) 
+	samples = array([[gauss(0,1)] for i in range(40) ] ).reshape([40,1]) 
 	
 	#C = [1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2]
 	#res = [ svm( samples, C=c ) for c in C ]
