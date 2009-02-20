@@ -36,7 +36,7 @@ cvxopt.solvers.options['abstol'] = 1e-10
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C=.1, gamma =arange(1,10,1) ):
+	def __init__(self,data=list(),C=.1, gamma =arange(1,4,1) ):
 		self.X = data
 		self.N = len(data)
 		
@@ -116,7 +116,7 @@ class svm:
 		
 		kappa = len( self.gamma )
 		(N,self.d) = self.X.shape
-		self.Y = ( (self.X.reshape(N,1,self.d) > transpose(self.X.reshape(N,1,self.d),[1,0,2])).prod(2).sum(1,dtype=float) / N ).reshape([N,])
+		self.Y = ( ( 1.+ (self.X.reshape(N,1,self.d) > transpose(self.X.reshape(N,1,self.d),[1,0,2])).prod(2).sum(1,dtype=float) ) / N ).reshape([N,])
 		Z = numpy.zeros([N,N])
 		self.K = numpy.ma.masked_less( vstack(
 			[ 
@@ -147,10 +147,14 @@ class svm:
 				
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % (float(duration.microseconds)/1000000)
+		print P
+		print q
+		print p['x']
+		print self.Y
 		
 def run():
-	samples = array([[gauss(0,1)] for i in range(20) ] + [[gauss(8,1)] for i in range(20) ]).reshape([40,1]) 
-	#samples = array([[gauss(0,1)] for i in range(40) ] ).reshape([40,1]) 
+	#samples = array([[gauss(0,1)] for i in range(20) ] + [[gauss(8,1)] for i in range(20) ]).reshape([40,1]) 
+	samples = array([[gauss(0,1)] for i in range(4) ] ).reshape([4,1]) 
 	
 	#C = [1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2]
 	#res = [ svm( samples, C=c ) for c in C ]
