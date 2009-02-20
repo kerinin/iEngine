@@ -72,6 +72,9 @@ class svm:
 		N = X.size
 		M = Y.size
 		
+		# Unbiased
+		# return ones([N,M])/10.
+		
 		# Sigmoid
 		return ( 1.0 / ( 1.0 + numpy.exp( -gamma * (X-Y) ) ) ).reshape(N,M)
 		
@@ -120,16 +123,17 @@ class svm:
 		(N,self.d) = self.X.shape
 		self.Y = ( ( 1.+ (self.X.reshape(N,1,self.d) > transpose(self.X.reshape(N,1,self.d),[1,0,2])).prod(2).sum(1,dtype=float) ) / N ).reshape([N,])
 		Z = numpy.zeros([N,N])
-		self.K = numpy.ma.masked_less( vstack(
+		self.K = numpy.array( vstack(
 			[ 
 				numpy.hstack( ( [Z,] * i ) + [self._K( self.Y.reshape([N,1]), self.Y.reshape([1,N]), self.gamma[i] ),] + ( [Z,]*(kappa-i-1 ) ) )
 				for i in range( kappa ) 
 			]
-		), 1e-10 )
+		) )
+		
 		self.Gamma = numpy.hstack( [ numpy.tile(g,N) for g in self.gamma ] )
 		
-		P = cvxopt.matrix( numpy.dot(self.K,self.K.T), (N*kappa,N*kappa) )
-		q = cvxopt.matrix( ( self._Omega(self.Gamma) - ( 2.0 * numpy.ma.dot( tile(self.Y,kappa), self.K.T ) ) ), (N*kappa,1) )
+		P = cvxopt.matrix( numpy.dot(self.K.T,self.K), (N*kappa,N*kappa) )
+		q = cvxopt.matrix( ( self._Omega(self.Gamma) - ( 2.0 * numpy.ma.dot( tile(self.Y,kappa), self.K ) ) ), (N*kappa,1) )
 		G = cvxopt.matrix( -identity(N*kappa), (N*kappa,N*kappa) )
 		h = cvxopt.matrix( 0.0, (N*kappa,1) )
 		A = cvxopt.matrix( 1., (1,N*kappa) )
@@ -162,7 +166,7 @@ def run():
 	#plt.show()
 	#return True
 	
-	mod = svm( samples,C=1., gamma=[1.,10] )
+	mod = svm( samples,C=0, gamma=[1e6,] )
 	print mod
 	
 	fig = plt.figure()
