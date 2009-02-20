@@ -129,7 +129,7 @@ class svm:
 		self.Gamma = numpy.hstack( [ numpy.tile(g,N) for g in self.gamma ] )
 		
 		P = cvxopt.matrix( numpy.dot(self.K,self.K.T), (N*kappa,N*kappa) )
-		q = cvxopt.matrix( ( self._Omega(self.Gamma) - ( 2.0 * numpy.ma.dot( tile(self.Y,kappa), self.K ) ) ), (N*kappa,1) )
+		q = cvxopt.matrix( ( self._Omega(self.Gamma) - ( 2.0 * numpy.ma.dot( tile(self.Y,kappa), self.K.T ) ) ), (N*kappa,1) )
 		G = cvxopt.matrix( -identity(N*kappa), (N*kappa,N*kappa) )
 		h = cvxopt.matrix( 0.0, (N*kappa,1) )
 		A = cvxopt.matrix( 1., (1,N*kappa) )
@@ -153,8 +153,8 @@ class svm:
 		print "Y argmax: %s" % numpy.argmax(self.Y)
 		
 def run():
-	#samples = array([[gauss(0,1)] for i in range(20) ] + [[gauss(8,1)] for i in range(20) ]).reshape([40,1]) 
-	samples = array([[gauss(0,1)] for i in range(10) ] ).reshape([10,1]) 
+	samples = array([[gauss(0,1)] for i in range(20) ] + [[gauss(8,1)] for i in range(20) ]).reshape([40,1]) 
+	#samples = array([[gauss(0,1)] for i in range(10) ] ).reshape([10,1]) 
 	
 	#C = [1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2]
 	#res = [ svm( samples, C=c ) for c in C ]
@@ -162,7 +162,7 @@ def run():
 	#plt.show()
 	#return True
 	
-	mod = svm( samples,C=.01, gamma=[1.,10] )
+	mod = svm( samples,C=1., gamma=[1.,10] )
 	print mod
 	
 	fig = plt.figure()
