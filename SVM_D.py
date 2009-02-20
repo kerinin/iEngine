@@ -31,7 +31,9 @@ import matplotlib.pyplot as plt
 
 
 cvxopt.solvers.options['show_progress'] = False
-cvxopt.solvers.options['abstol'] = 1e-10
+cvxopt.solvers.options['abstol'] = 1e-15
+cvxopt.solvers.options['reltol'] = 1e-15
+cvxopt.solvers.options['feastol'] = 1e-15
 
 _Functions = ['run']
 	
@@ -64,24 +66,24 @@ class svm:
 		return ret
 	
 	def _Omega(self,Gamma):
-		return self.C * (Gamma ** .2)
+		return self.C * Gamma
 		
 	def _K(self,X,Y,gamma):
 		N = X.size
 		M = Y.size
 		
 		# Sigmoid
-		# return ( 1.0 / ( 1.0 + numpy.exp( -gamma * (X-Y) ) ) ).reshape(N,M)
+		return ( 1.0 / ( 1.0 + numpy.exp( -gamma * (X-Y) ) ) ).reshape(N,M)
 		
 		# RBF
-		return ( exp( -((X-Y)**2.0) / gamma ) ).reshape(N,M)
+		#return ( exp( -((X-Y)**2.0) / gamma ) ).reshape(N,M)
 
 	def _k(self,X,Y,gamma):
 		diff = X-Y
 		N = X.size
 		M = Y.size
 		
-		return ( gamma / ( 2.0 + numpy.exp( gamma * diff ) + numpy.exp( -gamma * diff ) ) ).reshape(N,M)
+		return ( -gamma / ( 2.0 + numpy.exp( gamma * diff ) + numpy.exp( -gamma * diff ) ) ).reshape(N,M)
 		
 	def cdf(self,x):
 		#print 'cdf: %s' % repr(x.shape)
@@ -120,13 +122,13 @@ class svm:
 		Z = numpy.zeros([N,N])
 		self.K = numpy.ma.masked_less( vstack(
 			[ 
-				numpy.hstack( ( [Z,] * i ) + [self._K( self.Y.reshape(N,1,self.d), transpose(self.Y.reshape(N,1,self.d), [1,0,2]), self.gamma[i] ),] + ( [Z,]*(kappa-i-1 ) ) )
+				numpy.hstack( ( [Z,] * i ) + [self._K( self.Y.reshape([N,1]), self.Y.reshape([1,N]), self.gamma[i] ),] + ( [Z,]*(kappa-i-1 ) ) )
 				for i in range( kappa ) 
 			]
 		), 1e-10 )
 		self.Gamma = numpy.hstack( [ numpy.tile(g,N) for g in self.gamma ] )
-			
-		P = cvxopt.matrix( numpy.dot(self.K.T,self.K), (N*kappa,N*kappa) )
+		
+		P = cvxopt.matrix( numpy.dot(self.K,self.K.T), (N*kappa,N*kappa) )
 		q = cvxopt.matrix( ( self._Omega(self.Gamma) - ( 2.0 * numpy.ma.dot( tile(self.Y,kappa), self.K ) ) ), (N*kappa,1) )
 		G = cvxopt.matrix( -identity(N*kappa), (N*kappa,N*kappa) )
 		h = cvxopt.matrix( 0.0, (N*kappa,1) )
@@ -137,7 +139,7 @@ class svm:
 		# Solve!
 		p = solvers.qp( P=P, q=q, G=G, h=h, A=A, b=b )
 		
-		beta = ma.masked_less( p['x'], 1e-5 )
+		beta = ma.masked_less( p['x'], 1e-8 )
 		mask = ma.getmask(beta)
 		self.alpha = beta
 		self.beta = numpy.atleast_2d( beta.compressed() )
@@ -147,11 +149,12 @@ class svm:
 				
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % (float(duration.microseconds)/1000000)
-		print "Y argmin: %s" % numpy.argmin(self.Y)
+		print "Y argmin: %s (x=%s y=%s)" % ( numpy.argmin(self.Y),self.X[ numpy.argmin(self.Y)], numpy.min(self.Y) )
+		print "Y argmax: %s" % numpy.argmax(self.Y)
 		
 def run():
-	#samples = array([[gauss(0,1)] for i in range(20) ] + [[gauss(8,1)] for i in range(20) ]).reshape([40,1]) 
-	samples = array([[gauss(0,1)] for i in range(40) ] ).reshape([40,1]) 
+	samples = array([[gauss(0,1)] for i in range(20) ] + [[gauss(8,1)] for i in range(20) ]).reshape([40,1]) 
+	#samples = array([[gauss(0,1)] for i in range(4) ] ).reshape([4,1]) 
 	
 	#C = [1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2]
 	#res = [ svm( samples, C=c ) for c in C ]
@@ -159,7 +162,7 @@ def run():
 	#plt.show()
 	#return True
 	
-	mod = svm( samples,C=10. )
+	mod = svm( samples,C=.01, gamma=[.1, 1.,10.] )
 	print mod
 	
 	fig = plt.figure()
@@ -194,6 +197,7 @@ def run():
 	for i in range( mod.NSV ):
 		d.plot( X, numpy.dot( mod._K( atleast_2d(X).T, mod.SV[0][i], mod.Gamma[0][i] ), mod.beta[0][i].T ) )
 		#d.plot( X, numpy.dot( mod._K( X, mod.SV[i], mod.gamma[i] ), mod.beta[i] ) )
+	d.plot( mod.SV, mod.beta/2, 'o' )
 	d.set_title("SV Contributions")
 	
 	plt.show()
