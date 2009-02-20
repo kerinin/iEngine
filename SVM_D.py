@@ -133,17 +133,16 @@ class svm:
 		self.Gamma = numpy.hstack( [ numpy.tile(g,N) for g in self.gamma ] )
 		
 		P = cvxopt.matrix( numpy.dot(self.K.T,self.K), (N*kappa,N*kappa) )
-		#q = cvxopt.matrix( ( self._Omega(self.Gamma) - ( 2.0 * numpy.ma.dot( tile(self.Y,kappa), self.K ) ) ), (N*kappa,1) )
-		q = cvxopt.matrix( ( self._Omega(self.Gamma) - ( (self.K.sum(1)+.5) / self.Y ) ), (N*kappa,1) )
+		#P = cvxopt.matrix( ( self.K.T * self.K), (N*kappa,N*kappa) )
+		q = cvxopt.matrix( ( self._Omega(self.Gamma) - ( 2.0 * numpy.ma.dot( tile(self.Y,kappa), self.K ) ) ), (N*kappa,1) )
+		#q = cvxopt.matrix( ( self._Omega(self.Gamma) - ( (self.K.sum(1)+.5) / self.Y ) ), (N*kappa,1) )
 		G = cvxopt.matrix( -identity(N*kappa), (N*kappa,N*kappa) )
 		h = cvxopt.matrix( 0.0, (N*kappa,1) )
 		A = cvxopt.matrix( 1., (1,N*kappa) )
 		b = cvxopt.matrix( 1., (1,1) )
 		#print "P: %s, q: %s, G: %s, h: %s, A: %s, b: %s" % (P.size,q.size,G.size,h.size,A.size,b.size)
 		
-		p = numpy.dot( self.K.T,self.K )
-		print p
-		print p.sum(0)
+		print P 
 		
 		#print self.K
 		#print self.K.sum(1)
@@ -176,7 +175,7 @@ def run():
 	#plt.show()
 	#return True
 	
-	mod = svm( samples,C=0, gamma=[1e6,] )
+	mod = svm( samples,C=0, gamma=[12,] )
 	print mod
 	
 	fig = plt.figure()
@@ -214,7 +213,7 @@ def run():
 	d.plot( mod.SV, mod.beta/2, 'o' )
 	d.set_title("SV Contributions")
 	
-	#plt.show()
+	plt.show()
 	
 	
 def help():
