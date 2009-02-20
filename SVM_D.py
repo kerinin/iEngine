@@ -166,8 +166,8 @@ class svm:
 		print "Y argmax: %s" % numpy.argmax(self.Y)
 		
 def run():
-	#samples = array([[gauss(0,1)] for i in range(20) ] + [[gauss(8,1)] for i in range(20) ]).reshape([40,1]) 
-	samples = array([[gauss(0,1)] for i in range(10) ] ).reshape([10,1]) 
+	samples = array([[gauss(0,1)] for i in range(20) ] + [[gauss(8,1)] for i in range(20) ]).reshape([40,1]) 
+	#samples = array([[gauss(0,1)] for i in range(10) ] ).reshape([10,1]) 
 	
 	#C = [1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2]
 	#res = [ svm( samples, C=c ) for c in C ]
@@ -175,7 +175,7 @@ def run():
 	#plt.show()
 	#return True
 	
-	mod = svm( samples,C=0, gamma=[12,] )
+	mod = svm( samples,C=0, gamma=[1e6,] )
 	print mod
 	
 	fig = plt.figure()
