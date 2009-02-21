@@ -66,7 +66,7 @@ class svm:
 		return ret
 	
 	def _Omega(self,Gamma):
-		return self.C * ( Gamma ** -1. )
+		return 1e2 * ( Gamma ** self.C )
 		
 	def _K(self,X,Y,gamma):
 		N = X.size
@@ -141,7 +141,7 @@ class svm:
 		b = cvxopt.matrix( 1., (1,1) )
 		#print "P: %s, q: %s, G: %s, h: %s, A: %s, b: %s" % (P.size,q.size,G.size,h.size,A.size,b.size)
 		
-		
+		#print self._Omega(self.Gamma)
 		# Solve!
 		p = solvers.qp( P=P, q=q, G=G, h=h, A=A, b=b )
 		
@@ -165,14 +165,16 @@ def run():
 	#samples = array( [ [i,i+.1,i+.2] for i in range(0,10) ], dtype=float ).reshape([30,1])
 	#samples = list()
 	
+	#C = [-1e1,-1e0,-1e-1,-1e-2,-1e-3,-1e-4,-1e-5,0.,1e-5,1e-4,1e-3,1e-2,1e-1,1e0,1e1]
 	#C = [1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,1e-1,1e0,1e1,1e2,1e3,1e4,1e5,1e6,1e7]
-	#C = numpy.exp( arange(0,5,.1) )
+	#C = arange(0,5,.1) 
 	#res = [ svm( samples, C=c, gamma=[.25,.5,1.,2.,4.,8.,16.]) for c in C ]
-	#plt.plot( numpy.log(C), [ m.cdf_res().sum() for m in res ], 'o--' )
+	#plt.plot( numpy.log10(numpy.abs(C)), [ m.cdf_res().sum() for m in res ], 'o--' )
 	#plt.show()
 	#return True
 	
-	mod = svm( numpy.sort(samples),C=math.exp(10), gamma=[.25,.5,1.,2.,4.,8.,16.] )
+	# 2 good, 10 bad
+	mod = svm( numpy.sort(samples),C=-1, gamma=[.1,2.,10.] )
 	#mod = svm( numpy.sort(samples),C=math.exp(1), gamma=[3.,] )
 	
 	print mod
@@ -186,13 +188,12 @@ def run():
 	a = fig.add_subplot(2,2,1)
 	#a.hist(mod.K.compressed().flatten(), 20, normed=1)
 	#a.set_title("K distribution")
-	a.plot( [ i % mod.N for i in range( mod.N * len(mod.gamma) ) ], mod.alpha, 'o' )
-	a.set_title("weights (x=ell)")
+	#a.plot( [ i % mod.N for i in range( mod.N * len(mod.gamma) ) ], mod.alpha, 'o' )
+	#a.set_title("weights (x=ell)")
+	a.plot(mod.Gamma, mod.beta,  'o')
+	a.set_title('gamma vs weight')
 	
 	b = fig.add_subplot(2,2,3)
-	#b.plot(mod.Gamma, mod.beta,  'o')
-	#b.set_title('gamma vs weight')
-	
 	n, bins, patches = b.hist(mod.X, 20, normed=1, facecolor='green', alpha=0.5, label='empirical distribution')
 	b.plot(X,mod.pdf(X), 'r--', label="computed distribution")
 	b.set_title("Computed vs empirical PDF")
