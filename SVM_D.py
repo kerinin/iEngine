@@ -134,7 +134,7 @@ class svm:
 		
 		P = cvxopt.matrix( numpy.dot(self.K.T,self.K), (N*kappa,N*kappa) )
 		#P = cvxopt.matrix( ( self.K.T * self.K), (N*kappa,N*kappa) )
-		q = cvxopt.matrix( ( self._Omega(self.Gamma) - ( 2.0 * numpy.ma.dot( tile(self.Y,kappa), self.K ) ) ), (N*kappa,1) )
+		q = cvxopt.matrix( ( self._Omega(self.Gamma) - ( numpy.ma.dot( tile(self.Y,kappa), self.K ) ) ), (N*kappa,1) )
 		#q = cvxopt.matrix( ( self._Omega(self.Gamma) - ( (self.K.sum(1)+.5) / self.Y ) ), (N*kappa,1) )
 		G = cvxopt.matrix( -identity(N*kappa), (N*kappa,N*kappa) )
 		h = cvxopt.matrix( 0.0, (N*kappa,1) )
@@ -168,6 +168,7 @@ class svm:
 def run():
 	samples = array([[gauss(0,1)] for i in range(20) ] + [[gauss(8,1)] for i in range(20) ]).reshape([40,1]) 
 	#samples = array([[gauss(0,1)] for i in range(10) ] ).reshape([10,1]) 
+	#samples = array( range(0,20) ).reshape([20,1])
 	
 	#C = [1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2]
 	#res = [ svm( samples, C=c ) for c in C ]
@@ -175,7 +176,7 @@ def run():
 	#plt.show()
 	#return True
 	
-	mod = svm( samples,C=0, gamma=[1e6,] )
+	mod = svm( samples,C=1, gamma=[1e1,] )
 	print mod
 	
 	fig = plt.figure()
