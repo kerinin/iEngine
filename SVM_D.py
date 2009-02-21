@@ -151,7 +151,6 @@ class svm:
 		
 		# Solve!
 		p = solvers.qp( P=P, q=q, G=G, h=h, A=A, b=b )
-		print p['x']
 		
 		beta = ma.masked_less( p['x'], 1e-8 )
 		mask = ma.getmask(beta)
@@ -160,7 +159,9 @@ class svm:
 		self.SV = numpy.atleast_2d( numpy.ma.array( numpy.tile(self.X.T,kappa).T, mask=mask).compressed() )
 		self.Gamma = numpy.atleast_2d( numpy.ma.array( self.Gamma, mask=mask ).compressed() )
 		self.NSV = self.beta.size
-				
+		
+		print self.beta 
+		
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % (float(duration.microseconds)/1000000)
 		print "Y argmin: %s (x=%s y=%s)" % ( numpy.argmin(self.Y),self.X[ numpy.argmin(self.Y)], numpy.min(self.Y) )
@@ -168,8 +169,9 @@ class svm:
 		
 def run():
 	#samples = array([[gauss(0,1)] for i in range(20) ] + [[gauss(8,1)] for i in range(20) ]).reshape([40,1]) 
-	samples = array([[gauss(0,1)] for i in range(40) ] ).reshape([40,1]) 
+	#samples = array([[gauss(0,1)] for i in range(40) ] ).reshape([40,1]) 
 	#samples = array( range(0,10) ).reshape([10,1])
+	samples = array( [ [i,i+.1,i+.2] for i in range(0,10) ], dtype=float ).reshape([30,1])
 	
 	#C = [1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,1e-1,1e0,1e1,1e2,1e3,1e4,1e5,1e6,1e7]
 	#C = numpy.exp( arange(2,7,.1) )
@@ -179,7 +181,7 @@ def run():
 	#return True
 	
 	#mod = svm( numpy.sort(samples),C=math.exp(4.5), gamma=[.25,.5,1.,2.,4.,8.,16.] )
-	mod = svm( numpy.sort(samples),C=0., gamma=[1000.,] )
+	mod = svm( numpy.sort(samples),C=math.exp(5), gamma=[50.,] )
 	
 	print mod
 	
