@@ -67,8 +67,6 @@ class svm:
 	
 	def _Omega(self,Gamma):
 		return Gamma ** self.C
-		return 1e4 + (Gamma **self.C)
-		return len(self.gamma) * (Gamma ** self.C )
 		
 	def _K(self,X,Y,gamma):
 		N = X.size
@@ -165,25 +163,32 @@ def run():
 	start = -5.
 	end = 12.
 	X = arange(start,end,.25)
+	fig = plt.figure()
 	
 	#C = [-1e1,-1e0,-1e-1,-1e-2,-1e-3,-1e-4,-1e-5,0.,1e-5,1e-4,1e-3,1e-2,1e-1,1e0,1e1]
 	#C = [1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,1e-1,1e0,1e1,1e2,1e3,1e4,1e5,1e6,1e7]
-	C = arange(-10,0,1) 
+	C = arange(-10,0,.1) 
 	res = [ svm( samples, C=c, gamma=[.5,1.,2.,4.,8.]) for c in C ]
-	plt.plot(numpy.sort( res[0].X,0), numpy.sort( res[0].Y,0), 'green' )
+	
+	a = fig.add_subplot(1,2,1)
+	a.plot(numpy.sort( res[0].X,0), numpy.sort( res[0].Y,0), 'green' )
 	for mod in res:
-		plt.plot(X, mod.cdf(X), '--' )
+		a.plot(X, mod.cdf(X), '--' )
+	a.set_title("Computed vs emprical CDF")
+	
+	b = fig.add_subplot(1,2,2)
+	b.plot( [mod.NSV for mod in res], [mod.cdf_res().sum() for mod in res], 'o--')
+	b.set_title("NSV vs Loss")
+	
 	plt.show()
 	return True
 	
 	# 2 good, 10 bad
-	mod = svm( numpy.sort(samples),C=-1, gamma=[.5,1.,2.,5.,10.] )
+	mod = svm( numpy.sort(samples),C=-1, gamma=[.125,.5,2.,8.,16.] )
 	#mod = svm( numpy.sort(samples),C=math.exp(1), gamma=[3.,] )
 	
 	print mod
 	
-	fig = plt.figure()
-
 	a = fig.add_subplot(2,2,1)
 	#a.hist(mod.K.compressed().flatten(), 20, normed=1)
 	#a.set_title("K distribution")
