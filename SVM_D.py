@@ -118,8 +118,8 @@ class svm:
 		# definitions will be for the optimization problem and re-implement it in CVXOPT.  From
 		# there you can start working on decomposition.
 		
-		self.N = 50
-		self.X = arange(0,10,.2).reshape([self.N,1])
+		self.N = 100
+		self.X = arange(0,10,.1).reshape([self.N,1])
 		y1 = .5-self._K(array([2,]),self.X,3)/2
 		y2 = .5-self._K(array([6,]),self.X,3)/2
 		self.Y = (y1+y2).reshape([self.N,])
@@ -130,7 +130,7 @@ class svm:
 		Z = numpy.zeros([N,N])
 		self.K = numpy.array( vstack(
 			[ 
-				numpy.hstack( ( [Z,] * i ) + [self._K( self.Y.reshape([N,1]), self.Y.reshape([1,N]), self.gamma[i] ),] + ( [Z,]*(kappa-i-1 ) ) )
+				numpy.hstack( ( [Z,] * i ) + [self._K( self.X.reshape([N,1]), self.X.reshape([1,N]), self.gamma[i] ),] + ( [Z,]*(kappa-i-1 ) ) )
 				for i in range( kappa ) 
 			]
 		) )
@@ -147,12 +147,6 @@ class svm:
 		b = cvxopt.matrix( 1., (1,1) )
 		#print "P: %s, q: %s, G: %s, h: %s, A: %s, b: %s" % (P.size,q.size,G.size,h.size,A.size,b.size)
 		
-		#print numpy.dot(self.K.T,self.K).sum(0) - ( N* ( numpy.dot(self.Y, self.K) + (self.Y / 2) ) )
-		
-		#print self.K
-		#print self.K.sum(1)
-		#print self.Y
-		#print (self.K.sum(1)+.5) / self.Y
 		
 		# Solve!
 		p = solvers.qp( P=P, q=q, G=G, h=h, A=A, b=b )
