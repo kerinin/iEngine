@@ -124,21 +124,22 @@ class svm:
 		Z = numpy.zeros([N,N])
 		self.K = numpy.array( vstack(
 			[ 
-				numpy.hstack( [self._K( self.X.reshape([N,1]), self.X.reshape([1,N]), self.gamma[i] ),] + ( [Z,]*(kappa-1 ) ) )
+				numpy.hstack( ( [Z,] * i ) + [self._K( self.X.reshape([N,1]), self.X.reshape([1,N]), self.gamma[i] ),] + ( [Z,] * ( kappa-1-i ) ) )
 				for i in range( kappa ) 
 			]
 		) )
-		
+
 		self.Gamma = numpy.hstack( [ numpy.tile(g,N) for g in self.gamma ] )
 		
-		P = cvxopt.matrix( numpy.dot(self.K.T,self.K), (N*kappa,N*kappa) )
+		P = cvxopt.matrix( numpy.dot(self.K.T,self.K)*2, (N*kappa,N*kappa) )
 		q = cvxopt.matrix( ( self._Omega(self.Gamma) - ( numpy.ma.dot( tile(self.Y,kappa), self.K ) ) ), (N*kappa,1) )
+		
 		G = cvxopt.matrix( -identity(N*kappa), (N*kappa,N*kappa) )
 		h = cvxopt.matrix( 0.0, (N*kappa,1) )
 		A = cvxopt.matrix( 1., (1,N*kappa) )
 		b = cvxopt.matrix( 1., (1,1) )
 		#print "P: %s, q: %s, G: %s, h: %s, A: %s, b: %s" % (P.size,q.size,G.size,h.size,A.size,b.size)
-		
+
 		# Solve!
 		p = solvers.qp( P=P, q=q, G=G, h=h, A=A, b=b )
 		
@@ -156,7 +157,7 @@ class svm:
 def run():
 	samples = array([[gauss(0,1)] for i in range(50) ] + [[gauss(8,1)] for i in range(50) ]).reshape([100,1]) 
 	#samples = array([[gauss(0,1)] for i in range(40) ] ).reshape([40,1]) 
-	#samples = arange(0,10).reshape([10,1])
+	#samples = arange(0,4).reshape([4,1])
 	#samples = array( [ [i,i+.1,i+.2] for i in range(0,10) ], dtype=float ).reshape([30,1])
 	#samples = list()
 
@@ -186,7 +187,7 @@ def run():
 	'''
 	
 	# 2 good, 10 bad
-	mod = svm( numpy.sort(samples),C=-10, gamma=[.5,1.,2.,] )
+	mod = svm( numpy.sort(samples),C=-1, gamma=[2.,1.] )
 	#mod = svm( numpy.sort(samples),C=math.exp(1), gamma=[3.,] )
 	
 	print mod
