@@ -129,6 +129,7 @@ class svm:
 			]
 		) )
 		
+		self.Gamma = numpy.hstack( [ numpy.tile(g,N) for g in self.gamma ] )
 		
 		P = cvxopt.matrix( numpy.dot(self.K.T,self.K), (N*kappa,N*kappa) )
 		q = cvxopt.matrix( ( self._Omega(self.Gamma) - ( numpy.ma.dot( tile(self.Y,kappa), self.K ) ) ), (N*kappa,1) )
@@ -162,7 +163,7 @@ class svm:
 def run():
 	#samples = array([[gauss(0,1)] for i in range(20) ] + [[gauss(8,1)] for i in range(20) ]).reshape([40,1]) 
 	#samples = array([[gauss(0,1)] for i in range(40) ] ).reshape([40,1]) 
-	samples = array( range(0,4) ).reshape([4,1])
+	samples = 10-arange(0,10).reshape([10,1])
 	#samples = array( [ [i,i+.1,i+.2] for i in range(0,10) ], dtype=float ).reshape([30,1])
 	#samples = list()
 	
@@ -214,7 +215,7 @@ def run():
 	d.plot( mod.SV, mod.beta/2, 'o' )
 	d.set_title("SV Contributions")
 	
-	#plt.show()
+	plt.show()
 	
 	
 def help():
