@@ -66,7 +66,7 @@ class svm:
 		return ret
 	
 	def _Omega(self,Gamma):
-		return 1e6 + (Gamma ** self.C )
+		return len(self.gamma) * (Gamma ** self.C )
 		
 	def _K(self,X,Y,gamma):
 		N = X.size
@@ -124,12 +124,6 @@ class svm:
 		Z = numpy.zeros([N,N])
 		self.K = numpy.array( vstack(
 			[ 
-				numpy.hstack( ( [Z,] * i ) + [self._K( self.X.reshape([N,1]), self.X.reshape([1,N]), self.gamma[i] ),] + ( [Z,]*(kappa-i-1 ) ) )
-				for i in range( kappa ) 
-			]
-		) )
-		self.K = numpy.array( vstack(
-			[ 
 				numpy.hstack( [self._K( self.X.reshape([N,1]), self.X.reshape([1,N]), self.gamma[i] ),] + ( [Z,]*(kappa-1 ) ) )
 				for i in range( kappa ) 
 			]
@@ -148,10 +142,6 @@ class svm:
 		# Solve!
 		p = solvers.qp( P=P, q=q, G=G, h=h, A=A, b=b )
 		
-		
-		print 'results'
-		print p['x']
-		
 		beta = ma.masked_less( p['x'], 1e-8 )
 		mask = ma.getmask(beta)
 		self.alpha = beta
@@ -166,32 +156,34 @@ class svm:
 		print "Y argmax: %s" % numpy.argmax(self.Y)
 		
 def run():
-	samples = array([[gauss(0,1)] for i in range(20) ] + [[gauss(8,1)] for i in range(20) ]).reshape([40,1]) 
+	samples = array([[gauss(0,1)] for i in range(50) ] + [[gauss(8,1)] for i in range(50) ]).reshape([100,1]) 
 	#samples = array([[gauss(0,1)] for i in range(40) ] ).reshape([40,1]) 
 	#samples = arange(0,10).reshape([10,1])
 	#samples = array( [ [i,i+.1,i+.2] for i in range(0,10) ], dtype=float ).reshape([30,1])
 	#samples = list()
+
+	start = -5.
+	end = 12.
+	X = arange(start,end,.25)
 	
 	#C = [-1e1,-1e0,-1e-1,-1e-2,-1e-3,-1e-4,-1e-5,0.,1e-5,1e-4,1e-3,1e-2,1e-1,1e0,1e1]
 	#C = [1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,1e-1,1e0,1e1,1e2,1e3,1e4,1e5,1e6,1e7]
-	#C = arange(5.3,5.4,.005) 
-	#res = [ svm( samples, C=c, gamma=[.1,2.,10.]) for c in C ]
-	#plt.plot( numpy.abs(C), [ m.cdf_res().sum() for m in res ], 'o--' )
-	#plt.show()
-	#return True
+	C = arange(-4,0,.2) 
+	res = [ svm( samples, C=c, gamma=[.1,2.,10.]) for c in C ]
+	plt.plot(numpy.sort( res[0].X,0), numpy.sort( res[0].Y,0), 'green' )
+	for mod in res:
+		plt.plot(X, mod.cdf(X), 'r--' )
+	plt.show()
+	return True
 	
 	# 2 good, 10 bad
-	mod = svm( numpy.sort(samples),C=.0001, gamma=[2.,5.] )
+	mod = svm( numpy.sort(samples),C=-1, gamma=[.5,1.,2.,5.,10.] )
 	#mod = svm( numpy.sort(samples),C=math.exp(1), gamma=[3.,] )
 	
 	print mod
 	
 	fig = plt.figure()
-	
-	start = -5.
-	end = 12.
-	X = arange(start,end,.25)
-	
+
 	a = fig.add_subplot(2,2,1)
 	#a.hist(mod.K.compressed().flatten(), 20, normed=1)
 	#a.set_title("K distribution")
@@ -217,7 +209,7 @@ def run():
 	for i in range( mod.NSV ):
 		d.plot( X, numpy.dot( mod._K( atleast_2d(X).T, mod.SV[0][i], mod.Gamma[0][i] ), mod.beta[0][i].T ) )
 		#d.plot( X, numpy.dot( mod._K( X, mod.SV[i], mod.gamma[i] ), mod.beta[i] ) )
-	d.plot( mod.SV, mod.beta/2, 'o' )
+	d.plot( mod.SV, mod.beta, 'o' )
 	d.set_title("SV Contributions")
 	
 	plt.show()
