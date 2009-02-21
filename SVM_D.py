@@ -66,7 +66,7 @@ class svm:
 		return ret
 	
 	def _Omega(self,Gamma):
-		return self.C * Gamma
+		return self.C * ( Gamma ** -1. )
 		
 	def _K(self,X,Y,gamma):
 		N = X.size
@@ -86,7 +86,7 @@ class svm:
 		N = X.size
 		M = Y.size
 		
-		return ( -gamma / ( 2.0 + numpy.exp( gamma * diff ) + numpy.exp( -gamma * diff ) ) ).reshape(N,M)
+		return ( gamma / ( 2.0 + numpy.exp( gamma * diff ) + numpy.exp( -gamma * diff ) ) ).reshape(N,M)
 		
 	def cdf(self,x):
 		#print 'cdf: %s' % repr(x.shape)
@@ -121,7 +121,7 @@ class svm:
 		
 		kappa = len( self.gamma )
 		(N,self.d) = self.X.shape
-		self.Y = ( ( 1.+ (self.X.reshape(N,1,self.d) > transpose(self.X.reshape(N,1,self.d),[1,0,2])).prod(2).sum(1,dtype=float) ) / N ).reshape([N,])
+		self.Y = ( ( .5 + (self.X.reshape(N,1,self.d) > transpose(self.X.reshape(N,1,self.d),[1,0,2])).prod(2).sum(1,dtype=float) ) / N ).reshape([N,])
 		Z = numpy.zeros([N,N])
 		self.K = numpy.array( vstack(
 			[ 
@@ -135,14 +135,14 @@ class svm:
 		P = cvxopt.matrix( numpy.dot(self.K.T,self.K), (N*kappa,N*kappa) )
 		#P = cvxopt.matrix( ( self.K.T * self.K), (N*kappa,N*kappa) )
 		q = cvxopt.matrix( ( self._Omega(self.Gamma) - ( numpy.ma.dot( tile(self.Y,kappa), self.K ) ) ), (N*kappa,1) )
-		#q = cvxopt.matrix( ( self._Omega(self.Gamma) - ( (self.K.sum(1)+.5) / self.Y ) ), (N*kappa,1) )
+		#q = cvxopt.matrix( -N* ( numpy.dot(self.Y,self.K) + (self.Y / 2 ) ) )
 		G = cvxopt.matrix( -identity(N*kappa), (N*kappa,N*kappa) )
 		h = cvxopt.matrix( 0.0, (N*kappa,1) )
 		A = cvxopt.matrix( 1., (1,N*kappa) )
 		b = cvxopt.matrix( 1., (1,1) )
 		#print "P: %s, q: %s, G: %s, h: %s, A: %s, b: %s" % (P.size,q.size,G.size,h.size,A.size,b.size)
 		
-		print P 
+		#print numpy.dot(self.K.T,self.K).sum(0) - ( N* ( numpy.dot(self.Y, self.K) + (self.Y / 2) ) )
 		
 		#print self.K
 		#print self.K.sum(1)
@@ -151,6 +151,7 @@ class svm:
 		
 		# Solve!
 		p = solvers.qp( P=P, q=q, G=G, h=h, A=A, b=b )
+		print p['x']
 		
 		beta = ma.masked_less( p['x'], 1e-8 )
 		mask = ma.getmask(beta)
@@ -166,17 +167,20 @@ class svm:
 		print "Y argmax: %s" % numpy.argmax(self.Y)
 		
 def run():
-	samples = array([[gauss(0,1)] for i in range(20) ] + [[gauss(8,1)] for i in range(20) ]).reshape([40,1]) 
-	#samples = array([[gauss(0,1)] for i in range(10) ] ).reshape([10,1]) 
-	#samples = array( range(0,20) ).reshape([20,1])
+	#samples = array([[gauss(0,1)] for i in range(20) ] + [[gauss(8,1)] for i in range(20) ]).reshape([40,1]) 
+	samples = array([[gauss(0,1)] for i in range(40) ] ).reshape([40,1]) 
+	#samples = array( range(0,10) ).reshape([10,1])
 	
-	#C = [1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2]
-	#res = [ svm( samples, C=c ) for c in C ]
-	#plt.plot( C, [ m.cdf_res().sum() for m in res ], 'o--' )
+	#C = [1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,1e-1,1e0,1e1,1e2,1e3,1e4,1e5,1e6,1e7]
+	#C = numpy.exp( arange(2,7,.1) )
+	#res = [ svm( samples, C=c, gamma=[.25,.5,1.,2.,4.,8.,16.]) for c in C ]
+	#plt.plot( numpy.log(C), [ m.cdf_res().sum() for m in res ], 'o--' )
 	#plt.show()
 	#return True
 	
-	mod = svm( samples,C=1, gamma=[1e1,] )
+	#mod = svm( numpy.sort(samples),C=math.exp(4.5), gamma=[.25,.5,1.,2.,4.,8.,16.] )
+	mod = svm( numpy.sort(samples),C=0., gamma=[1000.,] )
+	
 	print mod
 	
 	fig = plt.figure()
@@ -186,18 +190,18 @@ def run():
 	X = arange(start,end,.25)
 	
 	a = fig.add_subplot(2,2,1)
-	#n, bins, patches = a.hist(mod.data, 20, normed=1, facecolor='green', alpha=0.5, label='empirical distribution')
-	#a.plot(X,mod.pdf(X), 'r--', label="computed distribution")
-	#a.set_title("Computed vs empirical PDF")
-	
 	#a.hist(mod.K.compressed().flatten(), 20, normed=1)
 	#a.set_title("K distribution")
 	a.plot( [ i % mod.N for i in range( mod.N * len(mod.gamma) ) ], mod.alpha, 'o' )
 	a.set_title("weights (x=ell)")
 	
 	b = fig.add_subplot(2,2,3)
-	b.plot(mod.Gamma, mod.beta,  'o')
-	b.set_title('gamma vs weight')
+	#b.plot(mod.Gamma, mod.beta,  'o')
+	#b.set_title('gamma vs weight')
+	
+	n, bins, patches = b.hist(mod.X, 20, normed=1, facecolor='green', alpha=0.5, label='empirical distribution')
+	b.plot(X,mod.pdf(X), 'r--', label="computed distribution")
+	b.set_title("Computed vs empirical PDF")
 	
 	c = fig.add_subplot(2,2,2)
 	c.plot(numpy.sort(mod.X,0), numpy.sort(mod.Y,0), 'green' )
