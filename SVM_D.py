@@ -66,6 +66,8 @@ class svm:
 		return ret
 	
 	def _Omega(self,Gamma):
+		return Gamma ** self.C
+		return 1e4 + (Gamma **self.C)
 		return len(self.gamma) * (Gamma ** self.C )
 		
 	def _K(self,X,Y,gamma):
@@ -151,9 +153,7 @@ class svm:
 		self.NSV = self.beta.size
 		
 		duration = datetime.datetime.now() - start
-		print "optimized in %ss" % (float(duration.microseconds)/1000000)
-		print "Y argmin: %s (x=%s y=%s)" % ( numpy.argmin(self.Y),self.X[ numpy.argmin(self.Y)], numpy.min(self.Y) )
-		print "Y argmax: %s" % numpy.argmax(self.Y)
+		print "optimized in %ss" % ( duration.seconds + float(duration.microseconds)/1000000)
 		
 def run():
 	samples = array([[gauss(0,1)] for i in range(50) ] + [[gauss(8,1)] for i in range(50) ]).reshape([100,1]) 
@@ -168,11 +168,11 @@ def run():
 	
 	#C = [-1e1,-1e0,-1e-1,-1e-2,-1e-3,-1e-4,-1e-5,0.,1e-5,1e-4,1e-3,1e-2,1e-1,1e0,1e1]
 	#C = [1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,1e-1,1e0,1e1,1e2,1e3,1e4,1e5,1e6,1e7]
-	C = arange(-4,0,.2) 
-	res = [ svm( samples, C=c, gamma=[.1,2.,10.]) for c in C ]
+	C = arange(-10,0,1) 
+	res = [ svm( samples, C=c, gamma=[.5,1.,2.,4.,8.]) for c in C ]
 	plt.plot(numpy.sort( res[0].X,0), numpy.sort( res[0].Y,0), 'green' )
 	for mod in res:
-		plt.plot(X, mod.cdf(X), 'r--' )
+		plt.plot(X, mod.cdf(X), '--' )
 	plt.show()
 	return True
 	
