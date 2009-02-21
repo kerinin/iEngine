@@ -168,6 +168,7 @@ def run():
 	#C = [-1e1,-1e0,-1e-1,-1e-2,-1e-3,-1e-4,-1e-5,0.,1e-5,1e-4,1e-3,1e-2,1e-1,1e0,1e1]
 	#C = [1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,1e-1,1e0,1e1,1e2,1e3,1e4,1e5,1e6,1e7]
 	C = arange(-10,0,.1) 
+	'''
 	res = [ svm( samples, C=c, gamma=[.5,1.,2.,4.,8.]) for c in C ]
 	
 	a = fig.add_subplot(1,2,1)
@@ -182,9 +183,10 @@ def run():
 	
 	plt.show()
 	return True
+	'''
 	
 	# 2 good, 10 bad
-	mod = svm( numpy.sort(samples),C=-1, gamma=[.125,.5,2.,8.,16.] )
+	mod = svm( numpy.sort(samples),C=-10, gamma=[.5,1.,2.,] )
 	#mod = svm( numpy.sort(samples),C=math.exp(1), gamma=[3.,] )
 	
 	print mod
@@ -214,7 +216,7 @@ def run():
 	for i in range( mod.NSV ):
 		d.plot( X, numpy.dot( mod._K( atleast_2d(X).T, mod.SV[0][i], mod.Gamma[0][i] ), mod.beta[0][i].T ) )
 		#d.plot( X, numpy.dot( mod._K( X, mod.SV[i], mod.gamma[i] ), mod.beta[i] ) )
-	d.plot( mod.SV, mod.beta, 'o' )
+	d.plot( mod.SV, mod.beta/2, 'o' )
 	d.set_title("SV Contributions")
 	
 	plt.show()
