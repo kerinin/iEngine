@@ -131,7 +131,7 @@ class svm:
 
 		self.Gamma = numpy.hstack( [ numpy.tile(g,N) for g in self.gamma ] )
 		
-		P = cvxopt.matrix( numpy.dot(self.K.T,self.K)*2, (N*kappa,N*kappa) )
+		P = cvxopt.matrix( kappa * numpy.dot(self.K.T,self.K), (N*kappa,N*kappa) )
 		q = cvxopt.matrix( ( self._Omega(self.Gamma) - ( numpy.ma.dot( tile(self.Y,kappa), self.K ) ) ), (N*kappa,1) )
 		
 		G = cvxopt.matrix( -identity(N*kappa), (N*kappa,N*kappa) )
@@ -187,7 +187,7 @@ def run():
 	'''
 	
 	# 2 good, 10 bad
-	mod = svm( numpy.sort(samples),C=-1, gamma=[2.,1.] )
+	mod = svm( numpy.sort(samples),C=-1, gamma=[.5,1.,2.,4.,8.] )
 	#mod = svm( numpy.sort(samples),C=math.exp(1), gamma=[3.,] )
 	
 	print mod
