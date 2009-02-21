@@ -66,7 +66,7 @@ class svm:
 		return ret
 	
 	def _Omega(self,Gamma):
-		return Gamma ** self.C
+		return 1e0+(Gamma ** self.C)
 		
 	def _K(self,X,Y,gamma):
 		N = X.size
@@ -131,7 +131,7 @@ class svm:
 
 		self.Gamma = numpy.hstack( [ numpy.tile(g,N) for g in self.gamma ] )
 		
-		P = cvxopt.matrix( kappa * numpy.dot(self.K.T,self.K), (N*kappa,N*kappa) )
+		P = cvxopt.matrix( numpy.dot(self.K.T,self.K), (N*kappa,N*kappa) )
 		q = cvxopt.matrix( ( self._Omega(self.Gamma) - ( numpy.ma.dot( tile(self.Y,kappa), self.K ) ) ), (N*kappa,1) )
 		
 		G = cvxopt.matrix( -identity(N*kappa), (N*kappa,N*kappa) )
@@ -155,8 +155,8 @@ class svm:
 		print "optimized in %ss" % ( duration.seconds + float(duration.microseconds)/1000000)
 		
 def run():
-	samples = array([[gauss(0,1)] for i in range(50) ] + [[gauss(8,1)] for i in range(50) ]).reshape([100,1]) 
-	#samples = array([[gauss(0,1)] for i in range(40) ] ).reshape([40,1]) 
+	#samples = array([[gauss(0,1)] for i in range(50) ] + [[gauss(8,1)] for i in range(50) ]).reshape([100,1]) 
+	samples = array([[gauss(0,1)] for i in range(40) ] ).reshape([40,1]) 
 	#samples = arange(0,4).reshape([4,1])
 	#samples = array( [ [i,i+.1,i+.2] for i in range(0,10) ], dtype=float ).reshape([30,1])
 	#samples = list()
@@ -168,7 +168,7 @@ def run():
 	
 	#C = [-1e1,-1e0,-1e-1,-1e-2,-1e-3,-1e-4,-1e-5,0.,1e-5,1e-4,1e-3,1e-2,1e-1,1e0,1e1]
 	#C = [1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,1e-1,1e0,1e1,1e2,1e3,1e4,1e5,1e6,1e7]
-	C = arange(-10,0,.1) 
+	C = arange(-10,0,1) 
 	'''
 	res = [ svm( samples, C=c, gamma=[.5,1.,2.,4.,8.]) for c in C ]
 	
@@ -187,7 +187,11 @@ def run():
 	'''
 	
 	# 2 good, 10 bad
-	mod = svm( numpy.sort(samples),C=-1, gamma=[.5,1.,2.,4.,8.] )
+	# 5->4
+	# 4->4
+	# 3->3
+	
+	mod = svm( numpy.sort(samples),C=-.5, gamma=[.01,.1,1,10,100] )
 	#mod = svm( numpy.sort(samples),C=math.exp(1), gamma=[3.,] )
 	
 	print mod
