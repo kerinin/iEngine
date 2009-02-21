@@ -129,7 +129,6 @@ class svm:
 			]
 		) )
 		
-		self.Gamma = numpy.hstack( [ numpy.tile(g,N) for g in self.gamma ] )
 		
 		P = cvxopt.matrix( numpy.dot(self.K.T,self.K), (N*kappa,N*kappa) )
 		q = cvxopt.matrix( ( self._Omega(self.Gamma) - ( numpy.ma.dot( tile(self.Y,kappa), self.K ) ) ), (N*kappa,1) )
@@ -141,6 +140,11 @@ class svm:
 		
 		# Solve!
 		p = solvers.qp( P=P, q=q, G=G, h=h, A=A, b=b )
+		
+		print 'results'
+		print p['x']
+		
+		print (array(p['x']) > 1e-5 ).sum()
 		
 		beta = ma.masked_less( p['x'], 1e-8 )
 		mask = ma.getmask(beta)
@@ -156,9 +160,9 @@ class svm:
 		print "Y argmax: %s" % numpy.argmax(self.Y)
 		
 def run():
-	samples = array([[gauss(0,1)] for i in range(20) ] + [[gauss(8,1)] for i in range(20) ]).reshape([40,1]) 
+	#samples = array([[gauss(0,1)] for i in range(20) ] + [[gauss(8,1)] for i in range(20) ]).reshape([40,1]) 
 	#samples = array([[gauss(0,1)] for i in range(40) ] ).reshape([40,1]) 
-	#samples = array( range(0,10) ).reshape([10,1])
+	samples = array( range(0,4) ).reshape([4,1])
 	#samples = array( [ [i,i+.1,i+.2] for i in range(0,10) ], dtype=float ).reshape([30,1])
 	#samples = list()
 	
@@ -171,7 +175,7 @@ def run():
 	#return True
 	
 	# 2 good, 10 bad
-	mod = svm( numpy.sort(samples),C=1, gamma=[.05,.1,2.,5.,15.] )
+	mod = svm( numpy.sort(samples),C=.0001, gamma=[2.,5.] )
 	#mod = svm( numpy.sort(samples),C=math.exp(1), gamma=[3.,] )
 	
 	print mod
@@ -197,7 +201,7 @@ def run():
 	
 	c = fig.add_subplot(2,2,2)
 	c.plot(numpy.sort(mod.X,0), numpy.sort(mod.Y,0), 'green' )
-	c.plot(X, mod.cdf(X), 'r--' )
+	c.plot(X, mod.cdf(X)/2, 'r--' )
 	c.plot( mod.X, mod.cdf_res(mod.X), '+' )
 	
 	#c.plot( mod.X, (mod.Y.reshape( [len(mod.X),]) - mod.cdf( mod.X.reshape( [len(mod.X),]) ) ) ** 2, '+' )
@@ -210,7 +214,7 @@ def run():
 	d.plot( mod.SV, mod.beta/2, 'o' )
 	d.set_title("SV Contributions")
 	
-	plt.show()
+	#plt.show()
 	
 	
 def help():
