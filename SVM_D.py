@@ -66,7 +66,7 @@ class svm:
 		return ret
 	
 	def _Omega(self,Gamma):
-		return 1e2 * ( Gamma ** self.C )
+		return 1e6 + (Gamma ** self.C )
 		
 	def _K(self,X,Y,gamma):
 		N = X.size
@@ -132,16 +132,13 @@ class svm:
 		self.Gamma = numpy.hstack( [ numpy.tile(g,N) for g in self.gamma ] )
 		
 		P = cvxopt.matrix( numpy.dot(self.K.T,self.K), (N*kappa,N*kappa) )
-		#P = cvxopt.matrix( ( self.K.T * self.K), (N*kappa,N*kappa) )
 		q = cvxopt.matrix( ( self._Omega(self.Gamma) - ( numpy.ma.dot( tile(self.Y,kappa), self.K ) ) ), (N*kappa,1) )
-		#q = cvxopt.matrix( -N* ( numpy.dot(self.Y,self.K) + (self.Y / 2 ) ) )
 		G = cvxopt.matrix( -identity(N*kappa), (N*kappa,N*kappa) )
 		h = cvxopt.matrix( 0.0, (N*kappa,1) )
 		A = cvxopt.matrix( 1., (1,N*kappa) )
 		b = cvxopt.matrix( 1., (1,1) )
 		#print "P: %s, q: %s, G: %s, h: %s, A: %s, b: %s" % (P.size,q.size,G.size,h.size,A.size,b.size)
 		
-		#print self._Omega(self.Gamma)
 		# Solve!
 		p = solvers.qp( P=P, q=q, G=G, h=h, A=A, b=b )
 		
@@ -167,14 +164,14 @@ def run():
 	
 	#C = [-1e1,-1e0,-1e-1,-1e-2,-1e-3,-1e-4,-1e-5,0.,1e-5,1e-4,1e-3,1e-2,1e-1,1e0,1e1]
 	#C = [1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,1e-1,1e0,1e1,1e2,1e3,1e4,1e5,1e6,1e7]
-	#C = arange(0,5,.1) 
-	#res = [ svm( samples, C=c, gamma=[.25,.5,1.,2.,4.,8.,16.]) for c in C ]
-	#plt.plot( numpy.log10(numpy.abs(C)), [ m.cdf_res().sum() for m in res ], 'o--' )
+	#C = arange(5.3,5.4,.005) 
+	#res = [ svm( samples, C=c, gamma=[.1,2.,10.]) for c in C ]
+	#plt.plot( numpy.abs(C), [ m.cdf_res().sum() for m in res ], 'o--' )
 	#plt.show()
 	#return True
 	
 	# 2 good, 10 bad
-	mod = svm( numpy.sort(samples),C=-1, gamma=[.1,2.,10.] )
+	mod = svm( numpy.sort(samples),C=1, gamma=[.05,.1,2.,5.,15.] )
 	#mod = svm( numpy.sort(samples),C=math.exp(1), gamma=[3.,] )
 	
 	print mod
