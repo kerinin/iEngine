@@ -151,7 +151,7 @@ class svm:
 		mask = ma.getmask(beta)
 		self.alpha = beta
 		self.beta = numpy.atleast_2d( beta.compressed() )
-		self.SV = numpy.atleast_2d( numpy.ma.array( numpy.tile(self.X.T,kappa).T, mask=mask).compressed() )
+		self.SV = kappa * numpy.atleast_2d( numpy.ma.array( numpy.tile(self.X.T,kappa).T, mask=mask).compressed() )
 		self.Gamma = numpy.atleast_2d( numpy.ma.array( self.Gamma, mask=mask ).compressed() )
 		self.NSV = self.beta.size
 		
@@ -161,9 +161,9 @@ class svm:
 		print "Y argmax: %s" % numpy.argmax(self.Y)
 		
 def run():
-	#samples = array([[gauss(0,1)] for i in range(20) ] + [[gauss(8,1)] for i in range(20) ]).reshape([40,1]) 
+	samples = array([[gauss(0,1)] for i in range(20) ] + [[gauss(8,1)] for i in range(20) ]).reshape([40,1]) 
 	#samples = array([[gauss(0,1)] for i in range(40) ] ).reshape([40,1]) 
-	samples = 10-arange(0,10).reshape([10,1])
+	#samples = 10-arange(0,10).reshape([10,1])
 	#samples = array( [ [i,i+.1,i+.2] for i in range(0,10) ], dtype=float ).reshape([30,1])
 	#samples = list()
 	
@@ -202,7 +202,7 @@ def run():
 	
 	c = fig.add_subplot(2,2,2)
 	c.plot(numpy.sort(mod.X,0), numpy.sort(mod.Y,0), 'green' )
-	c.plot(X, mod.cdf(X)/2, 'r--' )
+	c.plot(X, mod.cdf(X), 'r--' )
 	c.plot( mod.X, mod.cdf_res(mod.X), '+' )
 	
 	#c.plot( mod.X, (mod.Y.reshape( [len(mod.X),]) - mod.cdf( mod.X.reshape( [len(mod.X),]) ) ) ** 2, '+' )
