@@ -118,10 +118,15 @@ class svm:
 		# definitions will be for the optimization problem and re-implement it in CVXOPT.  From
 		# there you can start working on decomposition.
 		
+		self.N = 50
+		self.X = arange(0,10,.2).reshape([self.N,1])
+		y1 = .5-self._K(array([2,]),self.X,3)/2
+		y2 = .5-self._K(array([6,]),self.X,3)/2
+		self.Y = (y1+y2).reshape([self.N,])
 		
 		kappa = len( self.gamma )
 		(N,self.d) = self.X.shape
-		self.Y = ( ( .5 + (self.X.reshape(N,1,self.d) > transpose(self.X.reshape(N,1,self.d),[1,0,2])).prod(2).sum(1,dtype=float) ) / N ).reshape([N,])
+		#self.Y = ( ( .5 + (self.X.reshape(N,1,self.d) > transpose(self.X.reshape(N,1,self.d),[1,0,2])).prod(2).sum(1,dtype=float) ) / N ).reshape([N,])
 		Z = numpy.zeros([N,N])
 		self.K = numpy.array( vstack(
 			[ 
@@ -160,8 +165,6 @@ class svm:
 		self.Gamma = numpy.atleast_2d( numpy.ma.array( self.Gamma, mask=mask ).compressed() )
 		self.NSV = self.beta.size
 		
-		print self.beta 
-		
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % (float(duration.microseconds)/1000000)
 		print "Y argmin: %s (x=%s y=%s)" % ( numpy.argmin(self.Y),self.X[ numpy.argmin(self.Y)], numpy.min(self.Y) )
@@ -171,17 +174,18 @@ def run():
 	#samples = array([[gauss(0,1)] for i in range(20) ] + [[gauss(8,1)] for i in range(20) ]).reshape([40,1]) 
 	#samples = array([[gauss(0,1)] for i in range(40) ] ).reshape([40,1]) 
 	#samples = array( range(0,10) ).reshape([10,1])
-	samples = array( [ [i,i+.1,i+.2] for i in range(0,10) ], dtype=float ).reshape([30,1])
+	#samples = array( [ [i,i+.1,i+.2] for i in range(0,10) ], dtype=float ).reshape([30,1])
+	samples = list()
 	
 	#C = [1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,1e-1,1e0,1e1,1e2,1e3,1e4,1e5,1e6,1e7]
-	#C = numpy.exp( arange(2,7,.1) )
-	#res = [ svm( samples, C=c, gamma=[.25,.5,1.,2.,4.,8.,16.]) for c in C ]
+	#C = numpy.exp( arange(26,50,.5) )
+	#res = [ svm( samples, C=c, gamma=[3.]) for c in C ]
 	#plt.plot( numpy.log(C), [ m.cdf_res().sum() for m in res ], 'o--' )
 	#plt.show()
 	#return True
 	
 	#mod = svm( numpy.sort(samples),C=math.exp(4.5), gamma=[.25,.5,1.,2.,4.,8.,16.] )
-	mod = svm( numpy.sort(samples),C=math.exp(5), gamma=[50.,] )
+	mod = svm( numpy.sort(samples),C=math.exp(5), gamma=[3.,] )
 	
 	print mod
 	
