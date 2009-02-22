@@ -62,7 +62,7 @@ class svm:
 		ret += "C: %s\n" % self.C
 		ret += "gamma: %s\n" % str(self.gamma)
 		ret += "SV: %s (%s percent)\n" % ( self.NSV,100. * float(self.NSV) / float(self.N ) )
-		ret += "Loss: %s\n" % self.cdf_res().sum()
+		ret += "Loss: %s\n" % (self.cdf_res()**2).sum()
 		return ret
 	
 	def _Omega(self,Gamma):
@@ -99,7 +99,7 @@ class svm:
 	def cdf_res(self,X=None):
 		if X==None:
 			X = self.X
-		return ( self.Y.flatten() - self.cdf( X.flatten() ).flatten() )**2
+		return ( self.Y.flatten() - self.cdf( X.flatten() ).flatten() )
 	
 	def __iadd__(self, points):
 		# overloaded '+=', used for adding a vector list to the module's data
@@ -170,9 +170,9 @@ def run():
 	
 	#C = [-1e1,-1e0,-1e-1,-1e-2,-1e-3,-1e-4,-1e-5,0.,1e-5,1e-4,1e-3,1e-2,1e-1,1e0,1e1]
 	#C = [1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,1e-1,1e0,1e1,1e2,1e3,1e4,1e5,1e6,1e7]
-	C = arange(-10,0,1) 
+	C = arange(.005,.05,.005) 
 	'''
-	res = [ svm( samples, C=c, gamma=[.5,1.,2.,4.,8.]) for c in C ]
+	res = [ svm( samples, C=-1, gamma=[c,1.0]) for c in C ]
 	
 	a = fig.add_subplot(1,2,1)
 	a.plot(numpy.sort( res[0].X,0), numpy.sort( res[0].Y,0), 'green' )
@@ -193,7 +193,7 @@ def run():
 	# 4->4
 	# 3->3
 	
-	mod = svm( numpy.sort(samples),C=-1, gamma=[.125,.5,2.] )
+	mod = svm( samples,C=-1, gamma=[.5,2.] )
 	
 	print mod
 	
@@ -202,8 +202,14 @@ def run():
 	#a.set_title("K distribution")
 	#a.plot( [ i % mod.N for i in range( mod.N * len(mod.gamma) ) ], mod.alpha, 'o' )
 	#a.set_title("weights (x=ell)")
-	a.plot(mod.Gamma, mod.beta,  'o')
-	a.set_title('gamma vs weight')
+	
+	#a.plot(mod.Gamma, mod.beta,  'o')
+	#a.set_title('gamma vs weight')
+	
+	a.hist(mod.cdf_res(), 20, normed=1)
+	a.axvline(x=0)
+	a.set_title('residual distribution')
+	
 	
 	b = fig.add_subplot(2,2,3)
 	#n, bins, patches = b.hist(mod.X, 20, normed=1, facecolor='green', alpha=0.5, label='empirical distribution')
@@ -215,8 +221,8 @@ def run():
 	c = fig.add_subplot(2,2,2)
 	c.plot(numpy.sort(mod.X,0), numpy.sort(mod.Y,0), 'green' )
 	c.plot(X, mod.cdf(X), 'r--' )
-	c.plot( mod.X, mod.cdf_res(mod.X), '+' )
-	
+	c.plot( mod.X, mod.cdf_res(mod.X)**2, '+' )
+	c.grid(True)
 	#c.plot( mod.X, (mod.Y.reshape( [len(mod.X),]) - mod.cdf( mod.X.reshape( [len(mod.X),]) ) ) ** 2, '+' )
 	c.set_title("Computed vs emprical CDF")
 	
@@ -225,6 +231,7 @@ def run():
 		d.plot( X, numpy.dot( mod._K( atleast_2d(X).T, mod.SV[0][i], mod.Gamma[0][i] ), mod.beta[0][i].T ) )
 		#d.plot( X, numpy.dot( mod._K( X, mod.SV[i], mod.gamma[i] ), mod.beta[i] ) )
 	d.plot( mod.SV, mod.beta/2, 'o' )
+	d.grid(True)
 	d.set_title("SV Contributions")
 	
 	plt.show()
