@@ -22,7 +22,7 @@ import scipy
 import scipy.special
 import scipy.stats
 import cvxopt
-import cvxmod
+#import cvxmod
 from cvxopt import *
 
 from numpy import *
@@ -151,12 +151,14 @@ class svm:
 		self.Gamma = numpy.atleast_2d( numpy.ma.array( self.Gamma, mask=mask ).compressed() )
 		self.NSV = self.beta.size
 		
+		print self.SV
+		
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % ( duration.seconds + float(duration.microseconds)/1000000)
 		
 def run():
 	#samples = array([[gauss(0,1)] for i in range(50) ] + [[gauss(8,1)] for i in range(50) ]).reshape([100,1]) 
-	samples = array([[gauss(0,1)] for i in range(40) ] ).reshape([40,1]) 
+	samples = array([[gauss(0,1)] for i in range(80) ] ).reshape([80,1]) 
 	#samples = arange(0,4).reshape([4,1])
 	#samples = array( [ [i,i+.1,i+.2] for i in range(0,10) ], dtype=float ).reshape([30,1])
 	#samples = list()
@@ -205,9 +207,11 @@ def run():
 	a.set_title('gamma vs weight')
 	
 	b = fig.add_subplot(2,2,3)
-	n, bins, patches = b.hist(mod.X, 20, normed=1, facecolor='green', alpha=0.5, label='empirical distribution')
-	b.plot(X,mod.pdf(X), 'r--', label="computed distribution")
-	b.set_title("Computed vs empirical PDF")
+	#n, bins, patches = b.hist(mod.X, 20, normed=1, facecolor='green', alpha=0.5, label='empirical distribution')
+	#b.plot(X,mod.pdf(X), 'r--', label="computed distribution")
+	#b.set_title("Computed vs empirical PDF")
+	b.hist(mod.SV[0], 10 )
+	b.set_title('SV distribution')
 	
 	c = fig.add_subplot(2,2,2)
 	c.plot(numpy.sort(mod.X,0), numpy.sort(mod.Y,0), 'green' )
