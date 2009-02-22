@@ -193,7 +193,7 @@ def run():
 	# 4->4
 	# 3->3
 	
-	mod = svm( numpy.sort(samples),C=-1, gamma=[.01,.1,1,10,100] )
+	mod = svm( numpy.sort(samples),C=-9, gamma=[.01,.1,1,10,100] )
 	#mod = svm( numpy.sort(samples),C=math.exp(1), gamma=[3.,] )
 	
 	print mod
