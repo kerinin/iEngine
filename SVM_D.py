@@ -66,7 +66,7 @@ class svm:
 		return ret
 	
 	def _Omega(self,Gamma):
-		return 1e1+(Gamma ** self.C)
+		return 1e4+ (Gamma ** self.C)
 		
 	def _K(self,X,Y,gamma):
 		N = X.size
@@ -131,15 +131,15 @@ class svm:
 
 		self.Gamma = numpy.hstack( [ numpy.tile(g,N) for g in self.gamma ] )
 		
-		P = cvxopt.matrix( numpy.dot(self.K.T,self.K), (N*kappa,N*kappa) )
-		q = cvxopt.matrix( ( self._Omega(self.Gamma) - ( numpy.ma.dot( tile(self.Y,kappa), self.K ) ) ), (N*kappa,1) )
+		P = cvxopt.matrix( numpy.dot(self.K.T*(tile((self.Y**-2),kappa)),self.K), (N*kappa,N*kappa) )
+		q = cvxopt.matrix( ( self._Omega(self.Gamma) - ( numpy.ma.dot( tile((self.Y**-1),kappa), self.K ) ) ), (N*kappa,1) )
 		
 		G = cvxopt.matrix( -identity(N*kappa), (N*kappa,N*kappa) )
 		h = cvxopt.matrix( 0.0, (N*kappa,1) )
 		A = cvxopt.matrix( 1., (1,N*kappa) )
 		b = cvxopt.matrix( 1., (1,1) )
 		#print "P: %s, q: %s, G: %s, h: %s, A: %s, b: %s" % (P.size,q.size,G.size,h.size,A.size,b.size)
-
+		print (tile((self.Y**2),kappa)).shape
 		# Solve!
 		p = solvers.qp( P=P, q=q, G=G, h=h, A=A, b=b )
 		
@@ -157,8 +157,8 @@ class svm:
 		print "optimized in %ss" % ( duration.seconds + float(duration.microseconds)/1000000)
 		
 def run():
-	#samples = array([[gauss(0,1)] for i in range(50) ] + [[gauss(8,1)] for i in range(50) ]).reshape([100,1]) 
-	samples = array([[gauss(0,1)] for i in range(80) ] ).reshape([80,1]) 
+	samples = array([[gauss(0,1)] for i in range(50) ] + [[gauss(8,1)] for i in range(50) ]).reshape([100,1]) 
+	#samples = array([[gauss(0,1)] for i in range(80) ] ).reshape([80,1]) 
 	#samples = arange(0,4).reshape([4,1])
 	#samples = array( [ [i,i+.1,i+.2] for i in range(0,10) ], dtype=float ).reshape([30,1])
 	#samples = list()
@@ -193,8 +193,7 @@ def run():
 	# 4->4
 	# 3->3
 	
-	mod = svm( numpy.sort(samples),C=-9, gamma=[.01,.1,1,10,100] )
-	#mod = svm( numpy.sort(samples),C=math.exp(1), gamma=[3.,] )
+	mod = svm( numpy.sort(samples),C=-1, gamma=[.125,.5,2.] )
 	
 	print mod
 	
