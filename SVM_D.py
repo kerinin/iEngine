@@ -121,25 +121,27 @@ class svm:
 		kappa = len( self.gamma )
 		(N,self.d) = self.X.shape
 		self.Y = ( ( .5 + (self.X.reshape(N,1,self.d) > transpose(self.X.reshape(N,1,self.d),[1,0,2])).prod(2).sum(1,dtype=float) ) / N ).reshape([N,])
-		Z = numpy.zeros([N,N])
-		self.K = numpy.array( vstack(
-			[ 
-				numpy.hstack( ( [Z,] * i ) + [self._K( self.X.reshape([N,1]), self.X.reshape([1,N]), self.gamma[i] ),] + ( [Z,] * ( kappa-1-i ) ) )
-				for i in range( kappa ) 
-			]
-		) )
-
+		#Z = numpy.zeros([N,N])
+		#self.K = numpy.array( vstack(
+		#	[ 
+		#		numpy.hstack( ( [Z,] * i ) + [self._K( self.X.reshape([N,1]), self.X.reshape([1,N]), self.gamma[i] ),] + ( [Z,] * ( kappa-1-i ) ) )
+		#		for i in range( kappa ) 
+		#	]
+		#) )
+		
+		self.K = numpy.hstack(  [self._K( self.X.reshape([N,1]), self.X.reshape([1,N]), gamma ) for gamma in self.gamma] )
+		
 		self.Gamma = numpy.hstack( [ numpy.tile(g,N) for g in self.gamma ] )
 		
-		P = cvxopt.matrix( numpy.dot(self.K.T*(tile((self.Y**-2),kappa)),self.K), (N*kappa,N*kappa) )
-		q = cvxopt.matrix( ( self._Omega(self.Gamma) - ( numpy.ma.dot( tile((self.Y**-1),kappa), self.K ) ) ), (N*kappa,1) )
+		P = cvxopt.matrix( numpy.dot(self.K.T,self.K), (N*kappa,N*kappa) )
+		q = cvxopt.matrix( ( self._Omega(self.Gamma) - ( numpy.ma.dot( self.K.T, self.Y ) ) ), (N*kappa,1) )
 		
 		G = cvxopt.matrix( -identity(N*kappa), (N*kappa,N*kappa) )
 		h = cvxopt.matrix( 0.0, (N*kappa,1) )
 		A = cvxopt.matrix( 1., (1,N*kappa) )
 		b = cvxopt.matrix( 1., (1,1) )
 		#print "P: %s, q: %s, G: %s, h: %s, A: %s, b: %s" % (P.size,q.size,G.size,h.size,A.size,b.size)
-		print (tile((self.Y**2),kappa)).shape
+		
 		# Solve!
 		p = solvers.qp( P=P, q=q, G=G, h=h, A=A, b=b )
 		
@@ -150,8 +152,6 @@ class svm:
 		self.SV = numpy.atleast_2d( numpy.ma.array( numpy.tile(self.X.T,kappa).T, mask=mask).compressed() )
 		self.Gamma = numpy.atleast_2d( numpy.ma.array( self.Gamma, mask=mask ).compressed() )
 		self.NSV = self.beta.size
-		
-		print self.SV
 		
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % ( duration.seconds + float(duration.microseconds)/1000000)
@@ -193,7 +193,7 @@ def run():
 	# 4->4
 	# 3->3
 	
-	mod = svm( samples,C=-1, gamma=[.5,2.] )
+	mod = svm( samples,C=-1, gamma=[.125,.25,.5,1.,2.,4.,8.,16.,32.] )
 	
 	print mod
 	
@@ -203,12 +203,12 @@ def run():
 	#a.plot( [ i % mod.N for i in range( mod.N * len(mod.gamma) ) ], mod.alpha, 'o' )
 	#a.set_title("weights (x=ell)")
 	
-	#a.plot(mod.Gamma, mod.beta,  'o')
-	#a.set_title('gamma vs weight')
+	a.plot(mod.Gamma, mod.beta,  'o')
+	a.set_title('gamma vs weight')
 	
-	a.hist(mod.cdf_res(), 20, normed=1)
-	a.axvline(x=0)
-	a.set_title('residual distribution')
+	#a.hist(mod.cdf_res(), 20, normed=1)
+	#a.axvline(x=0)
+	#a.set_title('residual distribution')
 	
 	
 	b = fig.add_subplot(2,2,3)
