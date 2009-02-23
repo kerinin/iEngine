@@ -39,26 +39,31 @@ _Functions = ['run']
 	
 class svm:
 	def __init__(self,data=list(),Lambda=.1, gamma =arange(1,4,1) ):
-		self.X = data
-		self.N = len(data)
+	# SVM Class
+	#
+	# @param data		[Nxd] array of observations where N is the number of observations and d is the dimensionality of the abstract space
+	# @param Lambda		Regularizer to control Smoothness / Accuracy.  Preliminary experimental results show the range 0-1 controls this parameter.
+	# @param gamma		List of gamma values which define the kernel smoothness
+	
+		self.X = atleast_2d( data )
+		self.N,self.d = self.X.shape
 		
 		self.Lambda = Lambda
 		self.gamma = gamma
 		
-		self.Gamma = None
-		self.Y = None
-		self.SV = None
-		self.NSV = None
-		self.alpha = None
-		self.beta = None
-		self.d = None
-		self.K = None
+		self.Gamma = None		# gamma repeated N times
+		self.Y = None				# empirical CDF of X
+		self.SV = None			# X value array of SV
+		self.NSV = None			# cardinality of SV
+		self.alpha = None			# the full weight array for all observations
+		self.beta = None			# weight array for SV
+		self.K = None				# precomputed kernel matrix
 		
 		self._compute()
 		
 	def __str__(self):
 		ret = "SVM Instance\n"
-		ret += "X: (%s x %sd)\n" % (self.N, self.d)
+		ret += "X: [%s x %sd]\n" % (self.N, self.d)
 		ret += "Lambda: %s\n" % self.Lambda
 		ret += "gamma: %s\n" % str(self.gamma)
 		ret += "SV: %s (%s percent)\n" % ( self.NSV,100. * float(self.NSV) / float(self.N ) )
@@ -66,9 +71,19 @@ class svm:
 		return ret
 	
 	def _Omega(self,Gamma):
+	# Regularizer function
+	#
+	# @param Gamma			[N*kappa x 1] array of gamma values
+	
 		return self.Lambda * (Gamma)
 		
 	def _K(self,X,Y,gamma):
+	# Kernel function
+	#
+	# @param X				[Nxd] array of observations
+	# @param Y				[Mxd] array of observations
+	# @param gamma			kernel width parameter
+	
 		N = X.size
 		M = Y.size
 		
@@ -79,6 +94,12 @@ class svm:
 		#return ( exp( -((X-Y)**2.0) / gamma ) ).reshape(N,M)
 
 	def _k(self,X,Y,gamma):
+	# Cross-kernel function
+	#
+	# @param X				[Nxd] array of observations
+	# @param Y				[Mxd] array of observations
+	# @param gamma			kernel width parameter
+	
 		N = X.shape[0]
 		M = Y.shape[0]
 		
@@ -86,25 +107,33 @@ class svm:
 		
 		return ( gamma / ( 2.0 + numpy.exp( gamma * diff ) + numpy.exp( -gamma * diff ) ) ).prod(2).reshape(N,M)
 		
-	def cdf(self,x):
-		#print 'cdf: %s' % repr(x.shape)
-		N = x.shape[0]
-		return numpy.dot( self._K( x, self.SV, self.Gamma ), self.beta.T )
+	def cdf(self,X):
+	# Cumulative distribution function
+	#
+	# @param X				[Nxd] array of points for which to calculate the CDF
+	
+		return numpy.dot( self._K( atleast_2d(X), self.SV, self.Gamma ), self.beta.T )
 		
-	def pdf(self,x):
-		#print 'pdf: %s' % repr(x.shape)
-		N = x.shape[0]
-		return numpy.dot( self._k( x, self.SV, self.Gamma ), self.beta.T )
+	def pdf(self,X):
+	# Probability distribution function
+	#
+	# @param X				[Nxd] array of points for which to calculate the PDF
+	
+		return numpy.dot( self._k( atleast_2d(X), self.SV, self.Gamma ), self.beta.T )
 		
 	def cdf_res(self,X=None):
+	# CDF residuals
+	#
 		if X==None:
 			X = self.X
-		return ( self.Y.flatten() - self.cdf( X.flatten() ).flatten() )
-	
+		#return ( self.Y.flatten() - self.cdf( X.flatten() ).flatten() )
+		return self.Y - atleast_2d(X)
+		
 	def __iadd__(self, points):
 		# overloaded '+=', used for adding a vector list to the module's data
 		# 
 		# @param points		A LIST of observation vectors (not a single ovservation)
+		raise StandardError, 'Not Implemented'
 		self.X += points
 	
 	def _compute(self):
@@ -120,8 +149,8 @@ class svm:
 		
 		kappa = len( self.gamma )
 		(N,self.d) = self.X.shape
-		self.Y = ( ( .5 + (self.X.reshape(N,1,self.d) > transpose(self.X.reshape(N,1,self.d),[1,0,2])).prod(2).sum(1,dtype=float) ) / N ).reshape([N,])
-		self.K = numpy.hstack(  [self._K( self.X.reshape([N,1]), self.X.reshape([1,N]), gamma ) for gamma in self.gamma] )
+		self.Y = ( ( .5 + (self.X.reshape(N,1,self.d) > transpose(self.X.reshape(N,1,self.d),[1,0,2])).prod(2).sum(1,dtype=float) ) / N ).reshape([N,1])
+		self.K = numpy.hstack(  [self._K( self.X, self.X.T, gamma ) for gamma in self.gamma] )
 		self.Gamma = numpy.hstack( [ numpy.tile(g,N) for g in self.gamma ] )
 		
 		P = cvxopt.matrix( numpy.dot(self.K.T,self.K), (N*kappa,N*kappa) )
@@ -136,11 +165,11 @@ class svm:
 		
 		beta = ma.masked_less( p['x'], 1e-8 )
 		mask = ma.getmask(beta)
+		self.NSV = beta.count()
 		self.alpha = beta
-		self.beta = numpy.atleast_2d( beta.compressed() )
-		self.SV = numpy.atleast_2d( numpy.ma.array( numpy.tile(self.X.T,kappa).T, mask=mask).compressed() )
-		self.Gamma = numpy.atleast_2d( numpy.ma.array( self.Gamma, mask=mask ).compressed() )
-		self.NSV = self.beta.size
+		self.beta = beta.compressed().reshape([self.NSV,1])
+		self.SV = numpy.ma.array( numpy.tile(self.X.T,kappa).T, mask=mask).compressed().reshape([self.NSV,d])
+		self.Gamma = numpy.ma.array( self.Gamma, mask=mask ).compressed().reshape([self.NSV,1])
 		
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % ( duration.seconds + float(duration.microseconds)/1000000)
