@@ -38,11 +38,11 @@ cvxopt.solvers.options['feastol'] = 1e-15
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),C=.1, gamma =arange(1,4,1) ):
+	def __init__(self,data=list(),Lambda=.1, gamma =arange(1,4,1) ):
 		self.X = data
 		self.N = len(data)
 		
-		self.C = C
+		self.Lambda = Lambda
 		self.gamma = gamma
 		
 		self.Gamma = None
@@ -59,14 +59,14 @@ class svm:
 	def __str__(self):
 		ret = "SVM Instance\n"
 		ret += "X: (%s x %sd)\n" % (self.N, self.d)
-		ret += "C: %s\n" % self.C
+		ret += "Lambda: %s\n" % self.Lambda
 		ret += "gamma: %s\n" % str(self.gamma)
 		ret += "SV: %s (%s percent)\n" % ( self.NSV,100. * float(self.NSV) / float(self.N ) )
 		ret += "Loss: %s\n" % (self.cdf_res()**2).sum()
 		return ret
 	
 	def _Omega(self,Gamma):
-		return 1e4+ (Gamma ** self.C)
+		return self.Lambda * (Gamma)
 		
 	def _K(self,X,Y,gamma):
 		N = X.size
@@ -168,12 +168,14 @@ def run():
 	X = arange(start,end,.25)
 	fig = plt.figure()
 	
-	#C = [-1e1,-1e0,-1e-1,-1e-2,-1e-3,-1e-4,-1e-5,0.,1e-5,1e-4,1e-3,1e-2,1e-1,1e0,1e1]
-	#C = [1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,1e-1,1e0,1e1,1e2,1e3,1e4,1e5,1e6,1e7]
-	C = arange(.005,.05,.005) 
-	'''
-	res = [ svm( samples, C=-1, gamma=[c,1.0]) for c in C ]
+	#C = [0.,1e-5,1e-4,1e-3,1e-2,1e-1,1e0,1e1]
+	#C = [1e-11,1e-10,1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,1e-1,1e0]
+	#C = [1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,1e-1,1e0,1e1,1e2,1e3,1e4,1e5,1e6,1e7]
+	C = arange(1e-6,1e-0,1e-1) 
 	
+	res = [ svm( samples, Lambda=c, gamma=[.125,.5,2.,8.,32.]) for c in C ]
+	
+	#plt.plot( log10(C), [ mod.NSV for mod in res ], 'o--' )
 	a = fig.add_subplot(1,2,1)
 	a.plot(numpy.sort( res[0].X,0), numpy.sort( res[0].Y,0), 'green' )
 	for mod in res:
@@ -186,14 +188,14 @@ def run():
 	
 	plt.show()
 	return True
-	'''
+	
 	
 	# 2 good, 10 bad
 	# 5->4
 	# 4->4
 	# 3->3
 	
-	mod = svm( samples,C=-1, gamma=[.125,.25,.5,1.,2.,4.,8.,16.,32.] )
+	mod = svm( samples,Lambda=1e-8, gamma=[.125,.25,.5,1.,2.,4.,8.,16.,32.] )
 	
 	print mod
 	
