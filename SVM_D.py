@@ -183,7 +183,7 @@ def run():
 	a.set_title("Computed vs emprical CDF")
 	
 	b = fig.add_subplot(1,2,2)
-	b.plot( [mod.NSV for mod in res], [mod.cdf_res().sum() for mod in res], 'o--')
+	b.plot( [mod.NSV for mod in res], [(mod.cdf_res()**2).sum() for mod in res], 'o--')
 	b.set_title("NSV vs Loss")
 	
 	plt.show()
