@@ -183,7 +183,7 @@ def run():
 	
 	samples = numpy.random.multivariate_normal( mean=array([5,5]), cov=array([[1,0],[0,1]]), size=array([100,]) )
 	
-	mod = svm( samples, Lambda=1e-8, gamma=[1.,] )
+	mod = svm( samples, Lambda=1e-8, gamma=[.5,1.] )
 	
 	print mod
 	
