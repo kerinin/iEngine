@@ -28,6 +28,7 @@ from cvxopt import *
 from numpy import *
 
 import matplotlib.pyplot as plt
+import matplotlib.mlab as mlab
 
 
 cvxopt.solvers.options['show_progress'] = False
@@ -180,14 +181,18 @@ class svm:
 def run():
 	fig = plt.figure()
 	
-	samples = array([[gauss(0,1)] for i in range(50) ] + [[gauss(8,1)] for i in range(50) ]).reshape([50,2]) 
+	X= mgrid[0:10:2]
+	samples = mlab.bivariate_normal(X[0], X[1], 1.0, 1.0, 0.0, 0.0)
+
 	mod = svm( samples,Lambda=1e-8, gamma=[.125,.25,.5,1.,2.,4.,8.,16.,32.] )
 	print mod
 	
 	X = dstack(mgrid[0:10,0:10:]).reshape([100,2])
 	
-	plt.contour(hsplit(X,2)[0],hsplit(X,2)[1], mod.pdf(X) )
-	
+	#CS = plt.contour(hsplit(X,2)[0],hsplit(X,2)[1], mod.pdf(X) )
+	CS = plt.contour( hsplit(mod.X,2)[0], hsplit(mod.X,2)[1], mod.Y )
+	plt.clabel(CS, inline=1, fontsize=10)
+
 	#a = fig.add_subplot(2,2,1)
 	#a.plot( [ i % mod.N for i in range( mod.N * len(mod.gamma) ) ], mod.alpha, 'o' )
 	#a.set_title("weights (x=ell)")
