@@ -181,17 +181,19 @@ class svm:
 def run():
 	fig = plt.figure()
 	
-	samples = numpy.random.multivariate_normal( mean=array([5,5]), cov=array([[1,0],[0,1]]), size=array([50,]) )
+	samples = numpy.random.multivariate_normal( mean=array([5,5]), cov=array([[1,0],[0,1]]), size=array([100,]) )
 	
-	mod = svm( samples, Lambda=1e-8, gamma=[.125,.25,.5,1.,2.,4.,8.,16.,32.] )
+	mod = svm( samples, Lambda=1e-8, gamma=[1.,] )
 	
 	print mod
 	
-	X = dstack(mgrid[0:10,0:10]).reshape([100,2])
+	#X = dstack(mgrid[0:10,0:10]).reshape([100,2])
+	X = numpy.hstack( [ arange(0,10,.1), 5*numpy.ones([100,]) ] ).reshape([100,2])
 	
-	plt.contourf( hsplit(samples,2)[0], hsplit(samples,2)[1], mod.Y, antialiased=True, colors='k' )
-	plt.contour(hsplit(X,2)[0],hsplit(X,2)[1], mod.pdf(X) )
-	plt.plot( hsplit(samples,2)[0],hsplit(samples,2)[1], '+' )
+	#plt.contourf(arange(0,10),arange(0,10),mod.pdf(X).reshape([10,10]), antialiased=True, colors='k' )
+	#plt.plot( hsplit(samples,2)[0],hsplit(samples,2)[1], '+' )
+
+	plt.plot( arange(0,10,.1), mod.pdf(X) )
 
 	#a = fig.add_subplot(2,2,1)
 	#a.plot( [ i % mod.N for i in range( mod.N * len(mod.gamma) ) ], mod.alpha, 'o' )
