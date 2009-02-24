@@ -45,8 +45,13 @@ class svm:
 	# @param Lambda		Regularizer to control Smoothness / Accuracy.  Preliminary experimental results show the range 0-1 controls this parameter.
 	# @param gamma		List of gamma values which define the kernel smoothness
 	
-		self.X = atleast_2d( data )
-		self.N,self.d = self.X.shape
+		try:
+			self.N,self.d = data.shape
+		except ValueError:
+			self.N,self.d = (len(self.X),1)
+			self.X = data.reshape([ self.N, self.d ])
+		else:
+			self.X = data
 		
 		self.Lambda = Lambda
 		self.gamma = gamma
@@ -117,15 +122,15 @@ class svm:
 	# Cumulative distribution function
 	#
 	# @param X				[Nxd] array of points for which to calculate the CDF
-	
-		return numpy.dot( self._K( atleast_2d(X), self.SV, self.Gamma ), self.beta.T )
+
+		return numpy.dot( self._K( X, self.SV, self.Gamma ), self.beta )
 		
 	def pdf(self,X):
 	# Probability distribution function
 	#
 	# @param X				[Nxd] array of points for which to calculate the PDF
 	
-		return numpy.dot( self._k( atleast_2d(X), self.SV, self.Gamma ), self.beta.T )
+		return numpy.dot( self._k( X, self.SV, self.Gamma ), self.beta )
 		
 	def cdf_res(self,X=None):
 	# CDF residuals
@@ -179,7 +184,11 @@ def run():
 	mod = svm( samples,Lambda=1e-8, gamma=[.125,.25,.5,1.,2.,4.,8.,16.,32.] )
 	print mod
 	
-	a = fig.add_subplot(2,2,1)
+	X = dstack(mgrid[0:10,0:10:]).reshape([100,2])
+	
+	plt.contour(hsplit(X,2)[0],hsplit(X,2)[1], mod.pdf(X) )
+	
+	#a = fig.add_subplot(2,2,1)
 	#a.plot( [ i % mod.N for i in range( mod.N * len(mod.gamma) ) ], mod.alpha, 'o' )
 	#a.set_title("weights (x=ell)")
 	
@@ -189,7 +198,7 @@ def run():
 	
 	#d = fig.add_subplot(2,2,4)
 	
-	#plt.show()
+	plt.show()
 	
 	
 def help():
