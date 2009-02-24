@@ -181,14 +181,14 @@ class svm:
 def run():
 	fig = plt.figure()
 	
-	samples = numpy.random.multivariate_normal( mean=array([5,5]), cov=array([[1,0],[0,1]]), size=array([100,]) )
+	samples = numpy.random.multivariate_normal( mean=array([5,5,5]), cov=array( numpy.identity(3) ), size=array([100,]) )
 	
 	mod = svm( samples, Lambda=1e-8, gamma=[.5,1.] )
 	
 	print mod
 	
 	#X = dstack(mgrid[0:10,0:10]).reshape([100,2])
-	X = numpy.hstack( [ arange(0,10,.1), 5*numpy.ones([100,]) ] ).reshape([100,2])
+	X = numpy.hstack( [ arange(0,10,.1), 5*numpy.ones([100,]), 5*numpy.ones([100,]) ] ).reshape([100,3])
 	
 	#plt.contourf(arange(0,10),arange(0,10),mod.pdf(X).reshape([10,10]), antialiased=True, colors='k' )
 	#plt.plot( hsplit(samples,2)[0],hsplit(samples,2)[1], '+' )
