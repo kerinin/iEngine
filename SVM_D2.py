@@ -29,6 +29,8 @@ from numpy import *
 
 import matplotlib.pyplot as plt
 import matplotlib.mlab as mlab
+import matplotlib.cm as cm
+
 
 
 cvxopt.solvers.options['show_progress'] = False
@@ -155,10 +157,7 @@ class svm:
 		
 		kappa = len( self.gamma )
 		(N,self.d) = self.X.shape
-		# product CDF
 		self.Y = ( ( .5 + (self.X.reshape(N,1,self.d) > transpose(self.X.reshape(N,1,self.d),[1,0,2])).prod(2).sum(1,dtype=float) ) / N ).reshape([N,1])
-		# sum CDF
-		#self.Y = ( ( .5 + (self.X.reshape(N,1,self.d) > transpose(self.X.reshape(N,1,self.d),[1,0,2])).sum(2).sum(1,dtype=float) ) / (N*self.d) ).reshape([N,1])
 		self.K = numpy.hstack(  [self._K( self.X, self.X, gamma ) for gamma in self.gamma] )
 		self.Gamma = numpy.repeat(self.gamma,N).reshape([N*kappa,1])
 		
@@ -186,20 +185,20 @@ class svm:
 def run():
 	fig = plt.figure()
 	
-	samples = numpy.random.multivariate_normal( mean=array([5,5,5]), cov=array( numpy.identity(3) ), size=array([100,]) )
+	samples = numpy.random.multivariate_normal( mean=array([5,5]), cov=array( [[ 1,.75],[.75,1]] ), size=array([100,]) )
 	
-	mod = svm( samples, Lambda=1e-8, gamma=[.5,1] )
+	mod = svm( samples, Lambda=1e-2, gamma=[.125,.25,.5,1,2,4,8,16] )
 	
 	print mod
 	
-	#X = dstack(mgrid[0:10,0:10]).reshape([100,2])
-	X = numpy.vstack( [ arange(0,10,.1), 5*numpy.ones([100,]), 5*numpy.ones([100,]) ] ).T
+	X = dstack(mgrid[0:10:.1,0:10:.1]).reshape([10000,2])
+	#X = numpy.vstack( [ arange(0,10,.1), 5*numpy.ones([100,]), 5*numpy.ones([100,]) ] ).T
 	
-	#plt.contourf(arange(0,10),arange(0,10),mod.pdf(X).reshape([10,10]), antialiased=True, colors='k' )
-	#plt.plot( hsplit(samples,2)[0],hsplit(samples,2)[1], '+' )
+	plt.contourf(arange(0,10,.1),arange(0,10,.1),mod.pdf(X).reshape([100,100]),200, antialiased=True, cmap=cm.gray )
+	plt.plot( hsplit(samples,2)[0],hsplit(samples,2)[1], '+' )
 
-	plt.plot( arange(0,10,.1), mod.pdf(X) )
-	plt.plot( arange(0,10,.1),mod.cdf(X), '--' )
+	#plt.plot( arange(0,10,.1), mod.pdf(X) )
+	#plt.plot( arange(0,10,.1),mod.cdf(X), '--' )
 
 	#a = fig.add_subplot(2,2,1)
 	#a.plot( [ i % mod.N for i in range( mod.N * len(mod.gamma) ) ], mod.alpha, 'o' )
