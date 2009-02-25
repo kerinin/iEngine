@@ -143,7 +143,7 @@ class svm:
 		if X==None:
 			X = self.X
 		#return ( self.Y.flatten() - self.cdf( X.flatten() ).flatten() )
-		return self.Y - X
+		return self.Y - self.cdf(X)
 		
 	def cdf_loss(self,X=None):
 		
@@ -185,32 +185,44 @@ class svm:
 
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % ( duration.seconds + float(duration.microseconds)/1000000)
-		print p['y']
 		
 def run():
 	fig = plt.figure()
 	
 	samples = numpy.random.multivariate_normal( mean=array([5,5]), cov=array( [[ 1,.75],[.75,1]] ), size=array([100,]) )
 	
+	'''
 	C = arange(1e-6,1e-0,1e-1) 
 	res = [ svm( samples, Lambda=c, gamma=[.125,.5,2.,8.,32.]) for c in C ]
-
-	#plt.plot( [mod.NSV for mod in res], [mod.cdf_loss().sum() for mod in res], 'o--')
-	#plt.title("NSV vs Loss")
-	plt.plot( C, [mod.cdf_loss().sum() for mod in res], 'o--')
-	plt.title("Lambda vs Loss")
+	
+	a = fig.add_subplot(1,2,1)
+	a.plot( C, [mod.cdf_loss().sum() for mod in res],'r' )
+	a.set_title("Loss vs Lambda")
+	a.grid(True)
+	
+	b = fig.add_subplot(1,2,2)
+	b.plot( C, [mod.NSV for mod in res] )
+	b.set_title("NSV vs Lambda")
+	b.grid(True)
+	
+	c = fig.add_subplot(2,2,3)
+	c.plot( [mod.NSV for mod in res], [mod.cdf_loss().sum() for mod in res], 'o--' )
+	c.set_title("NSV vs Loss")
+	
+	
 	plt.show()
 	return True
+	'''
 	
-	mod = svm( samples, Lambda=1e-2, gamma=[.125,.25,.5,1,2,4,8,16] )
+	mod = svm( samples, Lambda=.005, gamma=[.125,.25,.5,1,2,4,8,16] )
 	
 	print mod
 	
 	X = dstack(mgrid[0:10:.1,0:10:.1]).reshape([10000,2])
-	#X = numpy.vstack( [ arange(0,10,.1), 5*numpy.ones([100,]), 5*numpy.ones([100,]) ] ).T
 	
 	plt.contourf(arange(0,10,.1),arange(0,10,.1),mod.pdf(X).reshape([100,100]),200, antialiased=True, cmap=cm.gray )
-	plt.plot( hsplit(samples,2)[0],hsplit(samples,2)[1], '+' )
+	plt.plot( hsplit(samples,2)[0],hsplit(samples,2)[1], 'r+' )
+	plt.scatter( hsplit(mod.SV,2)[0].reshape([mod.NSV,]),hsplit(mod.SV,2)[1].reshape([mod.NSV],), s=(mod.NSV*200*mod.beta.reshape([mod.NSV,])), alpha=.25, color='r' )
 
 	#plt.plot( arange(0,10,.1), mod.pdf(X) )
 	#plt.plot( arange(0,10,.1),mod.cdf(X), '--' )
