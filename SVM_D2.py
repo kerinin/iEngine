@@ -143,7 +143,11 @@ class svm:
 		if X==None:
 			X = self.X
 		#return ( self.Y.flatten() - self.cdf( X.flatten() ).flatten() )
-		return self.Y - atleast_2d(X)
+		return self.Y - X
+		
+	def cdf_loss(self,X=None):
+		
+		return sqrt( (self.cdf_res(X)**2).sum(1) )
 		
 	def __iadd__(self, points):
 		# overloaded '+=', used for adding a vector list to the module's data
@@ -181,11 +185,22 @@ class svm:
 
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % ( duration.seconds + float(duration.microseconds)/1000000)
+		print p['y']
 		
 def run():
 	fig = plt.figure()
 	
 	samples = numpy.random.multivariate_normal( mean=array([5,5]), cov=array( [[ 1,.75],[.75,1]] ), size=array([100,]) )
+	
+	C = arange(1e-6,1e-0,1e-1) 
+	res = [ svm( samples, Lambda=c, gamma=[.125,.5,2.,8.,32.]) for c in C ]
+
+	#plt.plot( [mod.NSV for mod in res], [mod.cdf_loss().sum() for mod in res], 'o--')
+	#plt.title("NSV vs Loss")
+	plt.plot( C, [mod.cdf_loss().sum() for mod in res], 'o--')
+	plt.title("Lambda vs Loss")
+	plt.show()
+	return True
 	
 	mod = svm( samples, Lambda=1e-2, gamma=[.125,.25,.5,1,2,4,8,16] )
 	
