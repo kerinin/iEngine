@@ -189,7 +189,9 @@ class svm:
 def run():
 	fig = plt.figure()
 	
-	samples = numpy.random.multivariate_normal( mean=array([5,5]), cov=array( [[ 1,.75],[.75,1]] ), size=array([100,]) )
+	samples = vstack( [ numpy.random.multivariate_normal( mean=array([3,3]), cov=array( identity(2) ), size=array([50,]) ),
+		numpy.random.multivariate_normal( mean=array([7,7]), cov=array( identity(2) ), size=array([50,]) ) 
+	] )
 	
 	'''
 	C = arange(1e-6,1e-0,1e-1) 
@@ -221,22 +223,12 @@ def run():
 	X = dstack(mgrid[0:10:.1,0:10:.1]).reshape([10000,2])
 	
 	plt.contourf(arange(0,10,.1),arange(0,10,.1),mod.pdf(X).reshape([100,100]).T,200, antialiased=True, cmap=cm.gray )
+	CS = plt.contour(arange(0,10,.1),arange(0,10,.1),mod.pdf(X).reshape([100,100]).T, [.01,], colors='r' )
 	plt.plot( hsplit(samples,2)[0],hsplit(samples,2)[1], 'r+' )
 	plt.scatter( hsplit(mod.SV,2)[0].reshape([mod.NSV,]),hsplit(mod.SV,2)[1].reshape([mod.NSV],), s=(mod.NSV*200*mod.beta.reshape([mod.NSV,])), alpha=.25, color='r' )
-
-	#plt.plot( arange(0,10,.1), mod.pdf(X) )
-	#plt.plot( arange(0,10,.1),mod.cdf(X), '--' )
-
-	#a = fig.add_subplot(2,2,1)
-	#a.plot( [ i % mod.N for i in range( mod.N * len(mod.gamma) ) ], mod.alpha, 'o' )
-	#a.set_title("weights (x=ell)")
+	plt.clabel(CS, inline=1, fontsize=10)
 	
-	#b = fig.add_subplot(2,2,3)
-	
-	#c = fig.add_subplot(2,2,2)
-	
-	#d = fig.add_subplot(2,2,4)
-	
+	plt.axis( [0,10,0,10] )
 	plt.show()
 	
 	
