@@ -11,8 +11,27 @@
 # Specifically, this is intended to implement the decomposition algorithm 
 # described in (3) using the Support Vector Machine described in (1)-1.9
 
-# NOTE: The general approach here is going to be to implement the SVM
-# first, then work out the math for decomposing it.
+# Decomposition options:
+# (A) Fast Training of Support Vector Machines using Sequential Minimal Optimization
+# (B) Working Set Selection Using Second Order Information for Training Support Vector Machines
+# (C) An Improved Training Algorithm for Support Vector Machines
+# (D) Parallel Support Vector Machines:  The Cascade SVM
+# (E) A parallel training algorithm for large scale support vector machines
+# (F) CUSVM: A CUDA IMPLEMENTATION OF SUPPORT VECTOR CLASSIFICATION AND REGRESSION
+# (G) Fast Support Vector Machine Training and Classification on Graphics Processors
+
+# A Presents SMO as an algorithm (apparently different than Osuna)
+# B is implemented in LIBSVM, and essentially presents a new method for determining which coef to optimiza
+# C is the original decomposition method, (better explained in A)
+# D seems to be parallelized SMO
+# E seems to be regular QP with parallelized matrix operations at some steps
+# F & G both present CUDA implementations, which in both cases seem to rely on 2nd-order SMO (B)
+
+# My current inclination is to use Osuna's decomposition w/ cunking determined
+# by the working size of a CUDA processor.  This will likely require re-implementation
+# of the optimization algorithm, so for now simply being able to do the decomposition
+# should be sufficient, as it allows SMO in the short term, and CUDA later on if required
+
 
 import sys, getopt, math, datetime, os, cmath
 from random import gauss
