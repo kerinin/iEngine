@@ -11,8 +11,6 @@
 # Specifically, this is intended to implement the decomposition algorithm 
 # described in (3) using the Support Vector Machine described in (1)-1.9
 
-# NOTE: The general approach here is going to be to implement the SVM
-# first, then work out the math for decomposing it.
 
 import sys, getopt, math, datetime, os, cmath
 from random import gauss
