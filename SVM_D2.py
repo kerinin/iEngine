@@ -96,8 +96,10 @@ class svm:
 		if d1 != self.d != d2:
 			raise StandardError, 'Matrices do not conform to the dimensionality of existing observations'
 		
+		diff = X.reshape([N,1,self.d]) - numpy.transpose( Y.reshape([M,1,self.d]), [1,0,2] )
+		
 		# Sigmoid
-		return ( 1.0 / ( 1.0 + numpy.exp( -gamma * ( X.reshape([N,1,self.d])-Y.reshape([1,M,self.d]) ) ) ) ).prod(2).reshape(N,M)
+		return ( 1.0 / ( 1.0 + numpy.exp( -gamma * diff ) ) ).prod(2).reshape(N,M)
 		
 		# RBF
 		#return ( exp( -((X-Y)**2.0) / gamma ) ).reshape(N,M)
@@ -115,7 +117,7 @@ class svm:
 		if d1 != self.d != d2:
 			raise StandardError, 'Matrices do not conform to the dimensionality of existing observations'
 		
-		diff = X.reshape([N,1,self.d])-Y.reshape([1,M,self.d])
+		diff = X.reshape([N,1,self.d])- numpy.transpose( Y.reshape([M,1,self.d]), [1,0,2] )
 		
 		return ( gamma / ( 2.0 + numpy.exp( gamma * diff ) + numpy.exp( -gamma * diff ) ) ).prod(2).reshape(N,M)
 		
@@ -123,7 +125,7 @@ class svm:
 	# Cumulative distribution function
 	#
 	# @param X				[Nxd] array of points for which to calculate the CDF
-
+		
 		return numpy.dot( self._K( X, self.SV, self.Gamma ), self.beta )
 		
 	def pdf(self,X):
@@ -153,7 +155,10 @@ class svm:
 		
 		kappa = len( self.gamma )
 		(N,self.d) = self.X.shape
+		# product CDF
 		self.Y = ( ( .5 + (self.X.reshape(N,1,self.d) > transpose(self.X.reshape(N,1,self.d),[1,0,2])).prod(2).sum(1,dtype=float) ) / N ).reshape([N,1])
+		# sum CDF
+		#self.Y = ( ( .5 + (self.X.reshape(N,1,self.d) > transpose(self.X.reshape(N,1,self.d),[1,0,2])).sum(2).sum(1,dtype=float) ) / (N*self.d) ).reshape([N,1])
 		self.K = numpy.hstack(  [self._K( self.X, self.X, gamma ) for gamma in self.gamma] )
 		self.Gamma = numpy.repeat(self.gamma,N).reshape([N*kappa,1])
 		
@@ -174,7 +179,7 @@ class svm:
 		self.beta = beta.compressed().reshape([self.NSV,1])
 		self.SV = numpy.ma.array( numpy.tile(self.X.T,kappa).T, mask=numpy.repeat(mask,self.d)).compressed().reshape([self.NSV,self.d])
 		self.Gamma = numpy.ma.array( self.Gamma, mask=mask ).compressed().reshape([self.NSV,1])
-		
+
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % ( duration.seconds + float(duration.microseconds)/1000000)
 		
@@ -183,17 +188,18 @@ def run():
 	
 	samples = numpy.random.multivariate_normal( mean=array([5,5,5]), cov=array( numpy.identity(3) ), size=array([100,]) )
 	
-	mod = svm( samples, Lambda=1e-8, gamma=[.5,1.] )
+	mod = svm( samples, Lambda=1e-8, gamma=[.5,1] )
 	
 	print mod
 	
 	#X = dstack(mgrid[0:10,0:10]).reshape([100,2])
-	X = numpy.hstack( [ arange(0,10,.1), 5*numpy.ones([100,]), 5*numpy.ones([100,]) ] ).reshape([100,3])
+	X = numpy.vstack( [ arange(0,10,.1), 5*numpy.ones([100,]), 5*numpy.ones([100,]) ] ).T
 	
 	#plt.contourf(arange(0,10),arange(0,10),mod.pdf(X).reshape([10,10]), antialiased=True, colors='k' )
 	#plt.plot( hsplit(samples,2)[0],hsplit(samples,2)[1], '+' )
 
 	plt.plot( arange(0,10,.1), mod.pdf(X) )
+	plt.plot( arange(0,10,.1),mod.cdf(X), '--' )
 
 	#a = fig.add_subplot(2,2,1)
 	#a.plot( [ i % mod.N for i in range( mod.N * len(mod.gamma) ) ], mod.alpha, 'o' )
