@@ -220,7 +220,7 @@ def run():
 	
 	X = dstack(mgrid[0:10:.1,0:10:.1]).reshape([10000,2])
 	
-	plt.contourf(arange(0,10,.1),arange(0,10,.1),mod.pdf(X).reshape([100,100]),200, antialiased=True, cmap=cm.gray )
+	plt.contourf(arange(0,10,.1),arange(0,10,.1),mod.pdf(X).reshape([100,100]).T,200, antialiased=True, cmap=cm.gray )
 	plt.plot( hsplit(samples,2)[0],hsplit(samples,2)[1], 'r+' )
 	plt.scatter( hsplit(mod.SV,2)[0].reshape([mod.NSV,]),hsplit(mod.SV,2)[1].reshape([mod.NSV],), s=(mod.NSV*200*mod.beta.reshape([mod.NSV,])), alpha=.25, color='r' )
 
