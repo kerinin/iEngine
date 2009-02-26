@@ -19,6 +19,8 @@
 # (E) A parallel training algorithm for large scale support vector machines
 # (F) CUSVM: A CUDA IMPLEMENTATION OF SUPPORT VECTOR CLASSIFICATION AND REGRESSION
 # (G) Fast Support Vector Machine Training and Classification on Graphics Processors
+# (H) A Study on SMO-type Decomposition Methods for Support Vector Machines
+
 
 # A Presents SMO as an algorithm (apparently different than Osuna)
 # B is implemented in LIBSVM, and essentially presents a new method for determining which coef to optimiza
@@ -26,11 +28,19 @@
 # D seems to be parallelized SMO
 # E seems to be regular QP with parallelized matrix operations at some steps
 # F & G both present CUDA implementations, which in both cases seem to rely on 2nd-order SMO (B)
+# H is a survey of decomposition (and supposedly extends the theory to regression)
 
 # My current inclination is to use Osuna's decomposition w/ cunking determined
 # by the working size of a CUDA processor.  This will likely require re-implementation
 # of the optimization algorithm, so for now simply being able to do the decomposition
 # should be sufficient, as it allows SMO in the short term, and CUDA later on if required
+
+# OK, we're using SMO.
+# The architecture will need to be revised to separate the selection of workin sets
+# the resolving of sub-problems, and the solving (and data maintenance) of the main
+# problem.  Ideally, the main problem is defined by the SVM structure, allowing
+# simple on-line processing. 
+
 
 
 import sys, getopt, math, datetime, os, cmath
@@ -60,12 +70,13 @@ cvxopt.solvers.options['feastol'] = 1e-15
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),Lambda=.1, gamma =arange(1,4,1) ):
+	def __init__(self,data=array(),Lambda=.1, gamma =arange(1,4,1), lazy=True ):
 	# SVM Class
 	#
 	# @param data		[Nxd] array of observations where N is the number of observations and d is the dimensionality of the abstract space
 	# @param Lambda		Regularizer to control Smoothness / Accuracy.  Preliminary experimental results show the range 0-1 controls this parameter.
 	# @param gamma		List of gamma values which define the kernel smoothness
+	# @param lazy		If true, computation takes place when PDF or CDF is requested, otherwise takes place when data added
 	
 		try:
 			self.N,self.d = data.shape
@@ -79,15 +90,23 @@ class svm:
 		self.gamma = gamma
 		
 		self.Gamma = None		# gamma repeated N times
-		self.Y = None				# empirical CDF of X
+		self.Y = array()			# empirical CDF of X
 		self.SV = None			# X value array of SV
 		self.NSV = None			# cardinality of SV
 		self.alpha = None			# the full weight array for all observations
 		self.beta = None			# weight array for SV
 		self.K = None				# precomputed kernel matrix
 		
-		self._compute()
+		self.lazy = lazy
 		
+		if not self.lazy:
+			self._compute()
+		
+	def __iadd__(self,X):
+		self.X = numpy.vstack( self.X, X )
+		if not self.lazy:
+			self._compute()
+			
 	def __str__(self):
 		ret = "SVM Instance\n"
 		ret += "X: [%s x %sd]\n" % (self.N, self.d)
@@ -146,6 +165,8 @@ class svm:
 	# Cumulative distribution function
 	#
 	# @param X				[Nxd] array of points for which to calculate the CDF
+	
+		self._compute()
 		
 		return numpy.dot( self._K( X, self.SV, self.Gamma ), self.beta )
 		
@@ -154,11 +175,15 @@ class svm:
 	#
 	# @param X				[Nxd] array of points for which to calculate the PDF
 	
+		self._compute()
+			
 		return numpy.dot( self._k( X, self.SV, self.Gamma ), self.beta )
 		
 	def cdf_res(self,X=None):
 	# CDF residuals
 	#
+		self._compute()
+			
 		if X==None:
 			X = self.X
 		#return ( self.Y.flatten() - self.cdf( X.flatten() ).flatten() )
@@ -167,20 +192,39 @@ class svm:
 	def cdf_loss(self,X=None):
 		
 		return sqrt( (self.cdf_res(X)**2).sum(1) )
-		
-	def __iadd__(self, points):
-		# overloaded '+=', used for adding a vector list to the module's data
-		# 
-		# @param points		A LIST of observation vectors (not a single ovservation)
-		raise StandardError, 'Not Implemented'
-		self.X += points
 	
-	def _compute(self):
-		start = datetime.datetime.now()
+	def _emp_dist(self, X):
+	# Empirical Distribution
+	#
+	# Calculates the empirical distribution of X based on all existing observations
+		(N,self.d) = X.shape
+		(M,self.d) = self.X.shape
+		return ( ( .5 + (X.reshape(N,1,self.d) > transpose(self.X.reshape(M,1,self.d),[1,0,2])).prod(2).sum(1,dtype=float) ) / M ).reshape([N,1])
+		
+	def _grad(self,alpha):
+	# Gradient of objective function at alpha
+	#
+	# P dot alpha - q 		(calculated only at alpha - so full P not needed)
+		pass
+		
+	def _select_working_set(self):
+		I = numpy.ma.masked_less( self.alpha, 1e-8 )
+		grad = self._grad(I)
+		i = (-grad).argmax()
+		
+		a = K[i,*] + K[*,*] - 2*K[i,j]
+		
+		b = grad - self_grad(alpha[i])
+		
+		j = ???
+		
+	def _sub_problem(self,i,j):
+		
+		X_i = self.X[i]
+		X_j = self.X[j]
 		
 		kappa = len( self.gamma )
 		(N,self.d) = self.X.shape
-		self.Y = ( ( .5 + (self.X.reshape(N,1,self.d) > transpose(self.X.reshape(N,1,self.d),[1,0,2])).prod(2).sum(1,dtype=float) ) / N ).reshape([N,1])
 		self.K = numpy.hstack(  [self._K( self.X, self.X, gamma ) for gamma in self.gamma] )
 		self.Gamma = numpy.repeat(self.gamma,N).reshape([N*kappa,1])
 		
@@ -194,16 +238,40 @@ class svm:
 		# Solve!
 		p = solvers.qp( P=P, q=q, G=G, h=h, A=A, b=b )
 		
-		beta = ma.masked_less( p['x'], 1e-8 )
-		mask = ma.getmask(beta)
-		self.NSV = beta.count()
-		self.alpha = beta
-		self.beta = beta.compressed().reshape([self.NSV,1])
-		self.SV = numpy.ma.array( numpy.tile(self.X.T,kappa).T, mask=numpy.repeat(mask,self.d)).compressed().reshape([self.NSV,self.d])
-		self.Gamma = numpy.ma.array( self.Gamma, mask=mask ).compressed().reshape([self.NSV,1])
+		return ( p['x'][0], p['x'][1] )
+		
+	def _test_stop(self):
+		pass
+		
+	def _compute(self):
+		if self.Y.shape != self.X.shape:
+			start = datetime.datetime.now()
+			
+			# Initialize alpha
+			
+			# Test stopping condition
+			while not self._test_stop():
+				
+				# Select working set
+				(i,j) = self._select_working_set()
+				
+				# Solve sub-problem
+				(alpha_i, alpha_j) = self._sub_problem(i,j)
+				
+				# Update alpha
+				self.alpha[i] = alpha_i
+				self.alpha[j] = alpha_j
+			
+			beta = ma.masked_less( p['x'], 1e-8 )
+			mask = ma.getmask(beta)
+			self.NSV = beta.count()
+			self.alpha = beta
+			self.beta = beta.compressed().reshape([self.NSV,1])
+			self.SV = numpy.ma.array( numpy.tile(self.X.T,kappa).T, mask=numpy.repeat(mask,self.d)).compressed().reshape([self.NSV,self.d])
+			self.Gamma = numpy.ma.array( self.Gamma, mask=mask ).compressed().reshape([self.NSV,1])
 
-		duration = datetime.datetime.now() - start
-		print "optimized in %ss" % ( duration.seconds + float(duration.microseconds)/1000000)
+			duration = datetime.datetime.now() - start
+			print "optimized in %ss" % ( duration.seconds + float(duration.microseconds)/1000000)
 		
 def run():
 	fig = plt.figure()
