@@ -201,7 +201,8 @@ class svm:
 		(M,self.d) = self.X.shape
 		return ( ( .5 + (X.reshape(N,1,self.d) > transpose(self.X.reshape(M,1,self.d),[1,0,2])).prod(2).sum(1,dtype=float) ) / M ).reshape([N,1])
 		
-	def _P( self, X ):
+	def _P( self, A, B ):
+		#NOTE: this isn't even close to working...
 		kappa = len( self.gamma )
 		(N,self.d) = self.X.shape
 		
