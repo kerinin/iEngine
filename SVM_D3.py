@@ -201,39 +201,51 @@ class svm:
 		(M,self.d) = self.X.shape
 		return ( ( .5 + (X.reshape(N,1,self.d) > transpose(self.X.reshape(M,1,self.d),[1,0,2])).prod(2).sum(1,dtype=float) ) / M ).reshape([N,1])
 		
+	def _P( self, X ):
+		kappa = len( self.gamma )
+		(N,self.d) = self.X.shape
+		
+		K = numpy.hstack(  [self._K( self.X, self.X, gamma ) for gamma in self.gamma] )
+		Gamma = numpy.repeat(self.gamma,N).reshape([N*kappa,1])
+		
+		return numpy.dot(K.T,K), (N*kappa,N*kappa)
+	
+	def _q( self ):
+		kappa = len( self.gamma )
+		(N,self.d) = self.X.shape
+		
+		K = numpy.hstack(  [self._K( self.X, self.X, gamma ) for gamma in self.gamma] )
+		return ( self._Omega(self.Gamma) - ( numpy.ma.dot( self.K.T, self.Y ) ) ), (N*kappa,1)
+		
 	def _grad(self,alpha):
 	# Gradient of objective function at alpha
 	#
 	# P dot alpha - q 		(calculated only at alpha - so full P not needed)
-		pass
+		return numpy.dot( self._P(alpha,self.X), alpha ) - self._q()
 		
 	def _select_working_set(self):
 		I = numpy.ma.masked_less( self.alpha, 1e-8 )
 		grad = self._grad(I)
+		
 		i = (-grad).argmax()
 		
 		a = K[i,*] + K[*,*] - 2*K[i,j]
 		
 		b = grad - self_grad(alpha[i])
 		
-		j = ???
+		j = ( (b**2) / -a ).argmin()
+		
+		return (i,j)
 		
 	def _sub_problem(self,i,j):
+		X = array([ self.X[i], self.X[j]]).reshape( [2,self.d] )
 		
-		X_i = self.X[i]
-		X_j = self.X[j]
-		
-		kappa = len( self.gamma )
-		(N,self.d) = self.X.shape
-		self.K = numpy.hstack(  [self._K( self.X, self.X, gamma ) for gamma in self.gamma] )
-		self.Gamma = numpy.repeat(self.gamma,N).reshape([N*kappa,1])
-		
-		P = cvxopt.matrix( numpy.dot(self.K.T,self.K), (N*kappa,N*kappa) )
-		q = cvxopt.matrix( ( self._Omega(self.Gamma) - ( numpy.ma.dot( self.K.T, self.Y ) ) ), (N*kappa,1) )
-		G = cvxopt.matrix( -identity(N*kappa), (N*kappa,N*kappa) )
+		P = cvxopt.matrix( self._P(X) )
+		q = cvxopt.matrix( ( self._q(X) + numpy.dot(self_P( BN ), self.alpha) ).T )
+		G = cvxopt.matrix( -identity(2), (22) )
 		h = cvxopt.matrix( 0.0, (N*kappa,1) )
 		A = cvxopt.matrix( 1., (1,N*kappa) )
-		b = cvxopt.matrix( 1., (1,1) )
+		b = cvxopt.matrix( 1. + self.alpha[i] + self.alpha[j] - self.alpha.sum(), (1,1) )
 		
 		# Solve!
 		p = solvers.qp( P=P, q=q, G=G, h=h, A=A, b=b )
@@ -241,7 +253,10 @@ class svm:
 		return ( p['x'][0], p['x'][1] )
 		
 	def _test_stop(self):
-		pass
+		I = numpy.ma.masked_less( self.alpha, 1e-8 )
+		grad = self._grad(I)
+		
+		return -grad.max() + grad.min() <= 1e-8
 		
 	def _compute(self):
 		if self.Y.shape != self.X.shape:
