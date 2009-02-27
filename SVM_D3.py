@@ -70,7 +70,7 @@ cvxopt.solvers.options['feastol'] = 1e-15
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=array(),Lambda=.1, gamma =arange(1,4,1), lazy=True ):
+	def __init__(self,data=numpy.empty([1,1]),Lambda=.1, gamma =arange(1,4,1), lazy=True ):
 	# SVM Class
 	#
 	# @param data		[Nxd] array of observations where N is the number of observations and d is the dimensionality of the abstract space
@@ -90,12 +90,12 @@ class svm:
 		self.gamma = gamma
 		
 		self.Gamma = None		# gamma repeated N times
-		self.Y = array()			# empirical CDF of X
+		self.Y = numpy.empty([1,1])	# empirical CDF of X
 		self.SV = None			# X value array of SV
-		self.NSV = None			# cardinality of SV
+		self.NSV = 0				# cardinality of SV
 		self.alpha = None			# the full weight array for all observations
 		self.beta = None			# weight array for SV
-		self.P = None				# kernel cache
+		self.P = dict()				# kernel cache
 		self.q = None				# q cache
 		
 		self.lazy = lazy
@@ -131,13 +131,16 @@ class svm:
 	# @param Y				[Mxd] array of observations
 	# @param gamma			kernel width parameter
 	
-		N,d1 = X.shape
-		M,d2 = Y.shape
+		(N,d1) = X.shape
+		(M,d2) = Y.shape
 		
 		if d1 != self.d != d2:
 			raise StandardError, 'Matrices do not conform to the dimensionality of existing observations'
 		
-		diff = X.reshape([N,1,self.d]) - numpy.transpose( Y.reshape([M,1,self.d]), [1,0,2] )
+		diff = X.reshape([N,1,d1]) - numpy.transpose( Y.reshape([M,1,d2]), [1,0,2] )
+		
+		print gamma.shape
+		print diff.shape
 		
 		# Sigmoid
 		return ( 1.0 / ( 1.0 + numpy.exp( -gamma * diff ) ) ).prod(2).reshape(N,M)
@@ -187,7 +190,6 @@ class svm:
 			
 		if X==None:
 			X = self.X
-		#return ( self.Y.flatten() - self.cdf( X.flatten() ).flatten() )
 		return self.Y - self.cdf(X)
 		
 	def cdf_loss(self,X=None):
@@ -210,32 +212,32 @@ class svm:
 	# @param A 			[2xd] Array of observations
 	# @param B			[Mxd] Array of observations
 	
-		if self.P[A[0]][A[1]]:
-			return self.Q[A[0]][A[1]]
+		#if self.P[A[0]][A[1]]:
+		#	return self.Q[A[0]][A[1]]
 			
 		#NOTE: this isn't even close to working...
 		kappa = len( self.gamma )
 		(N,self.d) = B.shape
 		
-		K = numpy.hstack(  [self._K( A, B, gamma ) for gamma in self.gamma] )
+		K = self._K( A, B, self.Gamma )
 		
-		ret = numpy.dot(K.T,K), (2*kappa,N*kappa)
-		self.P[A[0]][A[1]] = ret
+		ret = numpy.dot(K.T,K)
+		#self.P[A[0]][A[1]] = ret
 		
 		return ret
 	
 	def _q( self, x ):
 	# this is used to produce a [1xN] array
 	
-		if self.q[x]:
-			return self.q[x]
+		#if self.q[x]:
+		#	return self.q[x]
 			
 		(N,self.d) = self.X.shape
-		self.Gamma = numpy.repeat(self.gamma,N).reshape([N*kappa,1])
-		K = numpy.hstack(  [self._K( self.X, x, gamma ) for gamma in self.gamma] )
-			
-		ret = ( self._Omega(self.Gamma) - ( numpy.ma.dot( self.K.T, self.Y ) ) ), (N*kappa,1)
-		self.q[x] = ret
+		kappa = len(self.gamma)
+		K = self._K( self.X, x, self.Gamma )
+		
+		ret = ( self._Omega(self.Gamma) - ( numpy.ma.dot( K.T, self.Y ) ) )
+		#self.q[x] = ret
 		
 		return ret
 		
@@ -243,7 +245,10 @@ class svm:
 	# Gradient of objective function at alpha
 	#
 	# P dot alpha - q 		(calculated only at alpha - so full P not needed)
-		return numpy.dot( self._P(alpha,self.X), alpha ) - self._q(alpha)
+	
+		kappa = len(self.gamma)
+		
+		return numpy.ma.dot( self._P(alpha,numpy.vstack( [self.X,]*kappa ) ), alpha ) - self._q(alpha)
 		
 	def _select_working_set(self):
 		I = numpy.ma.masked_less( self.alpha, 1e-8 )
@@ -287,11 +292,13 @@ class svm:
 		if self.Y.shape != self.X.shape:
 			start = datetime.datetime.now()
 			
-			# Initialize alpha
+			# Initialize variables
 			kappa = len( self.gamma )
 			(N,self.d) = self.X.shape
-			self.alpha = array( ones, [N*kappa,1] ) / (N*kappa)
-			
+			self.alpha = numpy.ones( [N*kappa,1] ) / (N*kappa)
+			self.Y = ( ( .5 + (self.X.reshape(N,1,self.d) > transpose(self.X.reshape(N,1,self.d),[1,0,2])).prod(2).sum(1,dtype=float) ) / N ).reshape([N,1])
+			self.Gamma = numpy.repeat(self.gamma,N).reshape([N*kappa,1])
+
 			# Test stopping condition
 			while not self._test_stop():
 				
@@ -308,10 +315,15 @@ class svm:
 			beta = ma.masked_less( self.alpha, 1e-8 )
 			mask = ma.getmask(beta)
 			self.NSV = beta.count()
+			
+			self.beta = self.alpha
+			self.SV = numpy.vstack( [self.X,]*kappa )
+			
+			'''
 			self.beta = beta.compressed().reshape([self.NSV,1])
 			self.SV = numpy.ma.array( numpy.tile(self.X.T,kappa).T, mask=numpy.repeat(mask,self.d)).compressed().reshape([self.NSV,self.d])
 			self.Gamma = numpy.ma.array( self.Gamma, mask=mask ).compressed().reshape([self.NSV,1])
-
+			'''
 			duration = datetime.datetime.now() - start
 			print "optimized in %ss" % ( duration.seconds + float(duration.microseconds)/1000000)
 		
@@ -345,7 +357,8 @@ def run():
 	return True
 	'''
 	
-	mod = svm( samples, Lambda=.005, gamma=[.125,.25,.5,1,2,4,8,16] )
+	#mod = svm( samples, Lambda=.005, gamma=[.125,.25,.5,1,2,4,8,16] )
+	mod = svm( samples, Lambda=.005, gamma=[.125,4] )
 	
 	print mod
 	
