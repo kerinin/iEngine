@@ -203,8 +203,6 @@ class svm:
 		return ( ( .5 + (X.reshape(N,1,self.d) > transpose(self.X.reshape(M,1,self.d),[1,0,2])).prod(2).sum(1,dtype=float) ) / M ).reshape([N,1])
 		
 	def _P( self, A, B ):
-	# 
-	#
 	# this is used to compute one of two options: 
 	# a 2x2 array defined by the working set
 	# or a 2xN-2 array defined by the working set and all observations
@@ -227,7 +225,6 @@ class svm:
 		return ret
 	
 	def _q( self, x ):
-	#
 	# this is used to produce a [1xN] array
 	
 		if self.q[x]:
@@ -246,7 +243,7 @@ class svm:
 	# Gradient of objective function at alpha
 	#
 	# P dot alpha - q 		(calculated only at alpha - so full P not needed)
-		return numpy.dot( self._P(alpha,self.X), alpha ) - self._q()
+		return numpy.dot( self._P(alpha,self.X), alpha ) - self._q(alpha)
 		
 	def _select_working_set(self):
 		I = numpy.ma.masked_less( self.alpha, 1e-8 )
@@ -265,8 +262,8 @@ class svm:
 	def _sub_problem(self,i,j):
 		X = array([ self.X[i], self.X[j]]).reshape( [2,self.d] )
 		
-		P = cvxopt.matrix( self._P(X) )
-		q = cvxopt.matrix( ( self._q(X) + numpy.dot(self_P( BN ), self.alpha) ).T )
+		P = cvxopt.matrix( self._P( X, X ) )
+		q = cvxopt.matrix( ( self._q(X) + numpy.dot(self_P( X, self.X ), self.alpha) ).T )
 		G = cvxopt.matrix( -identity(2), (22) )
 		h = cvxopt.matrix( 0.0, (N*kappa,1) )
 		A = cvxopt.matrix( 1., (1,N*kappa) )
