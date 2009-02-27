@@ -139,9 +139,6 @@ class svm:
 		
 		diff = X.reshape([N,1,d1]) - numpy.transpose( Y.reshape([M,1,d2]), [1,0,2] )
 		
-		print gamma.shape
-		print diff.shape
-		
 		# Sigmoid
 		return ( 1.0 / ( 1.0 + numpy.exp( -gamma * diff ) ) ).prod(2).reshape(N,M)
 		
@@ -298,9 +295,10 @@ class svm:
 			self.alpha = numpy.ones( [N*kappa,1] ) / (N*kappa)
 			self.Y = ( ( .5 + (self.X.reshape(N,1,self.d) > transpose(self.X.reshape(N,1,self.d),[1,0,2])).prod(2).sum(1,dtype=float) ) / N ).reshape([N,1])
 			self.Gamma = numpy.repeat(self.gamma,N).reshape([N*kappa,1])
+			counter = 0
 
 			# Test stopping condition
-			while not self._test_stop():
+			while not counter or not self._test_stop():
 				
 				# Select working set
 				(i,j) = self._select_working_set()
@@ -308,9 +306,14 @@ class svm:
 				# Solve sub-problem
 				(alpha_i, alpha_j) = self._sub_problem(i,j)
 				
+				print self.alpha[i] - alpha_i
+				print self.alpha[j] - alpha_j
+				
 				# Update alpha
 				self.alpha[i] = alpha_i
 				self.alpha[j] = alpha_j
+				
+				counter += 1
 			
 			beta = ma.masked_less( self.alpha, 1e-8 )
 			mask = ma.getmask(beta)
