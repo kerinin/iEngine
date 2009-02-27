@@ -251,9 +251,12 @@ class svm:
 		
 		i = (-grad).argmax()
 		
-		a = K[i,*] + K[*,*] - 2*K[i,j]
+		P = self._P( self.X[i], self.X )		# P_IJ
+		a = numpy.ma.masked_less( P[0,i] + P.diag() - 2*P, 0 )
 		
-		b = grad - self_grad(alpha[i])
+		#NOTE the actual equation is -grad < -grad_i - i'm not sure if inversing the signs and equality operator is a problem
+		grad_i =  self._grad(alpha[i] )
+		b = numpy.ma.masked_greater(grad, grad_i) - grad_i
 		
 		j = ( (b**2) / -a ).argmin()
 		
@@ -263,7 +266,7 @@ class svm:
 		X = array([ self.X[i], self.X[j]]).reshape( [2,self.d] )
 		
 		P = cvxopt.matrix( self._P( X, X ) )
-		q = cvxopt.matrix( ( self._q(X) + numpy.dot(self_P( X, self.X ), self.alpha) ).T )
+		q = cvxopt.matrix( ( self._q(X) - numpy.dot(self_P( X, self.X ), self.alpha) ).T )
 		G = cvxopt.matrix( -identity(2), (22) )
 		h = cvxopt.matrix( 0.0, (N*kappa,1) )
 		A = cvxopt.matrix( 1., (1,N*kappa) )
@@ -285,6 +288,9 @@ class svm:
 			start = datetime.datetime.now()
 			
 			# Initialize alpha
+			kappa = len( self.gamma )
+			(N,self.d) = self.X.shape
+			self.alpha = array( ones, [N*kappa,1] ) / (N*kappa)
 			
 			# Test stopping condition
 			while not self._test_stop():
@@ -299,10 +305,9 @@ class svm:
 				self.alpha[i] = alpha_i
 				self.alpha[j] = alpha_j
 			
-			beta = ma.masked_less( p['x'], 1e-8 )
+			beta = ma.masked_less( self.alpha, 1e-8 )
 			mask = ma.getmask(beta)
 			self.NSV = beta.count()
-			self.alpha = beta
 			self.beta = beta.compressed().reshape([self.NSV,1])
 			self.SV = numpy.ma.array( numpy.tile(self.X.T,kappa).T, mask=numpy.repeat(mask,self.d)).compressed().reshape([self.NSV,self.d])
 			self.Gamma = numpy.ma.array( self.Gamma, mask=mask ).compressed().reshape([self.NSV,1])
