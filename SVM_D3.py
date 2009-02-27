@@ -95,7 +95,8 @@ class svm:
 		self.NSV = None			# cardinality of SV
 		self.alpha = None			# the full weight array for all observations
 		self.beta = None			# weight array for SV
-		self.K = None				# precomputed kernel matrix
+		self.P = None				# kernel cache
+		self.q = None				# q cache
 		
 		self.lazy = lazy
 		
@@ -202,21 +203,44 @@ class svm:
 		return ( ( .5 + (X.reshape(N,1,self.d) > transpose(self.X.reshape(M,1,self.d),[1,0,2])).prod(2).sum(1,dtype=float) ) / M ).reshape([N,1])
 		
 	def _P( self, A, B ):
+	# 
+	#
+	# this is used to compute one of two options: 
+	# a 2x2 array defined by the working set
+	# or a 2xN-2 array defined by the working set and all observations
+	#
+	# @param A 			[2xd] Array of observations
+	# @param B			[Mxd] Array of observations
+	
+		if self.P[A[0]][A[1]]:
+			return self.Q[A[0]][A[1]]
+			
 		#NOTE: this isn't even close to working...
 		kappa = len( self.gamma )
-		(N,self.d) = self.X.shape
+		(N,self.d) = B.shape
 		
-		K = numpy.hstack(  [self._K( self.X, self.X, gamma ) for gamma in self.gamma] )
-		Gamma = numpy.repeat(self.gamma,N).reshape([N*kappa,1])
+		K = numpy.hstack(  [self._K( A, B, gamma ) for gamma in self.gamma] )
 		
-		return numpy.dot(K.T,K), (N*kappa,N*kappa)
+		ret = numpy.dot(K.T,K), (2*kappa,N*kappa)
+		self.P[A[0]][A[1]] = ret
+		
+		return ret
 	
-	def _q( self ):
-		kappa = len( self.gamma )
+	def _q( self, x ):
+	#
+	# this is used to produce a [1xN] array
+	
+		if self.q[x]:
+			return self.q[x]
+			
 		(N,self.d) = self.X.shape
+		self.Gamma = numpy.repeat(self.gamma,N).reshape([N*kappa,1])
+		K = numpy.hstack(  [self._K( self.X, x, gamma ) for gamma in self.gamma] )
+			
+		ret = ( self._Omega(self.Gamma) - ( numpy.ma.dot( self.K.T, self.Y ) ) ), (N*kappa,1)
+		self.q[x] = ret
 		
-		K = numpy.hstack(  [self._K( self.X, self.X, gamma ) for gamma in self.gamma] )
-		return ( self._Omega(self.Gamma) - ( numpy.ma.dot( self.K.T, self.Y ) ) ), (N*kappa,1)
+		return ret
 		
 	def _grad(self,alpha):
 	# Gradient of objective function at alpha
