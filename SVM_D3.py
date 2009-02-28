@@ -213,8 +213,8 @@ class svm:
 	
 		#if self.P[A[0]][A[1]]:
 		#	return self.Q[A[0]][A[1]]
-			
-		if not A.shape == (2,self.d) or not B.shape[1] == self.d:
+		
+		if not A.shape[1] == self.d or not B.shape[1] == self.d:
 			raise StandardError, 'Arguments have incorrect shape - should be 2xd, Nxd'
 			
 		K = self._K( A, B, self.Gamma )
@@ -232,10 +232,16 @@ class svm:
 		
 		if not x.shape[1] == self.d:
 			raise StandardError, 'Arguments have incorrect shape - should be Nxd'
-			
-		K = self._K( self.X, x, self.Gamma )
 		
-		ret = ( self._Omega(self.Gamma) - ( ma.dot( K.T, self.Y ) ) )
+		#K = self._K( np.vstack([self.X,]*self.kappa) , x, self.Gamma )
+		K = self._K( x, np.vstack([self.X,]*self.kappa), self.Gamma )
+		
+		print K.shape
+		print ma.dot( K, np.vstack( [self.Y,]*self.kappa) ).shape
+		
+		#ret = ( self._Omega(self.Gamma) - ( ma.dot( K.T, np.vstack( [self.Y,]*self.kappa) ) ) )
+		#NOTE: this MUST be fixed at some point
+		ret = (  - ( ma.dot( K, np.vstack( [self.Y,]*self.kappa) ) ) ).T
 		#self.q[x] = ret
 		
 		return ret
@@ -253,7 +259,7 @@ class svm:
 		return ma.dot( P, self.alpha ) - q
 		
 	def _select_working_set(self):
-		kappa = len(self.gamma)
+		return (0,1)
 		
 		I = ma.masked_less( self.alpha, 1e-8 )
 		grad = self._grad( ma.array(self.X, mask=ma.getmask(I) ) )
@@ -272,14 +278,14 @@ class svm:
 		return (i,j)
 		
 	def _sub_problem(self,i,j):
-		X = array([ self.X[i], self.X[j]]).reshape( [2,self.d] )
+		X = np.array([ self.X[i], self.X[j]]).reshape( [2,self.d] )
 		
-		P = cvxopt.matrix( self._P( X, X ) )
-		q = cvxopt.matrix( ( self._q(X) - np.dot(self_P( X, self.X ), self.alpha) ).T )
-		G = cvxopt.matrix( -identity(2), (22) )
-		h = cvxopt.matrix( 0.0, (N*kappa,1) )
-		A = cvxopt.matrix( 1., (1,N*kappa) )
-		b = cvxopt.matrix( 1. + self.alpha[i] + self.alpha[j] - self.alpha.sum(), (1,1) )
+		P = cvx.matrix( self._P( X, X ) )
+		q = cvx.matrix( ( self._q(X) - np.dot(self_P( X, self.X ), self.alpha) ).T )
+		G = cvx.matrix( -np.identity(2), (22) )
+		h = cvx.matrix( 0.0, (self.N*self.kappa,1) )
+		A = cvx.matrix( 1., (1,self.N*self.kappa) )
+		b = cvx.matrix( 1. + self.alpha[i] + self.alpha[j] - self.alpha.sum(), (1,1) )
 		
 		# Solve!
 		p = solvers.qp( P=P, q=q, G=G, h=h, A=A, b=b )
