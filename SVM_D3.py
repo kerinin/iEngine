@@ -46,15 +46,16 @@
 import sys, getopt, math, datetime, os, cmath
 from random import gauss
 
-import numpy
+import numpy as np
+import numpy.ma as ma
 import scipy
 import scipy.special
 import scipy.stats
-import cvxopt
+import cvxopt as cvx
 #import cvxmod
-from cvxopt import *
+from cvxopt import solvers
 
-from numpy import *
+#from np import *
 
 import matplotlib.pyplot as plt
 import matplotlib.mlab as mlab
@@ -62,15 +63,15 @@ import matplotlib.cm as cm
 
 
 
-cvxopt.solvers.options['show_progress'] = False
-cvxopt.solvers.options['abstol'] = 1e-15
-cvxopt.solvers.options['reltol'] = 1e-15
-cvxopt.solvers.options['feastol'] = 1e-15
+cvx.solvers.options['show_progress'] = False
+cvx.solvers.options['abstol'] = 1e-15
+cvx.solvers.options['reltol'] = 1e-15
+cvx.solvers.options['feastol'] = 1e-15
 
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=numpy.empty([1,1]),Lambda=.1, gamma =arange(1,4,1), lazy=True ):
+	def __init__(self,data=np.empty([1,1]),Lambda=.1, gamma =np.arange(1,4,1), lazy=True ):
 	# SVM Class
 	#
 	# @param data		[Nxd] array of observations where N is the number of observations and d is the dimensionality of the abstract space
@@ -88,9 +89,10 @@ class svm:
 		
 		self.Lambda = Lambda
 		self.gamma = gamma
+		self.kappa = len(gamma)
 		
 		self.Gamma = None		# gamma repeated N times
-		self.Y = numpy.empty([1,1])	# empirical CDF of X
+		self.Y = np.empty([1,1])	# empirical CDF of X
 		self.SV = None			# X value array of SV
 		self.NSV = 0				# cardinality of SV
 		self.alpha = None			# the full weight array for all observations
@@ -104,7 +106,7 @@ class svm:
 			self._compute()
 		
 	def __iadd__(self,X):
-		self.X = numpy.vstack( self.X, X )
+		self.X = np.vstack( self.X, X )
 		if not self.lazy:
 			self._compute()
 			
@@ -137,10 +139,10 @@ class svm:
 		if d1 != self.d != d2:
 			raise StandardError, 'Matrices do not conform to the dimensionality of existing observations'
 		
-		diff = X.reshape([N,1,d1]) - numpy.transpose( Y.reshape([M,1,d2]), [1,0,2] )
+		diff = X.reshape([N,1,d1]) - np.transpose( Y.reshape([M,1,d2]), [1,0,2] )
 		
 		# Sigmoid
-		return ( 1.0 / ( 1.0 + numpy.exp( -gamma * diff ) ) ).prod(2).reshape(N,M)
+		return ( 1.0 / ( 1.0 + np.exp( -gamma * diff ) ) ).prod(2).reshape(N,M)
 		
 		# RBF
 		#return ( exp( -((X-Y)**2.0) / gamma ) ).reshape(N,M)
@@ -158,9 +160,9 @@ class svm:
 		if d1 != self.d != d2:
 			raise StandardError, 'Matrices do not conform to the dimensionality of existing observations'
 		
-		diff = X.reshape([N,1,self.d])- numpy.transpose( Y.reshape([M,1,self.d]), [1,0,2] )
+		diff = X.reshape([N,1,self.d])- np.transpose( Y.reshape([M,1,self.d]), [1,0,2] )
 		
-		return ( gamma / ( 2.0 + numpy.exp( gamma * diff ) + numpy.exp( -gamma * diff ) ) ).prod(2).reshape(N,M)
+		return ( gamma / ( 2.0 + np.exp( gamma * diff ) + np.exp( -gamma * diff ) ) ).prod(2).reshape(N,M)
 		
 	def cdf(self,X):
 	# Cumulative distribution function
@@ -169,7 +171,7 @@ class svm:
 	
 		self._compute()
 		
-		return numpy.dot( self._K( X, self.SV, self.Gamma ), self.beta )
+		return np.dot( self._K( X, self.SV, self.Gamma ), self.beta )
 		
 	def pdf(self,X):
 	# Probability distribution function
@@ -178,7 +180,7 @@ class svm:
 	
 		self._compute()
 			
-		return numpy.dot( self._k( X, self.SV, self.Gamma ), self.beta )
+		return np.dot( self._k( X, self.SV, self.Gamma ), self.beta )
 		
 	def cdf_res(self,X=None):
 	# CDF residuals
@@ -212,13 +214,12 @@ class svm:
 		#if self.P[A[0]][A[1]]:
 		#	return self.Q[A[0]][A[1]]
 			
-		#NOTE: this isn't even close to working...
-		kappa = len( self.gamma )
-		(N,self.d) = B.shape
-		
+		if not A.shape == (2,self.d) or not B.shape[1] == self.d:
+			raise StandardError, 'Arguments have incorrect shape - should be 2xd, Nxd'
+			
 		K = self._K( A, B, self.Gamma )
 		
-		ret = numpy.dot(K.T,K)
+		ret = ma.dot(K.T,K)
 		#self.P[A[0]][A[1]] = ret
 		
 		return ret
@@ -228,37 +229,43 @@ class svm:
 	
 		#if self.q[x]:
 		#	return self.q[x]
+		
+		if not x.shape[1] == self.d:
+			raise StandardError, 'Arguments have incorrect shape - should be Nxd'
 			
-		(N,self.d) = self.X.shape
-		kappa = len(self.gamma)
 		K = self._K( self.X, x, self.Gamma )
 		
-		ret = ( self._Omega(self.Gamma) - ( numpy.ma.dot( K.T, self.Y ) ) )
+		ret = ( self._Omega(self.Gamma) - ( ma.dot( K.T, self.Y ) ) )
 		#self.q[x] = ret
 		
 		return ret
 		
-	def _grad(self,alpha):
-	# Gradient of objective function at alpha
+	def _grad(self, maskedX ):
+	# Gradient of objective function of alpha at unmasked values of X
 	#
 	# P dot alpha - q 		(calculated only at alpha - so full P not needed)
-	
-		kappa = len(self.gamma)
+	#
+	# @param maskedX	# an array of X masked at unneeded values
 		
-		return numpy.ma.dot( self._P(alpha,numpy.vstack( [self.X,]*kappa ) ), alpha ) - self._q(alpha)
+		P = self._P( np.vstack( [maskedX,]*self.kappa) ,np.vstack( [self.X,]*self.kappa ) )
+		q =  self._q( np.vstack( [maskedX,]*self.kappa ) )
+		
+		return ma.dot( P, self.alpha ) - q
 		
 	def _select_working_set(self):
-		I = numpy.ma.masked_less( self.alpha, 1e-8 )
-		grad = self._grad(I)
+		kappa = len(self.gamma)
+		
+		I = ma.masked_less( self.alpha, 1e-8 )
+		grad = self._grad( ma.array(self.X, mask=ma.getmask(I) ) )
 		
 		i = (-grad).argmax()
 		
-		P = self._P( self.X[i], self.X )		# P_IJ
-		a = numpy.ma.masked_less( P[0,i] + P.diag() - 2*P, 0 )
+		P = self._P( self.X[ i % self.N ].reshape([1,self.d]), np.vstack( [self.X,]*kappa ) )		# P_IJ
+		a = ma.masked_less( P[0,i] + np.diagonal(P) - 2*P, 0 )
 		
 		#NOTE the actual equation is -grad < -grad_i - i'm not sure if inversing the signs and equality operator is a problem
-		grad_i =  self._grad(alpha[i] )
-		b = numpy.ma.masked_greater(grad, grad_i) - grad_i
+		grad_i =  self._grad( self.X[i % self.N] )
+		b = ma.masked_greater(grad, grad_i) - grad_i
 		
 		j = ( (b**2) / -a ).argmin()
 		
@@ -268,7 +275,7 @@ class svm:
 		X = array([ self.X[i], self.X[j]]).reshape( [2,self.d] )
 		
 		P = cvxopt.matrix( self._P( X, X ) )
-		q = cvxopt.matrix( ( self._q(X) - numpy.dot(self_P( X, self.X ), self.alpha) ).T )
+		q = cvxopt.matrix( ( self._q(X) - np.dot(self_P( X, self.X ), self.alpha) ).T )
 		G = cvxopt.matrix( -identity(2), (22) )
 		h = cvxopt.matrix( 0.0, (N*kappa,1) )
 		A = cvxopt.matrix( 1., (1,N*kappa) )
@@ -280,7 +287,7 @@ class svm:
 		return ( p['x'][0], p['x'][1] )
 		
 	def _test_stop(self):
-		I = numpy.ma.masked_less( self.alpha, 1e-8 )
+		I = ma.masked_less( self.alpha, 1e-8 )
 		grad = self._grad(I)
 		
 		return -grad.max() + grad.min() <= 1e-8
@@ -292,9 +299,9 @@ class svm:
 			# Initialize variables
 			kappa = len( self.gamma )
 			(N,self.d) = self.X.shape
-			self.alpha = numpy.ones( [N*kappa,1] ) / (N*kappa)
-			self.Y = ( ( .5 + (self.X.reshape(N,1,self.d) > transpose(self.X.reshape(N,1,self.d),[1,0,2])).prod(2).sum(1,dtype=float) ) / N ).reshape([N,1])
-			self.Gamma = numpy.repeat(self.gamma,N).reshape([N*kappa,1])
+			self.alpha = np.ones( [N*kappa,1] ) / (N*kappa)
+			self.Y = ( ( .5 + (self.X.reshape(N,1,self.d) > np.transpose(self.X.reshape(N,1,self.d),[1,0,2])).prod(2).sum(1,dtype=float) ) / N ).reshape([N,1])
+			self.Gamma = np.repeat(self.gamma,N).reshape([N*kappa,1])
 			counter = 0
 
 			# Test stopping condition
@@ -320,12 +327,12 @@ class svm:
 			self.NSV = beta.count()
 			
 			self.beta = self.alpha
-			self.SV = numpy.vstack( [self.X,]*kappa )
+			self.SV = np.vstack( [self.X,]*kappa )
 			
 			'''
 			self.beta = beta.compressed().reshape([self.NSV,1])
-			self.SV = numpy.ma.array( numpy.tile(self.X.T,kappa).T, mask=numpy.repeat(mask,self.d)).compressed().reshape([self.NSV,self.d])
-			self.Gamma = numpy.ma.array( self.Gamma, mask=mask ).compressed().reshape([self.NSV,1])
+			self.SV = ma.array( np.tile(self.X.T,kappa).T, mask=np.repeat(mask,self.d)).compressed().reshape([self.NSV,self.d])
+			self.Gamma = ma.array( self.Gamma, mask=mask ).compressed().reshape([self.NSV,1])
 			'''
 			duration = datetime.datetime.now() - start
 			print "optimized in %ss" % ( duration.seconds + float(duration.microseconds)/1000000)
@@ -333,8 +340,8 @@ class svm:
 def run():
 	fig = plt.figure()
 	
-	samples = vstack( [ numpy.random.multivariate_normal( mean=array([3,3]), cov=array( identity(2) ), size=array([50,]) ),
-		numpy.random.multivariate_normal( mean=array([7,7]), cov=array( identity(2) ), size=array([50,]) ) 
+	samples = np.vstack( [ np.random.multivariate_normal( mean=np.array([3,3]), cov=np.array( np.identity(2) ), size=np.array([50,]) ),
+		np.random.multivariate_normal( mean=np.array([7,7]), cov=np.array( np.identity(2) ), size=np.array([50,]) ) 
 	] )
 	
 	'''
