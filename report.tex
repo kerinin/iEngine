@@ -20,7 +20,7 @@
 
 \begin{document}
 \title{Robust Timeseries Analysis in the Context of Multiple Asynchronous Input Channels}
-\subtitle{Analysis of Ergodic Processes with Multiple Stationary Behaviors using Data from Multiple Asynchronous Input Channels}
+%\subtitle{Analysis of Ergodic Processes with Multiple Stationary Behaviors using Data from Multiple Asynchronous Input Channels}
 \author{Ryan Michael\\ \texttt{kerinin@gmail.com}}
 %\date{???}
 \maketitle
@@ -37,15 +37,15 @@ Decomposed into the ??? domain?
 %\tableofcontents
 
 \subsection{Existing Work}
-http://en.wikipedia.org/wiki/Expectation-maximization_algorithm
-http://en.wikipedia.org/wiki/Stationary_process
-http://en.wikipedia.org/wiki/Ergodicity
-http://en.wikipedia.org/wiki/Mixing_(mathematics)
-http://en.wikipedia.org/wiki/Lyapunov_exponent
-http://en.wikipedia.org/wiki/Recurrence_quantification_analysis
-http://en.wikipedia.org/wiki/Recurrence_plot
-http://en.wikipedia.org/wiki/Autoregressive_fractionally_integrated_moving_average
-http://en.wikipedia.org/wiki/Autocorrelation
+%http://en.wikipedia.org/wiki/Expectation-maximization_algorithm
+%http://en.wikipedia.org/wiki/Stationary_process
+%http://en.wikipedia.org/wiki/Ergodicity
+%http://en.wikipedia.org/wiki/Mixing_(mathematics)
+%http://en.wikipedia.org/wiki/Lyapunov_exponent
+%http://en.wikipedia.org/wiki/Recurrence_quantification_analysis
+%http://en.wikipedia.org/wiki/Recurrence_plot
+%http://en.wikipedia.org/wiki/Autoregressive_fractionally_integrated_moving_average
+%http://en.wikipedia.org/wiki/Autocorrelation
 
 % \subsubsection{Hidden Markov Model}
 % cannot account for future states - only capable of prediction
@@ -108,14 +108,14 @@ We assume that the probability of \(X \) is a time-dependent mixture of some set
 
 \begin{equation} \mathcal{P}(t,\theta) = \sum_i \delta_i \cdot f_i \end{equation}
 
-Finally, we assume that a similar mixture of densities can be determined for each channel:
+where \( \delta_n \) is the weight corresponding to \( f_n \).  Finally, we assume that a similar mixture of densities can be determined for each channel:
 
 \begin{equation} \mathcal{P}^n(t,\theta) = \sum_i \delta_i^n \cdot f_i^n \end{equation}
 
 \subsection{Single Channel Estimation}
 We begin by considering the case where only one channel exists, so for now we will omit the superscript and refer to \(X^n = (\Omega^n,\mathcal{F}^n,\mathcal{P}^n) \) as \(X = (\Omega, \mathcal{F},\mathcal{P}) \).  Our task is to determine both a set of underlying distributions \([f_0,...,f_w] \) and their relative influence over time.  We begin by restricting our attention to the set of observations \( S_{t,\theta} \) which fall into the window \( (t,\theta) \).  We estimate a set of probability distributions \(\Phi \) using some function \(\psi_E \) based on the sets of observations in different windows:
 
-\begin{equation} S_{t,\theta} = \left[ \left( x_i,\frac{t_i - t}{\theta} \right) \in X : t \le t_i < t+\theta \right] \end{equation}
+\begin{equation} S_{t,\theta} = \left[ \left( x_i,\frac{t_i - t}{\theta} \right) | \quad x_i \in X, \ t \le t_i < t+\theta \right] \end{equation}
 \begin{equation} \psi_E( S_{t,\theta}:\alpha_E ) \mapsto \phi_n \simeq \mathcal{P}(t,\theta)  \end{equation}
 \[ \Phi = [\phi_0,...,\phi_p ] \nonumber \]
 
@@ -126,17 +126,22 @@ The estimation algorithm \(\psi_{E} \) produces an estimate \(\phi_n \) of the p
 
 % Add a function for determining time windows, possibly in conjunction with creating estimates
 
-Given a set of estimations, we need a method to relate each estimate's relevance to observations in different time windows.  We use the Shannon entropy of the set of observations in a given time window with respect to a given estimation as a measure of the estimate's relevance to the observed data.  A set of data points which conform to the predicted values of an estimate will have lower entropy than a set of data points which diverge to teh same estimate.
+Given a set of estimations, we need a method to relate each estimate's relevance to observations in different time windows.  We use the Shannon entropy of the set of observations in a given time window with respect to a given estimation as a measure of the estimate's relevance to the observed data.  A set of data points which conform to the predicted values of an estimate will have lower entropy than a set of data points which diverge from the same estimate.
 
-\begin{equation} H_n( S_{t,\theta} ) \mapsto \delta_u = -\sum_{(x,t) \in S_{t,\theta}} \phi_n(x,t) \log \phi_n(x,t) \end{equation}
-\[ \Delta = [\delta_0,...,\delta_q] \]
+\begin{equation} H_n( S_{t,\theta} ) \mapsto \delta_u^n = -\sum_{(x,t) \in S_{t,\theta}} \phi_n(x,t) \log \phi_n(x,t) \end{equation}
+\[ \Delta = \begin{bmatrix} 
+\delta_0^0 & \hdots & \delta_q^0 \\
+\vdots & \ddots & \vdots \\
+\delta_0^p & \hdots & \delta_q^p \\
+\end{bmatrix} \]
 
-The entropy for each estimate over different time windows define a new random variable which we will refer to as \( H \).  We will compute a density estimate using \(\psi_C \) for \( H \) as we have with the input data previously:
+The entropy for each estimate over different time windows defines a new random variable which we will refer to as \( H \).  We will compute a density estimate using \(\psi_C \) for \( H \) as we have with the input data previously:
 
 \[ H = ( \Omega^H, \mathcal{F}^H, \mathcal{P}^H ), \quad \Omega^H \in \mathbb{R}, \mathcal{F}^H = \mathcal{B}(\mathbb{R}) \]
 \begin{equation} \psi_C( \Delta , \alpha_C ) \mapsto \phi_\Delta \end{equation}
-\begin{equation} \phi_\Delta(S_{t,\theta},\delta_u) \simeq P \left( H_n(S_{t,\theta}) = \delta_u \right)
+\begin{equation} \phi_\Delta(\delta, n) \simeq P \left( H_n = \delta \right)
 \end{equation}
+% There is no way this equation is correct - it's given a set of scalar entropy values - there's no way it's going to take a set of observations and produce a probability of an entropy value.
 
 \subsection{Single Channel Pediction}
 The derivation algorithm produces predictions of \(X \) over a time window \( (t,\theta) \) based on a set of observations which occur in that time window \(S_{t,\theta} \).  Rather than using the estimation algorithm \(\psi_E \) to predict these values, however, the derivation algorithm \(\psi_D \) predicts the probability distribution  using bayesian modification of existing estimates.  To accomplish this, we use the conditional probability of the entropy value.
@@ -174,20 +179,20 @@ P_{X|H_n \cap H_m} \left( (x,t), \delta_u, \delta_v \right) &=
 P_{H_n \cap H_m | X} \left( \delta_u, \delta_v, (x,t) \right) &= 
 	\prod_{\substack{i=[n,m] \\ j=[u,v]}} P_{H_i} \left( \delta_j + H_i((x,t)) \right) \nonumber 
 \\
-&= \prod_{\substack{i=[n,m]\\j=[i,j]}} \phi_\Delta(S_{t,\theta},\delta_j + H_i((x,t)) ) \\
+&= \prod_{\substack{i=[n,m]\\j=[i,j]}} \phi_\Delta \left( \delta_j + H_i((x,t)), i \right) \\
 P_{H_n \cap H_m} \left( \delta_u, \delta_v \right) &= 
 	\prod_{\substack{i=[n,m]\\j=[u,v]}} P_{H_i} \left( \delta_j \right) \nonumber 
 \\
-&= \prod_{\substack{i=[n,m]\\j=[u,v]}} \phi_\Delta(S_{t,\theta},\delta_j )
+&= \prod_{\substack{i=[n,m]\\j=[u,v]}} \phi_\Delta( \delta_j, i )
 \end{align}
 
 Which gives us the following as our prediction algorithm:
 
 \begin{align}
 \psi_P \left( (x,t) :S_{t,\theta}, \Phi \right) \mapsto \mathbb{P} 
-	&= \frac{ \prod_{0 \le n < q} \phi_\Delta \left( S_{t,\theta}, H_n(S_{t,\theta}) \right) \cdot \prod_{0 \le n < q} \phi_n \left( (x,t) \right) }{ \prod_{0 \le n < q} \phi_\Delta(S_{t,\theta}, H_n(S_{t,\theta}) + H_n((x,t)) ) }  \nonumber \\
+	&= \frac{ \prod_{0 \le n < q} \phi_\Delta \left( H_n(S_{t,\theta}), n \right) \cdot \prod_{0 \le n < q} \phi_n \left( (x,t) \right) }{ \prod_{0 \le n < q} \phi_\Delta( H_n(S_{t,\theta}) + H_n((x,t)), n ) }  \nonumber \\
 \nonumber \\
-&= \prod_{0 \le n < q} \phi_n \left( (x,t) \right) \cdot \frac{ \phi_\Delta \left (S_{t,\theta}, H_n(S_{t,\theta}) \right) }{ \phi_\Delta \left( S_{t,\theta}, H_n(S_{t,\theta}) + H_n((x,t)) \right) }
+&= \prod_{0 \le n < q} \phi_n \left( (x,t) \right) \cdot \frac{ \phi_\Delta \left ( H_n(S_{t,\theta}), n \right) }{ \phi_\Delta \left( H_n(S_{t,\theta}) + H_n((x,t)), n \right) }
 \end{align}
 
 
