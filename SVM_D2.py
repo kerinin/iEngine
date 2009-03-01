@@ -202,7 +202,7 @@ class svm:
 def run():
 	fig = plt.figure()
 	
-	samples = vstack( [ numpy.random.multivariate_normal( mean=array([3,3]), cov=array( identity(2) ), size=array([50,]) ),
+	samples = 1/vstack( [ numpy.random.multivariate_normal( mean=array([3,3]), cov=array( identity(2) ), size=array([50,]) ),
 		numpy.random.multivariate_normal( mean=array([7,7]), cov=array( identity(2) ), size=array([50,]) ) 
 	] )
 	
@@ -233,15 +233,17 @@ def run():
 	
 	print mod
 	
-	X = dstack(mgrid[0:10:.1,0:10:.1]).reshape([10000,2])
+	X = 1/dstack(mgrid[0:10:.1,0:10:.1]).reshape([10000,2])
 	
-	plt.contourf(arange(0,10,.1),arange(0,10,.1),mod.pdf(X).reshape([100,100]).T,200, antialiased=True, cmap=cm.gray )
-	CS = plt.contour(arange(0,10,.1),arange(0,10,.1),mod.pdf(X).reshape([100,100]).T, [.01,], colors='r' )
-	plt.plot( hsplit(samples,2)[0],hsplit(samples,2)[1], 'r+' )
-	plt.scatter( hsplit(mod.SV,2)[0].reshape([mod.NSV,]),hsplit(mod.SV,2)[1].reshape([mod.NSV],), s=(mod.NSV*200*mod.beta.reshape([mod.NSV,])), alpha=.25, color='r' )
-	plt.clabel(CS, inline=1, fontsize=10)
+	#plt.contourf(arange(0,10,.1),arange(0,10,.1),mod.pdf(X).reshape([100,100]).T,200, antialiased=True, cmap=cm.gray )
+	#CS = plt.contour(arange(0,10,.1),arange(0,10,.1),mod.pdf(X).reshape([100,100]).T, [.01,], colors='r' )
+	#plt.plot( hsplit(samples,2)[0],hsplit(samples,2)[1], 'r+' )
+	#plt.scatter( hsplit(mod.SV,2)[0].reshape([mod.NSV,]),hsplit(mod.SV,2)[1].reshape([mod.NSV],), s=(mod.NSV*200*mod.beta.reshape([mod.NSV,])), alpha=.25, color='r' )
+	#plt.clabel(CS, inline=1, fontsize=10)
 	
-	plt.axis( [0,10,0,10] )
+	plt.hist( mod.pdf(X) )
+	
+	#plt.axis( [0,10,0,10] )
 	plt.show()
 	
 	
