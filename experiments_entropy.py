@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
-
+import sys, getopt, math, datetime, os, cmath
+from random import gauss
 
 import numpy as np
 import numpy.ma as ma
@@ -12,31 +13,43 @@ import matplotlib.pyplot as plt
 import matplotlib.mlab as mlab
 import matplotlib.cm as cm
 
-from SVM_D3 import svm
+from SVM_D2 import svm
+from engine import engine
 
 _Functions = ['single',]
 
 def single():
-	samples1 = vstack( [ 
-		numpy.random.multivariate_normal( mean=array([0,0]), cov=array( identity(2) ), size=array([50,]) ),
-		numpy.random.multivariate_normal( mean=array([0,6]), cov=array( identity(2) ), size=array([50,]) ) 
+	samples1 = np.vstack( [ 
+		np.random.multivariate_normal( mean=np.array([0,0]), cov=np.array( np.identity(2) ), size=np.array([50,]) ),
+		np.random.multivariate_normal( mean=np.array([0,6]), cov=np.array( np.identity(2) ), size=np.array([50,]) ) 
 	] )
-	samples2 = vstack( [ 
-		numpy.random.multivariate_normal( mean=array([0,0]), cov=array( identity(2) ), size=array([50,]) ),
-		numpy.random.multivariate_normal( mean=array([6,0]), cov=array( identity(2) ), size=array([50,]) ) 
+	samples2 = np.vstack( [ 
+		np.random.multivariate_normal( mean=np.array([0,0]), cov=np.array( np.identity(2) ), size=np.array([50,]) ),
+		np.random.multivariate_normal( mean=np.array([6,0]), cov=np.array( np.identity(2) ), size=np.array([50,]) ) 
 	] )
 	
 	phi_1 = svm( samples1, Lambda=.005, gamma=[.125,.25,.5,1,2,4,8,16] )
 	phi_2 = svm( samples2, Lambda=.005, gamma=[.125,.25,.5,1,2,4,8,16] )
 	
+	test = np.vstack( [ 
+		np.random.multivariate_normal( mean=np.array([0,0]), cov=np.array( np.identity(2) ), size=np.array([50,]) )
+	] )
+	engine = engine( (phi_1,phi_2) )
+	
 	fig = plt.figure()
+	xrange=(-3.,9.)
+	yrange=(-3.,9.)
+	xstep=.1
+	ystep=.1
 	
 	a = fig.add_subplot(2,2,1)
-	phi_1.contourPlot( fig=a, xrange=(-2,8), yrange=(-2,8), xstep=.1, ystep=.1, title="phi_1 distribution" )
+	phi_1.contourPlot( fig=a, xrange=xrange, yrange=yrange, xstep=xstep, ystep=ystep, title="phi_1 distribution" )
 
-	b = fig.add_subplot(2,2,1)
-	phi_2.contourPlot( fig=b, xrange=(-2,8), yrange=(-2,8), xstep=.1, ystep=.1, title="phi_2 distribution" )
+	b = fig.add_subplot(2,2,2)
+	phi_2.contourPlot( fig=b, xrange=xrange, yrange=yrange, xstep=xstep, ystep=ystep, title="phi_2 distribution" )
 	
+	c = fig.add_subplot(2,2,3)
+	engine.contourPlot( S=test, fig=c, xrange=xrange, yrange=yrange, xstep=xstep, ystep=ystep, title="derived distribution" )
 	
 	
 	plt.show()

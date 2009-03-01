@@ -185,21 +185,17 @@ class svm:
 		print "optimized in %ss" % ( duration.seconds + float(duration.microseconds)/1000000)
 		
 	def contourPlot(self, fig, xrange, yrange, xstep, ystep, title="distribution contour plot",axes=(0,1) ):
-		xrange=(0,10)
-		yrange=(0,10)
-		xstep=.1
-		ystep=.1
-		xN = ((xrange[0]-xrange[1])/xstep)
-		yN =  ((yrange[0]-yrange[1])/ystep)
+		xN = int((xrange[1]-xrange[0])/xstep)
+		yN =  int((yrange[1]-yrange[0])/ystep)
 		X = dstack(mgrid[xrange[0]:xrange[1]:xstep,yrange[0]:yrange[1]:ystep]).reshape([ xN *yN,2])
 		x = arange(xrange[0],xrange[1],xstep)
 		y = arange(yrange[0],yrange[1],ystep)
-		
+
 		fig.contourf(x,y,self.pdf(X).reshape([xN,yN]).T,200, antialiased=True, cmap=cm.gray )
 		CS = plt.contour(x,y,self.pdf(X).reshape([xN,yN]).T, [.01,], colors='r' )
 		fig.plot( hsplit( self.X,self.d )[ axes[0] ],hsplit( self.X,self.d )[ axes[1] ], 'r+' )
 		fig.scatter( hsplit(self.SV,self.d)[ axes[0] ].reshape([self.NSV,]),hsplit(self.SV,self.d)[ axes[1] ].reshape([self.NSV],), s=(self.NSV*200*self.beta.reshape([self.NSV,])), alpha=.25, color='r' )
-		fig.clabel(CS, inline=1, fontsize=10)
+		#fig.clabel(CS, inline=1, fontsize=10)
 		fig.axis( [ xrange[0],xrange[1],yrange[0],yrange[1] ] )
 		fig.set_title(title)
 		
