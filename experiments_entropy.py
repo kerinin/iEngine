@@ -19,22 +19,6 @@ from engine import engine
 _Functions = ['single',]
 
 def single():
-	samples1 = np.vstack( [ 
-		np.random.multivariate_normal( mean=np.array([0,0]), cov=np.array( np.identity(2) ), size=np.array([50,]) ),
-		np.random.multivariate_normal( mean=np.array([0,6]), cov=np.array( np.identity(2) ), size=np.array([50,]) ) 
-	] )
-	samples2 = np.vstack( [ 
-		np.random.multivariate_normal( mean=np.array([0,0]), cov=np.array( np.identity(2) ), size=np.array([50,]) ),
-		np.random.multivariate_normal( mean=np.array([6,0]), cov=np.array( np.identity(2) ), size=np.array([50,]) ) 
-	] )
-	
-	phi_1 = svm( samples1, Lambda=.005, gamma=[.125,.25,.5,1,2,4,8,16] )
-	phi_2 = svm( samples2, Lambda=.005, gamma=[.125,.25,.5,1,2,4,8,16] )
-	
-	test = np.vstack( [ 
-		np.random.multivariate_normal( mean=np.array([0,0]), cov=np.array( np.identity(2) ), size=np.array([50,]) )
-	] )
-	engine = engine( (phi_1,phi_2) )
 	
 	fig = plt.figure()
 	xrange=(-3.,9.)
@@ -42,14 +26,35 @@ def single():
 	xstep=.1
 	ystep=.1
 	
+	samples1 = np.vstack( [ 
+		np.random.multivariate_normal( mean=np.array([0,0]), cov=np.array( np.identity(2) ), size=np.array([50,]) ),
+		np.random.multivariate_normal( mean=np.array([0,6]), cov=np.array( np.identity(2) ), size=np.array([50,]) ) 
+	] )
+	phi_1 = svm( samples1, Lambda=.005, gamma=[.125,.25,.5,1,2,4,8,16] )
 	a = fig.add_subplot(2,2,1)
 	phi_1.contourPlot( fig=a, xrange=xrange, yrange=yrange, xstep=xstep, ystep=ystep, title="phi_1 distribution" )
-
+	
+	samples2 = np.vstack( [ 
+		np.random.multivariate_normal( mean=np.array([0,0]), cov=np.array( np.identity(2) ), size=np.array([50,]) ),
+		np.random.multivariate_normal( mean=np.array([6,0]), cov=np.array( np.identity(2) ), size=np.array([50,]) ) 
+	] )
+	phi_2 = svm( samples2, Lambda=.005, gamma=[.125,.25,.5,1,2,4,8,16] )
 	b = fig.add_subplot(2,2,2)
 	phi_2.contourPlot( fig=b, xrange=xrange, yrange=yrange, xstep=xstep, ystep=ystep, title="phi_2 distribution" )
 	
+	e = engine( (phi_1,phi_2) )
+	
+	test1 = np.vstack( [ 
+		np.random.multivariate_normal( mean=np.array([0,0]), cov=np.array( np.identity(2) ), size=np.array([10,]) )
+	] )
 	c = fig.add_subplot(2,2,3)
-	engine.contourPlot( S=test, fig=c, xrange=xrange, yrange=yrange, xstep=xstep, ystep=ystep, title="derived distribution" )
+	e.contourPlot( S=test1, fig=c, xrange=xrange, yrange=yrange, xstep=xstep, ystep=ystep, title="derived distribution 1" )
+	
+	test2 = np.vstack( [ 
+		np.random.multivariate_normal( mean=np.array([0,6]), cov=np.array( np.identity(2) ), size=np.array([10,]) )
+	] )
+	c = fig.add_subplot(2,2,4)
+	e.contourPlot( S=test2, fig=c, xrange=xrange, yrange=yrange, xstep=xstep, ystep=ystep, title="derived distribution 2" )
 	
 	
 	plt.show()
