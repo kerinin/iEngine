@@ -30,7 +30,7 @@ def single():
 		np.random.multivariate_normal( mean=np.array([0,0]), cov=np.array( np.identity(2) ), size=np.array([50,]) ),
 		np.random.multivariate_normal( mean=np.array([0,6]), cov=np.array( np.identity(2) ), size=np.array([50,]) ) 
 	] )
-	phi_1 = svm( samples1, Lambda=.005, gamma=[.125,.25,.5,1,2,4,8,16] )
+	phi_1 = svm( samples1, Lambda=.05, gamma=[.125,.25,.5,1,2,4,8,16] )
 	a = fig.add_subplot(2,2,1)
 	phi_1.contourPlot( fig=a, xrange=xrange, yrange=yrange, xstep=xstep, ystep=ystep, title="phi_1 distribution" )
 	
@@ -38,17 +38,39 @@ def single():
 		np.random.multivariate_normal( mean=np.array([0,0]), cov=np.array( np.identity(2) ), size=np.array([50,]) ),
 		np.random.multivariate_normal( mean=np.array([6,0]), cov=np.array( np.identity(2) ), size=np.array([50,]) ) 
 	] )
-	phi_2 = svm( samples2, Lambda=.005, gamma=[.125,.25,.5,1,2,4,8,16] )
+	phi_2 = svm( samples2, Lambda=.05, gamma=[.125,.25,.5,1,2,4,8,16] )
 	b = fig.add_subplot(2,2,2)
 	phi_2.contourPlot( fig=b, xrange=xrange, yrange=yrange, xstep=xstep, ystep=ystep, title="phi_2 distribution" )
 	
-	e = engine( (phi_1,phi_2) )
+	samples = list()
+	for i in range(10):
+		samples.append( np.vstack( [ 
+			np.random.multivariate_normal( mean=np.array([0,0]), cov=np.array( np.identity(2) ), size=np.array([50,]) ),
+			np.random.multivariate_normal( mean=np.array([6,0]), cov=np.array( np.identity(2) ), size=np.array([50,]) ) 
+		] ) )
+		samples.append( np.vstack( [ 
+			np.random.multivariate_normal( mean=np.array([0,0]), cov=np.array( np.identity(2) ), size=np.array([50,]) ),
+			np.random.multivariate_normal( mean=np.array([0,6]), cov=np.array( np.identity(2) ), size=np.array([50,]) ) 
+		] ) )	
+	for i in range(10):
+		samples.append( np.vstack( [ 
+			np.random.multivariate_normal( mean=np.array([0,0]), cov=np.array( np.identity(2) ), size=np.array([5,]) ),
+			np.random.multivariate_normal( mean=np.array([6,0]), cov=np.array( np.identity(2) ), size=np.array([5,]) ) 
+		] ) )
+		samples.append( np.vstack( [ 
+			np.random.multivariate_normal( mean=np.array([0,0]), cov=np.array( np.identity(2) ), size=np.array([5,]) ),
+			np.random.multivariate_normal( mean=np.array([0,6]), cov=np.array( np.identity(2) ), size=np.array([5,]) ) 
+		] ) )		
+	e = engine( estimates=(phi_1,phi_2), S=samples )
 	
-	test1 = np.vstack( [ 
-		np.random.multivariate_normal( mean=np.array([0,0]), cov=np.array( np.identity(2) ), size=np.array([10,]) )
-	] )
+	#test1 = np.vstack( [ 
+	#	np.random.multivariate_normal( mean=np.array([0,0]), cov=np.array( np.identity(2) ), size=np.array([10,]) )
+	#] )
 	c = fig.add_subplot(2,2,3)
-	e.contourPlot( S=test1, fig=c, xrange=xrange, yrange=yrange, xstep=xstep, ystep=ystep, title="derived distribution 1" )
+	#e.contourPlot( S=test1, fig=c, xrange=xrange, yrange=yrange, xstep=xstep, ystep=ystep, title="derived distribution 1" )
+	#e.varphi.contourPlot( c, xrange=(-.1,0.), yrange=(-.1,0.), xstep=.005,ystep=.005 )
+	#e.varphiPlot(c)
+	c.hist(e.varphi.pdf( e.Delta ) )
 	
 	test2 = np.vstack( [ 
 		np.random.multivariate_normal( mean=np.array([0,6]), cov=np.array( np.identity(2) ), size=np.array([10,]) )
