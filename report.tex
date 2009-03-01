@@ -9,29 +9,24 @@
 \setlength{\parskip}{.25cm plus4mm minus3mm}
 \setlength{\parindent}{0in}
 
-% Spell Check?
-
 % Pick a title and make sure the terminology is consistent (architecture / system / algoirthm / etc)
 
-% Look into Hidden Markov to see if applicable, if not see if there are other approaches to timeseries statistics
 % If there's no existing theory to explain the mixture model, you'll need to spend more time on it
 
 % Do we need to think about inhibition at all?
 
 % Window selection for estimates is *important*, and deserves its own section and algorithm. 
 
-
 \begin{document}
 \title{Robust Timeseries Analysis in the Context of Multiple Asynchronous Input Channels}
 %\subtitle{Analysis of Ergodic Processes with Multiple Stationary Behaviors using Data from Multiple Asynchronous Input Channels}
 \author{Ryan Michael\\ \texttt{kerinin@gmail.com}}
-%\date{???}
+\date{}
 \maketitle
 
 \begin{abstract}
 Spectral Analysis is a common form of analysing timeseries data.  We propose a method of spectral analysis based on sets probability distributions generated from subsets of the observed data.  By decomposing the observations into a set of observed behaviors, the spectral analysis can be used more accurately to predict the timseries' behavior.
 
-Decomposed into the ??? domain?
 %\cite{lamport94}
 %\nocite{lamport94} - includes in bibliography w/o explicit citation
 \end{abstract}
@@ -40,29 +35,29 @@ Decomposed into the ??? domain?
 %\tableofcontents
 
 \subsection{Existing Work}
-%http://en.wikipedia.org/wiki/Expectation-maximization_algorithm
-%http://en.wikipedia.org/wiki/Stationary_process
-%http://en.wikipedia.org/wiki/Ergodicity
-%http://en.wikipedia.org/wiki/Mixing_(mathematics)
-%http://en.wikipedia.org/wiki/Lyapunov_exponent
-%http://en.wikipedia.org/wiki/Recurrence_quantification_analysis
-%http://en.wikipedia.org/wiki/Recurrence_plot
-%http://en.wikipedia.org/wiki/Autoregressive_fractionally_integrated_moving_average
-%http://en.wikipedia.org/wiki/Autocorrelation
+\url{http://en.wikipedia.org/wiki/Expectation-maximization_algorithm}
+\url{http://en.wikipedia.org/wiki/Stationary_process}
+\url{http://en.wikipedia.org/wiki/Ergodicity}
+\url{http://en.wikipedia.org/wiki/Mixing_(mathematics)}
+\url{http://en.wikipedia.org/wiki/Lyapunov_exponent}
+\url{http://en.wikipedia.org/wiki/Recurrence_quantification_analysis}
+\url{http://en.wikipedia.org/wiki/Recurrence_plot}
+\url{http://en.wikipedia.org/wiki/Autoregressive_fractionally_integrated_moving_average}
+\url{http://en.wikipedia.org/wiki/Autocorrelation}
 
-% \subsubsection{Hidden Markov Model}
-% cannot account for future states - only capable of prediction
-% weak, short-term memory
+\subsubsection{Hidden Markov Model}
+cannot account for future states - only capable of prediction
+weak, short-term memory
 
-% \subsubsection{Box-Jenkins}
-% intended for simplistic processes with well-understood stationarity and periodicity
-% http://en.wikipedia.org/wiki/Box-Jenkins
+\subsubsection{Box-Jenkins}
+intended for simplistic processes with well-understood stationarity and periodicity
+http://en.wikipedia.org/wiki/Box-Jenkins
 
-% \subsubsection{Spectral Analysis}
-% assumes some type of frequency-domain decomposition.  Frequency-domain signal representations do not do a very good job predicting time-domain values. 
+\subsubsection{Spectral Analysis}
+assumes some type of frequency-domain decomposition.  Frequency-domain signal representations do not do a very good job predicting time-domain values. 
 
-% \subsubsection{Shrinking-\epsilon SVM Regression}
-% theoretical foundation weak; only compensates for the relevance of recent data.  See Markhov problem
+\subsubsection{Shrinking \(\epsilon\) SVM Regression}
+theoretical foundation weak; only compensates for the relevance of recent data.  See Markhov problem
 
 
 \subsection{General Overview}
@@ -109,11 +104,11 @@ We pick at random a set of \( z \) time windows, each defined by a starting time
 
 We assume that the probability of \(X \) is a time-dependent mixture of some set of distributions \( [f_0,...,f_w] \) whose influence is unknown and changes over time.  We can refer to the weighted mixture which corresponds to a given time window \( (t,\theta) \) as:
 
-\begin{equation} \mathcal{P}(t,\theta) = \sum_i \delta_i \cdot f_i \end{equation}
+\begin{equation} \mathcal{P}(t,\theta) = \sum_i \beta_i \cdot f_i \end{equation}
 
-where \( \delta_n \) is the weight corresponding to \( f_n \).  Finally, we assume that a similar mixture of densities can be determined for each channel:
+where \( \beta_n \) is the weight corresponding to \( f_n \).  Finally, we assume that a similar mixture of densities can be determined for each channel:
 
-\begin{equation} \mathcal{P}^n(t,\theta) = \sum_i \delta_i^n \cdot f_i^n \end{equation}
+\begin{equation} \mathcal{P}^n(t,\theta) = \sum_i \beta_i^n \cdot f_i^n \end{equation}
 
 \subsection{Single Channel Estimation}
 We begin by considering the case where only one channel exists, so for now we will omit the superscript and refer to \(X^n = (\Omega^n,\mathcal{F}^n,\mathcal{P}^n) \) as \(X = (\Omega, \mathcal{F},\mathcal{P}) \).  Our task is to determine both a set of underlying distributions \([f_0,...,f_w] \) and their relative influence over time.  We begin by restricting our attention to the set of observations \( S_{t,\theta} \) which fall into the window \( (t,\theta) \).  We estimate a set of probability distributions \(\Phi \) using some function \(\psi_E \) based on the sets of observations in different windows:
@@ -225,7 +220,7 @@ In order to determine the conditional relations between channels, we begin with 
 \Delta_{t,\theta} = \{ A_{\phi_n} : \delta_{\phi_n,t,\theta}^A \ | \quad \phi_n \in \boldsymbol{\Phi}, \ 0 \le A < c \}
 \]
 
-Where \( \Delta_{t,\theta} \{ A_\phi_n \} = \delta_{\phi_n,t,\theta}^A \). Using the same algorithm \(\psi_C \) as we used previously, we can estimate the probability density \(\varphi \) of this random vector. 
+Where \( \Delta_{t,\theta} \{ A_{\phi_n} \} = \delta_{\phi_n,t,\theta}^A \). Using the same algorithm \(\psi_C \) as we used previously, we can estimate the probability density \(\varphi \) of this random vector. 
 
 \[ \boldsymbol{\Delta} = [ \Delta_{t,\theta} \ | \quad (t,\theta) \in \mathcal{T} ] \]
 \begin{equation} \psi_C( \boldsymbol{\Delta} , \alpha_C ) \mapsto \varphi \end{equation}
@@ -286,31 +281,13 @@ Implementing the inference architecture requires the specification of the two de
 % training and test corpus variable names
  
 \subsection{SVM-Density Algorithm}
-% See if the ML-SVM implmentation will work here - SVMstruct?
-% Implementing this yourself is a *bad* idea
+\begin{equation}\sum_{i=1}^\ell \left( y_i - \sum_{j=1}^\ell \sum_{n=1}^\kappa \alpha_j^n k_n(x_i, x_j) \right)^2 + \lambda \sum_{i=1}^\ell \sum_{n=1}^\kappa \frac{1}{\gamma_n}\alpha_i^n \end{equation}
+\begin{equation} \sum_i \alpha_i = 1 \end{equation}
+\begin{equation} \alpha \ge 0 \end{equation}
 
-Our objective is to determine the conditional density function and regression functions
-
-\begin{equation} p(y|x) = \sum_{i=1}^\ell \beta_i K_\gamma(x,x_i) K_\gamma(y,y_i) , \beta \ge 0 \end{equation}
-\begin{equation} r(x) = \sum_{i=1}^\ell y_i \beta_i K_\gamma(x,x_i) \end{equation}
-
-Which are determined by optimizing for the values of \( \beta_i \) which minimize
-
-\begin{equation} W_\gamma(\beta) = \Omega(f) = \sum_{i,j=1}^\ell \beta_i \beta_j K_\gamma(x_j,x_i) K_\gamma(y_j,y_i) \end{equation}
-
-Subject to the Constraints
-
-\begin{equation} \max_p \left | \sum_{i=1}^\ell \beta_i \frac{1}{\ell} \sum_{j=1}^\ell K_\gamma(x_j,x_i)\theta(x_p-x_j) \int_{-\infty}^{y_p} K_\gamma(y',y_i)dy' - F_\ell(x_p,y_p) \right | = \sigma_\ell \end{equation}
-
-\begin{equation} \sum_{i=1}^\ell \left ( \frac{1}{\ell} \sum_{j=1}^\ell \beta_j K_\gamma(x_i,x_j) \right ) = 1 \end{equation}
-
-We use a kernel function defined as follows, where \( \gamma \) is chosen from the admissible set to control the desired properties of the solution.
-
-\begin{equation} K_\gamma(x,x_i) = a(\gamma) \exp \left ( - \left | \frac{x-x_i}{\gamma} \right | ^p \right ) , 0 < p \le 2 \end{equation}
-
-We choose \( \sigma \) based on an appropriate quantile of the universal distribution of discrepancy:
-
-\begin{equation} \sigma = \frac{q}{\sqrt \ell} \end{equation}
+\[ \frac{1}{2} \boldsymbol{\alpha}^T P \boldsymbol{\alpha} + q^T \boldsymbol{\alpha} \]
+\[ P = \langle \mathbf{K}^T \cdot \mathbf{K} \rangle \]
+\[ q = \Omega( \boldsymbol{\gamma} ) - \langle \mathbf{K}^T \cdot y \rangle \]
 
 \subsection{Data Pre-Processing}
 % logistic function using mean and sd to put most training points between .1 and .9
