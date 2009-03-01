@@ -184,28 +184,29 @@ class svm:
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % ( duration.seconds + float(duration.microseconds)/1000000)
 		
-	def contourPlot(self, fig, xrange, yrange, xstep, ystep, title="distribution contour plot",axes=(0,1) ):
+	def contourPlot(self, fig, xrange, yrange, xstep, ystep, axes=(0,1) ):
 		xN = int((xrange[1]-xrange[0])/xstep)
 		yN =  int((yrange[1]-yrange[0])/ystep)
 		X = dstack(mgrid[xrange[0]:xrange[1]:xstep,yrange[0]:yrange[1]:ystep]).reshape([ xN *yN,2])
 		x = arange(xrange[0],xrange[1],xstep)
 		y = arange(yrange[0],yrange[1],ystep)
 
-		fig.contourf(x,y,self.pdf(X).reshape([xN,yN]).T,200, antialiased=True, cmap=cm.gray )
-		CS = plt.contour(x,y,self.pdf(X).reshape([xN,yN]).T, [.01,], colors='r' )
+		CS1 = fig.contourf(x,y,self.pdf(X).reshape([xN,yN]).T,200, antialiased=True, cmap=cm.gray )
+		CS2 = plt.contour(x,y,self.pdf(X).reshape([xN,yN]).T, [.01,], colors='r' )
 		fig.plot( hsplit( self.X,self.d )[ axes[0] ],hsplit( self.X,self.d )[ axes[1] ], 'r+' )
 		fig.scatter( hsplit(self.SV,self.d)[ axes[0] ].reshape([self.NSV,]),hsplit(self.SV,self.d)[ axes[1] ].reshape([self.NSV],), s=(self.NSV*200*self.beta.reshape([self.NSV,])), alpha=.25, color='r' )
 		#fig.clabel(CS, inline=1, fontsize=10)
 		fig.axis( [ xrange[0],xrange[1],yrange[0],yrange[1] ] )
-		fig.set_title(title)
+		return (CS1,CS2)
 		
 def run():
 	fig = plt.figure()
 	
-	samples = 1/vstack( [ numpy.random.multivariate_normal( mean=array([3,3]), cov=array( identity(2) ), size=array([50,]) ),
-		numpy.random.multivariate_normal( mean=array([7,7]), cov=array( identity(2) ), size=array([50,]) ) 
-	] )
+	#samples = 1/vstack( [ numpy.random.multivariate_normal( mean=array([3,3]), cov=array( identity(2) ), size=array([50,]) ),
+	#	numpy.random.multivariate_normal( mean=array([7,7]), cov=array( identity(2) ), size=array([50,]) ) 
+	#] )
 	
+	samples = numpy.random.multivariate_normal( mean=array([1,1]), cov=array( identity(2) )/10, size=array([50,]) )
 	'''
 	C = arange(1e-6,1e-0,1e-1) 
 	res = [ svm( samples, Lambda=c, gamma=[.125,.5,2.,8.,32.]) for c in C ]
@@ -233,17 +234,10 @@ def run():
 	
 	print mod
 	
-	X = 1/dstack(mgrid[0:10:.1,0:10:.1]).reshape([10000,2])
+	(c1,c2) = mod.contourPlot( plt, (0,2), (0,2),.02,.02 )
+	plt.colorbar(c1, orientation='horizontal')
+
 	
-	#plt.contourf(arange(0,10,.1),arange(0,10,.1),mod.pdf(X).reshape([100,100]).T,200, antialiased=True, cmap=cm.gray )
-	#CS = plt.contour(arange(0,10,.1),arange(0,10,.1),mod.pdf(X).reshape([100,100]).T, [.01,], colors='r' )
-	#plt.plot( hsplit(samples,2)[0],hsplit(samples,2)[1], 'r+' )
-	#plt.scatter( hsplit(mod.SV,2)[0].reshape([mod.NSV,]),hsplit(mod.SV,2)[1].reshape([mod.NSV],), s=(mod.NSV*200*mod.beta.reshape([mod.NSV,])), alpha=.25, color='r' )
-	#plt.clabel(CS, inline=1, fontsize=10)
-	
-	plt.hist( mod.pdf(X) )
-	
-	#plt.axis( [0,10,0,10] )
 	plt.show()
 	
 	
