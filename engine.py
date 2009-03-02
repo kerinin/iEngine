@@ -22,7 +22,7 @@ class engine:
 		self.estimates = estimates
 		
 		self.Delta = np.vstack( [ self._H(s) for s in S ] )
-			
+		
 		#self.varphi = svm( data=self.Delta, Lambda=.00005, gamma=[.125,.25,.5,1,2,4,8,16] )
 		self.varphi = svm( data=self.Delta, Lambda=.0005, gamma=[16,32,64,128,256,512] )
 		
@@ -31,9 +31,9 @@ class engine:
 	# @param X		[Nxd] array of sample points for calculating entropy of existing estimates
 		
 		prior = np.hstack( [ phi_n.pdf(X) for phi_n in self.estimates ] )
-		H_S = self._H( S )
+		H_S = self._H( S )  #List of entropy of S for each estimate [1x|est|]
 		
-		return ( prior * ( self._varphi( H_S ) / self._varphi( H_S + self._H( X ) ) ) ).prod(1)
+		return ( prior * ( self._varphi( H_S ) / self._varphi( H_S + self._H( X ) ) ).T ).sum(1)
 		
 	def _varphi( self, delta ):
 	# Probability distribution of known estimates' entropy
@@ -46,7 +46,7 @@ class engine:
 		(N,d) = S.shape
 		P = [ phi_n.pdf(S) for phi_n in self.estimates ]
 		
-		return ( np.hstack( [ -P_i * np.exp( P_i ) for P_i in P ] ).sum(0)/N ).reshape([1,len(self.estimates)])
+		return ( np.hstack( [ -P_i * np.exp( P_i ) for P_i in P ] ).sum(0)/N ).reshape([1,len(self.estimates)]).T
 	
 	def varphiPlot( self, fig, axes=(0,1) ):
 		fig.plot( np.hsplit(self.varphi.X,self.varphi.d)[axes[0]], np.hsplit(self.varphi.X,self.varphi.d)[axes[1]], 'ro' )

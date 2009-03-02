@@ -63,14 +63,14 @@ def single():
 		] ) )		
 	e = engine( estimates=(phi_1,phi_2), S=samples )
 	
-	#test1 = np.vstack( [ 
-	#	np.random.multivariate_normal( mean=np.array([0,0]), cov=np.array( np.identity(2) ), size=np.array([10,]) )
-	#] )
+	test1 = np.vstack( [ 
+		np.random.multivariate_normal( mean=np.array([0,0]), cov=np.array( np.identity(2) ), size=np.array([10,]) )
+	] )
 	c = fig.add_subplot(2,2,3)
-	#e.contourPlot( S=test1, fig=c, xrange=xrange, yrange=yrange, xstep=xstep, ystep=ystep, title="derived distribution 1" )
+	e.contourPlot( S=test1, fig=c, xrange=xrange, yrange=yrange, xstep=xstep, ystep=ystep, title="derived distribution 1" )
 	#e.varphi.contourPlot( c, xrange=(-.1,0.), yrange=(-.1,0.), xstep=.005,ystep=.005 )
 	#e.varphiPlot(c)
-	c.hist(e.varphi.pdf( e.Delta ) )
+	#c.hist(e.varphi.pdf( e.Delta ) )
 	
 	test2 = np.vstack( [ 
 		np.random.multivariate_normal( mean=np.array([0,6]), cov=np.array( np.identity(2) ), size=np.array([10,]) )
