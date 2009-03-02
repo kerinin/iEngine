@@ -119,7 +119,8 @@ class svm:
 		
 		diff = X.reshape([N,1,self.d])- numpy.transpose( Y.reshape([M,1,self.d]), [1,0,2] )
 		
-		return ( gamma / ( 2.0 + numpy.exp( gamma * diff ) + numpy.exp( -gamma * diff ) ) ).prod(2).reshape(N,M)
+		#return ( gamma / ( 2.0 + numpy.exp( gamma * diff ) + numpy.exp( -gamma * diff ) ) ).prod(2).reshape(N,M)
+		return ( 4. / ( 2.0 + numpy.exp( gamma * diff ) + numpy.exp( -gamma * diff ) ) ).prod(2).reshape(N,M)
 		
 	def cdf(self,X):
 	# Cumulative distribution function
@@ -230,7 +231,7 @@ def run():
 	return True
 	'''
 	
-	mod = svm( samples, Lambda=.005, gamma=[.125,.25,.5,1,2,4,8,16] )
+	mod = svm( samples, Lambda=.00005, gamma=[.125,.25,.5,1,2,4,8,16] )
 	
 	print mod
 	
