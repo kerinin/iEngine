@@ -33,10 +33,6 @@ class engine:
 		prior = np.hstack( [ phi_n.pdf(X) for phi_n in self.estimates ] )
 		H_S = self._H( S )
 		
-		print self.varphi.pdf(self.Delta)
-		print self.varphi.beta
-		print self.varphi.beta.sum()
-		
 		return ( prior * ( self._varphi( H_S ) / self._varphi( H_S + self._H( X ) ) ) ).prod(1)
 		
 	def _varphi( self, delta ):

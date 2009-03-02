@@ -32,7 +32,7 @@ def single():
 	] )
 	phi_1 = svm( samples1, Lambda=.05, gamma=[.125,.25,.5,1,2,4,8,16] )
 	a = fig.add_subplot(2,2,1)
-	phi_1.contourPlot( fig=a, xrange=xrange, yrange=yrange, xstep=xstep, ystep=ystep, title="phi_1 distribution" )
+	phi_1.contourPlot( fig=a, xrange=xrange, yrange=yrange, xstep=xstep, ystep=ystep )
 	
 	samples2 = np.vstack( [ 
 		np.random.multivariate_normal( mean=np.array([0,0]), cov=np.array( np.identity(2) ), size=np.array([50,]) ),
@@ -40,7 +40,7 @@ def single():
 	] )
 	phi_2 = svm( samples2, Lambda=.05, gamma=[.125,.25,.5,1,2,4,8,16] )
 	b = fig.add_subplot(2,2,2)
-	phi_2.contourPlot( fig=b, xrange=xrange, yrange=yrange, xstep=xstep, ystep=ystep, title="phi_2 distribution" )
+	phi_2.contourPlot( fig=b, xrange=xrange, yrange=yrange, xstep=xstep, ystep=ystep )
 	
 	samples = list()
 	for i in range(10):
