@@ -24,7 +24,7 @@ class engine:
 		self.Delta = np.vstack( [ self._H(s) for s in S ] )
 		
 		#self.varphi = svm( data=self.Delta, Lambda=.00005, gamma=[.125,.25,.5,1,2,4,8,16] )
-		self.varphi = svm( data=self.Delta, Lambda=.0005, gamma=[16,32,64,128,256,512] )
+		self.varphi = svm( data=self.Delta, Lambda=.0000005, gamma=[16,32,64,128,256,512] )
 		
 	def pdf(self,X,S):
 	# @param X		[Nxd] array of points for which to calculate a probability value
