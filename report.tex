@@ -9,6 +9,9 @@
 \setlength{\parskip}{.25cm plus4mm minus3mm}
 \setlength{\parindent}{0in}
 
+\bibliographystyle{plain}
+
+
 % Spell Check?
 
 % Pick a title and make sure the terminology is consistent (architecture / system / algoirthm / etc)
@@ -31,16 +34,13 @@
 \begin{abstract}
 Spectral Analysis is a common form of analysing timeseries data.  We propose a method of spectral analysis based on sets probability distributions generated from subsets of the observed data.  By decomposing the observations into a set of observed behaviors, the spectral analysis can be used more accurately to predict the timseries' behavior.
 
-Decomposed into the ??? domain?
-%\cite{lamport94}
-%\nocite{lamport94} - includes in bibliography w/o explicit citation
 \end{abstract}
 
 \section{Introduction}
 %\tableofcontents
 
 \subsection{Existing Work}
-%http://en.wikipedia.org/wiki/Expectation-maximization_algorithm
+ %http://en.wikipedia.org/wiki/Expectation-maximization_algorithm
 %http://en.wikipedia.org/wiki/Stationary_process
 %http://en.wikipedia.org/wiki/Ergodicity
 %http://en.wikipedia.org/wiki/Mixing_(mathematics)
@@ -49,6 +49,9 @@ Decomposed into the ??? domain?
 %http://en.wikipedia.org/wiki/Recurrence_plot
 %http://en.wikipedia.org/wiki/Autoregressive_fractionally_integrated_moving_average
 %http://en.wikipedia.org/wiki/Autocorrelation
+
+\url{http://en.wikipedia.org/wiki/Linear_discriminant_analysis}
+
 
 % \subsubsection{Hidden Markov Model}
 % cannot account for future states - only capable of prediction
@@ -225,7 +228,7 @@ In order to determine the conditional relations between channels, we begin with 
 \Delta_{t,\theta} = \{ A_{\phi_n} : \delta_{\phi_n,t,\theta}^A \ | \quad \phi_n \in \boldsymbol{\Phi}, \ 0 \le A < c \}
 \]
 
-Where \( \Delta_{t,\theta} \{ A_\phi_n \} = \delta_{\phi_n,t,\theta}^A \). Using the same algorithm \(\psi_C \) as we used previously, we can estimate the probability density \(\varphi \) of this random vector. 
+Where \( \Delta_{t,\theta} \{ A_{\phi_n} \} = \delta_{\phi_n,t,\theta}^A \). Using the same algorithm \(\psi_C \) as we used previously, we can estimate the probability density \(\varphi \) of this random vector. 
 
 \[ \boldsymbol{\Delta} = [ \Delta_{t,\theta} \ | \quad (t,\theta) \in \mathcal{T} ] \]
 \begin{equation} \psi_C( \boldsymbol{\Delta} , \alpha_C ) \mapsto \varphi \end{equation}
@@ -293,7 +296,7 @@ The One-Class SVM algorithm is commonly used for anomoly detection and clusterin
 For our kernel we choose the covariance value of the observations in the two windows.  Covariance is a good candidate for use as a kernel, it is bilinear, symmetric, and positive semidefinite.  While it is limited by the assumption of normally distributed noise, we are using the One-Class SVM to quickly eliminate redundancy, so this lack of robustness seems an acceptable compromise.  The kernel function is defined as such:
 
 \begin{equation} \label{eq:KOneClass} 
-K_\theta( S_{t_i,\theta}}, S_{t_j,\theta} ) = 1 - \frac{\text{Cov}( S_{t_i,\theta}, S_{t_j,\theta} )}{2}
+K_\theta( S_{t_i,\theta}, S_{t_j,\theta} ) = 1 - \frac{\text{Cov}( S_{t_i,\theta}, S_{t_j,\theta} )}{2}
 \end{equation}
 
 This kernel will be 0 of the two sets are perfectly correlated and 1 if they are perfectly anticorrelated.  This produces a positive definite kernel matrix.  We would like to eliminate the parameter \( \theta \) from the algorithm, so we use a range of \( \theta \) values in the optimization task.  We can take to approaches to this; the first is to scale \( S_{t,\theta} \) to some uniform range, say \( 0 \le t \le 1 \).  The second is to leave \( S_{t,\theta} \) unscaled and define a second kernel function for comparing heterogenous values of \( \theta \).  We shall use the latter method, with our kernel defined as the sum of the autocovariance over all offset values:
@@ -383,21 +386,28 @@ For prediction, it is not necessary to actually use each of the estimates in gen
 \section{Conclusion}
 Eat it, bitches
 
-\end{document}
+
+\nocite{you}
+\nocite{moreno}
 
 \begin{thebibliography}{9}
- 
+
+\bibitem{you}
+	Chang Huai You et al
+	\emph{An SVM Kernel With GMM-Supervector Based on the Bhattacharyya Distance for Speaker Recognition}
+	2009
+	\url{http://www1.i2r.a-star.edu.sg/~hli/papers/SPL_Vol16No1_GUMI_2009.pdf}
+
+\bibitem{moreno}
+	Pedro J. Moreno et al
+	A Kullback-Leibler Divergence Based Kernel for SVM Classification in Multimedia Applications
+	\url{http://www.svcl.ucsd.edu/publications/conference/2003/nips03/nips03.ps}
 \bibitem{ruping}
-  Stefan Ruping
-  \emph{SVM Kernels for Time Series Analysis}
-  2001
- http://www-ai.cs.uni-dortmund.de/EVENTS/FGML2001/FGML2001-Paper-Rueping.pdf
- 
-\bibitem{lamport94}
-  Leslie Lamport,
-  \emph{\LaTeX: A Document Preparation System}.
-  Addison Wesley, Massachusetts,
-  2nd Edition,
-  1994.
- 
+	Stefan Ruping
+	\emph{SVM Kernels for Time Series Analysis}
+	2001
+	\url{http://www-ai.cs.uni-dortmund.de/EVENTS/FGML2001/FGML2001-Paper-Rueping.pdf}
+
 \end{thebibliography}
+
+\end{document}
