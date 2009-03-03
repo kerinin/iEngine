@@ -289,17 +289,31 @@ Implementing the inference architecture requires the specification of the two de
 % training and test corpus variable names
  
 \subsection{Window Selection: One-Class SVM}
-The first challenge is the selection of \( \mathcal{T} \), the intervals used to create the estimates \( \Phi \).  We treat each observation as a \( t_n \) and select a set of indicative \( t_n \) using the One-Class SVM algorithm with a covariance-based kernel function.
+\url{http://en.wikipedia.org/wiki/Semidefinite_embedding}
 
-The One-Class SVM algorithm is commonly used for anomoly detection and clustering.  It operates by selecting the minimal enclosing hypersphere in the image space defined by some kernel function, usually the Radial Basis Function kernel.  Our objective is to use this algorithm to isolate an indicative set of windows over a set of data points; rather than using vectors as the input to the SVM, we shall use sets of vectors with arbitrary and heterogenous sampling in the time domain.  We must choose a kernel which expresses similarity between two time windows.
+\url{http://en.wikipedia.org/wiki/Nonlinear_dimensionality_reduction}
 
-For our kernel we choose the covariance value of the observations in the two windows.  Covariance is a good candidate for use as a kernel, it is bilinear, symmetric, and positive semidefinite.  While it is limited by the assumption of normally distributed noise, we are using the One-Class SVM to quickly eliminate redundancy, so this lack of robustness seems an acceptable compromise.  The kernel function is defined as such:
+\url{http://en.wikipedia.org/wiki/Feature_selection}
+
+The first challenge is the selection of \( \mathcal{T} \), the intervals used to define subsets \( S_{t,\theta} \).  Using the Support Vector approach, we search for a solution which represents the observed data as a linear combination of a Support Vectors drawn from the observed data.  Rather than using the observations \( X = [ (x_0,t_0),...,(x_\ell,t_\ell) ] \), we use the subsets \( S = [ S_{t,\theta} | t \in X, \theta \in \Theta ] \), where \( \Theta \) is set of values chosen as part of the algorithm.  We select Support Vectors from \( S \) to minimize the number of points required to describe the observed data \( X \) to some level of accuracy while maximizing the information entropy of the Support Vectors themselves.  We represent the optimization task as such:
+
+% We need to build from OUR objectives to these - the relationship isn't clear
+
+\begin{equation}
+\min_\beta \sum_{i,j} \beta_i \beta_j K(S_i,S_j) - \sum_i \beta_i K(S_i, S_i)
+\end{equation}
+
+\begin{equation}
+\text{subject to} \quad 0 \le \beta_i \le \frac{1}{\nu \ell}, \quad \sum_i \beta_i = 1
+\end{equation}
+
+Because we are using vector sets rather than vectors, we must define a kernel capable of expressing similarity between vector sets. We choose the covariance value of the observations in the two sets.  Covariance is a good candidate for use as a kernel; it is bilinear, symmetric, and positive semidefinite.  While it is limited by the assumption of normally distributed noise, the interval selection process is intended only to reduce the dimensionality of the observed data, so this lack of robustness seems an acceptable compromise.  The kernel function is defined as such:
 
 \begin{equation} \label{eq:KOneClass} 
 K_\theta( S_{t_i,\theta}, S_{t_j,\theta} ) = 1 - \frac{\text{Cov}( S_{t_i,\theta}, S_{t_j,\theta} )}{2}
 \end{equation}
 
-This kernel will be 0 of the two sets are perfectly correlated and 1 if they are perfectly anticorrelated.  This produces a positive definite kernel matrix.  We would like to eliminate the parameter \( \theta \) from the algorithm, so we use a range of \( \theta \) values in the optimization task.  We can take to approaches to this; the first is to scale \( S_{t,\theta} \) to some uniform range, say \( 0 \le t \le 1 \).  The second is to leave \( S_{t,\theta} \) unscaled and define a second kernel function for comparing heterogenous values of \( \theta \).  We shall use the latter method, with our kernel defined as the sum of the autocovariance over all offset values:
+This kernel will be 0 if the two sets are perfectly correlated and 1 if they are perfectly anticorrelated.  This produces a positive definite kernel matrix.  We would like to eliminate the parameter \( \theta \) from the algorithm, so we use a range of \( \theta \) values in the optimization task.  We can take to approaches to this; the first is to scale \( S_{t,\theta} \) to some uniform range, say \( 0 \le t \le 1 \).  The second is to leave \( S_{t,\theta} \) unscaled and define a second kernel function for comparing heterogenous values of \( \theta \).  We shall use the latter method, with our kernel defined as the sum of the autocovariance over all offset values:
 
 \begin{equation} \label{eq:KOneClassAuto}
 K( S_{t_i,\theta_n}, S_{t_j,\theta_m} ) = \sum_p1 - \frac{ \text{Cov}( S_{p,\theta_n}, S_{t_j,\theta_m} ) }{ 2 }
