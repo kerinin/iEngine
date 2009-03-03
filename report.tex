@@ -295,9 +295,21 @@ Implementing the inference architecture requires the specification of the two de
 
 \url{http://en.wikipedia.org/wiki/Feature_selection}
 
-The first challenge is the selection of \( \mathcal{T} \), the intervals used to define subsets \( S_{t,\theta} \).  Using the Support Vector approach, we search for a solution which represents the observed data as a linear combination of a Support Vectors drawn from the observed data.  Rather than using the observations \( X = [ (x_0,t_0),...,(x_\ell,t_\ell) ] \), we use the subsets \( S = [ S_{t,\theta} | t \in X, \theta \in \Theta ] \), where \( \Theta \) is set of values chosen as part of the algorithm.  We select Support Vectors from \( S \) to minimize the number of points required to describe the observed data \( X \) to some level of accuracy while maximizing the information entropy of the Support Vectors themselves.  We represent the optimization task as such:
+The first challenge is the selection of \( \mathcal{T} \), the intervals used to define subsets \( S_{t,\theta} \).  Using the Support Vector approach, we search for a solution which represents the observed data as a linear combination of a Support Vectors drawn from the observed data.  Rather than using the observations \( X = [ (x_0,t_0),...,(x_\ell,t_\ell) ] \), we use the subsets \( S = [ S_{t,\theta} | t \in X, \theta \in \Theta ] \), where \( \Theta \) is set of values chosen as part of the algorithm.  We select Support Vectors from \( S \) to minimize the number of points required to describe the observed data \( X \) to some level of accuracy while maximizing the information entropy of the Support Vectors themselves.
 
-% We need to build from OUR objectives to these - the relationship isn't clear
+We define the a function \( I \) which computes the mutual information of two subsets using an estimate of the Kolmogorov Complexity \( K \) of the two sets:
+
+\begin{equation}
+I(S_i,S_j) = K( S_i ) - K( S_i | S_j)
+\end{equation}
+
+We use this function to define a kernel which assigns high values to sets which are similar and low values to sets which are different (the denominator is used to avoid a singuarity if \( I = 0 \) ):
+
+\begin{equation}
+K(S_i,S_j) = \frac{1}{1+ I( S_i, S_j ) }
+\end{equation}
+
+We define the optimization task as minimizing weighted sum of the kernel matrix which corresponds to maximizing the mutual information of the support vectors:
 
 \begin{equation}
 \min_\beta \sum_{i,j} \beta_i \beta_j K(S_i,S_j) - \sum_i \beta_i K(S_i, S_i)
@@ -307,7 +319,7 @@ The first challenge is the selection of \( \mathcal{T} \), the intervals used to
 \text{subject to} \quad 0 \le \beta_i \le \frac{1}{\nu \ell}, \quad \sum_i \beta_i = 1
 \end{equation}
 
-Because we are using vector sets rather than vectors, we must define a kernel capable of expressing similarity between vector sets. We choose the covariance value of the observations in the two sets.  Covariance is a good candidate for use as a kernel; it is bilinear, symmetric, and positive semidefinite.  While it is limited by the assumption of normally distributed noise, the interval selection process is intended only to reduce the dimensionality of the observed data, so this lack of robustness seems an acceptable compromise.  The kernel function is defined as such:
+% See if we can tweak this kernel into the covariance 
 
 \begin{equation} \label{eq:KOneClass} 
 K_\theta( S_{t_i,\theta}, S_{t_j,\theta} ) = 1 - \frac{\text{Cov}( S_{t_i,\theta}, S_{t_j,\theta} )}{2}
