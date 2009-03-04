@@ -294,10 +294,11 @@ The first challenge is the selection of \( \mathcal{T} \), the intervals used to
 
 We define the a function \( I \) which computes the mutual information of two subsets using an estimate of the Kolmogorov Complexity \( \kappa \) of the two sets:
 
-\begin{equation}
-I(S_i,S_j) = \kappa( S_i ) - \kappa( S_i | S_j)
-\end{equation}
-
+\begin{align}
+I(S_i,S_j) &= \kappa( S_i ) - \kappa( S_i | S_j) \\
+&= H(S_i) + H(S_j) - H(S_i,S_j) \nonumber \\
+&= \sum_{ \substack{ p \in S_i \\ q \in S_j } } \Pr(p) \log \Pr(p) + \Pr(q) \log \Pr(q) - \Pr(p,q) \log \Pr(p,q)
+\end{align}
 We use this function to define a kernel which assigns high values to sets which are similar and low values to sets which are different (the denominator is used to avoid a singuarity if \( I = 0 \) ):
 
 \begin{equation}
