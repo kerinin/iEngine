@@ -186,7 +186,7 @@ Which gives us the following as our prediction algorithm:
 \psi_P \left( (x,t) :S_{t,\theta}, \Phi \right) \mapsto \mathbb{P} 
 	&= \frac{ \prod_{0 \le n < q} \varphi_n \big( H_n(S_{t,\theta}) \big) \cdot \prod_{0 \le n < q} \phi_n(x,t) }{ \prod_{0 \le n < q} \varphi_n \big( H_n(S_{t,\theta}) + H_n((x,t)) \big) }  \nonumber \\
 \nonumber \\
-&= \prod_{0 \le n < q} \phi_n(x,t) \cdot \frac{ \varphi_n \Big( H_n(S_{t,\theta}) \Big) }{ \varphi_n \Big( H_n(S_{t,\theta}) + H_n\big((x,t)\big) \Big) }
+&= \label{eq:predSingle} \prod_{0 \le n < q} \phi_n(x,t) \cdot \frac{ \varphi_n \Big( H_n(S_{t,\theta}) \Big) }{ \varphi_n \Big( H_n(S_{t,\theta}) + H_n\big((x,t)\big) \Big) }
 \end{align}
 
 
@@ -292,10 +292,10 @@ Implementing the inference architecture requires the specification of the two de
 
 The first challenge is the selection of \( \mathcal{T} \), the intervals used to define subsets \( S_{t,\theta} \).  Using the Support Vector approach, we search for a solution which represents the observed data as a linear combination of a Support Vectors drawn from the observed data.  Rather than using the observations \( X = [ (x_0,t_0),...,(x_\ell,t_\ell) ] \), we use the subsets \( S = [ S_{t,\theta} | t \in X, \theta \in \Theta ] \), where \( \Theta \) is set of values chosen as part of the algorithm.  We select Support Vectors from \( S \) to minimize the number of points required to describe the observed data \( X \) to some level of accuracy while maximizing the information entropy of the Support Vectors themselves.
 
-We define the a function \( I \) which computes the mutual information of two subsets using an estimate of the Kolmogorov Complexity \( K \) of the two sets:
+We define the a function \( I \) which computes the mutual information of two subsets using an estimate of the Kolmogorov Complexity \( \kappa \) of the two sets:
 
 \begin{equation}
-I(S_i,S_j) = K( S_i ) - K( S_i | S_j)
+I(S_i,S_j) = \kappa( S_i ) - \kappa( S_i | S_j)
 \end{equation}
 
 We use this function to define a kernel which assigns high values to sets which are similar and low values to sets which are different (the denominator is used to avoid a singuarity if \( I = 0 \) ):
@@ -305,6 +305,11 @@ K(S_i,S_j) = \frac{1}{1+ I( S_i, S_j ) }
 \end{equation}
 
 We define the optimization task as minimizing weighted sum of the kernel matrix which corresponds to maximizing the mutual information of the support vectors:
+\[
+\min_\beta \sum_{i,j} \beta_i \beta_j K(S_i,S_j)
+\]
+
+Using the One-Class SVM algorithm \cite{Scholkopf99} to exclude a portion of outliers, we rewrite this objective function as
 
 \begin{equation}
 \min_\beta \sum_{i,j} \beta_i \beta_j K(S_i,S_j) - \sum_i \beta_i K(S_i, S_i)
@@ -314,25 +319,14 @@ We define the optimization task as minimizing weighted sum of the kernel matrix 
 \text{subject to} \quad 0 \le \beta_i \le \frac{1}{\nu \ell}, \quad \sum_i \beta_i = 1
 \end{equation}
 
-% See if we can tweak this kernel into the covariance 
-
-\begin{equation} \label{eq:KOneClass} 
-K_\theta( S_{t_i,\theta}, S_{t_j,\theta} ) = 1 - \frac{\text{Cov}( S_{t_i,\theta}, S_{t_j,\theta} )}{2}
-\end{equation}
-
-This kernel will be 0 if the two sets are perfectly correlated and 1 if they are perfectly anticorrelated.  This produces a positive definite kernel matrix.  We would like to eliminate the parameter \( \theta \) from the algorithm, so we use a range of \( \theta \) values in the optimization task.  We can take to approaches to this; the first is to scale \( S_{t,\theta} \) to some uniform range, say \( 0 \le t \le 1 \).  The second is to leave \( S_{t,\theta} \) unscaled and define a second kernel function for comparing heterogenous values of \( \theta \).  We shall use the latter method, with our kernel defined as the sum of the autocovariance over all offset values:
-
-\begin{equation} \label{eq:KOneClassAuto}
-K( S_{t_i,\theta_n}, S_{t_j,\theta_m} ) = \sum_p1 - \frac{ \text{Cov}( S_{p,\theta_n}, S_{t_j,\theta_m} ) }{ 2 }
-\end{equation}
-
-\begin{quotation}
-This method may be able to solve the problem without explicitly generating any density estimates, in which case we *might* be able to do something simple like Parzen windows on the SVM output (since in this case sparsity isn't so important; sparsity is accomplished through the SVM).  This would require finding a substitute for \( \psi_E \) and \( H_n(S) \) capable of implementing the same behavior.  Specifically, the kernel would need to evaluate the similarity between two sets of observations.  
-
-One possiblity is using the Mutual Information (which is essentially what the existing system uses).  For this to be an improvement we would need some method of evaluating the mutual information without evaluating the marginal probabilities of the subsets, which wikipedia suggests is possible: "Using the ideas of Kolmogorov complexity, one can consider the mutual information of two sequences independent of any probability distribution".  This approach requries a method of compression, and the Mutual Information is determined as the difference in data required.  The benefit of mutual information is that it abstracts the existing system to the point that it could use any compression algorithm, potentially enabling a more robust or computationally efficient approach to the data.
-\end{quotation}
-
 \subsection{Estimate Generation: SVM-Density Algorithm}
+\begin{align}
+&k(x,x') = \frac{1}{1+e^{-\gamma(x-x')} } \\
+&\mathcal{K}(x,x') = -\frac{\gamma}{2 + e^{\gamma(x-x')} + e^{-\gamma(x-x')} } \\
+&\min \left( \sum_{i=1}^\ell \left( y_i - \sum_{j=1}^\ell \sum_{n=1}^\kappa \alpha_j^n k_n(x_i, x_j) \right)^2 + \lambda \sum_{i=1}^\ell \sum_{n=1}^\kappa \frac{1}{\gamma_n} \alpha_i^n \right) \\
+&\text{subject to} \quad \sum_{i=1}^\ell \sum_{n=1}^\kappa \alpha_i^n = 1, \quad \alpha_i \ge 0 \\
+&p(x) = \sum_{i=1}^\ell \left( \alpha_i^1 \mathcal{K}_1(x_i,x) + ... + \alpha_i^\kappa \mathcal{K}_\kappa( x_i,x) \right)
+\end{align}
 
 \subsection{Correlation: SVM-Density Algorithm}
 
