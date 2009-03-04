@@ -284,6 +284,17 @@ Implementing the inference architecture requires the specification of the two de
 % training and test corpus variable names
  
 \subsection{Window Selection: One-Class SVM}
+\subsubsection{Head-clearing regarding Entropy}
+Each subset can be seen as a random variable whose probability distribution is estimated using the observations in the subset.  We therefore define the probability measure of the subset as approximately equal to the estimated probability measure generated from the points in the set.  
+
+We use the Kullback–Leibler divergence defined as 
+
+\begin{align}
+D_{KL}(P||Q) &= -\sum_{x} p(x) \log(q) + \sum_{x} p \log(p) \\
+D_{KL}(P,Q) &= D_{KL}(P||Q) + D_{KL}(Q||P) \\
+&= -\sum_{x} p(x) \log q(x) + \sum_{x} p(x) \log p(x) -\sum_{x} q(x) \log p(x) + \sum_{x} q(x) \log q(x)
+\end{align}
+
 \url{http://en.wikipedia.org/wiki/Semidefinite_embedding}
 
 \url{http://en.wikipedia.org/wiki/Nonlinear_dimensionality_reduction}
@@ -297,7 +308,7 @@ We define the a function \( I \) which computes the mutual information of two su
 \begin{align}
 I(S_i,S_j) &= \kappa( S_i ) - \kappa( S_i | S_j) \\
 &= H(S_i) + H(S_j) - H(S_i,S_j) \nonumber \\
-&= \sum_{ \substack{ p \in S_i \\ q \in S_j } } \Pr(p) \log \Pr(p) + \Pr(q) \log \Pr(q) - \Pr(p,q) \log \Pr(p,q)
+&=  \sum_{ \substack{ p \in S_i \\ q \in S_j } } \Pr(p,q) \log \Pr(p,q) - \sum_{p \in S_i} \Pr(p) \log \Pr(p) - \sum_{q \in S_j} \Pr(q) \log \Pr(q)
 \end{align}
 We use this function to define a kernel which assigns high values to sets which are similar and low values to sets which are different (the denominator is used to avoid a singuarity if \( I = 0 \) ):
 
