@@ -294,6 +294,10 @@ The first challenge is the selection of \( \mathcal{T} \), the intervals used to
 
 We can treat each set \( S \in \mathbf{S} \) as a probability measure over the abstract space \( \Omega \), and thus as a coding scheme for observations drawn from \( \Omega \).  Our goal is to encode such observations using as few \( S \) as possible, so it is clear that maximizing the variation among the selected \( S \) is important.  
 
+% This gets more complex the more I think about it.  First, we can describe the entropy of a set as the information contained in that set.  We want to select for sets which have high information content.  Second, we can describe the variation between sets using the KL distance, we want to select sets which have high KL distance (IE, they represent different patterns).  Finally, we want to select for sets which have high probability.  It would seem that highly probable sets would have low KL distance, as they would be close to a lot of other similar sets, so KL and probability would seem to be in conflict...
+
+% Parzen window explicity defines a point's probability as a sum of the kernelized distance to all known points.  In other words, the cumulative KL distance between a subset and the others constitutes the Parzen estimate of it's probability, using a linear kernel.  In this sense, minimizing the KL matrix of the SV's will maximize the probability of similar sets being observed.
+
 % Theoretical description of a 'good' encoding scheme?
 \url{http://en.wikipedia.org/wiki/Rate-distortion_theory}
 % the basic idea is to define an optimization task which minimizes the mutual information of selected points while maximizing the cumulative probability of the selected points (or vica versa).  
