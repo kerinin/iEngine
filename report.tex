@@ -284,39 +284,36 @@ Implementing the inference architecture requires the specification of the two de
 % training and test corpus variable names
  
 \subsection{Window Selection: One-Class SVM}
-\subsubsection{Head-clearing regarding Entropy}
-Each subset can be seen as a random variable whose probability distribution is estimated using the observations in the subset.  We therefore define the probability measure of the subset as approximately equal to the estimated probability measure generated from the points in the set.  
-
-We use the Kullback–Leibler divergence defined as 
-
-\begin{align}
-D_{KL}(P||Q) &= -\sum_{x} p(x) \log(q) + \sum_{x} p \log(p) \\
-D_{KL}(P,Q) &= D_{KL}(P||Q) + D_{KL}(Q||P) \\
-&= -\sum_{x} p(x) \log q(x) + \sum_{x} p(x) \log p(x) -\sum_{x} q(x) \log p(x) + \sum_{x} q(x) \log q(x)
-\end{align}
-
 \url{http://en.wikipedia.org/wiki/Semidefinite_embedding}
 
 \url{http://en.wikipedia.org/wiki/Nonlinear_dimensionality_reduction}
 
 \url{http://en.wikipedia.org/wiki/Feature_selection}
 
-The first challenge is the selection of \( \mathcal{T} \), the intervals used to define subsets \( S_{t,\theta} \).  Using the Support Vector approach, we search for a solution which represents the observed data as a linear combination of a Support Vectors drawn from the observed data.  Rather than using the observations \( X = [ (x_0,t_0),...,(x_\ell,t_\ell) ] \), we use the subsets \( S = [ S_{t,\theta} | t \in X, \theta \in \Theta ] \), where \( \Theta \) is set of values chosen as part of the algorithm.  We select Support Vectors from \( S \) to minimize the number of points required to describe the observed data \( X \) to some level of accuracy while maximizing the information entropy of the Support Vectors themselves.
+The first challenge is the selection of \( \mathcal{T} \), the intervals used to define subsets \( S_{t,\theta} \).  Using the Support Vector approach, we search for a solution which represents the observed data as a linear combination of a Support Vectors drawn from the observed data.  Rather than using the observations \( X = [ (x_0,t_0),...,(x_\ell,t_\ell) ] \), we use the subsets \( \mathbf{S} = [ S_{t,\theta} | t \in X, \theta \in \Theta ] \), where \( \Theta \) is a set of values which must be chosen.  We select points from \( \mathbf{S} \) to minimize the number of Support Vectors required to describe the observed data \( X \) to some level of accuracy.
 
-We define the a function \( I \) which computes the mutual information of two subsets using an estimate of the Kolmogorov Complexity \( \kappa \) of the two sets:
+We can treat each set \( S \in \mathbf{S} \) as a probability measure over the abstract space \( \Omega \), and thus as a coding scheme for observations drawn from \( \Omega \).  Our goal is to encode such observations using as few \( S \) as possible, so it is clear that maximizing the variation among the selected \( S \) is important.  
 
-\begin{align}
-I(S_i,S_j) &= \kappa( S_i ) - \kappa( S_i | S_j) \\
-&= H(S_i) + H(S_j) - H(S_i,S_j) \nonumber \\
-&=  \sum_{ \substack{ p \in S_i \\ q \in S_j } } \Pr(p,q) \log \Pr(p,q) - \sum_{p \in S_i} \Pr(p) \log \Pr(p) - \sum_{q \in S_j} \Pr(q) \log \Pr(q)
-\end{align}
-We use this function to define a kernel which assigns high values to sets which are similar and low values to sets which are different (the denominator is used to avoid a singuarity if \( I = 0 \) ):
+% Theoretical description of a 'good' encoding scheme?
+\url{http://en.wikipedia.org/wiki/Rate-distortion_theory}
+% the basic idea is to define an optimization task which minimizes the mutual information of selected points while maximizing the cumulative probability of the selected points (or vica versa).  
+% another approach is to set one of these quantities and minimize the other
 
+
+The variation between any two sets \( S_i, S_j \) with corresponding probability measures \( p_i, p_j \) can be quantified using the Kullback Leibler divergence evaluated at each observation in the two sets:
+
+% Explain why using the points in the two sets is a sufficient set of data to evaluate the divergence
 \begin{equation}
-K(S_i,S_j) = \frac{1}{1+ I( S_i, S_j ) }
+D_{KL}(S_i||S_j) = -\sum_{x \in S_i \cup S_j} p_i(x) \log p_j(x) + \sum_{x \in S_i \cup S_j} p_j(x) \log p_i(x)
 \end{equation}
 
-We define the optimization task as minimizing weighted sum of the kernel matrix which corresponds to maximizing the mutual information of the support vectors:
+We use this function to define a kernel which assigns high values to sets which are similar and low values to sets which are different (the denominator is used to avoid a singuarity if \( D_{KL} = 0 \) ):
+
+\begin{equation}
+K(S_i,S_j) = \frac{1}{1+ D_{KL}( S_i || S_j ) + D_{KL}( S_j || S_i )}
+\end{equation}
+
+We define the optimization task as minimizing a weighted sum of the kernel matrix which corresponds to maximizing the divergence of the support vectors:
 \[
 \min_\beta \sum_{i,j} \beta_i \beta_j K(S_i,S_j)
 \]
