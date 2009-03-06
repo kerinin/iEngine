@@ -1,0 +1,456 @@
+\documentclass[10pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+
+\usepackage{hyperref}
+\usepackage[all]{hypcap}
+
+\setlength{\parskip}{.25cm plus4mm minus3mm}
+\setlength{\parindent}{0in}
+
+% Pick a title and make sure the terminology is consistent (architecture / system / algoirthm / etc)
+
+% Look into Hidden Markov to see if applicable, if not see if there are other approaches to timeseries statistics
+% If there's no existing theory to explain the mixture model, you'll need to spend more time on it
+
+% Do we need to think about inhibition at all?
+
+% Window selection for estimates is *important*, and deserves its own section and algorithm. 
+
+
+\begin{document}
+\title{Robust Timeseries Analysis in the Context of Multiple Asynchronous Input Channels}
+%\subtitle{Analysis of Ergodic Processes with Multiple Stationary Behaviors using Data from Multiple Asynchronous Input Channels}
+\author{Ryan Michael\\ \texttt{kerinin@gmail.com}}
+%\date{???}
+\maketitle
+
+\begin{abstract}
+Spectral Analysis is a common form of analysing timeseries data.  We propose a method of spectral analysis based on sets probability distributions generated from subsets of the observed data.  By decomposing the observations into a set of observed behaviors, the spectral analysis can be used more accurately to predict the timseries' behavior.
+
+\end{abstract}
+
+\section{Introduction}
+%\tableofcontents
+
+\subsection{Existing Work}
+ %http://en.wikipedia.org/wiki/Expectation-maximization_algorithm
+%http://en.wikipedia.org/wiki/Stationary_process
+%http://en.wikipedia.org/wiki/Ergodicity
+%http://en.wikipedia.org/wiki/Mixing_(mathematics)
+%http://en.wikipedia.org/wiki/Lyapunov_exponent
+%http://en.wikipedia.org/wiki/Recurrence_quantification_analysis
+%http://en.wikipedia.org/wiki/Recurrence_plot
+%http://en.wikipedia.org/wiki/Autoregressive_fractionally_integrated_moving_average
+%http://en.wikipedia.org/wiki/Autocorrelation
+
+\url{http://en.wikipedia.org/wiki/Linear_discriminant_analysis}
+
+
+% \subsubsection{Hidden Markov Model}
+% cannot account for future states - only capable of prediction
+% weak, short-term memory
+
+% \subsubsection{Box-Jenkins}
+% intended for simplistic processes with well-understood stationarity and periodicity
+% http://en.wikipedia.org/wiki/Box-Jenkins
+
+% \subsubsection{Spectral Analysis}
+% assumes some type of frequency-domain decomposition.  Frequency-domain signal representations do not do a very good job predicting time-domain values. 
+
+% \subsubsection{Shrinking-\epsilon SVM Regression}
+% theoretical foundation weak; only compensates for the relevance of recent data.  See Markhov problem
+
+
+\subsection{General Overview}
+The goal is to create a method of statistical inference capable of processing timeseries data which is both multi-variate and exhibits different behaviors at different times.  This type of data is common, and developing a robust method of analysis has applications in many domains.  The general approach is to create a series of estimates using subsets of the observed data, and to then combine these estimates in an intelligent manner which captures the relevance of each estimate to the current prediction task.  By using a set of 'typical' estimates, we are able to reduce the computational demands of the system, as each estimate is a condensed representation of the data from which it was derived.  This approach also allows us to reduce data redundancy by only using distinct estimates.
+
+The most basic operation used in this system is the estimation of probability densities.  Based on a set of observations drawn from some random process, we generate an estimate of the underlying probability distribution.  This estimate tells us the probability of each point in the input space being observed.  Areas of the input space in which a dense set of observations are observed are given high probability, while areas of the input space with few observations are given low probability.  This basic operation, in combination with some basic laws of statistics allow us to build the full inference system.
+
+We assume that observations are pulled from multiple independent sources, all of which respond to some underlying phenomena.  For instance one set of observations could be from a microphone and another from a light detector.  We do not know how the inputs are related or to what extent their behavior changes over time.  For example one input could be a steady sine wave and another could be based on the decay of a radioactive isotope.  In the former case previous observations of the source are useful, in the latter they're not.  Alternately two inputs could be light detectors in the same room or they could be on different continents; in the former their input would be highly similar, in the latter not as much.
+
+Our general strategy has three phases; generating estimates, correlating estimates, and applying estimates to a given prediction task.
+
+\subsection{Generating Estimates}
+Estimates are generated by picking a time window at random and only dealing with observations which take place in that window.  Using these observations we create an estimate of the probability distribution underlying the observations (this distribution would include time as a variable).  This process is repeated until we feel we have a reasonable sample of the system as a whole, at which time we can start to correlate the estimates.
+
+\subsection{Correlating Estimates}
+The goal of correlating estimates is to determine the relationships between estimates at different times and from different sources.  Estimates are correlated by treating them as variables whose value for a given time window is determined by the extent to which the observed data corresponds to the estimate.  For each time window there exist a set of estimates which have some value describing their accuracy at predicting the observed value.  We can treat the accuracy measurement of each estimate as a multi-dimensional point, each dimension determined by an estimate's accuracy.  Using a set of these points taken at different times, we create a probability distribution estimate.  The domain of this probability distribution has the same dimensionality as the number of estimates we have generated.  This probability density allows us to predict the probability of an estimate in of one source based on the probability of an estimate in of another source because frequent combinations of accuracy values will have higher probability than other combinations.  This 'correlation density' also tells us which estimates are most commonly observed - information we can use in conjunction with estimate similarity to determine which estimates to use and which to discard.
+
+\subsection{Making Pedictions}
+Once the estimates have been correlated, we are able to generate predictions.  For simplicity, we'll assume that the first two phases occur on as set of 'training' data which is representative of the underlying data, while prediction takes place continuously using new sets of observations which occur in some time window.  We make predictions for a given source by combining the existing estimates we have for that source based on their accuracy at predicting the given observations.  Because we have determined the correlation between estimate accuracy of different sources, we can use other sources to refine our confidence in each estimate of the given source; the influence of estimates of the given source which do not correspond to a likely 'point' in the correlation density are suppressed while the influence of estimates which correspond to likely points in the correlation density are enhanced.
+
+\section{Formal Description}
+
+% This gets more complex the more I think about it.  First, we can describe the entropy of a set as the information contained in that set.  We want to select for sets which have high information content.  Second, we can describe the variation between sets as a distance using the KL divergence.  Parzen window defines a point's probability as a sum of the kernelized distance to all known points.  In other words, the cumulative KL distance between a subset and the others constitutes the Parzen estimate of it's probability, using a linear kernel.  In this sense, minimizing the KL matrix of the SV's will maximize the probability of similar sets being observed.  Conversely, maximizing the KL matrix of the SV's will increase the net entropy of the SV set.  The trade-off between these two outcomes is a parameter which must be determined.
+
+% Another way to think about this is that we want to pick SV's such that each observed set lies as close as possible to an SV, which is to say we locate SV's such that they give us a good a possible a cross-section of the data.  In this case, we don't need to trade divergence for probability, we only need to decide how accurate we want to be.  In this version, we assume that we want a small set of highly similar SV's to influence the estimate of a point, rather than assuming that SV's are essentially wavelets to be combined until they approach the solution.  Given the nature of the reconstruction algorithm, I think this is a better way of thinking about this.  
+
+% We want to minimize the distance from each observed point to an SV, which probably means minimizing the enclosing hypershere in feature space.  This also gives us a way to think of 'outliers' - they're simply points which are unlike all the others, and thus cannot be easily represented by similarity to their neighbors.  These points are ignored because we do not have enough information to accurately model their behavior, although it might be interesting to select both BSV's and SV's for estimation.
+
+% One thing to consider is the fact that we're using KL divergence to select estimates, then entropy to combine them.  It might be better to use the same measure of correlation in both cases, and I suspect the KL divergence could easily be used in place of the entropy.
+
+\subsection{Problem Setting}
+We begin with a hidden random variable 
+
+\[ X = (\Omega,\mathcal{F},\mathcal{P}) \]
+
+Our knowledge of \( X \) comes from a set of independant sources which we treat as random variables generated by \( X \):
+
+\[ X^n : \Omega \mapsto \Omega^n \in \mathbb{R}^d \times \mathbb{R}_+  \]
+\[ X^n = (\Omega^n,\mathcal{F}^n,\mathcal{P}^n) \]
+\[ \mathbf{X} = [X^0,...,X^c]   \]
+
+We refer to each of these sources as a channel, and refer to each channel as the \( i^\text{th} \) element of the set \( \mathbf{X} \):
+
+\[ C^n = [\Omega^n,\mathcal{F}^n,\mathcal{P}^n] \]
+
+For each channel we are given a set of \( \ell \) observations of dimension \( d \), each with a time value:
+
+\[ \mathbf{x}_i^n = (x_i^n, t_i^n ) \]
+\[ X^n = \left[ \mathbf{x}_0^n,\hdots,\mathbf{x}_\ell^n \right] \in \mathbb{R}^d \times \mathbb{R}_+ \]
+
+Given a set of time durations \( \theta \in \Theta \), we define a set of time widows:
+
+\[  \mathcal{T}^n =  
+\begin{bmatrix} 
+(t_0^n,\theta_0) & \hdots & (t_0^n,\theta_z) \\
+\vdots & \ddots & \vdots \\
+(t_\ell^n, \theta_0) & \hdots & (t_\ell^n, \theta_z) \\
+\end{bmatrix} 
+\]
+
+We assume that the probability of \(X \) is a time-dependent mixture of some set of distributions \( [f_0,...,f_w] \) whose influence is unknown and changes over time.  We can refer to the weighted mixture which corresponds to a given time window \( (t,\theta) \) as:
+
+\begin{equation} \mathcal{P}(t,\theta) = \sum_i \delta_i \cdot f_i \end{equation}
+
+where \( \delta_n \) is the weight corresponding to \( f_n \).  Finally, we assume that a similar mixture of densities can be determined for each channel:
+
+\begin{equation} \mathcal{P}^n(t,\theta) = \sum_i \delta_i^n \cdot f_i^n \end{equation}
+
+\subsection{Single Channel Estimation}
+We begin by considering the case where only one channel exists, so for now we will omit the superscript and refer to \(X^n = (\Omega^n,\mathcal{F}^n,\mathcal{P}^n) \) as \(X = (\Omega, \mathcal{F},\mathcal{P}) \).  Given a set of test data \( Y \), our goal is to estimate the probability distribution of \( Y \) over some time window \( \mathcal{T}_y \):
+
+\begin{align*}
+\mathbf{y}_i &= (y_i,t_i) \\
+ Y &= [ \mathbf{y}_0,\hdots,\mathbf{y}_k ] \\
+ \mathcal{T}_y &= (t_y, \theta_y ), \quad t_y < \min_t Y < \max_t Y < t_y + \theta_y 
+\end{align*}
+
+We begin by defining the subset of the training observations which fall into each time window, scaled and shifted to the interval \( t \in [0,1) \):
+
+\begin{equation} S_{t,\theta} = \left[ \left( x_i,\frac{t_i - t}{\theta} \right) \Big| \quad x_i \in X, \ t \le t_i < t+\theta \right] \end{equation}
+\[ \mathcal{S} = 
+\begin{bmatrix} 
+S_{t_0,\theta_0} & \hdots & S_{t_0,\theta_z} \\
+\vdots & \ddots & \vdots \\
+S_{t_\ell, \theta_0} & \hdots & S_{t_\ell, \theta_z} \\
+\end{bmatrix}  
+\]
+
+We treat \( \mathcal{S} \) as a random process and observe that \( Y \) can be treated as an observation of \( \mathcal{S} \):
+
+\[ S_y =  \left[ \left( y_i,\frac{t_i - t_y}{\theta_y} \right) \Big| \quad (y_i,t_i) \in Y \right] \]
+
+We can now frame the task of estimating the probability distribution of \( Y \) as the task of estimating \( S_y \).  One method of accomplishing this is using the Parzen Window method.  This requires the definition of a metric over the abstract space of \( \mathcal{S} \).  Such a metric can be defined use the symmetric Kullbeck Liebler divergence, again using the Parzen Window method to evaluate the probability measure of \( S \):
+
+\begin{align}
+D_{KL}(S_n||S_m) &= -\sum_{\mathbf{x} \in \{ S_n \cup S_m \} } p_n(\mathbf{x}) \log p_m(\mathbf{x}) + \sum_{\mathbf{x} \in \{ S_n \cup S_m \} } p_m(\mathbf{x}) \log p_n(\mathbf{x}) \\
+|S_n - S_m|_{KL} &= D_{KL}(S_n||S_m) + D_{KL}(S_m||S_n) \\
+p_n\big( \mathbf{x} \big) &= \frac{1}{Nh} \sum_{\mathbf{x}_i \in S_n} K \left( \frac{ | \mathbf{x} - \mathbf{x}_i |^2 }{ h} \right)
+\end{align}
+
+We can now define an estimate of the distribution of \( Y \) at \( \mathbf{x} \) as:
+
+\begin{align*} 
+\Pr\big( \mathbf{x} \ | \ Y, \mathcal{S} \big) &\mapsto \Pr\big( \{ S_y \cup \mathbf{x} \} \ | \ \mathcal{S} \big) \\
+&\simeq \frac{1}{\ell z h} \sum_{t,\theta} K \left( \frac{ \left| \{ S_y \cup \mathbf{x} \} - S_{t,\theta} \right|_{KL} } { h } \right)
+\end{align*}
+
+\subsection{Single Channel Correlation}
+
+Given a set of estimations, we need a method to relate each estimate's relevance to observations in different time windows.  We use the Shannon entropy of the set of observations in a given time window with respect to a given estimation as a measure of the estimate's relevance to the observed data.  A set of data points which conform to the predicted values of an estimate will have lower entropy than a set of data points which diverge from the same estimate.
+
+\begin{equation} \label{eq:HnSingle} H_n( S_{t,\theta} ) \mapsto \delta_{\phi_n,t,\theta} = \sum_{(x,t) \in S_{t,\theta}} -\phi_n(x,t) \log \phi_n(x,t) \end{equation}
+\[ \Delta_n = [ \delta_{\phi_n,t,\theta} \ | \quad (t,\theta) \in \mathcal{T} ] \]
+
+The entropy for each estimate over different time windows defines a new random variable which we will refer to as \( H_n \).  We will compute a density estimate using \(\psi_C \) for \( H_n \) as we have with the input data previously:
+
+\begin{equation} \label{eq:HSingle} H_n = ( \Omega^H, \mathcal{F}^H, \mathcal{P}_n^H ), \quad \Omega^H \in \mathbb{R}, \mathcal{F}^H = \mathcal{B}(\mathbb{R}) \end{equation}
+\begin{equation} \psi_C( \Delta_n , \alpha_C ) \mapsto \varphi_n \end{equation}
+\begin{equation} \varphi_n(\delta) \simeq P \left( H_n = \delta \right)
+\end{equation}
+
+\subsection{Single Channel Pediction}
+The derivation algorithm produces predictions of \(X \) over a time window \( (t,\theta) \) based on a set of observations which occur in that time window \(S_{t,\theta} \).  Rather than using the estimation algorithm \(\psi_E \) to predict these values, however, the derivation algorithm \(\psi_D \) predicts the probability distribution  using bayesian modification of existing estimates.  To accomplish this, we use the conditional probability of the entropy value.
+
+\[ P \left( X = (x,t) | H_n(S_{t,\theta}) = \delta \right) = \frac { P \left( H_n( S_{t,\theta} ) = \delta | X = (x,t) \right) \cdot P \left( X = (x,t) \right) } { P \left( H_n( S_{t,\theta} ) = \delta \right) } \]
+
+Which for compactness we will write as:
+
+\begin{equation} P_{X|H_n} \left( (x,t), \delta \right) = \frac { P_{H_n|X} \left( \delta, (x,t) \right) \cdot P_X \left( (x,t) \right) } { P_{H_n} \left( \delta \right) } \end{equation}
+
+We can easily determine one of these terms:
+
+\begin{equation} P_X \big( (x,t) \big) = \prod_{0 \le n < q} \phi_n(x,t) \end{equation}
+
+Because the entropy \ref{eq:HnSingle} is calculated as a sum of the entropy of each observation, we can determine the conditional probability \( P \left( H_n(S_{t,\theta}) = \delta | X = (x,t) \right) \) by subtracting the entropy of \(H_n((x,t)) \) from the value of \(\delta \), and then using our correlation estimate \(\varphi_n \) to predict the probability of \(\delta - H_n((x,t)) \).  We include the expanded form of \(P( H_n(S_{t,\theta}) ) \) to clarify the cancellation of terms:
+
+\begin{align*}
+P_{H_n} \left( \delta \right) &= \frac{ | y : H_n(y) = \delta | }{ | y : H_n(y) \ne \delta | } \\
+P_{H_n |X} \left( \delta, S_{t,\theta} \right) &= \frac{ | y : H_n(y) = \delta + H_n \left( (x,t) \right) | }{ | y : H_n (y) \ne \delta | } \\
+\frac{ P_{H_n |X} \left( \delta, S_{t,\theta} \right) }{ P_{H_n}( \delta ) } &= \frac{ | y : H_n(y) = \delta + H_n \left( (x,t) \right) | \cdot | y : H_n(y) \ne \delta | }
+{ | y : H_n(y) = \delta | \cdot | y : H_n(y) \ne \delta | } \\
+&= \frac{ P_{H_n} \left( \delta + H_n \left( (x,t) \right) \right) }{ P_{H_n} \left( \delta \right) } 
+\end{align*}
+
+Where \( | \cdot | \) denotes the number of elements in the set \( (\cdot) \).  The derivation algorithm can easily be extended to multiple windows by using joint entropy probabilities.  Because we do not know anything about the conditional relationships between estimates, we must assume they are i.i.d., and that their joint probability is equal to the sum of the marginal probabilities.
+
+
+\[ P(A|B \cap C) = \frac{ P(B \cap C|A) \cdot P(A) }{ P(B \cap C) } \]
+
+\begin{align}
+P_{X|H_n \cap H_m} \left( (x,t), \delta_u, \delta_v \right) &=
+	\frac { P_{H_n \cap H_m | X} \left( \delta_u, \delta_v, (x,t) \right) \cdot P_X \left( (x,t) \right) } { P_{H_n \cap H_m} \left( \delta_u, \delta_v \right) } \nonumber \\
+P_{H_n \cap H_m | X} \left( \delta_u, \delta_v, (x,t) \right) &= 
+	\prod_{\substack{i=[n,m] \\ j=[u,v]}} P_{H_i} \left( \delta_j + H_i((x,t)) \right) \nonumber 
+\\
+&= \prod_{\substack{i=[n,m]\\j=[i,j]}} \varphi_i \left( \delta_j + H_i((x,t)) \right) \\
+P_{H_n \cap H_m} \left( \delta_u, \delta_v \right) &= 
+	\prod_{\substack{i=[n,m]\\j=[u,v]}} P_{H_i} \left( \delta_j \right) \nonumber 
+\\
+&= \prod_{\substack{i=[n,m]\\j=[u,v]}} \varphi_i( \delta_j )
+\end{align}
+
+Which gives us the following as our prediction algorithm:
+
+\begin{align}
+\psi_P \left( (x,t) :S_{t,\theta}, \Phi \right) \mapsto \mathbb{P} 
+	&= \frac{ \prod_{0 \le n < q} \varphi_n \big( H_n(S_{t,\theta}) \big) \cdot \prod_{0 \le n < q} \phi_n(x,t) }{ \prod_{0 \le n < q} \varphi_n \big( H_n(S_{t,\theta}) + H_n((x,t)) \big) }  \nonumber \\
+\nonumber \\
+&= \label{eq:predSingle} \prod_{0 \le n < q} \phi_n(x,t) \cdot \frac{ \varphi_n \Big( H_n(S_{t,\theta}) \Big) }{ \varphi_n \Big( H_n(S_{t,\theta}) + H_n\big((x,t)\big) \Big) }
+\end{align}
+
+
+\subsection{Multiple Channel Estimation}
+Algorithms for determining probability density functions tend to scale exponentially with the dimensionality of the input data.  For this reason it would be helpful if the algorithm could operate on independent channels of data and only calculate relationships between channels in cases where the channel's probability distribution is conditional on such relationships.
+
+Extending the existing theory to this situation, we return to our original setting of the problem:
+
+\[ X^n : \Omega \mapsto \Omega^n \in \mathbb{R}^d \times \mathbb{R}_+ \]
+\[ X^n = (\Omega^n,\mathcal{F}^n,\mathcal{P}^n) \]
+\[ \mathbf{X} = [X^0,...,X^c]   \]
+\[ C^A = [\Omega^A,\mathcal{F}^A,\mathcal{P}^A] \]
+
+
+We will now refer to observations and estimates using superscript to denote their channel.  We previously developed three generalized algorithms, \(\psi_E, \psi_C, \psi_D \); we will now extend each one to handle multiple channels.
+
+The estimation algorithm is unchanged in the context of multiple channels.  Each channel generates independent estimates over independent time windows.  The estimation process is intended to give each channel an understanding of its own behavior at a specific time window, and as such the generation of estimates does not rely on previous behaviors of the channel or the behavior of other channels.  We therefore re-write the estimation algorithm to reflect the new notation:
+
+\begin{equation} S_{t,\theta}^A = \left[ \left( x_i^A,\frac{t_i - t}{\theta} \right) | \quad x_i^A \in X^A, \ t \le t_i < t + \theta \right] \end{equation}
+\begin{equation} \label{eq:phiMulti} \psi_E( S_{t,\theta}^A:\alpha_E^A ) \mapsto \phi_n^A \ \simeq \ \mathcal{P}^A(t,\theta)  \end{equation}
+\[ \Phi^A = [\phi_0^A,...,\phi_p^A ] \nonumber \]
+\[ \boldsymbol{\Phi} = [\Phi^0,...,\Phi^c] \]
+
+\subsection{Multiple Channel Correlation}
+% Reiterate the independent set of time windows
+
+The correlation algorithm is where the most substantial changes must be made to accomodate multiple channels.  The biggest difference from the single-channel approach is that each channel takes place in an independent abstract space.  Recall that a critical component of the prediction algorithm is the evaluation of the entropy \ref{eq:HnSingle} of a set of observations given an estimate \( \phi_n \) \ref{eq:phiMulti}.  If the probability density \ref{eq:phiMulti} operates over a different abstract space \(\Omega \) than the observations \(S_{t,\theta} \) are taken from, we cannot calculate the entropy.  In other words, we cannot evaluate the entropy of an estimate from channel \(C^B \) using observations of channel \(C^A \), so we must restrict our entropy definition to a single channel:
+
+\begin{equation} \label{eq:HnMulti} H_n^A( S_{t,\theta}^A ) \mapsto \delta_{\phi_n,t,\theta}^A = \sum_{(x,t) \in S_{t,\theta}^A } -\phi_n^A(x,t) \log \phi_n^A(x,t) \end{equation}
+
+In order to determine the conditional relations between channels, we begin with the observation that all channels share the time dimension \(t \) as part of their abstract space \(\Omega^A \).  This allows us to specify a uniform time window \((t,\theta) \) for all channels \(C^A \in \mathbf{C} \), and to then evaluate the entropy \ref{eq:HnMulti} of each estimate \(\phi_n^A \in \Phi^A \) given the subset of each channel's observations \(S_{t,\theta}^A \) for the time window.  Given the time window \((t,\theta) \), we can treat these entropy measurements as a coherent set and interpret them as a multi-dimensional random vector in much the same way we treated different time windows in the single-channel case \ref{eq:HSingle}.
+
+\[
+\Delta_{t,\theta} = \{ A_{\phi_n} : \delta_{\phi_n,t,\theta}^A \ | \quad \phi_n \in \boldsymbol{\Phi}, \ 0 \le A < c \}
+\]
+
+Where \( \Delta_{t,\theta} \{ A_{\phi_n} \} = \delta_{\phi_n,t,\theta}^A \). Using the same algorithm \(\psi_C \) as we used previously, we can estimate the probability density \(\varphi \) of this random vector. 
+
+\[ \boldsymbol{\Delta} = [ \Delta_{t,\theta} \ | \quad (t,\theta) \in \mathcal{T} ] \]
+\begin{equation} \psi_C( \boldsymbol{\Delta} , \alpha_C ) \mapsto \varphi \end{equation}
+\[ \varphi( \Delta_{t,\theta} ) \simeq \bigcap_{\substack{ \phi_n \in \boldsymbol{\Phi} \\ 0 \le A < c }} P( H_n^A = \Delta_{t,\theta}\{A_{\phi_n} \} ) \]
+
+\subsection{Multiple Channel Pediction}
+We begin by considering the situation in which we wish to make predictions on channel \(C^A \) using information from another, \(C^B \).  The derivation algorithm therefore produces predictions of \(X^A \) over a time window \((t,\theta) \) based on a set of observations which occur in that time window \(S_{t,\theta}^B \).  To do so we select estimates in both channels:
+
+\begin{align*}
+C^A &\rightarrow [\phi_0^A,...,\phi_p^A] \\
+C^B &\rightarrow [\phi_0^B,...,\phi_q^B]
+\end{align*}
+
+We calculate the entropy of each estimate in its own context:
+
+\begin{align*}
+[\delta_{\phi_0}^A,...,\delta_{\phi_p}^A ] &= [ H_0^A( S_{t,\theta}^A ),...,H_p^A( S_{t,\theta}^A ) ] \\
+[\delta_{\phi_0}^B,...,\delta_{\phi_q}^B ] &= [ H_0^B( S_{t,\theta}^B ),...,H_q^B( S_{t,\theta}^B ) ]
+\end{align*}
+
+Given an two estimates from the channels, we calculate the probability of each point in \(X^A \) based on the joint probability of the entropy values \(P(\delta^A \cap \delta^B) \).
+
+\begin{equation}
+P_{X|H_n \cap H_m}^A \left( (x,t), \delta^A, \delta^B \right) =
+\frac 
+{ P_{H_n \cap H_m | X}^A \left( \delta^A, \delta^B,(x,t) \right) \cdot P_X^A \left( (x,t) \right) }
+{ P_{H_n \cap H_m}^A \left( \delta^A, \delta^B \right) }
+\end{equation}
+
+This time, we can easily determine two of these terms:
+
+\begin{equation} P_X^A \left( (x,t) \right) = \prod_{0 \le i < p} \phi_i^A(x,t) \end{equation}
+\begin{equation} P_{H_n \cap H_m}^A \left( \delta^A, \delta^B \right) = \varphi \left( \{ A_{\phi_n}: \delta^A, B_{\phi_m}: \delta^B \} \right) \end{equation}
+
+Which leaves us with the process of calculating the effect of \(X^A = (x,t) \) on the entropy of \(\phi_n^A \) and \(\phi_m^B \).  We adopt the same process used in the single-channel case, replacing \(\delta^A \) with \(\delta^A + H_n^A((x,t)) \), and recalculating the joint probability. Since \(\phi_m^B \) is in a different abstract space, we cannot make any useful statements about the dependence of its entropy given a point outside the abstract space being predicted.  We can now determine the third of the three terms:
+% This assumption may be too expansive - if we can make assumptions about H(A) based on B, we should be able to make assumptions about H(B) based on A right?
+
+\begin{align}
+P_{H_n \cap H_m | X}^A \left( \delta^A, \delta^B, (x,t) \right) &= P_{H_n \cap H_m}^A \left( \delta^A + H_n^A((x,t)), \delta^B \right) \nonumber \\
+&= \varphi \left( \{ A_{\phi_n}:\delta^A + H_n^A((x,t)), B_{\phi_m}: \delta^B \} \right)
+\end{align}
+
+This result can easily be extended to an arbitrary number of channels and estimates:
+
+\begin{equation} P_\Delta^A \left( \Delta_{t,\theta} \right) = \varphi \left( \Delta_{t,\theta} \right) \end{equation}
+\begin{equation} P_{\Delta|X}^A \left( \Delta_{t,\theta}, (x,t) \right) = \varphi \left( \{ A_{\phi_n} : \delta_{\phi_n}^A + H_n^A((x,t)), \Delta_{t,\theta} \land A_{\phi_n} \} \right) \end{equation}
+
+Which gives us a the final prediction equation:
+
+\[ \psi(x,t) \mapsto \mathbb{P} = P(X^A = (x,t) ) \]
+\begin{equation} 
+= \prod_{0 \le n < p} \phi_n^A( x, t) \cdot \frac{ \varphi \left( \{ A_{\phi_n} : \delta_{\phi_n}^A + H_n^A((x,t)), \Delta_{t,\theta} \land A_{\phi_n} \} \right) }{ \varphi( \Delta_{t,\theta} ) }
+\end{equation}
+
+\section{Sample Implementation}
+Implementing the inference architecture requires the specification of the two density estimation functions, \( \psi_E \) and \( \psi_C \).  We will use the same algorithm for both; Vapnik's SVM for conditional density estimation.  The SVM algorithm has been chosen due to its simplicity of parameters and determinacy. 
+
+% training and test corpus variable names
+ 
+\subsection{Window Selection: One-Class SVM}
+\url{http://en.wikipedia.org/wiki/Semidefinite_embedding}
+
+\url{http://en.wikipedia.org/wiki/Nonlinear_dimensionality_reduction}
+
+\url{http://en.wikipedia.org/wiki/Feature_selection}
+
+The first challenge is the selection of \( \mathcal{T} \), the intervals used to define subsets \( S_{t,\theta} \).  Using the Support Vector approach, we search for a solution which represents the observed data as a linear combination of a Support Vectors drawn from the observed data.  Rather than using the observations \( X = [ (x_0,t_0),...,(x_\ell,t_\ell) ] \), we use the subsets \( \mathbf{S} = [ S_{t,\theta} | t \in X, \theta \in \Theta ] \), where \( \Theta \) is a set of values which must be chosen.  We select points from \( \mathbf{S} \) to minimize the number of Support Vectors required to describe the observed data \( X \) to some level of accuracy.
+
+We can treat each set \( S \in \mathbf{S} \) as a probability measure over the abstract space \( \Omega \), and thus as a coding scheme for observations drawn from \( \Omega \).  Our goal is to encode such observations using as few \( S \) as possible, so it is clear that maximizing the variation among the selected \( S \) is important.  
+
+The variation between any two sets \( S_i, S_j \) with corresponding probability measures \( p_i, p_j \) can be quantified using the Kullback Leibler divergence evaluated at each observation in the two sets:
+
+% Explain why using the points in the two sets is a sufficient set of data to evaluate the divergence
+\begin{equation}
+D_{KL}(S_i||S_j) = -\sum_{x \in S_i \cup S_j} p_i(x) \log p_j(x) + \sum_{x \in S_i \cup S_j} p_j(x) \log p_i(x)
+\end{equation}
+
+We use this function to define a kernel which assigns high values to sets which are similar and low values to sets which are different (the denominator is used to avoid a singuarity if \( D_{KL} = 0 \) ):
+
+\begin{equation}
+K(S_i,S_j) = \frac{1}{1+ D_{KL}( S_i || S_j ) + D_{KL}( S_j || S_i )}
+\end{equation}
+
+We define the optimization task as minimizing a weighted sum of the kernel matrix which corresponds to maximizing the divergence of the support vectors:
+\[
+\min_\beta \sum_{i,j} \beta_i \beta_j K(S_i,S_j)
+\]
+
+Using the One-Class SVM algorithm \cite{Scholkopf99} to exclude a portion of outliers, we rewrite this objective function as
+
+\begin{equation}
+\min_\beta \sum_{i,j} \beta_i \beta_j K(S_i,S_j) - \sum_i \beta_i K(S_i, S_i)
+\end{equation}
+
+\begin{equation}
+\text{subject to} \quad 0 \le \beta_i \le \frac{1}{\nu \ell}, \quad \sum_i \beta_i = 1
+\end{equation}
+
+\subsection{Estimate Generation: SVM-Density Algorithm}
+\begin{align}
+&k(x,x') = \frac{1}{1+e^{-\gamma(x-x')} } \\
+&\mathcal{K}(x,x') = -\frac{\gamma}{2 + e^{\gamma(x-x')} + e^{-\gamma(x-x')} } \\
+&\min \left( \sum_{i=1}^\ell \left( y_i - \sum_{j=1}^\ell \sum_{n=1}^\kappa \alpha_j^n k_n(x_i, x_j) \right)^2 + \lambda \sum_{i=1}^\ell \sum_{n=1}^\kappa \frac{1}{\gamma_n} \alpha_i^n \right) \\
+&\text{subject to} \quad \sum_{i=1}^\ell \sum_{n=1}^\kappa \alpha_i^n = 1, \quad \alpha_i \ge 0 \\
+&p(x) = \sum_{i=1}^\ell \left( \alpha_i^1 \mathcal{K}_1(x_i,x) + ... + \alpha_i^\kappa \mathcal{K}_\kappa( x_i,x) \right)
+\end{align}
+
+\subsection{Correlation: SVM-Density Algorithm}
+
+\subsection{Data Pre-Processing}
+% logistic function using mean and sd to put most training points between .1 and .9
+
+% upper and lower bounds on \(\int \Delta \) as non-stationary data detections mechanism
+
+% logistic function from delta using mean and sd in same way if data non-stationary
+
+% iterative integration process until stationary data found ?
+
+\section{Results}
+The architecture has been tested against several data sets.  In all cases the system parameters are left unchanged to eliminate the possbility of optimizing the system performance to best match the known outcomes.
+
+\subsection{Eunite Competition Data}
+
+
+\subsection{Santa Fe Data}
+
+
+\subsection{CATS Benchmark Data}
+
+
+\subsection{Results Summary}
+
+
+\section{Further Research}
+The system as described thus far makes several assumptions for simplicity which would lead to unnecessary computational demands.  We now spend some time discussion methods of reducing the computational demands of the system.  
+
+\subsection{Data Retention}
+% this can probably be worked into the other 3 sections, but for now I'll put it here
+
+\subsection{Estimation Optimization}
+The generation of estimates has been described as a process of selecting time windows at random from the full set of training data.  Selecting windows at random is not necessary to satisfy the i.i.d. requirements of producing an accurate probability estimate, so long as the selection of time windows for which entropy is calculated is random.  Let's consider the characteristics of a 'good' set of estimates for prediction.  
+
+The most obvious characteristic of a 'good' estimate is that it has a low average entropy, which is to say that it frequently captures the behavior of observed data.  If an estimate is not applicable to the observed data, its influence on predictions will be marginal, and the computational time required to calculate its entropy and influence on a prediction will have been wasted.  
+
+Another characteristic of a 'good' set of estimates is that they have minimal redundancy.  Again, if two estimates are essentially identical, their influence on prediction tasks will be identical, and the computational demands of evaluating their entropy and influence will be wasted. 
+
+Unfortunately, these two parameters will likely be mutually exclusive, so some method of balancing them is required.
+
+\subsection{Correlation}
+It is critical that correlation takes place using i.i.d. data in order to produce accurate probability estimates.  We had previously assumed that each time window used to generate estimates would be used to correlate the estimates, however it is not necessary that the time windows used to determine the entropy values used to correlate estimates correspond to the time windows used to generate estimates.  This allows us to select a number of time windows to use which balances the computational demands of density estimation with the need for accuracy.
+
+\subsection{Pediction}
+For prediction, it is not necessary to actually use each of the estimates in generating predictions, so long as we have accurate estimates of their individual probabilities and the joint probability of any two estimates.  Since we must evaluate a number of joint probabilities equal to the square of the number of estimates being considered, selecting a useful subset of the defined estimates can provide substantial reductions in computational demands.
+
+% you need to get into details here
+% for a given estimate, we can ignore other estimates which
+% do not influence the estimates value.  That's all that
+% can really be said.  this can be measured by the
+% correlation in their PDF's.  low entropoy (measured against
+% a flat distribution) should equal low probability of influence.
+
+\subsection{Ensemble System}
+% more analysis of recent data, some type of transfer from short to long-term 'memory'
+
+% heirarchical system?
+
+% what parameters change?
+
+\subsection{Prediction with Heterogenous Time Windows}
+% Look into extending the prediction algorithm to the case where each estimate is being evaluated for its own
+% window - this allows estimates to be evaluated online and then 'applied' to correct offsets
+% The biggest benefit of this is that we don't duplicate portions of a given pattern to compensate
+% for offsets - allows a sliding match
+
+% Doing this will require conditional probability estimation across time windows :0
+
+
+\section{Conclusion}
+Eat it, bitches
+
+
+\nocite{Moreno03}
+
+\bibliographystyle{plain}
+\bibliography{Research/research.bib}
+
+\end{document}
