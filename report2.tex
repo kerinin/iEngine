@@ -163,10 +163,10 @@ p_n\big( \mathbf{x} \big) &= \frac{1}{Nh} \sum_{\mathbf{x}_i \in S_n} K \left( \
 
 We can now define an estimate of the distribution of \( Y \) at \( \mathbf{x} \) as:
 
-\begin{align*} 
-\Pr\big( \mathbf{x} \ | \ Y, \mathcal{S} \big) &\mapsto \Pr\big( \{ S_y \cup \mathbf{x} \} \ | \ \mathcal{S} \big) \\
+\begin{align} 
+\Pr\big( \mathbf{x} \ | \ Y, \mathcal{S} \big) &\mapsto \Pr\big( \{ S_y \cup \mathbf{x} \} \ | \ \mathcal{S} \big) \nonumber \\
 &\simeq \frac{1}{\ell z h} \sum_{t,\theta} K \left( \frac{ \left| \{ S_y \cup \mathbf{x} \} - S_{t,\theta} \right|_{KL} } { h } \right)
-\end{align*}
+\end{align}
 
 \subsection{Single Channel Correlation}
 
