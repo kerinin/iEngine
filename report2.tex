@@ -8,6 +8,10 @@
 
 \setlength{\parskip}{.25cm plus4mm minus3mm}
 \setlength{\parindent}{0in}
+\setlength{\voffset}{-.5in}
+\setlength{\hoffset}{-.5in}
+\setlength{\textwidth}{6.0in}
+
 
 % Pick a title and make sure the terminology is consistent (architecture / system / algoirthm / etc)
 
@@ -240,17 +244,43 @@ This requires the following minor extension of \ref{eq:PrSParzenMultiple} and \r
 
 The Parzen Window method is neither sparse nor computationally efficient, and as the number of observations grows, these deficiencies quickly become prohibitive.  We now investigate the use of Support Vector Machines to generate \( \varphi(\mathbf{x}, S) \).
 
-The Support Vector approach seeks a solution in the following form:
+\subsection{ Support Vector Optimization Formulation }
+Support Vector Machines are usually used to estimate probability distributions by solving the related problem of estimating the cumulative distribution function of the random variable in question.  This reduces the problem to one of estimating a non-linear mapping from observations to cumulative distribution values, which can be formulated as an optimization problem over a linear operator equation.  Unfortunately, these methods depend on the ability to calculate an empirical distribution for each observation:
 
-\[ \varphi( \mathbf{x}, S) = \sum_{i} \beta_i K( \{ S \cup \mathbf{x} \}, S_i ) \]
+\begin{equation} F_\ell(x) = \frac{1}{\ell} \sum_i \theta(x-x_i) \end{equation}
 
-Where \( \beta \) is determined by evaluating a constrained convex optimization problem \footnote{The SV and Parzen Window methods converge when \( \beta_i = \frac{1}{|\mathcal{S}|} \) and similar kernel functions are chosen.}.
+where \( \theta(x) \) is the indicator function.  To evaluate this function, the abstract space \( \Omega^\mathcal{S} \) must be ordered.  While we have described a distance metric over \( \Omega^\mathcal{S} \), it is not clear what a meaningful ordering relation would be.
 
-% Distance function definition 
+Rather than calculating the cumulative probability distribution of \( \Omega^\mathcal{S} \), we begin with the assumption that the Parzen Window estimate of the probability distribution is accurate and attempt to minimize the square loss between the Support Vector estimate and the Parzen Window estimate.  Because we are hoping to generate a sparse representation of the probability distribution, we add a regularizing term \( \Omega \) which penalizes similar \( S \).  The Support Vector approach seeks a solution in the following form:
 
-% optimization constraints
+\begin{align*}
+\varphi( \mathbf{x}, S) &= \sum_{i} \beta_i K( S_\mathbf{x}, S_i ) \\
+S_\mathbf{x} &= \{ S \cup \mathbf{x} \}
+\end{align*}
 
-% handling of varphi vs phi
+So we can express the Support Vector optimization problem as:
+
+\begin{align*}
+W(\beta) &= \sum_{\mathbf{x} \in X } \Big( \varphi_{P}(\mathbf{x}, S) - \varphi_{SV}(\mathbf{x}, S : \beta ) \Big)^2 + \lambda \Omega(\beta,S) \\
+&= \sum_{ \mathbf{x} \in X } \Big( \varphi_{SV}(\mathbf{x},S : \beta)^2 - 2 \varphi_P(\mathbf{x},S) \varphi_{SV}(\mathbf{x},S : \beta) \Big)  + \lambda \Omega( \beta, S ) \\
+&= \sum_{i,j} \beta_i \beta_j \sum_{\mathbf{x} \in X } K(S_{\mathbf{x}},S_i)K(S_{\mathbf{x}},S_j) - \sum_i \beta_i \sum_j \sum_{\mathbf{x} \in X } \frac{2}{|\mathcal{S}|}K(S_{\mathbf{x}},S_i) K(S_{\mathbf{x}},S_j) + \lambda \sum_i \beta_i \sum_j K(S_i,S_j))^{-1} \\
+&= \sum_{i,j} \beta_i \beta_j \sum_{\mathbf{x} \in X} K(S_{\mathbf{x}},S_i) K(S_{\mathbf{x}},S_j) - \sum_i \beta_i \sum_j \left( \lambda K(S_i,S_j)^{-1} + \frac{2}{|\mathcal{S}|} \sum_{\mathbf{x} \in X} K(S_{\mathbf{x}},S_i) K(S_{\mathbf{x}},S_j) \right)
+\end{align*}
+
+\begin{equation}&\text{subject to} \quad \sum_i \beta_i = 1, \quad \beta_i \ge 0, \ i=1,\hdots,|\mathcal{S}|
+\end{equation}
+
+Notice the regularizer selected is defined as:
+
+\begin{equation}
+\Omega(\beta,S) = \sum_i \beta_i \sum_j K(S_i,S_j)^{-1}
+\end{equation}
+
+\subsection{ Kernel Definition }
+
+When developing the Parzen Window algorithm, we used kernel function \ref{eq:KLsingle} which is based on the Kullbeck Liebler divergence of a probability estimate \ref{eq:PhiSingle} defined at the sets being evaluated.  Our motivation in developing a Support Vector approach is to generate sparse representations of \( \mathcal{P}^{\mathcal{S}} \), in part to reduce the computational demands of evaluating \( \varphi( \mathbf{x}, S) \) for test data sets.  Unfortunately, the kernel function \ref{eq:KLsingle} requires probability estimates of both sets being compared - it would be helpful to develop a kernel function capable of evaluating a distance between a test set \( S_{\hat{X}} \) and a training set \( S_i \) without first calculating an estimate of the probability distribution of \( S_{\hat{X}} \).
+
+
 
 \subsection{Single Channel Correlation}
 
