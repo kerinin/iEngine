@@ -129,18 +129,18 @@ where \( \delta_n \) is the weight corresponding to \( f_n \).  Finally, we assu
 
 \begin{equation} \mathcal{P}^n(t,\theta) = \sum_i \delta_i^n \cdot f_i^n \end{equation}
 
-\subsection{Single Channel Estimation}
-We begin by considering the case where only one channel exists, so for now we will omit the superscript and refer to \(X^n = (\Omega^n,\mathcal{F}^n,\mathcal{P}^n) \) as \(X = (\Omega, \mathcal{F},\mathcal{P}) \).  Given a set of test data \( Y \), our goal is to estimate the probability distribution of \( Y \) over some time window \( \mathcal{T}_y \):
+\subsection{Single Channel Setting}
+We begin by considering the case where only one channel exists, so for now we will omit the superscript and refer to \(X^n = (\Omega^n,\mathcal{F}^n,\mathcal{P}^n) \) as \(X = (\Omega, \mathcal{F},\mathcal{P}) \).  Given a set of test data \( \hat{X} \), our goal is to estimate the probability distribution of \( X \) over some time window \( \mathcal{T}_\hat{x} \):
 
 \begin{align*}
-\mathbf{y}_i &= (y_i,t_i) \\
- Y &= [ \mathbf{y}_0,\hdots,\mathbf{y}_k ] \\
- \mathcal{T}_y &= (t_y, \theta_y ), \quad t_y < \min_t Y < \max_t Y < t_y + \theta_y 
+\hat{x}_i &= (\hat{x}_i,t_i) \\
+\hat{X} &= [ \hat{x}_0,\hdots,\hat{x}_k ] \\
+\mathcal{T}_\hat{x} &= (t_{\hat{x}}, \theta_{\hat{x}} ), \quad t_{\hat{x}} < \min_t \hat{X} < \max_t \hat{X} < t_{\hat{x}} + \theta_{\hat{x}}
 \end{align*}
 
 We begin by defining the subset of the training observations which fall into each time window, scaled and shifted to the interval \( t \in [0,1) \):
 
-\begin{equation} S_{t,\theta} = \left[ \left( x_i,\frac{t_i - t}{\theta} \right) \Big| \quad x_i \in X, \ t \le t_i < t+\theta \right] \end{equation}
+\begin{equation} \label{eq:Ssingle} S_{t,\theta} = \left[ \left( x_i,\frac{t_i - t}{\theta} \right) \Big| \quad x_i \in X, \ t \le t_i < t+\theta \right] \end{equation}
 \[ \mathcal{S} = 
 \begin{bmatrix} 
 S_{t_0,\theta_0} & \hdots & S_{t_0,\theta_z} \\
@@ -149,24 +149,108 @@ S_{t_\ell, \theta_0} & \hdots & S_{t_\ell, \theta_z} \\
 \end{bmatrix}  
 \]
 
-We treat \( \mathcal{S} \) as a random process and observe that \( Y \) can be treated as an observation of \( \mathcal{S} \):
+We treat \( \mathcal{S} \) as a random process:
 
-\[ S_y =  \left[ \left( y_i,\frac{t_i - t_y}{\theta_y} \right) \Big| \quad (y_i,t_i) \in Y \right] \]
+\[ \mathcal{S} = [ \Omega^\mathcal{S}, \mathcal{F}^\mathcal{S},\mathcal{P}^\mathcal{S}] \]
 
-We can now frame the task of estimating the probability distribution of \( Y \) as the task of estimating \( S_y \).  One method of accomplishing this is using the Parzen Window method.  This requires the definition of a metric over the abstract space of \( \mathcal{S} \).  Such a metric can be defined use the symmetric Kullbeck Liebler divergence, again using the Parzen Window method to evaluate the probability measure of \( S \):
+ and observe that \( \hat{X} \) can be treated as an observation of \( \mathcal{S} \):
 
-\begin{align}
-D_{KL}(S_n||S_m) &= -\sum_{\mathbf{x} \in \{ S_n \cup S_m \} } p_n(\mathbf{x}) \log p_m(\mathbf{x}) + \sum_{\mathbf{x} \in \{ S_n \cup S_m \} } p_m(\mathbf{x}) \log p_n(\mathbf{x}) \\
-|S_n - S_m|_{KL} &= D_{KL}(S_n||S_m) + D_{KL}(S_m||S_n) \\
-p_n\big( \mathbf{x} \big) &= \frac{1}{Nh} \sum_{\mathbf{x}_i \in S_n} K \left( \frac{ | \mathbf{x} - \mathbf{x}_i |^2 }{ h} \right)
+\begin{equation} \label{eq:SySingle} 
+S_{\hat{x}} =  \left[ \left( x_i,\frac{t_i - t_{\hat{x}}}{\theta_{\hat{x}}} \right) \Big| \quad (x_i,t_i) \in \hat{X} \right] 
+\end{equation}
+
+We can now frame the task of estimating the probability distribution of \( \hat{X} \) as a task of estimating a probability density function \( \varphi \) for the random process \( \mathcal{S} \): 
+
+\begin{equation} \label{eq:PrS}
+\Pr( X = \mathbf{x} \ | \ S_{\hat{x}} ) &\mapsto \ \Pr( \mathcal{S} = \{ S_{\hat{x}} \cup \mathbf{x} \} ) \ \simeq \ \varphi( \mathbf{x}, S )
+\end{equation}
+
+
+\subsection{Multiple Channel Setting}
+
+In order to extend this result to settings in which multiple channels exist, we return to \ref{eq:Ssingle} and extend the scope to multiple channels:
+
+\begin{equation} \label{eq:Smultiple} S_{t,\theta} = \left[ \left( x_i^n,\frac{t_i - t}{\theta} \right) \Big| \quad x_i^n \in \mathbf{X}, \ t \le t_i < t+\theta \right] \end{equation}
+
+In this case, we treat each channel as an orthonormal basis of the abstract space \( \Omega^\mathcal{S} \).  Equation \ref{eq:SySingle} is likewise extended in the same manner:
+
+\begin{equation} \label{eq:SyMultiple} 
+S_{\hat{x}} =  \left[ \left( x_i^n,\frac{t_i - t_{\hat{x}}}{\theta_{\hat{x}}} \right) \Big| \quad (x_i^n,t_i) \in \mathbf{\hat{X}} \right] 
+\end{equation}
+
+\section{ Parzen Window Estimation}
+
+One method of evaluating \ref{eq:PrS} is by using the Parzen Window method.  We will again begin by considering the single-channel case, then extend the resulting equations as necessary
+
+\subsection{ Single Channel Parzen Window}
+
+The Parzen Window method requires the definition of a metric over the abstract space \( \Omega^\mathcal{S} \).  Such a metric can be defined using the symmetric Kullbeck Liebler divergence with probability measures \( \phi_n(\mathbf{x}) \simeq Pr(X \ | \ S_n) \):
+
+\begin{align} \label{eq:KLsingle}
+D_{KL}(S_n\|S_m) &= -\sum_{\mathbf{x} \in \{ S_n \cup S_m \} } \phi_n(\mathbf{x}) \log \phi_m(\mathbf{x}) + \sum_{\mathbf{x} \in \{ S_n \cup S_m \} } \phi_m(\mathbf{x}) \log \phi_n(\mathbf{x}) \\
+\|S_n - S_m\|_{KL} &= D_{KL}(S_n\|S_m) + D_{KL}(S_m\|S_n)
+\end{align}
+% Need to discuss why the union of n&m is sufficient to evaluate the KL divergence
+
+The Parzen Window estimation of \( \mathcal{P}^\mathcal{S} \) is defined as:
+
+\begin{align} \label{eq:PrSParzenSingle}
+\Pr( \mathcal{S} = S ) &\simeq \frac{1}{|\mathcal{S}| h} \sum_{t,\theta} K \left( \frac{ \left\| S - S_{t,\theta} \right\|_{KL} } { h } \right)
 \end{align}
 
-We can now define an estimate of the distribution of \( Y \) at \( \mathbf{x} \) as:
+where \( | \cdot | \) denotes the cardinality of \( ( \cdot ) \) and \( K \) is some kernel function, for instance the Radial Basis Function:
+
+\begin{equation} \label{eq:RBFparzen}
+K(x) = {1 \over \sqrt{2\pi} }\,e^{-\frac{1}{2}x^2}
+\end{equation}
+
+The same method can be used to estimate \( \phi_n(\mathbf{x}) \) for a given subset \( S_n \):
+
+\begin{equation} \label{eq:PhiSingle}
+\phi_n( \mathbf{x} ) &= \frac{1}{|S_n| h} \sum_{\mathbf{x}_i \in S_n} K \left( \frac{ \| \mathbf{x} - \mathbf{x}_i \|^2 }{ h} \right)
+\end{equation}
+
+Substituting \ref{eq:PrSParzenSingle} into \ref{eq:PrS} our probability distribution estimate becomes:
+
+\begin{equation} \label{eq:VarphiParzenSingle}
+\varphi(\mathbf{x}, S) = \frac{1}{|\mathcal{S}| h} \sum_{t,\theta} K \left( \frac{ \left\| \{ S \cup \mathbf{x} \} - S_{t,\theta} \right\|_{KL} } { h } \right)
+\end{equation}
+
+
+\subsection{ Multiple Channel Parzen Window}
+
+Extending the Parzen Window approach requires the realization that \ref{eq:KLsingle} requires that \( S_n \) and \( S_m \) both be defined over the same abstract space \footnote{ For instance if \( X_n \in \mathbb{R}^2 \) and \( X_m \in \mathbb{R}^3 \), it is impossible to calculate \( \phi_n\big( (x_m,t) \big) \) because the quantituy \( \| x_m - x_n \|^2 \) from using \ref{eq:PhiSingle} is ambiguous.}.  As mentioned earlier, in the Multiple Channel context, each channel is treated as an orthonormal basis of \( \Omega^\mathcal{S} \).  An obvious approach to defining a measure over \( \Omega^\mathcal{S} \) for mutliple channels is to use the Euclidean norm of the Kullbeck Liebler divergence of each channel considered independently:
 
 \begin{align} 
-\Pr\big( \mathbf{x} \ | \ Y, \mathcal{S} \big) &\mapsto \Pr\big( \{ S_y \cup \mathbf{x} \} \ | \ \mathcal{S} \big) \nonumber \\
-&\simeq \frac{1}{\ell z h} \sum_{t,\theta} K \left( \frac{ \left| \{ S_y \cup \mathbf{x} \} - S_{t,\theta} \right|_{KL} } { h } \right)
+S_n^c &= [ \mathbf{x} \ | \ \mathbf{x} \in \{ S_n \cap X^c \} ] \nonumber \\
+\| S_n - S_m \|_{KL}^2 &= \sqrt{ \ \sum_c D_{KL}( S_n^c \| S_m^c )^2 } \label{eq:NormMultiple}
 \end{align}
+
+This requires the following minor extension of \ref{eq:PrSParzenMultiple} and \ref{eq:VarphiParzenSingle}:
+\begin{align} \label{eq:PrSParzenMultiple}
+\Pr( \mathcal{S} = S ) &\simeq \frac{1}{|\mathbf{S}| h} \sum_{t,\theta} K \left( \frac{ \left\| S - S_{t,\theta} \right\|_{KL}^2 } { h } \right)
+\end{align}
+
+\begin{equation} \label{eq:VarphiParzenMultiple}
+\varphi(\mathbf{x}) = \frac{1}{ | \mathbf{S} | h} \sum_{t,\theta} K \left( \frac{ \left\| \{ S \cup \mathbf{x} \} - S_{t,\theta} \right\|_{KL}^2 } { h } \right)
+\end{equation}
+
+
+\section{ Support Vector Estimation}
+
+The Parzen Window method is neither sparse nor computationally efficient, and as the number of observations grows, these deficiencies quickly become prohibitive.  We now investigate the use of Support Vector Machines to generate \( \varphi(\mathbf{x}, S) \).
+
+The Support Vector approach seeks a solution in the following form:
+
+\[ \varphi( \mathbf{x}, S) = \sum_{i} \beta_i K( \{ S \cup \mathbf{x} \}, S_i ) \]
+
+Where \( \beta \) is determined by evaluating a constrained convex optimization problem \footnote{The SV and Parzen Window methods converge when \( \beta_i = \frac{1}{|\mathcal{S}|} \) and similar kernel functions are chosen.}.
+
+% Distance function definition 
+
+% optimization constraints
+
+% handling of varphi vs phi
 
 \subsection{Single Channel Correlation}
 
