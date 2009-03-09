@@ -199,26 +199,26 @@ D_{KL}(S_n\|S_m) &= \sum_{\mathbf{x} \in \{ S_n \cup S_m \} } \phi_n( \mathbf{x}
 
 The Parzen Window estimation of \( \mathcal{P}^\mathcal{S} \) is defined as:
 
-\begin{align} \label{eq:PrSParzenSingle}
-\Pr( \mathcal{S} = S ) &\simeq \frac{1}{|\mathcal{S}| \gamma} \sum_{t,\theta} K \left( \frac{ \left\| S - S_{t,\theta} \right\|_{KL} } { \gamma } \right)
-\end{align}
+\begin{equation} \label{eq:PrSParzenSingle}
+\Pr( \mathcal{S} = S ) \simeq \sum_{i \in \mathcal{S}}  \frac{1}{|\mathcal{S}| } K_\gamma( S, S_i ) 
+\end{equation}
 
 where \( | \cdot | \) denotes the cardinality of \( ( \cdot ) \) and \( K \) is some kernel function, for instance the Radial Basis Function:
 
-\begin{equation} \label{eq:RBFparzen}
-K(x) = {1 \over \sqrt{2\pi} }\,e^{-\frac{1}{2}x^2}
+\begin{equation} \label{eq:KRBFparzen}
+K_\gamma( S_i, S_j ) =  \frac{1}{\gamma \sqrt{2\pi} } e^{-\frac{1}{\gamma} \|S_i - S_j \|_{KL}}
 \end{equation}
 
 The same method can be used to estimate \( \phi_n(\mathbf{x}) \) for a given subset \( S_n \):
 
 \begin{equation} \label{eq:PhiSingle}
-\phi_n( \mathbf{x} ) = \frac{1}{|S_n| \gamma} \sum_{\mathbf{x}_i \in S_n} K \left( \frac{ \| \mathbf{x} - \mathbf{x}_i \|^2 }{ \gamma } \right)
+\phi_n( \mathbf{x} ) = \sum_{\mathbf{x}_i \in S_n} \frac{1}{|S_n|}  K_\gamma (\mathbf{x}, \mathbf{x}_i ) 
 \end{equation}
 
 Substituting \ref{eq:PrSParzenSingle} into \ref{eq:PrS} our probability distribution estimate becomes:
 
 \begin{equation} \label{eq:VarphiParzenSingle}
-\varphi(\mathbf{x}, S) = \frac{1}{|\mathcal{S}| \gamma} \sum_{t,\theta} K \left( \frac{ \left\| \{ S \cup \mathbf{x} \} - S_{t,\theta} \right\|_{KL} } { \gamma } \right)
+\varphi(\mathbf{x}, S) = \frac{1}{|\mathcal{S}|} \sum_{i \in \mathcal{S}} K_\gamma ( \{ S \cup \mathbf{x} \}, S_i )
 \end{equation}
 
 
@@ -231,13 +231,18 @@ S_n^c &= [ \mathbf{x} \ | \ \mathbf{x} \in \{ S_n \cap X^c \} ] \nonumber \\
 \| S_n - S_m \|_{KL}^2 &= \sqrt{ \ \sum_c D_{KL}( S_n^c \| S_m^c )^2 } \label{eq:NormMultiple}
 \end{align}
 
-This requires the following minor extension of \ref{eq:PrSParzenMultiple} and \ref{eq:VarphiParzenSingle}:
-\begin{align} \label{eq:PrSParzenMultiple}
-\Pr( \mathcal{S} = S ) &\simeq \frac{1}{|\mathbf{S}| \gamma} \sum_{t,\theta} K \left( \frac{ \left\| S - S_{t,\theta} \right\|_{KL}^2 } { \gamma } \right)
-\end{align}
+This requires the following minor extension of \ref{eq:KRBFparzen}, \ref{eq:PrSParzenMultiple} and \ref{eq:VarphiParzenSingle}:
+
+\begin{equation} \label{eq:KRBFParzenMultiple}
+K_\gamma( S_i, S_j ) =  \frac{1}{\gamma \sqrt{2\pi} } e^{-\frac{1}{\gamma} \|S_i - S_j \|_{KL}^2 }
+\end{equation}
+
+\begin{equation} \label{eq:PrSParzenMultiple}
+\Pr( \mathcal{S} = S ) \simeq \sum_{i \in \mathbf{S}} \frac{1}{|\mathbf{S}|} K(S, S_i)
+\end{equation}
 
 \begin{equation} \label{eq:VarphiParzenMultiple}
-\varphi(\mathbf{x}) = \frac{1}{ | \mathbf{S} | \gamma } \sum_{t,\theta} K \left( \frac{ \left\| \{ S \cup \mathbf{x} \} - S_{t,\theta} \right\|_{KL}^2 } { \gamma } \right)
+\varphi(\mathbf{x}, S) = \frac{1}{|\mathbf{S}|} \sum_{i \in \mathbf{S}} K_\gamma ( \{ S \cup \mathbf{x} \}, S_i )
 \end{equation}
 
 
