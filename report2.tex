@@ -200,7 +200,7 @@ D_{KL}(S_n\|S_m) &= \sum_{\mathbf{x} \in \{ S_n \cup S_m \} } \phi_n( \mathbf{x}
 The Parzen Window estimation of \( \mathcal{P}^\mathcal{S} \) is defined as:
 
 \begin{align} \label{eq:PrSParzenSingle}
-\Pr( \mathcal{S} = S ) &\simeq \frac{1}{|\mathcal{S}| h} \sum_{t,\theta} K \left( \frac{ \left\| S - S_{t,\theta} \right\|_{KL} } { h } \right)
+\Pr( \mathcal{S} = S ) &\simeq \frac{1}{|\mathcal{S}| \gamma} \sum_{t,\theta} K \left( \frac{ \left\| S - S_{t,\theta} \right\|_{KL} } { \gamma } \right)
 \end{align}
 
 where \( | \cdot | \) denotes the cardinality of \( ( \cdot ) \) and \( K \) is some kernel function, for instance the Radial Basis Function:
@@ -212,13 +212,13 @@ K(x) = {1 \over \sqrt{2\pi} }\,e^{-\frac{1}{2}x^2}
 The same method can be used to estimate \( \phi_n(\mathbf{x}) \) for a given subset \( S_n \):
 
 \begin{equation} \label{eq:PhiSingle}
-\phi_n( \mathbf{x} ) = \frac{1}{|S_n| h} \sum_{\mathbf{x}_i \in S_n} K \left( \frac{ \| \mathbf{x} - \mathbf{x}_i \|^2 }{ h} \right)
+\phi_n( \mathbf{x} ) = \frac{1}{|S_n| \gamma} \sum_{\mathbf{x}_i \in S_n} K \left( \frac{ \| \mathbf{x} - \mathbf{x}_i \|^2 }{ \gamma } \right)
 \end{equation}
 
 Substituting \ref{eq:PrSParzenSingle} into \ref{eq:PrS} our probability distribution estimate becomes:
 
 \begin{equation} \label{eq:VarphiParzenSingle}
-\varphi(\mathbf{x}, S) = \frac{1}{|\mathcal{S}| h} \sum_{t,\theta} K \left( \frac{ \left\| \{ S \cup \mathbf{x} \} - S_{t,\theta} \right\|_{KL} } { h } \right)
+\varphi(\mathbf{x}, S) = \frac{1}{|\mathcal{S}| \gamma} \sum_{t,\theta} K \left( \frac{ \left\| \{ S \cup \mathbf{x} \} - S_{t,\theta} \right\|_{KL} } { \gamma } \right)
 \end{equation}
 
 
@@ -233,11 +233,11 @@ S_n^c &= [ \mathbf{x} \ | \ \mathbf{x} \in \{ S_n \cap X^c \} ] \nonumber \\
 
 This requires the following minor extension of \ref{eq:PrSParzenMultiple} and \ref{eq:VarphiParzenSingle}:
 \begin{align} \label{eq:PrSParzenMultiple}
-\Pr( \mathcal{S} = S ) &\simeq \frac{1}{|\mathbf{S}| h} \sum_{t,\theta} K \left( \frac{ \left\| S - S_{t,\theta} \right\|_{KL}^2 } { h } \right)
+\Pr( \mathcal{S} = S ) &\simeq \frac{1}{|\mathbf{S}| \gamma} \sum_{t,\theta} K \left( \frac{ \left\| S - S_{t,\theta} \right\|_{KL}^2 } { \gamma } \right)
 \end{align}
 
 \begin{equation} \label{eq:VarphiParzenMultiple}
-\varphi(\mathbf{x}) = \frac{1}{ | \mathbf{S} | h} \sum_{t,\theta} K \left( \frac{ \left\| \{ S \cup \mathbf{x} \} - S_{t,\theta} \right\|_{KL}^2 } { h } \right)
+\varphi(\mathbf{x}) = \frac{1}{ | \mathbf{S} | \gamma } \sum_{t,\theta} K \left( \frac{ \left\| \{ S \cup \mathbf{x} \} - S_{t,\theta} \right\|_{KL}^2 } { \gamma } \right)
 \end{equation}
 
 
@@ -255,7 +255,7 @@ where \( \theta(x) \) is the indicator function.  To evaluate this function, the
 Rather than calculating the cumulative probability distribution of \( \Omega^\mathcal{S} \), we begin with the assumption that the Parzen Window estimate of the probability distribution is accurate and attempt to minimize the square loss between the Support Vector estimate and the Parzen Window estimate.  Because we are hoping to generate a sparse representation of the probability distribution, we add a regularizing term \( \Omega \) which penalizes similar \( S \).  The Support Vector approach seeks a solution in the following form:
 
 \begin{align} \label{eq:SVResultSingle}
-\varphi( \mathbf{x}, S) &= \sum_{i} \beta_i K( S_\mathbf{x}, S_i ) \\
+\varphi( \mathbf{x}, S) &= \sum_{i} \beta_i K_\gamma( S_\mathbf{x}, S_i ) \\
 S_\mathbf{x} &= \{ S \cup \mathbf{x} \} \nonumber
 \end{align}
 
@@ -264,8 +264,8 @@ So we can express the Support Vector optimization problem as:
 \begin{align*}
 W(\beta) &= \sum_{\mathbf{x} \in X } \Big( \varphi_{P}(\mathbf{x}, S) - \varphi_{SV}(\mathbf{x}, S : \beta ) \Big)^2 + \lambda \Omega(\beta,S) \\
 &= \sum_{ \mathbf{x} \in X } \Big( \varphi_{SV}(\mathbf{x},S : \beta)^2 - 2 \varphi_P(\mathbf{x},S) \varphi_{SV}(\mathbf{x},S : \beta) \Big)  + \lambda \Omega( \beta, S ) \\
-&= \sum_{i,j} \beta_i \beta_j \sum_{\mathbf{x} \in X } K(S_{\mathbf{x}},S_i)K(S_{\mathbf{x}},S_j) - \sum_i \beta_i \sum_{\mathbf{x} \in X } \sum_j \frac{2}{|\mathcal{S}|}K(S_{\mathbf{x}},S_i) K(S_{\mathbf{x}},S_j) + \lambda \sum_i \beta_i \sum_{\mathbf{x} \in X} K(S_{\mathbf{x}},S_i)^{-1} \\
-&= \sum_{i,j} \beta_i \beta_j \sum_{\mathbf{x} \in X} K(S_{\mathbf{x}},S_i) K(S_{\mathbf{x}},S_j) + \sum_i \beta_i \sum_{\mathbf{x} \in X } \left( \lambda K(S_{\mathbf{x}},S_i)^{-1} - \frac{2}{|\mathcal{S}|} \sum_j K(S_{\mathbf{x}},S_i) K(S_{\mathbf{x}},S_j) \right)
+&= \sum_{i,j} \beta_i \beta_j \sum_{\mathbf{x} \in X } K_\gamma(S_{\mathbf{x}},S_i)K_\gamma(S_{\mathbf{x}},S_j) - \sum_i \beta_i \sum_{\mathbf{x} \in X } \sum_j \frac{2}{|\mathcal{S}|}K_\gamma(S_{\mathbf{x}},S_i) K_\gamma(S_{\mathbf{x}},S_j) + \lambda \sum_i \beta_i \sum_{\mathbf{x} \in X} K_\gamma(S_{\mathbf{x}},S_i)^{-1} \\
+&= \sum_{i,j} \beta_i \beta_j \sum_{\mathbf{x} \in X} K_\gamma(S_{\mathbf{x}},S_i) K_\gamma(S_{\mathbf{x}},S_j) + \sum_i \beta_i \sum_{\mathbf{x} \in X } \left( \lambda K_\gamma(S_{\mathbf{x}},S_i)^{-1} - \frac{2}{|\mathcal{S}|} \sum_j K_\gamma(S_{\mathbf{x}},S_i) K_\gamma(S_{\mathbf{x}},S_j) \right)
 \end{align*}
 
 \begin{equation} \label{eq:SVProcessSingle} \text{subject to} \quad \sum_i \beta_i = 1, \quad \beta_i \ge 0, \ i=1,\hdots,|\mathcal{S}|
@@ -274,15 +274,15 @@ W(\beta) &= \sum_{\mathbf{x} \in X } \Big( \varphi_{P}(\mathbf{x}, S) - \varphi_
 Notice the regularizer selected is defined as:
 
 \begin{equation}
-\Omega(\beta,S) = \sum_i \beta_i \sum_{\mathbf{x} \in X} K(S_{\mathbf{x}},S_i)^{-1}
+\Omega(\beta,S) = \sum_i \beta_i \sum_{\mathbf{x} \in X} K_\gamma(S_{\mathbf{x}},S_i)^{-1}
 \end{equation}
 
 Equation \ref{eq:SVProcessSingle} is a quadratic optimiztion problem defined as:
 
 \begin{align*}
 W(\beta) &= \frac{1}{2} \beta^T P \beta + q^T \beta \\
-P_{i,j} &= \sum_{\mathbf{x} \in X } K(S_{\mathbf{x}},S_i) K(S_{\mathbf{x}},S_j) \\
-q_i &= \sum_{\mathbf{x} \in X } \left( \lambda K(S_{\mathbf{x}},S_i)^{-1} - \frac{2}{|\mathcal{S}|} \sum_j K(S_{\mathbf{x}},S_i) K(S_{\mathbf{x}},S_j) \right) \\
+P_{i,j} &= \sum_{\mathbf{x} \in X } K_\gamma(S_{\mathbf{x}},S_i) K_\gamma(S_{\mathbf{x}},S_j) \\
+q_i &= \sum_{\mathbf{x} \in X } \left( \lambda K_\gamma(S_{\mathbf{x}},S_i)^{-1} - \frac{2}{|\mathcal{S}|} \sum_j K_\gamma(S_{\mathbf{x}},S_i) K_\gamma(S_{\mathbf{x}},S_j) \right) \\
 \end{align*}
 \begin{align}
 P &= \langle \mathbf{K}^T \cdot \mathbf{K} \rangle  \label{eq:SVPSingle} \\
@@ -296,16 +296,22 @@ When developing the Parzen Window algorithm, we used kernel function \ref{eq:KLs
 Note that \ref{eq:SVProcessSingle} is formulated in such a way that the first kernel argument is always \( S_{\mathbf{x}} \), which allows us to define a kernel which takes a set of points as its first argument and a probability distribution as its second.  The definition of \ref{eq:SVPSingle} also allows us to define non-symmetric kernels without sacrificing convexity or monotonicity in the optimization objective function.  We can therefore use any measure of the likelihood of observing a set of points given a probability distribution, for example the conditional likelihood, the shannon entropy, the jaynes entropy, the renyi entropy, and possibly the average self-information.  We will use the Shannon Entropy, as it is equivalent the the Kullback Lieblier divergence in the context of Renyi entropy with \( \alpha = 1 \).
 
 \begin{equation}
-K_{SV}( X, \phi ) = \sum_{x \in X} \phi(x) \log \phi(x)
+\| X - \phi \|_{SV} = \sum_{x \in X} \phi(x) \log \phi(x)
 \end{equation}
 
 Recalling that \( S_\mathbf{x} = \{ S \cup \mathbf{x} \} \), we observe that:
 
 \begin{equation}
-K( S_{\mathbf{x}}, S_i ) = K(S, S_i) + K( \mathbf{x}, S_i )
+\| S_{\mathbf{x}} - S_i \|_{SV} = \| S - S_i \|_{SV} + \| \mathbf{x} - S_i \|_{SV}
 \end{equation}
 
-In situations where probabilities are being calculated for a uniform set of points in \( \Omega^{\mathcal{S}} \), this can considerably reduce the computational time needed to evaluate \( \mathbf{K} \).
+We restate the kernel function as:
+
+\begin{equation}
+K_\gamma( X, S_i ) = e^{ -\frac{ \| X - S_i \|_{SV} }{ \gamma } }
+\end{equation}
+
+In situations where probabilities are being calculated for a uniform set of points in \( \Omega^{\mathcal{S}} \), this can considerably reduce the computational time needed to evaluate \( \mathbf{K} \), as \( \|\mathbf{x},S_i \| \) can be computed once and then added to each \( \|S,S_i\|, S \in \mathcal{S} \).
 
 
 \subsection{ Random Vector Estimation }
@@ -315,14 +321,14 @@ Evaluating \ref{eq:SVProcessSingle} over a training set \( X \) produces a set \
 One method of Support Vector density estimation is to search for a solution in the following form:
 
 \begin{equation} \label{eq:SVDensity}
-p(x) = \sum_{i=1}^\ell \left( \alpha_i^1 \mathcal{K}_1(x_i,x) + ... + \alpha_i^\kappa \mathcal{K}_\kappa( x_i,x) \right)
+\phi(x) = \sum_{i=1}^\ell \left( \beta_i^1 \mathcal{K}_1(x_i,x) + ... + \beta_i^\kappa \mathcal{K}_\kappa( x_i,x) \right)
 \end{equation}
 
 by selecting values of \( \beta \) which minimize the square loss of the empirical cumulative probability distribution using some regularizer:
 
 \begin{align}
-&\min \left( \sum_{i=1}^\ell \left( y_i - \sum_{j=1}^\ell \sum_{n=1}^\kappa \alpha_j^n k_n(x_i, x_j) \right)^2 + \lambda \sum_{i=1}^\ell \sum_{n=1}^\kappa \frac{1}{\gamma_n} \alpha_i^n \right) \\
-&\text{subject to} \quad \sum_{i=1}^\ell \sum_{n=1}^\kappa \alpha_i^n = 1, \quad \alpha_i \ge 0 \\
+&\min \left( \sum_{i=1}^\ell \left( y_i - \sum_{j=1}^\ell \sum_{n=1}^\kappa \beta_j^n k_n(x_i, x_j) \right)^2 + \lambda \sum_{i=1}^\ell \sum_{n=1}^\kappa \frac{1}{\gamma_n} \beta_i^n \right) \\
+&\text{subject to} \quad \sum_{i=1}^\ell \sum_{n=1}^\kappa \beta_i^n = 1, \quad \beta_i \ge 0 \\
 \end{align}
 
 given a kernel function \( k(x,x') \) and a cross-kernel \( \mathcal{K}(x,x') \):
