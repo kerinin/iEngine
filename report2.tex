@@ -264,8 +264,8 @@ So we can express the Support Vector optimization problem as:
 \begin{align*}
 W(\beta) &= \sum_{\mathbf{x} \in X } \Big( \varphi_{P}(\mathbf{x}, S) - \varphi_{SV}(\mathbf{x}, S : \beta ) \Big)^2 + \lambda \Omega(\beta,S) \\
 &= \sum_{ \mathbf{x} \in X } \Big( \varphi_{SV}(\mathbf{x},S : \beta)^2 - 2 \varphi_P(\mathbf{x},S) \varphi_{SV}(\mathbf{x},S : \beta) \Big)  + \lambda \Omega( \beta, S ) \\
-&= \sum_{i,j} \beta_i \beta_j \sum_{\mathbf{x} \in X } K(S_{\mathbf{x}},S_i)K(S_{\mathbf{x}},S_j) - \sum_i \beta_i \sum_j \sum_{\mathbf{x} \in X } \frac{2}{|\mathcal{S}|}K(S_{\mathbf{x}},S_i) K(S_{\mathbf{x}},S_j) + \lambda \sum_i \beta_i \sum_j K(S_i,S_j))^{-1} \\
-&= \sum_{i,j} \beta_i \beta_j \sum_{\mathbf{x} \in X} K(S_{\mathbf{x}},S_i) K(S_{\mathbf{x}},S_j) + \sum_i \beta_i \sum_j \left( \lambda K(S_i,S_j)^{-1} - \frac{2}{|\mathcal{S}|} \sum_{\mathbf{x} \in X} K(S_{\mathbf{x}},S_i) K(S_{\mathbf{x}},S_j) \right)
+&= \sum_{i,j} \beta_i \beta_j \sum_{\mathbf{x} \in X } K(S_{\mathbf{x}},S_i)K(S_{\mathbf{x}},S_j) - \sum_i \beta_i \sum_{\mathbf{x} \in X } \sum_j \frac{2}{|\mathcal{S}|}K(S_{\mathbf{x}},S_i) K(S_{\mathbf{x}},S_j) + \lambda \sum_i \beta_i \sum_{\mathbf{x} \in X} K(S_{\mathbf{x}},S_i)^{-1} \\
+&= \sum_{i,j} \beta_i \beta_j \sum_{\mathbf{x} \in X} K(S_{\mathbf{x}},S_i) K(S_{\mathbf{x}},S_j) + \sum_i \beta_i \sum_{\mathbf{x} \in X } \left( \lambda K(S_{\mathbf{x}},S_i)^{-1} - \frac{2}{|\mathcal{S}|} \sum_j K(S_{\mathbf{x}},S_i) K(S_{\mathbf{x}},S_j) \right)
 \end{align*}
 
 \begin{equation} \label{eq:SVProcessSingle} \text{subject to} \quad \sum_i \beta_i = 1, \quad \beta_i \ge 0, \ i=1,\hdots,|\mathcal{S}|
@@ -274,7 +274,7 @@ W(\beta) &= \sum_{\mathbf{x} \in X } \Big( \varphi_{P}(\mathbf{x}, S) - \varphi_
 Notice the regularizer selected is defined as:
 
 \begin{equation}
-\Omega(\beta,S) = \sum_i \beta_i \sum_j K(S_i,S_j)^{-1}
+\Omega(\beta,S) = \sum_i \beta_i \sum_{\mathbf{x} \in X} K(S_{\mathbf{x}},S_i)^{-1}
 \end{equation}
 
 Equation \ref{eq:SVProcessSingle} is a quadratic optimiztion problem defined as:
@@ -282,16 +282,30 @@ Equation \ref{eq:SVProcessSingle} is a quadratic optimiztion problem defined as:
 \begin{align*}
 W(\beta) &= \frac{1}{2} \beta^T P \beta + q^T \beta \\
 P_{i,j} &= \sum_{\mathbf{x} \in X } K(S_{\mathbf{x}},S_i) K(S_{\mathbf{x}},S_j) \\
-q_i &= \sum_j \left( \lambda K(S_i,S_j)^{-1} - \frac{2}{|\mathcal{S}|} \sum_{\mathbf{x} \in X} K(S_{\mathbf{x}},S_i) K(S_{\mathbf{x}},S_j) \right) \\
+q_i &= \sum_{\mathbf{x} \in X } \left( \lambda K(S_{\mathbf{x}},S_i)^{-1} - \frac{2}{|\mathcal{S}|} \sum_j K(S_{\mathbf{x}},S_i) K(S_{\mathbf{x}},S_j) \right) \\
 \end{align*}
 \begin{align}
-P &= \langle \mathbf{K}^T \cdot \mathbf{K} \rangle \\
+P &= \langle \mathbf{K}^T \cdot \mathbf{K} \rangle  \label{eq:SVPSingle} \\
 q &= \lambda \langle \mathbf{K}^T \cdot \mathbf{1}_{( |K|, 1 )} \rangle^{-1} - \frac{2}{ | \mathcal{S} | } \langle \mathbf{K}^T \cdot \mathbf{K} \cdot \mathbf{1}_{( |K|, 1 )} \rangle
 \end{align}
 
 \subsection{  Random Process Kernel Definition }
 
 When developing the Parzen Window algorithm, we used kernel function \ref{eq:KLsingle} which is based on the Kullbeck Liebler divergence of a probability estimate \ref{eq:PhiSingle} defined at the sets being evaluated.  Our motivation in developing a Support Vector approach is to generate sparse representations of \( \mathcal{P}^{\mathcal{S}} \), in part to reduce the computational demands of evaluating \( \varphi( \mathbf{x}, S) \) for test data sets.  Unfortunately, kernel function \ref{eq:KLsingle} requires probability estimates of both sets being compared - it would be helpful to develop a kernel function capable of evaluating a distance between a test set \( S_{\hat{X}} \) and a training set \( S_i \) without first calculating an estimate of the probability distribution of \( S_{\hat{X}} \).
+
+Note that \ref{eq:SVProcessSingle} is formulated in such a way that the first kernel argument is always \( S_{\mathbf{x}} \), which allows us to define a kernel which takes a set of points as its first argument and a probability distribution as its second.  The definition of \ref{eq:SVPSingle} also allows us to define non-symmetric kernels without sacrificing convexity or monotonicity in the optimization objective function.  We can therefore use any measure of the likelihood of observing a set of points given a probability distribution, for example the conditional likelihood, the shannon entropy, the jaynes entropy, the renyi entropy, and possibly the average self-information.  We will use the Shannon Entropy, as it is equivalent the the Kullback Lieblier divergence in the context of Renyi entropy with \( \alpha = 1 \).
+
+\begin{equation}
+K_{SV}( X, \phi ) = \sum_{x \in X} \phi(x) \log \phi(x)
+\end{equation}
+
+Recalling that \( S_\mathbf{x} = \{ S \cup \mathbf{x} \} \), we observe that:
+
+\begin{equation}
+K( S_{\mathbf{x}}, S_i ) = K(S, S_i) + K( \mathbf{x}, S_i )
+\end{equation}
+
+In situations where probabilities are being calculated for a uniform set of points in \( \Omega^{\mathcal{S}} \), this can considerably reduce the computational time needed to evaluate \( \mathbf{K} \).
 
 
 \subsection{ Random Vector Estimation }
