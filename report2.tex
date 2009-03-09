@@ -191,7 +191,8 @@ One method of evaluating \ref{eq:PrS} is by using the Parzen Window method.  We 
 The Parzen Window method requires the definition of a metric over the abstract space \( \Omega^\mathcal{S} \).  Such a metric can be defined using the symmetric Kullbeck Liebler divergence with probability measures \( \phi_n(\mathbf{x}) \simeq Pr(X \ | \ S_n) \):
 
 \begin{align} \label{eq:KLsingle}
-D_{KL}(S_n\|S_m) &= -\sum_{\mathbf{x} \in \{ S_n \cup S_m \} } \phi_n(\mathbf{x}) \log \phi_m(\mathbf{x}) + \sum_{\mathbf{x} \in \{ S_n \cup S_m \} } \phi_m(\mathbf{x}) \log \phi_n(\mathbf{x}) \\
+D_{KL}(S_n\|S_m) &= \sum_{\mathbf{x} \in \{ S_n \cup S_m \} } \phi_n( \mathbf{x} ) \log \frac{ \phi_n(\mathbf{x}) }{ \phi_m( \mathbf{x} ) } \nonumber \\
+&= -\sum_{\mathbf{x} \in \{ S_n \cup S_m \} } \phi_n(\mathbf{x}) \log \phi_m(\mathbf{x}) + \sum_{\mathbf{x} \in \{ S_n \cup S_m \} } \phi_n(\mathbf{x}) \log \phi_n(\mathbf{x}) \\
 \|S_n - S_m\|_{KL} &= D_{KL}(S_n\|S_m) + D_{KL}(S_m\|S_n)
 \end{align}
 % Need to discuss why the union of n&m is sufficient to evaluate the KL divergence
@@ -264,7 +265,7 @@ So we can express the Support Vector optimization problem as:
 W(\beta) &= \sum_{\mathbf{x} \in X } \Big( \varphi_{P}(\mathbf{x}, S) - \varphi_{SV}(\mathbf{x}, S : \beta ) \Big)^2 + \lambda \Omega(\beta,S) \\
 &= \sum_{ \mathbf{x} \in X } \Big( \varphi_{SV}(\mathbf{x},S : \beta)^2 - 2 \varphi_P(\mathbf{x},S) \varphi_{SV}(\mathbf{x},S : \beta) \Big)  + \lambda \Omega( \beta, S ) \\
 &= \sum_{i,j} \beta_i \beta_j \sum_{\mathbf{x} \in X } K(S_{\mathbf{x}},S_i)K(S_{\mathbf{x}},S_j) - \sum_i \beta_i \sum_j \sum_{\mathbf{x} \in X } \frac{2}{|\mathcal{S}|}K(S_{\mathbf{x}},S_i) K(S_{\mathbf{x}},S_j) + \lambda \sum_i \beta_i \sum_j K(S_i,S_j))^{-1} \\
-&= \sum_{i,j} \beta_i \beta_j \sum_{\mathbf{x} \in X} K(S_{\mathbf{x}},S_i) K(S_{\mathbf{x}},S_j) - \sum_i \beta_i \sum_j \left( \lambda K(S_i,S_j)^{-1} + \frac{2}{|\mathcal{S}|} \sum_{\mathbf{x} \in X} K(S_{\mathbf{x}},S_i) K(S_{\mathbf{x}},S_j) \right)
+&= \sum_{i,j} \beta_i \beta_j \sum_{\mathbf{x} \in X} K(S_{\mathbf{x}},S_i) K(S_{\mathbf{x}},S_j) + \sum_i \beta_i \sum_j \left( \lambda K(S_i,S_j)^{-1} - \frac{2}{|\mathcal{S}|} \sum_{\mathbf{x} \in X} K(S_{\mathbf{x}},S_i) K(S_{\mathbf{x}},S_j) \right)
 \end{align*}
 
 \begin{equation} \label{eq:SVProcessSingle} \text{subject to} \quad \sum_i \beta_i = 1, \quad \beta_i \ge 0, \ i=1,\hdots,|\mathcal{S}|
@@ -276,17 +277,21 @@ Notice the regularizer selected is defined as:
 \Omega(\beta,S) = \sum_i \beta_i \sum_j K(S_i,S_j)^{-1}
 \end{equation}
 
+Equation \ref{eq:SVProcessSingle} is a quadratic optimiztion problem defined as:
+
+\begin{align*}
+W(\beta) &= \frac{1}{2} \beta^T P \beta + q^T \beta \\
+P_{i,j} &= \sum_{\mathbf{x} \in X } K(S_{\mathbf{x}},S_i) K(S_{\mathbf{x}},S_j) \\
+q_i &= \sum_j \left( \lambda K(S_i,S_j)^{-1} - \frac{2}{|\mathcal{S}|} \sum_{\mathbf{x} \in X} K(S_{\mathbf{x}},S_i) K(S_{\mathbf{x}},S_j) \right) \\
+\end{align*}
+\begin{align}
+P &= \langle \mathbf{K}^T \cdot \mathbf{K} \rangle \\
+q &= \lambda \langle \mathbf{K}^T \cdot \mathbf{1}_{( |K|, 1 )} \rangle^{-1} - \frac{2}{ | \mathcal{S} | } \langle \mathbf{K}^T \cdot \mathbf{K} \cdot \mathbf{1}_{( |K|, 1 )} \rangle
+\end{align}
+
 \subsection{  Random Process Kernel Definition }
 
 When developing the Parzen Window algorithm, we used kernel function \ref{eq:KLsingle} which is based on the Kullbeck Liebler divergence of a probability estimate \ref{eq:PhiSingle} defined at the sets being evaluated.  Our motivation in developing a Support Vector approach is to generate sparse representations of \( \mathcal{P}^{\mathcal{S}} \), in part to reduce the computational demands of evaluating \( \varphi( \mathbf{x}, S) \) for test data sets.  Unfortunately, kernel function \ref{eq:KLsingle} requires probability estimates of both sets being compared - it would be helpful to develop a kernel function capable of evaluating a distance between a test set \( S_{\hat{X}} \) and a training set \( S_i \) without first calculating an estimate of the probability distribution of \( S_{\hat{X}} \).
-
-From the definition of the Kullback Liebler divergence, we can see that if we are calculating the divergence between a set of points and a probability distribution is possible using the empirical distribution of the points:
-
-\begin{align}
-p_{\text{emp}}(X = x) &= \begin{cases} |X|^{-1} & x \in X \\ 0 & \text{otherwise} \end{cases} \\
-\hat{D}_{KL}(P\|p_{\text{emp}}) &= \sum_i P(i) \log \frac{ P(i) }{ p_{\text{emp}}(i) } \nonumber \\
-&= \sum_{x \in X} P(x) \log P(x) |X|  \label{eq:DKLemp}
-\end{align}
 
 
 \subsection{ Random Vector Estimation }
