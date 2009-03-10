@@ -218,8 +218,9 @@ The same method can be used to estimate \( \phi_n(\mathbf{x}) \) for a given sub
 Substituting \ref{eq:PrSParzenSingle} into \ref{eq:PrS} our probability distribution estimate becomes:
 
 \begin{equation} \label{eq:VarphiParzenSingle}
-\varphi(\mathbf{x}, S_{\hat{x}}) = \frac{1}{|\mathcal{S}|} \sum_{i \in \mathcal{S}} K_\gamma ( \{ S_{\hat{x}} \cup \mathbf{x} \}, S_i )
+\varphi_P(\mathbf{x}, S) = \sum_{i \in \mathcal{S}} \frac{1}{|\mathcal{S}|} K_\gamma ( S_{\mathbf{x}}, S_i )
 \end{equation}
+\[ S_{\mathbf{x}} = \{ S \cup \mathbf{x} \}\]
 
 
 \subsection{ Multiple Channel Parzen Window}
@@ -252,7 +253,7 @@ where \( \theta(x) \) is the indicator function.  To evaluate this function, the
 Rather than calculating the cumulative probability distribution of \( \Omega^\mathcal{S} \), we begin with the assumption that the Parzen Window estimate of the probability distribution is accurate and attempt to minimize the square loss between the Support Vector estimate and the Parzen Window estimate.  Because we are hoping to generate a sparse representation of the probability distribution, we add a regularizing term \( \Omega \) which penalizes similar \( S \).  The Support Vector approach seeks a solution in the following form:
 
 \begin{align} \label{eq:SVResultSingle}
-\varphi( \mathbf{x}, S) &= \sum_{i} \beta_i K_\gamma( S_\mathbf{x}, S_i ) \\
+\varphi_{SV}( \mathbf{x}, S : \beta) &= \sum_{i} \beta_i K_\gamma( S_\mathbf{x}, S_i ) \\
 S_\mathbf{x} &= \{ S \cup \mathbf{x} \} \nonumber
 \end{align}
 
@@ -290,45 +291,45 @@ q &= \lambda \langle \mathbf{K}^T \cdot \mathbf{1}_{( |K|, 1 )} \rangle^{-1} - \
 
 When developing the Parzen Window algorithm, we used kernel function \ref{eq:KLsingle} which is based on the Kullbeck Liebler divergence of a probability estimate \ref{eq:PhiSingle} defined at the sets being evaluated.  Our motivation in developing a Support Vector approach is to generate sparse representations of \( \mathcal{P}^{\mathcal{S}} \), in part to reduce the computational demands of evaluating \( \varphi( \mathbf{x}, S) \) for test data sets.  Unfortunately, kernel function \ref{eq:KLsingle} requires probability estimates of both sets being compared - it would be helpful to develop a kernel function capable of evaluating a distance between a test set \( S_{\hat{X}} \) and a training set \( S_i \) without first calculating an estimate of the probability distribution of \( S_{\hat{X}} \).
 
-Note that \ref{eq:SVProcessSingle} is formulated in such a way that the first kernel argument is always \( S_{\mathbf{x}} \), which allows us to define a kernel which takes a set of points as its first argument and a probability distribution as its second.  The definition of \ref{eq:SVPSingle} also allows us to define non-symmetric kernels without sacrificing convexity or monotonicity in the optimization objective function.  We can therefore use any measure of the likelihood of observing a set of points given a probability distribution, for example the conditional likelihood, the shannon entropy, the jaynes entropy, the renyi entropy, and possibly the average self-information.  We will use the Shannon Entropy, as it is equivalent the the Kullback Lieblier divergence in the context of Renyi entropy with \( \alpha = 1 \).
+Note that \ref{eq:SVProcessSingle} is formulated in such a way that the first kernel argument is always \( S_{\mathbf{x}} \), which allows us to define a kernel which takes a set of points as its first argument and a probability distribution as its second.  The definition of \ref{eq:SVPSingle} also allows us to define non-symmetric kernels without sacrificing convexity or monotonicity in the optimization objective function.  We can therefore use any measure of the divergence between a set of points and a probability distribution.  We consider the Renyi entropy with \( \alpha = 1 \) and select the Shannon Entropy as our kernel metric, as it is equivalent the the Kullback Lieblier divergence.
 
 \begin{equation}
-\| X - \phi \|_{SV} = \sum_{x \in X} \phi(x) \log \phi(x)
+\| X - \phi \|_{H} = \sum_{x \in X} \phi(x) \log \phi(x)
 \end{equation}
 
 Recalling that \( S_\mathbf{x} = \{ S \cup \mathbf{x} \} \), we observe that:
 
 \begin{equation}
-\| S_{\mathbf{x}} - S_i \|_{SV} = \| S - S_i \|_{SV} + \| \mathbf{x} - S_i \|_{SV}
+\| S_{\mathbf{x}} - S_i \|_{H} = \| S - S_i \|_{H} + \| \mathbf{x} - S_i \|_{H}
 \end{equation}
 
 We restate the kernel function as:
 
 \begin{equation}
-K_\gamma( X, S_i ) = e^{ -\frac{ \| X - S_i \|_{SV} }{ \gamma } }
+K_\gamma( X, S_i ) = e^{ -\frac{ \| X - S_i \|_{H} }{ \gamma } }
 \end{equation}
 
-In situations where probabilities are being calculated for a uniform set of points in \( \Omega^{\mathcal{S}} \), this can considerably reduce the computational time needed to evaluate \( \mathbf{K} \), as \( \|\mathbf{x},S_i \| \) can be computed once and then added to each \( \|S,S_i\|, S \in \mathcal{S} \).
+In situations where probabilities are being calculated for a uniform set of points in \( \Omega^{\mathcal{S}} \), this can considerably reduce the computational time needed to evaluate \( \mathbf{K} \), as \( \|\mathbf{x} - S_i \|_H \) can be computed once and then added to each \( \|S - S_i\|_H, S \in \mathcal{S} \).
 
 
 \subsection{ Random Vector Estimation }
  
-Evaluating \ref{eq:SVProcessSingle} over a training set \( X \) produces a set \( \mathcal{S}_{SV} \in \mathcal{S} \) referred to as Support Vectors.  While \ref{eq:SVProcessSingle} produces a sparse representation of \( \mathcal{P}^\mathcal{S} \), further sparseness can be achieved by refining the definition of \( \phi(\mathbf{x}) \).  In the context of computing the kernel matrices used in optimizing \ref{eq:SVProcessSingle} the Parzen Window definition of \( \phi(\mathbf{x}) \) is computationally acceptable, as it results in a good approximation with a minimal amount of computation \footnote{ The Parzen Window estimate at a point requires distance computations for each observation and a summation.  By contrast, the SV estimate requires the same number of distance computations as well as the solving of a quadratic optimization problem whose complexity increases exponentially with the number of observations. }.  In the context of evaluating \ref{eq:SVResultSingle} over a testing set \( \hat{X} \), the Parzen Window algorithm for \( \phi(\mathbf{x}) \) is sub-optimal due to the fact that it requires the full set of observations for each \( S_i \in \mathcal{S}_{SV} \).  In this context, a sparse algorithm for \( \phi(\mathbf{x}) \) would reduce both the data required to store \( \mathcal{S}_{SV} \) and the computational resources required to evaluate \ref{eq:DKLemp}.
+Evaluating \ref{eq:SVProcessSingle} over a training set \( X \) produces a set \( \mathcal{S}_{SV} \in \mathcal{S} \) referred to as Support Vectors.  While \ref{eq:SVProcessSingle} produces a sparse representation of \( \mathcal{P}^\mathcal{S} \) by eliminating some \( S \), further sparseness can be achieved by refining the definition of \( \phi(\mathbf{x}) \) to allow the elimination of some \( \mathbf{x} \) in each \( S \in \mathcal{S}_{SV} \).  In the context of computing the kernel matrices used in optimizing \ref{eq:SVProcessSingle} the Parzen Window definition of \( \phi(\mathbf{x}) \) is computationally acceptable, as it results in a good approximation with a minimal amount of computation \footnote{ The Parzen Window estimate at a point requires distance computations for each observation and a summation.  By contrast, the SV estimate requires the same number of distance computations as well as the solving of a quadratic optimization problem whose complexity increases exponentially with the number of observations. }.  In the context of evaluating \ref{eq:SVResultSingle} over a testing set \( \hat{X} \), the Parzen Window algorithm for \( \phi(\mathbf{x}) \) is sub-optimal due to the fact that it requires the full set of observations for each \( S \in \mathcal{S}_{SV} \).  In this context, a sparse algorithm for \( \phi(\mathbf{x}) \) would reduce both the data required to store \( \mathcal{S}_{SV} \) and the computational resources required to evaluate \ref{eq:DKLemp}.
 
-One method of Support Vector density estimation is to search for a solution in the following form:
+We return now to the empirical cumulative distribution function method of Support Vector density estimation and search for a solution in the following form, which is able to use multiple non-symmetric kernel functions simultaneously:
 
 \begin{equation} \label{eq:SVDensity}
 \phi(x) = \sum_{i=1}^\ell \left( \beta_i^1 \mathcal{K}_1(x_i,x) + ... + \beta_i^\kappa \mathcal{K}_\kappa( x_i,x) \right)
 \end{equation}
 
-by selecting values of \( \beta \) which minimize the square loss of the empirical cumulative probability distribution using some regularizer:
+We select values of \( \beta \) which minimize the square loss of the empirical cumulative probability distribution using some regularizer:
 
 \begin{align}
 &\min \left( \sum_{i=1}^\ell \left( y_i - \sum_{j=1}^\ell \sum_{n=1}^\kappa \beta_j^n k_n(x_i, x_j) \right)^2 + \lambda \sum_{i=1}^\ell \sum_{n=1}^\kappa \frac{1}{\gamma_n} \beta_i^n \right) \\
 &\text{subject to} \quad \sum_{i=1}^\ell \sum_{n=1}^\kappa \beta_i^n = 1, \quad \beta_i \ge 0 \\
 \end{align}
 
-given a kernel function \( k(x,x') \) and a cross-kernel \( \mathcal{K}(x,x') \):
+given a kernel function \( k(x,x') \) from the sigmoid family to approximate the cumulative probability distribution and it's derivative which we refer to as the cross-kernel \( \mathcal{K}(x,x') \) which we use to construct an estimate of the probability distribution:
 
 \begin{align}
 &k(x,x') = \frac{1}{1+e^{-\gamma(x-x')} } \\
@@ -373,7 +374,12 @@ The architecture has been tested against several data sets.  In all cases the sy
 
 % what parameters change?
 
+
+\subsection{Weighted Influence}
+% a weight term could be added to the regularizer to control the influence of specific sets.  This could provide more information in 'important' situations, which could be useful in motivated learning.
+
 \subsection{ Sliding Prediction Offset }
+% we're currently predicting each point from a given window.  It might be better to iteratively match estimates to the full training set - this is the shadow input idea again.
 
 
 \section{Conclusion}
