@@ -62,13 +62,6 @@ class svm:
 		ret += "SV: %s (%s percent)\n" % ( self.NSV,100. * float(self.NSV) / float(self.N ) )
 		ret += "Loss: %s\n" % (self.cdf_res()**2).sum()
 		return ret
-	
-	def _Omega(self,Gamma):
-	# Regularizer function
-	#
-	# @param Gamma			[N*kappa x 1] array of gamma values
-	
-		return self.Lambda * (Gamma)
 		
 	def _K(self,X,Y):
 	# Kernel function
@@ -113,14 +106,14 @@ class svm:
 	#
 	# @param X				[Nxd] array of points for which to calculate the CDF
 		
-		return numpy.dot( self._K( X, self.SV, self.Gamma ), self.beta )
+		return numpy.dot( self._K( X, self.SV ), self.beta )
 		
 	def pdf(self,X):
 	# Probability distribution function
 	#
 	# @param X				[Nxd] array of points for which to calculate the PDF
 	
-		return numpy.dot( self._k( X, self.SV, self.Gamma ), self.beta )
+		return numpy.dot( self._k( X, self.SV ), self.beta )
 		
 	def cdf_res(self,X=None):
 	# CDF residuals
@@ -143,19 +136,16 @@ class svm:
 	
 	def _compute(self):
 		start = datetime.datetime.now()
-		
-		kappa = len( self.gamma )
-		(N,self.d) = self.X.shape
-		self.Y = ( ( .5 + (self.X.reshape(N,1,self.d) > transpose(self.X.reshape(N,1,self.d),[1,0,2])).prod(2).sum(1,dtype=float) ) / N ).reshape([N,1])
+
+		self.Y = ( ( .5 + (self.X.reshape(self.N,1,self.d) > transpose(self.X.reshape(self.N,1,self.d),[1,0,2])).prod(2).sum(1,dtype=float) ) / self.N ).reshape([self.N,1])
 		self.K = self._K( self.X.T, self.X )
-		self.Gamma = numpy.repeat(self.gamma,N).reshape([N*kappa,1])
 		
-		P = cvxopt.matrix( numpy.dot(self.K.T,self.K), (N*kappa,N*kappa) )
+		P = cvxopt.matrix( numpy.dot(self.K.T,self.K), (self.N,self.N) )
 		#q = cvxopt.matrix( ( self._Omega(self.Gamma) - ( numpy.ma.dot( self.K.T, self.Y ) ) ), (N*kappa,1) )
 		q = cvxopt.matrix( ( self.Lambda / self.K.T.sum(0) ) - ( ( 2/self.N ) * ( np.dot( K.T, K ).sum(0) ) ) )
-		G = cvxopt.matrix( -identity(N*kappa), (N*kappa,N*kappa) )
-		h = cvxopt.matrix( 0.0, (N*kappa,1) )
-		A = cvxopt.matrix( 1., (1,N*kappa) )
+		G = cvxopt.matrix( -identity(self.N), (self.N,self.N) )
+		h = cvxopt.matrix( 0.0, (self.N,1) )
+		A = cvxopt.matrix( 1., (1,self.N) )
 		b = cvxopt.matrix( 1., (1,1) )
 		
 		# Solve!
@@ -166,8 +156,7 @@ class svm:
 		self.NSV = beta.count()
 		self.alpha = beta
 		self.beta = beta.compressed().reshape([self.NSV,1])
-		self.SV = numpy.ma.array( numpy.tile(self.X.T,kappa).T, mask=numpy.repeat(mask,self.d)).compressed().reshape([self.NSV,self.d])
-		self.Gamma = numpy.ma.array( self.Gamma, mask=mask ).compressed().reshape([self.NSV,1])
+		self.SV = numpy.ma.array( self.X, mask=numpy.repeat(mask,self.d)).compressed().reshape([self.NSV,self.d])
 
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % ( duration.seconds + float(duration.microseconds)/1000000)
