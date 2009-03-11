@@ -106,14 +106,14 @@ class svm:
 	#
 	# @param X				[Nxd] array of points for which to calculate the CDF
 		
-		return numpy.dot( self._K( X, self.SV ), self.beta )
+		return numpy.ma.dot( self._K( X, self.SV ), self.beta )
 		
 	def pdf(self,X):
 	# Probability distribution function
 	#
 	# @param X				[Nxd] array of points for which to calculate the PDF
 	
-		return numpy.dot( self._k( X, self.SV ), self.beta )
+		return numpy.ma.dot( self._k( X, self.SV ), self.beta )
 		
 	def cdf_res(self,X=None):
 	# CDF residuals
@@ -161,10 +161,10 @@ class svm:
 		mask = ma.getmask(beta)
 		self.NSV = beta.count()
 		self.alpha = beta
-		#self.beta = beta.compressed().reshape([self.NSV,1])
-		#self.SV = numpy.ma.array( self.X, mask=numpy.repeat(mask,self.d)).compressed().reshape([self.NSV,self.d])
-		self.beta = beta
-		self.SV = self.X
+		self.beta = beta.compressed().reshape([self.NSV,1])
+		self.SV = numpy.ma.array( self.X, mask=numpy.repeat(mask,self.d)).compressed().reshape([self.NSV,self.d])
+		#self.beta = beta
+		#self.SV = self.X
 
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % ( duration.seconds + float(duration.microseconds)/1000000)
@@ -214,7 +214,7 @@ def run():
 	return True
 	'''
 	
-	mod = svm( samples, Lambda=0. )
+	mod = svm( samples, Lambda=.0005 )
 	
 	print mod
 	#plt.plot(hsplit(samples,2)[0], hsplit(samples,2)[1], 'o')
