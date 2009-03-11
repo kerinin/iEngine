@@ -142,7 +142,7 @@ class svm:
 		
 		P = cvxopt.matrix( numpy.dot(self.K.T,self.K), (self.N,self.N) )
 		#q = cvxopt.matrix( ( self._Omega(self.Gamma) - ( numpy.ma.dot( self.K.T, self.Y ) ) ), (N*kappa,1) )
-		q = cvxopt.matrix( ( self.Lambda / self.K.T.sum(0) ) - ( ( 2/self.N ) * ( np.dot( K.T, K ).sum(0) ) ) )
+		q = cvxopt.matrix( ( self.Lambda / self.K.T.sum(0) ) - ( ( 2/self.N ) * ( numpy.dot( K.T, K ).sum(0) ) ) )
 		G = cvxopt.matrix( -identity(self.N), (self.N,self.N) )
 		h = cvxopt.matrix( 0.0, (self.N,1) )
 		A = cvxopt.matrix( 1., (1,self.N) )
