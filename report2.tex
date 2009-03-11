@@ -227,7 +227,7 @@ Substituting \ref{eq:PrSParzenSingle} into \ref{eq:PrS} our probability distribu
 
 Extending the Parzen Window approach requires the realization that \ref{eq:KLsingle} requires that \( S_n \) and \( S_m \) both be defined over the same abstract space \footnote{ For instance if \( X_n \in \mathbb{R}^2 \) and \( X_m \in \mathbb{R}^3 \), it is impossible to calculate \( \phi_n\big( (x_m,t) \big) \) because the quantituy \( \| x_m - x_n \|^2 \) from using \ref{eq:PhiSingle} is ambiguous.}.  As mentioned earlier, in the Multiple Channel context each channel is treated as an orthonormal basis of \( \Omega^\mathcal{S} \).  An obvious approach to defining a measure over \( \Omega^\mathcal{S} \) for mutliple channels is to use the Euclidean norm of the Kullbeck Liebler divergence of each channel considered independently:
 
-\[ S_n^c &= [ \mathbf{x} \ | \ \mathbf{x} \in \{ S_n \cap X^c \} ] \]
+\[ S_n^c = [ \mathbf{x} \ | \ \mathbf{x} \in \{ S_n \cap X^c \} ] \]
 
 This requires the following minor extension of \ref{eq:KRBFparzen}:
 
@@ -260,7 +260,6 @@ So we can express the Support Vector optimization problem as:
 W(\beta) &= \sum_{\mathbf{x} \in X } \Big( \varphi_{P}(\mathbf{x}, S) - \varphi_{SV}(\mathbf{x}, S : \beta ) \Big)^2 + \lambda \Omega(\beta,S) \\
 &= \sum_{ \mathbf{x} \in X } \Big( \varphi_{SV}(\mathbf{x},S : \beta)^2 - 2 \varphi_{SV}(\mathbf{x},S : \beta) \varphi_P(\mathbf{x},S)  \Big)  + \lambda \Omega( \beta, S ) \\
 &= \sum_{ \mathbf{x} \in X } \left( \Big( \sum_i \beta_i K_\gamma( S_{\mathbf{x}}, S_i ) \Big) \cdot \Big( \sum_j \beta_j K_\gamma( S_{\mathbf{x}}, S_j ) \Big) - 2 \Big( \sum_i \beta_i K_\gamma( S_{\mathbf{x}}, S_i ) \Big) \cdot \Big( \sum_j \frac{1}{|\mathcal{S}|} K_\gamma( S_{\mathbf{x}}, S_j ) \Big)   \right) + \lambda \Omega( \beta,S ) \\
-&= \sum_{i,j} \beta_i \beta_j \sum_{\mathbf{x} \in X } K_\gamma(S_{\mathbf{x}},S_i)K_\gamma(S_{\mathbf{x}},S_j) - \sum_i \beta_i \sum_{\mathbf{x} \in X } \sum_j \frac{2}{|\mathcal{S}|}K_\gamma(S_{\mathbf{x}},S_i) K_\gamma(S_{\mathbf{x}},S_j) + \lambda \sum_i \beta_i \sum_{\mathbf{x} \in X} K_\gamma(S_{\mathbf{x}},S_i)^{-1} \\
 &= \sum_{i,j} \beta_i \beta_j \sum_{\mathbf{x} \in X} K_\gamma(S_{\mathbf{x}},S_i) K_\gamma(S_{\mathbf{x}},S_j) + \sum_i \beta_i \sum_{\mathbf{x} \in X } \left( \lambda K_\gamma(S_{\mathbf{x}},S_i)^{-1} - \frac{2}{|\mathcal{S}|} \sum_j K_\gamma(S_{\mathbf{x}},S_i) K_\gamma(S_{\mathbf{x}},S_j) \right)
 \end{align*}
 
@@ -278,11 +277,11 @@ Equation \ref{eq:SVProcessSingle} is a quadratic optimiztion problem defined as:
 \begin{align*}
 W(\beta) &= \frac{1}{2} \beta^T P \beta + q^T \beta \\
 P_{i,j} &= \sum_{\mathbf{x} \in X } K_\gamma(S_{\mathbf{x}},S_i) K_\gamma(S_{\mathbf{x}},S_j) \\
-q_i &= \sum_{\mathbf{x} \in X } \left( \lambda K_\gamma(S_{\mathbf{x}},S_i)^{-1} - \frac{2}{|\mathcal{S}|} \sum_j K_\gamma(S_{\mathbf{x}},S_i) K_\gamma(S_{\mathbf{x}},S_j) \right) \\
+q_i &= \sum_{\mathbf{x} \in X } \left( \lambda K_\gamma(S_{\mathbf{x}},S_i)^{-1} - \frac{1}{|\mathcal{S}|} \sum_j K_\gamma(S_{\mathbf{x}},S_i) K_\gamma(S_{\mathbf{x}},S_j) \right) \\
 \end{align*}
 \begin{align}
 P &= \langle \mathbf{K}^T \cdot \mathbf{K} \rangle  \label{eq:SVPSingle} \\
-q &= \lambda \langle \mathbf{K}^T \cdot \mathbf{1}_{( |K|, 1 )} \rangle^{-1} - \frac{2}{ | \mathcal{S} | } \langle \mathbf{K}^T \cdot \mathbf{K} \cdot \mathbf{1}_{( |K|, 1 )} \rangle
+q &= \lambda \langle \mathbf{K}^T \cdot \mathbf{1}_{( |K|, 1 )} \rangle^{-1} - \frac{1}{ | \mathcal{S} | } \langle \mathbf{K}^T \cdot \mathbf{K} \cdot \mathbf{1}_{( |K|, 1 )} \rangle
 \end{align}
 
 \subsection{  Random Process Kernel Definition }
