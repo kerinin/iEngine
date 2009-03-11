@@ -138,11 +138,11 @@ class svm:
 		start = datetime.datetime.now()
 
 		self.Y = ( ( .5 + (self.X.reshape(self.N,1,self.d) > transpose(self.X.reshape(self.N,1,self.d),[1,0,2])).prod(2).sum(1,dtype=float) ) / self.N ).reshape([self.N,1])
-		self.K = self._K( self.X.T, self.X )
+		self.K = self._K( self.X, self.X )
 		
 		P = cvxopt.matrix( numpy.dot(self.K.T,self.K), (self.N,self.N) )
 		#q = cvxopt.matrix( ( self._Omega(self.Gamma) - ( numpy.ma.dot( self.K.T, self.Y ) ) ), (N*kappa,1) )
-		q = cvxopt.matrix( ( self.Lambda / self.K.T.sum(0) ) - ( ( 2/self.N ) * ( numpy.dot( K.T, K ).sum(0) ) ) )
+		q = cvxopt.matrix( ( self.Lambda / self.K.T.sum(0) ) - ( ( 2/self.N ) * ( numpy.dot( self.K.T, self.K ).sum(0) ) ) )
 		G = cvxopt.matrix( -identity(self.N), (self.N,self.N) )
 		h = cvxopt.matrix( 0.0, (self.N,1) )
 		A = cvxopt.matrix( 1., (1,self.N) )
@@ -179,11 +179,10 @@ class svm:
 def run():
 	fig = plt.figure()
 	
-	#samples = 1/vstack( [ numpy.random.multivariate_normal( mean=array([3,3]), cov=array( identity(2) ), size=array([50,]) ),
-	#	numpy.random.multivariate_normal( mean=array([7,7]), cov=array( identity(2) ), size=array([50,]) ) 
-	#] )
+	samples = vstack( [ numpy.random.multivariate_normal( mean=array([3,3]), cov=array( identity(2) ), size=array([50,]) ),
+		numpy.random.multivariate_normal( mean=array([7,7]), cov=array( identity(2) ), size=array([50,]) ) 
+	] )
 	
-	samples = numpy.random.multivariate_normal( mean=array([1,1]), cov=array( identity(2) )/10, size=array([50,]) )
 	'''
 	C = arange(1e-6,1e-0,1e-1) 
 	res = [ svm( samples, Lambda=c, gamma=[.125,.5,2.,8.,32.]) for c in C ]
@@ -207,11 +206,11 @@ def run():
 	return True
 	'''
 	
-	mod = svm( samples, Lambda=.00005, gamma=[.125,.25,.5,1,2,4,8,16] )
+	mod = svm( samples, Lambda=0. )
 	
 	print mod
-	
-	(c1,c2) = mod.contourPlot( plt, (0,2), (0,2),.02,.02 )
+	#plt.plot(hsplit(samples,2)[0], hsplit(samples,2)[1], 'o')
+	(c1,c2) = mod.contourPlot( plt, (0,10), (0,10),.1,.1 )
 	plt.colorbar(c1, orientation='horizontal')
 
 	
