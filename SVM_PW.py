@@ -142,21 +142,29 @@ class svm:
 		
 		P = cvxopt.matrix( numpy.dot(self.K.T,self.K), (self.N,self.N) )
 		#q = cvxopt.matrix( ( self._Omega(self.Gamma) - ( numpy.ma.dot( self.K.T, self.Y ) ) ), (N*kappa,1) )
-		q = cvxopt.matrix( ( self.Lambda / self.K.T.sum(0) ) - ( ( 2/self.N ) * ( numpy.dot( self.K.T, self.K ).sum(0) ) ) )
+		q = cvxopt.matrix( ( self.Lambda / self.K.T.sum(0) ) - ( ( 1./self.N ) * ( numpy.dot( self.K.T, self.K ).sum(0) ) ) )
 		G = cvxopt.matrix( -identity(self.N), (self.N,self.N) )
 		h = cvxopt.matrix( 0.0, (self.N,1) )
 		A = cvxopt.matrix( 1., (1,self.N) )
 		b = cvxopt.matrix( 1., (1,1) )
 		
+		
+		print P.size
+		print q.size
+		
 		# Solve!
 		p = solvers.qp( P=P, q=q, G=G, h=h, A=A, b=b )
+		
+		print p['x']
 		
 		beta = ma.masked_less( p['x'], 1e-8 )
 		mask = ma.getmask(beta)
 		self.NSV = beta.count()
 		self.alpha = beta
-		self.beta = beta.compressed().reshape([self.NSV,1])
-		self.SV = numpy.ma.array( self.X, mask=numpy.repeat(mask,self.d)).compressed().reshape([self.NSV,self.d])
+		#self.beta = beta.compressed().reshape([self.NSV,1])
+		#self.SV = numpy.ma.array( self.X, mask=numpy.repeat(mask,self.d)).compressed().reshape([self.NSV,self.d])
+		self.beta = beta
+		self.SV = self.X
 
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % ( duration.seconds + float(duration.microseconds)/1000000)
@@ -179,8 +187,8 @@ class svm:
 def run():
 	fig = plt.figure()
 	
-	samples = vstack( [ numpy.random.multivariate_normal( mean=array([3,3]), cov=array( identity(2) ), size=array([50,]) ),
-		numpy.random.multivariate_normal( mean=array([7,7]), cov=array( identity(2) ), size=array([50,]) ) 
+	samples = vstack( [ numpy.random.multivariate_normal( mean=array([3,3]), cov=array( identity(2) ), size=array([25,]) ),
+		numpy.random.multivariate_normal( mean=array([7,7]), cov=array( identity(2) ), size=array([25,]) ) 
 	] )
 	
 	'''

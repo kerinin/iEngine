@@ -258,7 +258,8 @@ So we can express the Support Vector optimization problem as:
 
 \begin{align*}
 W(\beta) &= \sum_{\mathbf{x} \in X } \Big( \varphi_{P}(\mathbf{x}, S) - \varphi_{SV}(\mathbf{x}, S : \beta ) \Big)^2 + \lambda \Omega(\beta,S) \\
-&= \sum_{ \mathbf{x} \in X } \Big( \varphi_{SV}(\mathbf{x},S : \beta)^2 - 2 \varphi_P(\mathbf{x},S) \varphi_{SV}(\mathbf{x},S : \beta) \Big)  + \lambda \Omega( \beta, S ) \\
+&= \sum_{ \mathbf{x} \in X } \Big( \varphi_{SV}(\mathbf{x},S : \beta)^2 - 2 \varphi_{SV}(\mathbf{x},S : \beta) \varphi_P(\mathbf{x},S)  \Big)  + \lambda \Omega( \beta, S ) \\
+&= \sum_{ \mathbf{x} \in X } \left( \Big( \sum_i \beta_i K_\gamma( S_{\mathbf{x}}, S_i ) \Big) \cdot \Big( \sum_j \beta_j K_\gamma( S_{\mathbf{x}}, S_j ) \Big) - 2 \Big( \sum_i \beta_i K_\gamma( S_{\mathbf{x}}, S_i ) \Big) \cdot \Big( \sum_j \frac{1}{|\mathcal{S}|} K_\gamma( S_{\mathbf{x}}, S_j ) \Big)   \right) + \lambda \Omega( \beta,S ) \\
 &= \sum_{i,j} \beta_i \beta_j \sum_{\mathbf{x} \in X } K_\gamma(S_{\mathbf{x}},S_i)K_\gamma(S_{\mathbf{x}},S_j) - \sum_i \beta_i \sum_{\mathbf{x} \in X } \sum_j \frac{2}{|\mathcal{S}|}K_\gamma(S_{\mathbf{x}},S_i) K_\gamma(S_{\mathbf{x}},S_j) + \lambda \sum_i \beta_i \sum_{\mathbf{x} \in X} K_\gamma(S_{\mathbf{x}},S_i)^{-1} \\
 &= \sum_{i,j} \beta_i \beta_j \sum_{\mathbf{x} \in X} K_\gamma(S_{\mathbf{x}},S_i) K_\gamma(S_{\mathbf{x}},S_j) + \sum_i \beta_i \sum_{\mathbf{x} \in X } \left( \lambda K_\gamma(S_{\mathbf{x}},S_i)^{-1} - \frac{2}{|\mathcal{S}|} \sum_j K_\gamma(S_{\mathbf{x}},S_i) K_\gamma(S_{\mathbf{x}},S_j) \right)
 \end{align*}
