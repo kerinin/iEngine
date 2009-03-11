@@ -206,7 +206,7 @@ The Parzen Window estimation of \( \mathcal{P}^\mathcal{S} \) is defined as:
 where \( | \cdot | \) denotes the cardinality of \( ( \cdot ) \) and \( K \) is some kernel function, for instance the Radial Basis Function:
 
 \begin{equation} \label{eq:KRBFparzen}
-K_\gamma( S_i, S_j ) =  \frac{1}{\gamma \sqrt{2\pi} } e^{-\frac{1}{\gamma} \|S_i - S_j \|_{KL}}
+K_\gamma( S_i, S_j ) =  \frac{1}{\gamma \sqrt{2\pi} } e^{-\frac{1}{\gamma} \|S_i - S_j \|_{KL}^2}
 \end{equation}
 
 The same method can be used to estimate \( \phi_n(\mathbf{x}) \) for a given subset \( S_n \):
@@ -227,15 +227,12 @@ Substituting \ref{eq:PrSParzenSingle} into \ref{eq:PrS} our probability distribu
 
 Extending the Parzen Window approach requires the realization that \ref{eq:KLsingle} requires that \( S_n \) and \( S_m \) both be defined over the same abstract space \footnote{ For instance if \( X_n \in \mathbb{R}^2 \) and \( X_m \in \mathbb{R}^3 \), it is impossible to calculate \( \phi_n\big( (x_m,t) \big) \) because the quantituy \( \| x_m - x_n \|^2 \) from using \ref{eq:PhiSingle} is ambiguous.}.  As mentioned earlier, in the Multiple Channel context each channel is treated as an orthonormal basis of \( \Omega^\mathcal{S} \).  An obvious approach to defining a measure over \( \Omega^\mathcal{S} \) for mutliple channels is to use the Euclidean norm of the Kullbeck Liebler divergence of each channel considered independently:
 
-\begin{align} 
-S_n^c &= [ \mathbf{x} \ | \ \mathbf{x} \in \{ S_n \cap X^c \} ] \nonumber \\
-\| S_n - S_m \|_{KL}^2 &= \sqrt{ (\|S_n^c - S_m^c\|_{KL})^2 } \label{eq:NormMultiple}
-\end{align}
+\[ S_n^c &= [ \mathbf{x} \ | \ \mathbf{x} \in \{ S_n \cap X^c \} ] \]
 
 This requires the following minor extension of \ref{eq:KRBFparzen}:
 
 \begin{equation} \label{eq:KRBFParzenMultiple}
-K_\gamma( S_i, S_j ) =  \frac{1}{\gamma \sqrt{2\pi} } e^{-\frac{1}{\gamma} \|S_i - S_j \|_{KL}^2 }
+K_\gamma( S_i, S_j ) =  \prod_c \frac{1}{\gamma \sqrt{2\pi} } e^{-\frac{1}{\gamma} \|S_i^c - S_j^c \|_{KL}^2 }
 \end{equation}
 
 
@@ -306,7 +303,7 @@ Recalling that \( S_\mathbf{x} = \{ S \cup \mathbf{x} \} \), we observe that:
 We restate the kernel function as:
 
 \begin{equation}
-K_\gamma( X, S_i ) = e^{ -\frac{ \| X - S_i \|_{H} }{ \gamma } }
+K_\gamma( X, S_i ) =  \frac{1}{\gamma \sqrt{2\pi} } e^{-\frac{1}{\gamma} \|X - S_i \|_{H}^2}
 \end{equation}
 
 In situations where probabilities are being calculated for a uniform set of points in \( \Omega^{\mathcal{S}} \), this can considerably reduce the computational time needed to evaluate \( \mathbf{K} \), as \( \|\mathbf{x} - S_i \|_H \) can be computed once and then added to each \( \|S - S_i\|_H, S \in \mathcal{S} \).
