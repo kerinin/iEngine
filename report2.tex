@@ -378,6 +378,13 @@ The architecture has been tested against several data sets.  In all cases the sy
 \subsection{ Sliding Prediction Offset }
 % we're currently predicting each point from a given window.  It might be better to iteratively match estimates to the full training set - this is the shadow input idea again.
 
+% The basic idea here is that the optimization is intended to punish similar patterns - this means that the prediction algorithm is almost guaranteed to have irregular accuracy as the prediction window moves from one estimate to another (ie, the inbetween states will have lower accuracy than either termination state).
+
+% We're already assuming that the output is a linear combination of SV's, what if we looked at this in the context of real-time processing and evaluated each SV at each point in time, but also included SV's from different points in time and allowed some type of competition between them, say restricting \sum \beta = 1 at all points in time, but allowing overlap somehow?
+
+% Basically, the current formulation assumes we have a test set that is static - we need to re-think the system under the assumption that the test set is dynamic, and we want to reduce the computation at each set using information from previous sets (this likewise can reduce the number of SV's required, as periodic signals need only be represented once).
+
+
 
 \section{Conclusion}
 Eat it, bitches
