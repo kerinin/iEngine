@@ -17,7 +17,7 @@
 % If there's no existing theory to explain the mixture model, you'll need to spend more time on it
 
 \begin{document}
-\title{Robust Timeseries Analysis in the Context of Multiple Asynchronous Input Channels}
+\title{A Random Process Approach to Timeseries Analysis}
 %\subtitle{Analysis of Ergodic Processes with Multiple Stationary Behaviors using Data from Multiple Asynchronous Input Channels}
 \author{Ryan Michael\\ \texttt{kerinin@gmail.com}}
 \maketitle
@@ -166,6 +166,7 @@ In this case, we treat each channel as an orthonormal basis of the abstract spac
 S_{\hat{x}} =  \left[ \left( x_i^n,t_i - t_{\hat{x}} \right) | \quad (x_i^n,t_i) \in \mathbf{\hat{X}} \right] 
 \end{equation}
 
+
 \section{ Parzen Window Estimation}
 
 One method of evaluating \ref{eq:PrS} is by using the Parzen Window method.  We choose the Parzen Window method because it allows us to estimate probabilities of unordered sets, provided they have an addition operation and a kernel function exists to provide a distance metric.  
@@ -220,6 +221,21 @@ K_\gamma( S_i, S_j ) =  \prod_c \frac{1}{\gamma \sqrt{2\pi} } e^{-\frac{1}{\gamm
 \end{equation}
 
 
+\subsection{Sliding Parzen Windows}
+
+Observe that subsets do not exist in isolation; it is possible for the time windows defined for two subsets to overlap.  This makes it possible for the estimates at at two such subsets to take advantage of this shared information.  This can be accomplished by modifying \ref{eq:PrSParzenSingle} to include not only sets offset to the beginnig of the window being predicted, but at each start point defined as well:
+
+\[
+S_{t,\theta}^{\Delta t} =  \left[ \left( x_i, 2t_i - t - \Delta t \right) | \quad (x_i^n,t_i) \in S_{t,\theta} \right] 
+\]
+
+\begin{equation} \label{eq:PrSParzenSlidingSingle}
+\Pr( \mathcal{S} = S ) \simeq \sum_{\Delta t \in \mathcal{T}} \frac{1}{|\mathcal{T}|} \sum_{i \in \mathcal{S}}  \frac{1}{|\mathcal{S}| } K_\gamma( S, S_i^{\Delta t} ) 
+\end{equation}
+
+In the context of Parzen Windows, this defintion increases computational demands and provides little increase in predictive power, however we shall see that it provides an important starting point for improving system performance.
+
+
 \section{ Support Vector Estimation}
 
 The Parzen Window method is neither sparse nor computationally efficient, and as the number of observations grows, these deficiencies quickly become prohibitive.  We now investigate the use of Support Vector Machines to generate \( \varphi(\mathbf{x}, S) \).
@@ -267,6 +283,25 @@ q_i &= \sum_{\mathbf{x} \in X } \left( \lambda K_\gamma(S_{\mathbf{x}},S_i)^{-1}
 P &= \langle \mathbf{K}^T \cdot \mathbf{K} \rangle  \label{eq:SVPSingle} \\
 q &= \lambda \langle \mathbf{K}^T \cdot \mathbf{1}_{( |K|, 1 )} \rangle^{-1} - \frac{1}{ | \mathcal{S} | } \langle \mathbf{K}^T \cdot \mathbf{K} \cdot \mathbf{1}_{( |K|, 1 )} \rangle
 \end{align}
+
+
+\subsection{ Sliding Windows }
+
+Modifying the SV algorithm to use sliding time windows allows the system to take advantage of periodicity in the observed data and reduces redundancy.  Adapting the earlier Parzen Window approach, we search for a solution in the following form:
+
+\begin{align} \label{eq:SVResultSlidingSingle}
+\varphi_{SV}( \mathbf{x}, S : \beta) &= \sum_{\Delta t \in \mathcal{T}} \sum_{i \in \mathcal{S}} \beta_{\Delta t, i} K_\gamma( S_\mathbf{x}, S_i^{\Delta t} ) 
+\end{align}
+
+The optimization problem must be modified as follows:
+
+\begin{align*}
+W(\beta) &= \sum_{ \mathbf{x} \in X } \Big( \varphi_{SV}(\mathbf{x},S : \beta)^2 - 2 \varphi_{SV}(\mathbf{x},S : \beta) \varphi_P(\mathbf{x},S)  \Big)  + \lambda \Omega( \beta, S ) \\
+&= \sum_{ \mathbf{x} \in X } \Big( \sum_{\Delta t \in \mathcal{T}} \sum_i \beta_i K_\gamma( S_{\mathbf{x}}, S_i^{\Delta t} ) \Big) \cdot \Big( \sum_{\Delta t \in \mathcal{T}} \sum_j \beta_j K_\gamma( S_{\mathbf{x}}, S_j^{\Delta t} ) \Big) - \\
+& \qquad \qquad \qquad \qquad 2 \Big( \sum_{\Delta t \in \mathcal{T}} \sum_i \beta_i K_\gamma( S_{\mathbf{x}}, S_i^{\Delta t} ) \Big) \cdot \Big( \sum_{\Delta t \in \mathcal{T}} \sum_j \frac{1}{|\mathcal{S}|} K_\gamma( S_{\mathbf{x}}, S_j^{\Delta t} ) \Big)  + \lambda \Omega( \beta,S ) \\
+&= \sum_{i,j} \sum_{\Delta t \in \mathcal{T}} \beta_i \beta_j \sum_{\mathbf{x} \in X} K_\gamma(S_{\mathbf{x}},S_i^{\Delta t}) K_\gamma(S_{\mathbf{x}},S_j^{\Delta t}) + \\
+& \qquad \qquad \qquad \qquad \sum_{\Delta t \in \mathcal{T}} \sum_i \beta_i \sum_{\mathbf{x} \in X } \left( \lambda K_\gamma(S_{\mathbf{x}},S_i^{\Delta t})^{-1} - \frac{2}{|\mathcal{S}|} \sum_j K_\gamma(S_{\mathbf{x}},S_i^{\Delta t}) K_\gamma(S_{\mathbf{x}},S_j^{\Delta t}) \right)
+\end{align*}
 
 \subsection{  Random Process Kernel Definition }
 
