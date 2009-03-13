@@ -12,23 +12,19 @@
 \setlength{\hoffset}{-.5in}
 \setlength{\textwidth}{6.0in}
 
-% Pick a title and make sure the terminology is consistent (architecture / system / algoirthm / etc)
-
-% If there's no existing theory to explain the mixture model, you'll need to spend more time on it
 
 \begin{document}
-\title{A Random Process Approach to Timeseries Analysis}
-%\subtitle{Analysis of Ergodic Processes with Multiple Stationary Behaviors using Data from Multiple Asynchronous Input Channels}
+\title{Parzen-SVM: An Approach to Timeseries Analysis Using Support Vector Machines based on Parzen Windows}
 \author{Ryan Michael\\ \texttt{kerinin@gmail.com}}
 \maketitle
 
 \begin{abstract}
-Spectral Analysis is a common form of analysing timeseries data.  We propose a method of spectral analysis based on sets probability distributions generated from subsets of the observed data.  By decomposing the observations into a set of observed behaviors, the spectral analysis can be used more accurately to predict the timseries' behavior.
 
 \end{abstract}
 
+\tableofcontents
+
 \section{Introduction}
-%\tableofcontents
 
 \subsection{Existing Work}
  %http://en.wikipedia.org/wiki/Expectation-maximization_algorithm
@@ -40,46 +36,32 @@ Spectral Analysis is a common form of analysing timeseries data.  We propose a m
 %http://en.wikipedia.org/wiki/Recurrence_plot
 %http://en.wikipedia.org/wiki/Autoregressive_fractionally_integrated_moving_average
 %http://en.wikipedia.org/wiki/Autocorrelation
+%\url{http://en.wikipedia.org/wiki/Linear_discriminant_analysis}
 
-\url{http://en.wikipedia.org/wiki/Linear_discriminant_analysis}
 
-
-% \subsubsection{Hidden Markov Model}
+\subsubsection{Hidden Markov Model}
 % cannot account for future states - only capable of prediction
 % weak, short-term memory
 
-% \subsubsection{Box-Jenkins}
+\subsubsection{Box-Jenkins}
 % intended for simplistic processes with well-understood stationarity and periodicity
 % http://en.wikipedia.org/wiki/Box-Jenkins
 
-% \subsubsection{Spectral Analysis}
+\subsubsection{Spectral Analysis}
 % assumes some type of frequency-domain decomposition.  Frequency-domain signal representations do not do a very good job predicting time-domain values. 
 
-% \subsubsection{Shrinking-\epsilon SVM Regression}
+\subsubsection{Shrinking-\(\epsilon\) SVM Regression}
 % theoretical foundation weak; only compensates for the relevance of recent data.  See Markhov problem
 
 
 \subsection{General Overview}
 The goal is to create a method of statistical inference capable of processing timeseries data which is both multi-variate and exhibits different behaviors at different times.  This type of data is common, and developing a robust method of analysis has applications in many domains.  The general approach is to create a series of estimates using subsets of the observed data, and to then combine these estimates in an intelligent manner which captures the relevance of each estimate to the current prediction task.  By using a set of 'typical' estimates, we are able to reduce the computational demands of the system, as each estimate is a condensed representation of the data from which it was derived.  This approach also allows us to reduce data redundancy by only using distinct estimates.
 
-The most basic operation used in this system is the estimation of probability densities.  Based on a set of observations drawn from some random process, we generate an estimate of the underlying probability distribution.  This estimate tells us the probability of each point in the input space being observed.  Areas of the input space in which a dense set of observations are observed are given high probability, while areas of the input space with few observations are given low probability.  This basic operation, in combination with some basic laws of statistics allow us to build the full inference system.
+The most basic operation used in this system is the estimation of probability densities.  Based on a set of observations drawn from some random process, we generate an estimate of the underlying probability distribution.  This estimate tells us the probability of each point in the input space being observed.  Areas of the input space in which a dense set of observations are observed are given high probability, while areas of the input space with few observations are given low probability.
 
 We assume that observations are pulled from multiple independent sources, all of which respond to some underlying phenomena.  For instance one set of observations could be from a microphone and another from a light detector.  We do not know how the inputs are related or to what extent their behavior changes over time.  For example one input could be a steady sine wave and another could be based on the decay of a radioactive isotope.  In the former case previous observations of the source are useful, in the latter they're not.  Alternately two inputs could be light detectors in the same room or they could be on different continents; in the former their input would be highly similar, in the latter not as much.
 
-Our general strategy has three phases; generating estimates, correlating estimates, and applying estimates to a given prediction task.
-
-\subsection{Generating Estimates}
-Estimates are generated by picking a time window at random and only dealing with observations which take place in that window.  Using these observations we create an estimate of the probability distribution underlying the observations (this distribution would include time as a variable).  This process is repeated until we feel we have a reasonable sample of the system as a whole, at which time we can start to correlate the estimates.
-
-\subsection{Correlating Estimates}
-The goal of correlating estimates is to determine the relationships between estimates at different times and from different sources.  Estimates are correlated by treating them as variables whose value for a given time window is determined by the extent to which the observed data corresponds to the estimate.  For each time window there exist a set of estimates which have some value describing their accuracy at predicting the observed value.  We can treat the accuracy measurement of each estimate as a multi-dimensional point, each dimension determined by an estimate's accuracy.  Using a set of these points taken at different times, we create a probability distribution estimate.  The domain of this probability distribution has the same dimensionality as the number of estimates we have generated.  This probability density allows us to predict the probability of an estimate in of one source based on the probability of an estimate in of another source because frequent combinations of accuracy values will have higher probability than other combinations.  This 'correlation density' also tells us which estimates are most commonly observed - information we can use in conjunction with estimate similarity to determine which estimates to use and which to discard.
-
-\subsection{Making Pedictions}
-Once the estimates have been correlated, we are able to generate predictions.  For simplicity, we'll assume that the first two phases occur on as set of 'training' data which is representative of the underlying data, while prediction takes place continuously using new sets of observations which occur in some time window.  We make predictions for a given source by combining the existing estimates we have for that source based on their accuracy at predicting the given observations.  Because we have determined the correlation between estimate accuracy of different sources, we can use other sources to refine our confidence in each estimate of the given source; the influence of estimates of the given source which do not correspond to a likely 'point' in the correlation density are suppressed while the influence of estimates which correspond to likely points in the correlation density are enhanced.
-
-\section{Formal Description}
-
-\subsection{Problem Setting}
+\section{Problem Setting}
 We begin with a hidden random variable 
 
 \[ X = (\Omega,\mathcal{F},\mathcal{P}) \]
@@ -99,15 +81,11 @@ For each channel we are given a set of \( \ell \) observations of dimension \( d
 \[ \mathbf{x}_i^n = (x_i^n, t_i^n ) \]
 \[ X^n = \left[ \mathbf{x}_0^n,\hdots,\mathbf{x}_\ell^n \right] \in \mathbb{R}^d \times \mathbb{R}_+ \]
 
-Given a set of time durations \( \theta \in \Theta \), we define a set of time widows:
+We define a set of time values and durations:
 
-\[  \mathcal{T}^n =  
-\begin{bmatrix} 
-(t_0^n,\theta_0) & \hdots & (t_0^n,\theta_z) \\
-\vdots & \ddots & \vdots \\
-(t_\ell^n, \theta_0) & \hdots & (t_\ell^n, \theta_z) \\
-\end{bmatrix} 
-\]
+\[  \mathcal{T} = [ t_0,\hdots,t_\ell ] \]
+
+\[ \Theta = [ \theta_0,\hdots,\theta_z ] \]
 
 We assume that \( \mathcal{P} \) can be approximated in a given time window using a shifted set of weighted distributions defined over some set of time intervals.
 
@@ -118,15 +96,15 @@ where \( \delta_n \) is the weight corresponding to \( f_n \).  Finally, we assu
 \begin{equation} \mathcal{P}^n(t,\theta) = \sum_i \delta_i^n \cdot f_i^n(t - t_i) \end{equation}
 
 \subsection{Single Channel Setting}
-We begin by considering the case where only one channel exists, so for now we will omit the superscript and refer to \(X^n = (\Omega^n,\mathcal{F}^n,\mathcal{P}^n) \) as \(X = (\Omega, \mathcal{F},\mathcal{P}) \).  Given a set of test data \( \hat{X} \), our goal is to estimate the probability distribution of \( X \) over some time window \( \mathcal{T}_{\hat{x}} \):
+We begin by considering the case where only one channel exists, so for now we will omit the superscript and refer to \(X^n = (\Omega^n,\mathcal{F}^n,\mathcal{P}^n) \) as \(X = (\Omega, \mathcal{F},\mathcal{P}) \).  Given a set of test data \( \hat{X} \), our goal is to estimate the probability distribution of \( X \) over some time window:
 
 \begin{align*}
 \mathbf{\hat{x}}_i &= (\hat{x}_i,t_i) \\
 \hat{X} &= [ \mathbf{\hat{x}}_0,\hdots,\mathbf{\hat{x}}_k ] \\
-\mathcal{T}_{\hat{x}} &= (t_{\hat{x}}, \theta_{\hat{x}} ), \quad t_{\hat{x}} < \min_t \hat{X} < \max_t \hat{X} < t_{\hat{x}} + \theta_{\hat{x}}
+&(t_{\hat{x}}, \theta_{\hat{x}} ), \quad t_{\hat{x}} < \min_t \hat{X} < \max_t \hat{X} < t_{\hat{x}} + \theta_{\hat{x}}
 \end{align*}
 
-We begin by defining the subset of the training observations which fall into each time window, scaled and shifted to the interval \( t \in [0,1) \):
+We begin by defining the subset of the training observations which fall into each time window, shifted to the interval \( t \in [0,\theta) \):
 
 \begin{equation} \label{eq:Ssingle} S_{t,\theta} = \left[ \left( x_i,t_i - t \right) | \quad x_i \in X, \ t \le t_i < t+\theta \right] \end{equation}
 \[ \mathcal{S} = 
@@ -226,11 +204,15 @@ K_\gamma( S_i, S_j ) =  \prod_c \frac{1}{\gamma \sqrt{2\pi} } e^{-\frac{1}{\gamm
 Observe that subsets do not exist in isolation; it is possible for the time windows defined for two subsets to overlap.  This makes it possible for the estimates at at two such subsets to take advantage of this shared information.  This can be accomplished by modifying \ref{eq:PrSParzenSingle} to include not only sets offset to the beginnig of the window being predicted, but at each start point defined as well:
 
 \[
-S_{t,\theta}^{\Delta t} =  \left[ \left( x_i, 2t_i - t - \Delta t \right) | \quad (x_i^n,t_i) \in S_{t,\theta} \right] 
+S_{t,\theta}^\tau =  \left[ \left( x_i, 2t_i - t - \tau \right) | \quad (x_i^n,t_i) \in S_{t,\theta} \right] 
+\]
+
+\[
+\mathcal{S}^{\mathcal{T}} = [ S_{t,\theta}^\tau | \quad \tau \in \mathcal{T}, \ (t,\theta) \in (\mathcal{T},\Theta) ]
 \]
 
 \begin{equation} \label{eq:PrSParzenSlidingSingle}
-\Pr( \mathcal{S} = S ) \simeq \sum_{\Delta t \in \mathcal{T}} \frac{1}{|\mathcal{T}|} \sum_{i \in \mathcal{S}}  \frac{1}{|\mathcal{S}| } K_\gamma( S, S_i^{\Delta t} ) 
+\Pr( \mathcal{S} = S ) \simeq \sum_{i \in \mathcal{S}}  \frac{1}{|\mathcal{S}^{\mathcal{T}}| } K_\gamma( S, S_i ) 
 \end{equation}
 
 In the context of Parzen Windows, this defintion increases computational demands and provides little increase in predictive power, however we shall see that it provides an important starting point for improving system performance.
@@ -250,7 +232,7 @@ where \( \theta(x) \) is the indicator function.  To evaluate this function, the
 Rather than calculating the cumulative probability distribution of \( \Omega^\mathcal{S} \), we begin with the assumption that the Parzen Window estimate of the probability distribution is accurate and attempt to minimize the square loss between the Support Vector estimate and the Parzen Window estimate.  Because we are hoping to generate a sparse representation of the probability distribution, we add a regularizing term \( \Omega \) which penalizes similar \( S \).  The Support Vector approach seeks a solution in the following form:
 
 \begin{align} \label{eq:SVResultSingle}
-\varphi_{SV}( \mathbf{x}, S : \beta) &= \sum_{i} \beta_i K_\gamma( S_\mathbf{x}, S_i ) \\
+\varphi_{SV}( \mathbf{x}, S : \beta) &= \sum_{i \in \mathcal{S}} \beta_i K_\gamma( S_\mathbf{x}, S_i ) \\
 S_\mathbf{x} &= \{ S \cup \mathbf{x} \} \nonumber
 \end{align}
 
@@ -259,8 +241,10 @@ So we can express the Support Vector optimization problem as:
 \begin{align*}
 W(\beta) &= \sum_{\mathbf{x} \in X } \Big( \varphi_{P}(\mathbf{x}, S) - \varphi_{SV}(\mathbf{x}, S : \beta ) \Big)^2 + \lambda \Omega(\beta,S) \\
 &= \sum_{ \mathbf{x} \in X } \Big( \varphi_{SV}(\mathbf{x},S : \beta)^2 - 2 \varphi_{SV}(\mathbf{x},S : \beta) \varphi_P(\mathbf{x},S)  \Big)  + \lambda \Omega( \beta, S ) \\
-&= \sum_{ \mathbf{x} \in X } \left( \Big( \sum_i \beta_i K_\gamma( S_{\mathbf{x}}, S_i ) \Big) \cdot \Big( \sum_j \beta_j K_\gamma( S_{\mathbf{x}}, S_j ) \Big) - 2 \Big( \sum_i \beta_i K_\gamma( S_{\mathbf{x}}, S_i ) \Big) \cdot \Big( \sum_j \frac{1}{|\mathcal{S}|} K_\gamma( S_{\mathbf{x}}, S_j ) \Big)   \right) + \lambda \Omega( \beta,S ) \\
-&= \sum_{i,j} \beta_i \beta_j \sum_{\mathbf{x} \in X} K_\gamma(S_{\mathbf{x}},S_i) K_\gamma(S_{\mathbf{x}},S_j) + \sum_i \beta_i \sum_{\mathbf{x} \in X } \left( \lambda K_\gamma(S_{\mathbf{x}},S_i)^{-1} - \frac{2}{|\mathcal{S}|} \sum_j K_\gamma(S_{\mathbf{x}},S_i) K_\gamma(S_{\mathbf{x}},S_j) \right)
+&= \sum_{ \mathbf{x} \in X } \left( \Big( \sum_{i \in \mathcal{S}} \beta_i K_\gamma( S_{\mathbf{x}}, S_i ) \Big) \cdot \Big( \sum_{j \in \mathcal{S}} \beta_j K_\gamma( S_{\mathbf{x}}, S_j ) \Big) \\
+& \qquad \qquad \qquad \qquad - 2 \Big( \sum_{i \in \mathcal{S}} \beta_i K_\gamma( S_{\mathbf{x}}, S_i ) \Big) \cdot \Big( \sum_{j \in \mathcal{S}} \frac{1}{|\mathcal{S}|} K_\gamma( S_{\mathbf{x}}, S_j ) \Big)   \right) + \lambda \Omega( \beta,S ) \\
+&= \sum_{i,j \in \mathcal{S}} \beta_i \beta_j \sum_{\mathbf{x} \in X} K_\gamma(S_{\mathbf{x}},S_i) K_\gamma(S_{\mathbf{x}},S_j) \\
+& \qquad \qquad \qquad \qquad + \sum_{i \in \mathcal{S}} \beta_i \sum_{\mathbf{x} \in X } \left( \lambda K_\gamma(S_{\mathbf{x}},S_i)^{-1} - \frac{2}{|\mathcal{S}|} \sum_{j \in \mathcal{S}} K_\gamma(S_{\mathbf{x}},S_i) K_\gamma(S_{\mathbf{x}},S_j) \right)
 \end{align*}
 
 \begin{equation} \label{eq:SVProcessSingle} \text{subject to} \quad \sum_i \beta_i = 1, \quad \beta_i \ge 0, \ i=1,\hdots,|\mathcal{S}|
@@ -269,7 +253,7 @@ W(\beta) &= \sum_{\mathbf{x} \in X } \Big( \varphi_{P}(\mathbf{x}, S) - \varphi_
 Notice the regularizer selected is defined as:
 
 \begin{equation}
-\Omega(\beta,S) = \sum_i \beta_i \sum_{\mathbf{x} \in X} K_\gamma(S_{\mathbf{x}},S_i)^{-1}
+\Omega(\beta,S) = \sum_{i \in \mathcal{S}} \beta_i \sum_{\mathbf{x} \in X} K_\gamma(S_{\mathbf{x}},S_i)^{-1}
 \end{equation}
 
 Equation \ref{eq:SVProcessSingle} is a quadratic optimiztion problem defined as:
@@ -277,7 +261,7 @@ Equation \ref{eq:SVProcessSingle} is a quadratic optimiztion problem defined as:
 \begin{align*}
 W(\beta) &= \frac{1}{2} \beta^T P \beta + q^T \beta \\
 P_{i,j} &= \sum_{\mathbf{x} \in X } K_\gamma(S_{\mathbf{x}},S_i) K_\gamma(S_{\mathbf{x}},S_j) \\
-q_i &= \sum_{\mathbf{x} \in X } \left( \lambda K_\gamma(S_{\mathbf{x}},S_i)^{-1} - \frac{1}{|\mathcal{S}|} \sum_j K_\gamma(S_{\mathbf{x}},S_i) K_\gamma(S_{\mathbf{x}},S_j) \right) \\
+q_i &= \sum_{\mathbf{x} \in X } \left( \lambda K_\gamma(S_{\mathbf{x}},S_i)^{-1} - \frac{1}{|\mathcal{S}|} \sum_{j \in \mathcal{S}} K_\gamma(S_{\mathbf{x}},S_i) K_\gamma(S_{\mathbf{x}},S_j) \right) \\
 \end{align*}
 \begin{align}
 P &= \langle \mathbf{K}^T \cdot \mathbf{K} \rangle  \label{eq:SVPSingle} \\
@@ -289,19 +273,87 @@ q &= \lambda \langle \mathbf{K}^T \cdot \mathbf{1}_{( |K|, 1 )} \rangle^{-1} - \
 
 Modifying the SV algorithm to use sliding time windows allows the system to take advantage of periodicity in the observed data and reduces redundancy.  Adapting the earlier Parzen Window approach, we search for a solution in the following form:
 
+\[
+\mathcal{S}^{\mathcal{T}} = [ S_{t,\theta}^\tau | \quad \tau \in \mathcal{T}, \ (t,\theta) \in (\mathcal{T},\Theta) ]
+\]
+
 \begin{align} \label{eq:SVResultSlidingSingle}
-\varphi_{SV}( \mathbf{x}, S : \beta) &= \sum_{\Delta t \in \mathcal{T}} \sum_{i \in \mathcal{S}} \beta_{\Delta t, i} K_\gamma( S_\mathbf{x}, S_i^{\Delta t} ) 
+\varphi_{SV}( \mathbf{x}, S : \beta) &= \sum_{i \in \mathcal{S}^\mathcal{T}} \beta_i K_\gamma( S_\mathbf{x}, S_i ) 
 \end{align}
 
 The optimization problem must be modified as follows:
 
 \begin{align*}
 W(\beta) &= \sum_{ \mathbf{x} \in X } \Big( \varphi_{SV}(\mathbf{x},S : \beta)^2 - 2 \varphi_{SV}(\mathbf{x},S : \beta) \varphi_P(\mathbf{x},S)  \Big)  + \lambda \Omega( \beta, S ) \\
-&= \sum_{ \mathbf{x} \in X } \Big( \sum_{\Delta t \in \mathcal{T}} \sum_i \beta_i K_\gamma( S_{\mathbf{x}}, S_i^{\Delta t} ) \Big) \cdot \Big( \sum_{\Delta t \in \mathcal{T}} \sum_j \beta_j K_\gamma( S_{\mathbf{x}}, S_j^{\Delta t} ) \Big) - \\
-& \qquad \qquad \qquad \qquad 2 \Big( \sum_{\Delta t \in \mathcal{T}} \sum_i \beta_i K_\gamma( S_{\mathbf{x}}, S_i^{\Delta t} ) \Big) \cdot \Big( \sum_{\Delta t \in \mathcal{T}} \sum_j \frac{1}{|\mathcal{S}|} K_\gamma( S_{\mathbf{x}}, S_j^{\Delta t} ) \Big)  + \lambda \Omega( \beta,S ) \\
-&= \sum_{i,j} \sum_{\Delta t \in \mathcal{T}} \beta_i \beta_j \sum_{\mathbf{x} \in X} K_\gamma(S_{\mathbf{x}},S_i^{\Delta t}) K_\gamma(S_{\mathbf{x}},S_j^{\Delta t}) + \\
-& \qquad \qquad \qquad \qquad \sum_{\Delta t \in \mathcal{T}} \sum_i \beta_i \sum_{\mathbf{x} \in X } \left( \lambda K_\gamma(S_{\mathbf{x}},S_i^{\Delta t})^{-1} - \frac{2}{|\mathcal{S}|} \sum_j K_\gamma(S_{\mathbf{x}},S_i^{\Delta t}) K_\gamma(S_{\mathbf{x}},S_j^{\Delta t}) \right)
+&= \sum_{ \mathbf{x} \in X } \left( \sum_{i \in \mathcal{S}^{\mathcal{T}}} \beta_i K_\gamma( S_{\mathbf{x}}, S_i ) \right) \cdot \left( \sum_{j \in \mathcal{S}^{\mathcal{T}}} \beta_j K_\gamma( S_{\mathbf{x}}, S_j ) \right) \\
+& \qquad \qquad \qquad \qquad - 2 \left( \sum_{i \in \mathcal{S}^{\mathcal{T}}} \beta_i K_\gamma( S_{\mathbf{x}}, S_i ) \right) \cdot \left( \sum_{j \in \mathcal{S}^{\mathcal{T}}} \frac{1}{|\mathcal{S}^{\mathcal{T}}|} K_\gamma( S_{\mathbf{x}}, S_j ) \right)  + \lambda \Omega( \beta,S ) \\
+&= \sum_{i,j \in \mathcal{S}^{\mathcal{T}}} \beta_i \beta_j \sum_{\mathbf{x} \in X} K_\gamma(S_{\mathbf{x}},S_i) K_\gamma(S_{\mathbf{x}},S_j) \\
+& \qquad \qquad \qquad \qquad + \sum_{i \in \mathcal{S}^{\mathcal{T}}} \beta_i \sum_{\mathbf{x} \in X } \left( \lambda K_\gamma(S_{\mathbf{x}},S_i)^{-1} - \frac{2}{|\mathcal{S}^{\mathcal{T}}|} \sum_{j \in \mathcal{S}^{\mathcal{T}}} K_\gamma(S_{\mathbf{x}},S_i) K_\gamma(S_{\mathbf{x}},S_j) \right)
 \end{align*}
+
+\begin{equation} \text{subject to} \quad \sum_i \beta_i = 1, \quad \beta_i \ge 0, \ i=1,\hdots,|\mathcal{S}^{\mathcal{T}}|
+\end{equation}
+
+This means that using sliding windows increases \( P \) by a factor of \( \ell^2 \) and \( q \) by a factor or \( \ell \).  Fortunately, most of the added kernel values will be \(0\) if we restrict \(\theta_\text{max}\) to some reasonable subset of the observed duration.
+
+
+\subsection{ Parzen-SVM Decomposition }
+
+Due to the simplicity of the constraints in the optimization problem, it is possible to use the decomposition method of Osuna to reduce the memory requirements of the Parzen-SVM algorithm.
+
+\subsubsection{ Sub-Problem Definition }
+The decomposition algorithm breaks \(X\) into two working sets \(B,N\), and attempts to optimize \(B\) while keeping \(N\) fixed.  This results in the following iterative optimization problem where \(\boldsymbol{\beta}^k\) denotes the result of the previous iteration:
+
+\begin{align*}
+W(\boldsymbol{\beta}_B) &= \frac{1}{2} 
+\begin{bmatrix} \boldsymbol{\beta}_B^T & ( \boldsymbol{\beta}_N^k )^T \end{bmatrix} 
+\begin{bmatrix} P_{BB} & P_{BN} \\ P_{NB} & P_{NN} \end{bmatrix} 
+\begin{bmatrix} \boldsymbol{\beta}_B \\ \boldsymbol{\beta}_N^k \end{bmatrix} - 
+\begin{bmatrix} q_B^T & q_N^T \end{bmatrix} 
+\begin{bmatrix} \boldsymbol{\beta}_B \\ \boldsymbol{\beta}_N^k \end{bmatrix} \\
+&= \frac{1}{2} \boldsymbol{\beta}_B^T P_{BB} \boldsymbol{\beta}_B - ( -q_B + P_{BN} \boldsymbol{\beta}_N^k )^T \boldsymbol{\beta}_B 
+\\
+&= \frac{1}{2} 
+\begin{bmatrix} \beta_i & \beta_j \end{bmatrix}
+\begin{bmatrix} P_{ii} & P_{ij} \\ P_{ij} & P_{jj} \end{bmatrix}
+\begin{bmatrix} \beta_i \\ \beta_j \end{bmatrix}
+- ( -q_B + P_{BN} \boldsymbol{\beta}_N^k )^T
+\begin{bmatrix} \beta_i \\ \beta_j \end{bmatrix}
+\end{align*}
+
+\begin{equation}
+\text{subject to} \quad 0 \le \beta_i, \beta_j, \quad \beta_i + \beta_j = 1 - \mathbf{1}^T \boldsymbol{\beta}_N^k
+\end{equation}
+
+\subsubsection{ Working Set Selection }
+
+Select
+
+\begin{align}
+& i \in \text{arg} \max_t \left\{ -\nabla f( \boldsymbol{\beta}^k )_t \ | \quad t \in I( \boldsymbol{\beta}^k ) \right\} \\
+& j \in \text{arg} \min_t \left\{ -\frac{b_{it}^2}{a_{it}} \ | \quad t \in I( \boldsymbol{\beta}^k ), \quad -\nabla f(\boldsymbol{\beta}^k)_t < -\nabla f(\boldsymbol{\beta}^k)_i \right\}
+\end{align}
+
+Where
+% This needs to be checked for the new optimization scenario
+
+\begin{align}
+I( \boldsymbol{\beta} ) & \equiv \{ t \ | \quad \beta_t < 1 \quad \text{or} \quad \beta_t > 0 \} \\
+& a_{it} = P_{ii} + P_{tt} - 2P_{it} \\
+& \bar{a}_{it} = \begin{cases}
+a_{it} & \text{if} \ a_{it} > 0 \\
+\delta & \text{otherwise} \\
+\end{cases} \\
+& b_{it} = -\nabla f(\boldsymbol{\beta}^k)_i + \nabla f(\boldsymbol{\beta}^k)_t \\
+\nabla f( \boldsymbol{\beta} )_i & \equiv P_i \boldsymbol{\beta} - q_i
+\end{align}
+
+
+\subsubsection{ Stopping Condition }
+
+\begin{equation}
+\max_{i \in I(\boldsymbol{\alpha}^k)} -\nabla f( \boldsymbol{\alpha} )_i + \min_{j \in I(\boldsymbol{\alpha}^k)} \nabla f( \boldsymbol{\alpha} )_j \le \epsilon
+\end{equation}
 
 \subsection{  Random Process Kernel Definition }
 
@@ -352,15 +404,6 @@ given a kernel function \( k(x,x') \) from the sigmoid family to approximate the
 &\mathcal{K}(x,x') = -\frac{\gamma}{2 + e^{\gamma(x-x')} + e^{-\gamma(x-x')} } 
 \end{align}
 
-\subsection{Data Pre-Processing}
-% logistic function using mean and sd to put most training points between .1 and .9
-
-% upper and lower bounds on \(\int \Delta \) as non-stationary data detections mechanism
-
-% logistic function from delta using mean and sd in same way if data non-stationary
-
-% iterative integration process until stationary data found ?
-
 \section{Results}
 The architecture has been tested against several data sets.  In all cases the system parameters are left unchanged to eliminate the possbility of optimizing the system performance to best match the known outcomes.
 
@@ -378,8 +421,14 @@ The architecture has been tested against several data sets.  In all cases the sy
 
 \section{Further Research}
 
-\subsection{Data Retention}
-% this can probably be worked into the other 3 sections, but for now I'll put it here
+\subsection{Data Pre-Processing}
+% logistic function using mean and sd to put most training points between .1 and .9
+
+% upper and lower bounds on \(\int \Delta \) as non-stationary data detections mechanism
+
+% logistic function from delta using mean and sd in same way if data non-stationary
+
+% iterative integration process until stationary data found ?
 
 
 \subsection{Ensemble System}
@@ -392,16 +441,6 @@ The architecture has been tested against several data sets.  In all cases the sy
 
 \subsection{Weighted Influence}
 % a weight term could be added to the regularizer to control the influence of specific sets.  This could provide more information in 'important' situations, which could be useful in motivated learning.
-
-\subsection{ Sliding Prediction Offset }
-% we're currently predicting each point from a given window.  It might be better to iteratively match estimates to the full training set - this is the shadow input idea again.
-
-% The basic idea here is that the optimization is intended to punish similar patterns - this means that the prediction algorithm is almost guaranteed to have irregular accuracy as the prediction window moves from one estimate to another (ie, the inbetween states will have lower accuracy than either termination state).
-
-% We're already assuming that the output is a linear combination of SV's, what if we looked at this in the context of real-time processing and evaluated each SV at each point in time, but also included SV's from different points in time and allowed some type of competition between them, say restricting \sum \beta = 1 at all points in time, but allowing overlap somehow?
-
-% Basically, the current formulation assumes we have a test set that is static - we need to re-think the system under the assumption that the test set is dynamic, and we want to reduce the computation at each set using information from previous sets (this likewise can reduce the number of SV's required, as periodic signals need only be represented once).
-
 
 
 \section{Conclusion}
