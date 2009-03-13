@@ -12,14 +12,12 @@
 import sys, getopt, math, datetime, os, cmath
 from random import gauss
 
-import numpy
-import scipy
+import numpy as np
+import scipy as sp
 import scipy.special
 import scipy.stats
-import cvxopt
-from cvxopt import *
-
-from numpy import *
+import cvxopt as cvx
+import cvxopt.solvers as solvers
 
 import matplotlib.pyplot as plt
 import matplotlib.mlab as mlab
@@ -27,25 +25,26 @@ import matplotlib.cm as cm
 
 
 
-cvxopt.solvers.options['show_progress'] = False
-cvxopt.solvers.options['abstol'] = 1e-15
-cvxopt.solvers.options['reltol'] = 1e-15
-cvxopt.solvers.options['feastol'] = 1e-15
+solvers.options['show_progress'] = False
+solvers.options['abstol'] = 1e-15
+solvers.options['reltol'] = 1e-15
+solvers.options['feastol'] = 1e-15
 
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),Lambda=.001, gamma =.5 ):
+	def __init__(self,data=list(),Lambda=.001, gamma =.5, theta=None ):
 	# SVM Class
 	#
 	# @param data		[Nxd] array of observations where N is the number of observations and d is the dimensionality of the abstract space
 	# @param Lambda		Regularizer to control Smoothness / Accuracy.  Preliminary experimental results show the range 0-1 controls this parameter.
 	# @param gamma		List of gamma values which define the kernel smoothness
 	
+		print data.shape
 		try:
 			self.N,self.d = data.shape
 		except ValueError:
-			self.N,self.d = (len(self.X),1)
+			self.N,self.d = (len(data),1)
 			self.X = data.reshape([ self.N, self.d ])
 		else:
 			self.X = data
@@ -84,10 +83,10 @@ class svm:
 		if d1 != self.d != d2:
 			raise StandardError, 'Matrices do not conform to the dimensionality of existing observations'
 		
-		diff = X.reshape([N,1,self.d]) - numpy.transpose( Y.reshape([M,1,self.d]), [1,0,2] )
+		diff = X.reshape([N,1,self.d]) - np.transpose( Y.reshape([M,1,self.d]), [1,0,2] )
 		
 		# Sigmoid
-		return ( 1.0 / ( 1.0 + numpy.exp( -self.gamma * diff ) ) ).prod(2).reshape(N,M)
+		return ( 1.0 / ( 1.0 + np.exp( -self.gamma * diff ) ) ).prod(2).reshape(N,M)
 		
 		# RBF
 		#return ( exp( -((X-Y)**2.0) / gamma ) ).reshape(N,M)
@@ -145,16 +144,16 @@ class svm:
 	def _compute(self):
 		start = datetime.datetime.now()
 
-		self.Y = ( ( .5 + (self.X.reshape(self.N,1,self.d) > transpose(self.X.reshape(self.N,1,self.d),[1,0,2])).prod(2).sum(1,dtype=float) ) / self.N ).reshape([self.N,1])
+		self.Y = ( ( .5 + (self.X.reshape(self.N,1,self.d) > np.transpose(self.X.reshape(self.N,1,self.d),[1,0,2])).prod(2).sum(1,dtype=float) ) / self.N ).reshape([self.N,1])
 		self.K = self._K( self.X, self.X )
 		
-		P = cvxopt.matrix( numpy.dot(self.K.T,self.K), (self.N,self.N) )
+		P = cvx.matrix( np.dot(self.K.T,self.K), (self.N,self.N) )
 		#q = cvxopt.matrix( ( self._Omega(self.Gamma) - ( numpy.ma.dot( self.K.T, self.Y ) ) ), (N*kappa,1) )
-		q = cvxopt.matrix( ( self.Lambda / self.K.T.sum(0) ) - ( ( 1./self.N ) * ( numpy.dot( self.K.T, self.K ).sum(0) ) ) )
-		G = cvxopt.matrix( -identity(self.N), (self.N,self.N) )
-		h = cvxopt.matrix( 0.0, (self.N,1) )
-		A = cvxopt.matrix( 1., (1,self.N) )
-		b = cvxopt.matrix( 1., (1,1) )
+		q = cvx.matrix( ( self.Lambda / self.K.T.sum(0) ) - ( ( 1./self.N ) * ( np.dot( self.K.T, self.K ).sum(0) ) ) )
+		G = cvx.matrix( -np.identity(self.N), (self.N,self.N) )
+		h = cvx.matrix( 0.0, (self.N,1) )
+		A = cvx.matrix( 1., (1,self.N) )
+		b = cvx.matrix( 1., (1,1) )
 		
 		
 		print P.size
@@ -165,12 +164,12 @@ class svm:
 		
 		print p['x']
 		
-		beta = ma.masked_less( p['x'], 1e-8 )
-		mask = ma.getmask(beta)
+		beta = np.ma.masked_less( p['x'], 1e-8 )
+		mask = np.ma.getmask(beta)
 		self.NSV = beta.count()
 		self.alpha = beta
 		self.beta = beta.compressed().reshape([self.NSV,1])
-		self.SV = numpy.ma.array( self.X, mask=numpy.repeat(mask,self.d)).compressed().reshape([self.NSV,self.d])
+		self.SV = np.ma.array( self.X, mask=np.repeat(mask,self.d)).compressed().reshape([self.NSV,self.d])
 		#self.beta = beta
 		#self.SV = self.X
 
@@ -195,40 +194,19 @@ class svm:
 def run():
 	fig = plt.figure()
 	
-	samples = vstack( [ numpy.random.multivariate_normal( mean=array([3,3]), cov=array( identity(2) ), size=array([25,]) ),
-		numpy.random.multivariate_normal( mean=array([7,7]), cov=array( identity(2) ), size=array([25,]) ) 
-	] )
+	Xtrain = np.arange(0,20,.2)
+	Ytrain = np.sin(Xtrain) + (np.random.randn( Xtrain.shape[0] )/10.)
 	
-	'''
-	C = arange(1e-6,1e-0,1e-1) 
-	res = [ svm( samples, Lambda=c, gamma=[.125,.5,2.,8.,32.]) for c in C ]
+	Xtest = np.arange(5,15,.1)
+	Ytest = np.sin(Xtest)+ (np.random.randn( Xtest.shape[0] )/10.)
+	
+	mod = svm( np.vstack([Xtrain,Ytrain]).T, gamma=.1, Lambda=.0005, theta=[5.,] )
 	
 	a = fig.add_subplot(1,2,1)
-	a.plot( C, [mod.cdf_loss().sum() for mod in res],'r' )
-	a.set_title("Loss vs Lambda")
-	a.grid(True)
+	a.plot(Xtrain,Ytrain,'o')
 	
 	b = fig.add_subplot(1,2,2)
-	b.plot( C, [mod.NSV for mod in res] )
-	b.set_title("NSV vs Lambda")
-	b.grid(True)
-	
-	c = fig.add_subplot(2,2,3)
-	c.plot( [mod.NSV for mod in res], [mod.cdf_loss().sum() for mod in res], 'o--' )
-	c.set_title("NSV vs Loss")
-	
-	
-	plt.show()
-	return True
-	'''
-	
-	mod = svm( samples, Lambda=.0005 )
-	
-	print mod
-	#plt.plot(hsplit(samples,2)[0], hsplit(samples,2)[1], 'o')
-	(c1,c2) = mod.contourPlot( plt, (0,10), (0,10),.1,.1 )
-	plt.colorbar(c1, orientation='horizontal')
-
+	b.plot(Xtest,Ytest, 'o')
 	
 	plt.show()
 	
