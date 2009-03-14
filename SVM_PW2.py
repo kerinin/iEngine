@@ -28,7 +28,7 @@ class kMachine(object):
 	def __init__(self,gamma):
 		self.gamma = gamma
 		
-	def _K(self,X,Y):
+	def _K(self,X,Y=None):
 	# Kernel function
 	#
 	# @param X				[Nxd] array of observations
@@ -44,7 +44,10 @@ class kMachine(object):
 		#diff = X.reshape([N,1,self.d]) - np.transpose( Y.reshape([M,1,self.d]), [1,0,2] )
 		
 		# Subset difference
-		diff = X - Y
+		if not Y==None:
+			diff = np.asfarray( X - Y )
+		else:
+			diff = np.asfarray( X )
 		
 		# Gaussian
 		#return (1.0/(self.gamma*math.sqrt(math.pi))) * np.exp( (diff**2)/-self.gamma).prod(2).reshape(N,M)
@@ -56,14 +59,25 @@ class kMachine(object):
 		#return ( 1.0 / ( 1.0 + np.exp( -self.gamma * diff ) ) ).prod(2).reshape(N,M)
 
 class subset(kMachine):
-	def __init__(self,t,data,tStart,theta,gamma):
-		
+	def __init__(self,t,data,gamma,tStart=None,theta=None):
+
+		try:
+			self.N,self.d = data.shape
+		except ValueError:
+			self.N,self.d = (len(data),1)
+			
 		self.tStart = tStart
 		self.theta = theta
+		super(subset, self).__init__(gamma)
 		
-		self.t = np.ma.masked_outside( t, self.tStart, (self.tStart+self.theta) )
-		self.x = np.ma.array(data,mask=(self.t.mask))
-		self.X = np.hstack( self.t, self.X )
+		if tStart and theta:
+			self.t = np.ma.masked_outside( t, self.tStart, (self.tStart+self.theta) )
+			self.x = np.ma.array(data,mask=(self.t.mask))
+		else:
+			self.t = np.ma.array(t)
+			self.x = np.ma.array(data)
+			
+		self.X = np.vstack( [self.t.compressed(), self.x.compressed()] ).T
 		
 	def __sub__(self,other):
 	# difference - for comparing two subsets using symmetric KL divergence
@@ -71,18 +85,21 @@ class subset(kMachine):
 		X = np.vstack( [self.X, other.X] )
 		pSelf = self._Pr( X )
 		pOther = other._Pr( X )
-		logpSelf = np.log(pSelf)
-		logpOther = np.log(pOther)
+		logpSelf = np.log2(pSelf)
+		logpOther = np.log2(pOther)
 		
-		return ( pSelf * logpSelf ).sum() + ( pOther * logpOther ).sum() - ( pSelf * logpOther ).sum() - ( pOther * logpSelf ).sum()
+		return  ( pSelf * logpSelf ).sum() + ( pOther * logpOther ).sum() - ( pSelf * logpOther ).sum() - ( pOther * logpSelf ).sum()
 	
 	def _Pr(self,X):
 		N,d1 = X.shape
 		M,d2 = self.X.shape
 		
-		return ( 1/X.shape[1] ) * self._K(
-			X.reshape([N,1,d1]), np.transpose( self.X.reshape([M,1,d2]), [1,0,2] ) 
-		).prod(2).reshape(N,M).sum(1)
+		if N and M:
+			return ( 1./N ) * self._K(
+				X.reshape([N,1,d1]), np.transpose( self.X.reshape([M,1,d2]), [1,0,2] ) 
+			).prod(2).reshape(N,M).sum(1)
+		else:
+			return X
 
 class svm(kMachine):
 	def __init__(self,t=list(),data=list(),Lambda=.1, gamma =.5, theta=None ):
@@ -105,7 +122,7 @@ class svm(kMachine):
 		
 		self.theta = theta
 		self.Lambda = Lambda
-		super(kMachine, self).__init__(gamma)
+		super(svm, self).__init__(gamma)
 		
 		self.S = self._S()
 		self.Y = None				# empirical CDF of X
@@ -127,20 +144,24 @@ class svm(kMachine):
 		
 	def _S(self):
 		
-		self.S = np.ma.vstack( 
+		return np.ma.vstack( 
 			[ 
 				np.ma.vstack( 
-					[ subset(self.t,self.X,tStart,theta) for tStart in self.t ] 
+					[ subset(self.t,self.X,tStart,theta,self.gamma) for tStart in self.t ] 
 				) for theta in self.theta 
 			]
 		)
 		
-	def pdf(self,X):
+	def pdf(self,S,X):
 	# Probability distribution function
 	#
+	# @param X				Set of training observations
 	# @param X				[Nxd] array of points for which to calculate the PDF
-	
-		return np.ma.dot( self._K( X, self.SV.T ), self.beta )
+		
+		diffS = S - self.SV.T
+		diffX = X - self.SV.T
+		
+		return np.ma.dot( self._K( diffS + diffX ), self.beta )
 		
 	def __iadd__(self, points):
 		# overloaded '+=', used for adding a vector list to the module's data
@@ -174,33 +195,32 @@ class svm(kMachine):
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % ( duration.seconds + float(duration.microseconds)/1000000)
 		
-	def contourPlot(self, fig, xrange, yrange, xstep, ystep, axes=(0,1) ):
+	def contourPlot(self, S, fig, xrange, yrange, xstep, ystep, axes=(0,1) ):
 		xN = int((xrange[1]-xrange[0])/xstep)
 		yN =  int((yrange[1]-yrange[0])/ystep)
 		X = np.dstack(np.mgrid[xrange[0]:xrange[1]:xstep,yrange[0]:yrange[1]:ystep]).reshape([ xN *yN,2])
 		x = np.arange(xrange[0],xrange[1],xstep)
 		y = np.arange(yrange[0],yrange[1],ystep)
 
-		CS1 = fig.contourf(x,y,self.pdf(X).reshape([xN,yN]).T,200, antialiased=True, cmap=cm.gray )
-		CS2 = plt.contour(x,y,self.pdf(X).reshape([xN,yN]).T, [.1,], colors='r' )
-		fig.plot( np.hsplit( self.X,self.d )[ axes[0] ],np.hsplit( self.X,self.d )[ axes[1] ], 'r+' )
-		fig.scatter( np.hsplit(self.SV,self.d)[ axes[0] ].reshape([self.NSV,]),np.hsplit(self.SV,self.d)[ axes[1] ].reshape([self.NSV],), s=(self.NSV*200*self.beta.reshape([self.NSV,])), alpha=.25, color='r' )
-		#fig.clabel(CS, inline=1, fontsize=10)
+		CS1 = fig.contourf(x,y,self.pdf(S,X).reshape([xN,yN]).T,200, antialiased=True, cmap=cm.gray )
+		CS2 = plt.contour(x,y,self.pdf(S,X).reshape([xN,yN]).T, [.1,], colors='r' )
+		fig.plot( S.t,np.hsplit( S.x,S.d )[ axes[1] ], 'r+' )
 		fig.axis( [ xrange[0],xrange[1],yrange[0],yrange[1] ] )
 		return (CS1,CS2)
 		
 def run():
 	fig = plt.figure()
 	
-	Xtrain = np.arange(0,20,.2)
+	Xtrain = np.arange(0,20,2)
 	Ytrain = np.sin(Xtrain) + (np.random.randn( Xtrain.shape[0] )/10.)
 	
 	Xtest = np.arange(5,15,.1)
 	Ytest = np.sin(Xtest)+ (np.random.randn( Xtest.shape[0] )/10.)
+	S = subset(Xtest,Ytest,gamma=.5)
 	
 	mod = svm( Xtrain.reshape([Xtrain.shape[0],1]), Ytrain.reshape([Ytrain.shape[0],1]), gamma=.5, Lambda=.5, theta=[5.] )
 
-	(c1,c2) = mod.contourPlot( plt, (0,20), (-2,2),.1,.01 )
+	(c1,c2) = mod.contourPlot( S, plt, (0,20), (-2,2),.1,.01 )
 
 	plt.show()
 	
