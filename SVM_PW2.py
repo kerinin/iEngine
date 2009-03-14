@@ -24,7 +24,67 @@ cvxopt.solvers.options['feastol'] = 1e-15
 
 _Functions = ['run']
 	
-class svm:
+class kMachine(object):
+	def __init__(self,gamma):
+		self.gamma = gamma
+		
+	def _K(self,X,Y):
+	# Kernel function
+	#
+	# @param X				[Nxd] array of observations
+	# @param Y				[Mxd] array of observations
+	# @param gamma			kernel width parameter
+	
+		#N,d1 = X.shape
+		#M,d2 = Y.shape
+		
+		#if d1 != self.d != d2:
+		#	raise StandardError, 'Matrices do not conform to the dimensionality of existing observations'
+		
+		#diff = X.reshape([N,1,self.d]) - np.transpose( Y.reshape([M,1,self.d]), [1,0,2] )
+		
+		# Subset difference
+		diff = X - Y
+		
+		# Gaussian
+		#return (1.0/(self.gamma*math.sqrt(math.pi))) * np.exp( (diff**2)/-self.gamma).prod(2).reshape(N,M)
+		
+		# Subset Gaussian
+		return (1.0/(self.gamma*math.sqrt(math.pi))) * np.exp( (diff**2)/-self.gamma)
+		
+		# Sigmoid
+		#return ( 1.0 / ( 1.0 + np.exp( -self.gamma * diff ) ) ).prod(2).reshape(N,M)
+
+class subset(kMachine):
+	def __init__(self,t,data,tStart,theta,gamma):
+		
+		self.tStart = tStart
+		self.theta = theta
+		
+		self.t = np.ma.masked_outside( t, self.tStart, (self.tStart+self.theta) )
+		self.x = np.ma.array(data,mask=(self.t.mask))
+		self.X = np.hstack( self.t, self.X )
+		
+	def __sub__(self,other):
+	# difference - for comparing two subsets using symmetric KL divergence
+		
+		X = np.vstack( [self.X, other.X] )
+		pSelf = self._Pr( X )
+		pOther = other._Pr( X )
+		logpSelf = np.log(pSelf)
+		logpOther = np.log(pOther)
+		
+		return ( pSelf * logpSelf ).sum() + ( pOther * logpOther ).sum() - ( pSelf * logpOther ).sum() - ( pOther * logpSelf ).sum()
+	
+	def _Pr(self,X):
+		N,d1 = X.shape
+		M,d2 = self.X.shape
+		
+		return ( 1/X.shape[1] ) * self._K(
+			X.reshape([N,1,d1]), np.transpose( self.X.reshape([M,1,d2]), [1,0,2] ) 
+		).prod(2).reshape(N,M).sum(1)
+
+class svm(kMachine):
 	def __init__(self,t=list(),data=list(),Lambda=.1, gamma =.5, theta=None ):
 	# SVM Class
 	#
@@ -40,11 +100,12 @@ class svm:
 			self.N,self.d = (len(self.X),1)
 			self.X = data.reshape([ self.N, self.d ])
 		else:
+			self.t = t
 			self.X = data
 		
 		self.theta = theta
 		self.Lambda = Lambda
-		self.gamma = gamma
+		super(kMachine, self).__init__(gamma)
 		
 		self.S = self._S()
 		self.Y = None				# empirical CDF of X
@@ -69,40 +130,17 @@ class svm:
 		self.S = np.ma.vstack( 
 			[ 
 				np.ma.vstack( 
-					[ 
-						np.ma.array(self.X,mask=(np.ma.masked_outside( self.t, t, (t+theta) ).mask)).T
-					for t in self.t ] 
+					[ subset(self.t,self.X,tStart,theta) for tStart in self.t ] 
 				) for theta in self.theta 
 			]
 		)
-		
-	def _K(self,X,Y):
-	# Kernel function
-	#
-	# @param X				[Nxd] array of observations
-	# @param Y				[Mxd] array of observations
-	# @param gamma			kernel width parameter
-	
-		N,d1 = X.shape
-		M,d2 = Y.shape
-		
-		if d1 != self.d != d2:
-			raise StandardError, 'Matrices do not conform to the dimensionality of existing observations'
-		
-		diff = X.reshape([N,1,self.d]) - np.transpose( Y.reshape([M,1,self.d]), [1,0,2] )
-		
-		# Gaussian
-		return (1.0/(self.gamma*math.sqrt(math.pi))) * np.exp( (diff**2)/-self.gamma).prod(2).reshape(N,M)
-		
-		# Sigmoid
-		#return ( 1.0 / ( 1.0 + np.exp( -self.gamma * diff ) ) ).prod(2).reshape(N,M)
 		
 	def pdf(self,X):
 	# Probability distribution function
 	#
 	# @param X				[Nxd] array of points for which to calculate the PDF
 	
-		return np.ma.dot( self._K( X, self.SV ), self.beta )
+		return np.ma.dot( self._K( X, self.SV.T ), self.beta )
 		
 	def __iadd__(self, points):
 		# overloaded '+=', used for adding a vector list to the module's data
@@ -114,11 +152,9 @@ class svm:
 	def _compute(self):
 		start = datetime.datetime.now()
 
-		self.Y = ( ( .5 + (self.X.reshape(self.N,1,self.d) > np.transpose(self.X.reshape(self.N,1,self.d),[1,0,2])).prod(2).sum(1,dtype=float) ) / self.N ).reshape([self.N,1])
-		self.K = self._K( self.X, self.X )
+		self.K = self._K( self.S, self.S.T )
 		
 		P = cvxopt.matrix( np.dot(self.K.T,self.K), (self.N,self.N) )
-		#q = cvxopt.matrix( ( self._Omega(self.Gamma) - ( np.ma.dot( self.K.T, self.Y ) ) ), (N*kappa,1) )
 		q = cvxopt.matrix( ( self.Lambda / self.K.T.sum(0) ) - ( ( 1./self.N ) * ( np.dot( self.K.T, self.K ).sum(0) ) ) )
 		G = cvxopt.matrix( -np.identity(self.N), (self.N,self.N) )
 		h = cvxopt.matrix( 0.0, (self.N,1) )
@@ -133,7 +169,7 @@ class svm:
 		self.NSV = beta.count()
 		self.alpha = beta
 		self.beta = beta.compressed().reshape([self.NSV,1])
-		self.SV = np.ma.array( self.X, mask=np.repeat(mask,self.d)).compressed().reshape([self.NSV,self.d])
+		self.SV = np.ma.array( self.S, mask=mask).compressed().reshape([self.NSV,1])
 
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % ( duration.seconds + float(duration.microseconds)/1000000)
