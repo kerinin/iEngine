@@ -215,7 +215,7 @@ def run():
 	'''
 	
 	mod = svm( samples, Lambda=.0005 )
-
+	
 	print mod
 	#plt.plot(hsplit(samples,2)[0], hsplit(samples,2)[1], 'o')
 	(c1,c2) = mod.contourPlot( plt, (0,10), (0,10),.1,.1 )
