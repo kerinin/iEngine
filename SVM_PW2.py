@@ -25,7 +25,7 @@ cvxopt.solvers.options['feastol'] = 1e-15
 _Functions = ['run']
 	
 class svm:
-	def __init__(self,data=list(),Lambda=.1, gamma =.5 ):
+	def __init__(self,t=list(),data=list(),Lambda=.1, gamma =.5, theta=None ):
 	# SVM Class
 	#
 	# @param data		[Nxd] array of observations where N is the number of observations and d is the dimensionality of the abstract space
@@ -33,16 +33,20 @@ class svm:
 	# @param gamma		List of gamma values which define the kernel smoothness
 	
 		try:
+			self.t = t
 			self.N,self.d = data.shape
 		except ValueError:
+			self.t = t
 			self.N,self.d = (len(self.X),1)
 			self.X = data.reshape([ self.N, self.d ])
 		else:
 			self.X = data
 		
+		self.theta = theta
 		self.Lambda = Lambda
 		self.gamma = gamma
 		
+		self.S = self._S()
 		self.Y = None				# empirical CDF of X
 		self.SV = None			# X value array of SV
 		self.NSV = None			# cardinality of SV
@@ -59,6 +63,18 @@ class svm:
 		ret += "gamma: %s\n" % str(self.gamma)
 		ret += "SV: %s (%s percent)\n" % ( self.NSV,100. * float(self.NSV) / float(self.N ) )
 		return ret
+		
+	def _S(self):
+		
+		self.S = np.ma.vstack( 
+			[ 
+				np.ma.vstack( 
+					[ 
+						np.ma.array(self.X,mask=(np.ma.masked_outside( self.t, t, (t+theta) ).mask)).T
+					for t in self.t ] 
+				) for theta in self.theta 
+			]
+		)
 		
 	def _K(self,X,Y):
 	# Kernel function
@@ -146,9 +162,8 @@ def run():
 	Xtest = np.arange(5,15,.1)
 	Ytest = np.sin(Xtest)+ (np.random.randn( Xtest.shape[0] )/10.)
 	
-	mod = svm( np.vstack([Xtrain,Ytrain]).T, gamma=.5, Lambda=.0005 )
+	mod = svm( Xtrain.reshape([Xtrain.shape[0],1]), Ytrain.reshape([Ytrain.shape[0],1]), gamma=.5, Lambda=.5, theta=[5.] )
 
-	#plt.plot(hsplit(samples,2)[0], hsplit(samples,2)[1], 'o')
 	(c1,c2) = mod.contourPlot( plt, (0,20), (-2,2),.1,.01 )
 
 	plt.show()
