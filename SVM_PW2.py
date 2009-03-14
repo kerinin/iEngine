@@ -82,11 +82,20 @@ class subset(kMachine):
 	def __sub__(self,other):
 	# difference - for comparing two subsets using symmetric KL divergence
 		
-		X = np.vstack( [self.X, other.X] )
+		try:
+			X = np.vstack( [self.X, other.X] )
+		except AttributeError:
+			X = np.vstack( [self.X, other] )
+			
 		pSelf = self._Pr( X )
 		pOther = other._Pr( X )
 		logpSelf = np.log2(pSelf)
 		logpOther = np.log2(pOther)
+		
+		print pSelf.shape
+		print pOther.shape
+		print logpSelf.shape
+		print logpOther.shape
 		
 		return  ( pSelf * logpSelf ).sum() + ( pOther * logpOther ).sum() - ( pSelf * logpOther ).sum() - ( pOther * logpSelf ).sum()
 	
@@ -158,7 +167,7 @@ class svm(kMachine):
 	# @param X				Set of training observations
 	# @param X				[Nxd] array of points for which to calculate the PDF
 		
-		diffS = S - self.SV.T
+		diffS = np.array(S) - self.SV.T
 		diffX = X - self.SV.T
 		
 		return np.ma.dot( self._K( diffS + diffX ), self.beta )
