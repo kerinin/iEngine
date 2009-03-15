@@ -66,6 +66,8 @@ class subset(kMachine):
 		except ValueError:
 			self.N,self.d = (len(data),1)
 			
+		self.xTest = None
+		
 		self.tStart = tStart
 		self.theta = theta
 		super(subset, self).__init__(gamma)
@@ -82,31 +84,41 @@ class subset(kMachine):
 	def __sub__(self,other):
 	# difference - for comparing two subsets using symmetric KL divergence
 		
-		try:
-			X = np.vstack( [self.X, other.X] )
-		except AttributeError:
-			X = np.vstack( [self.X, other] )
+		if other.__class__ == np.ndarray or class.__class__ == np.ma.core.MaskedArray:
+			if other.dtype == object:
+			# other is an array of subsets
+				X = np.vstack( [self.X, other.X] )
+				
+				pSelf = self._Pr( X )
+				pOther = other._Pr( X )
+				logpSelf = np.log2(pSelf)
+				logpOther = np.log2(pOther)
+				
+				return  ( pSelf * logpSelf ).sum() + ( pOther * logpOther ).sum() - ( pSelf * logpOther ).sum() - ( pOther * logpSelf ).sum()
+			elif other.dtype == float:
+			# other is an array of floats
+				X = np.vstack( [self.X, other] )
+				
+				pSelf = self._Pr( X )
+				#pOther = other._Pr( X )		#This needs to be modified, since X won't have a Pr measure - possible use self's
+				logpSelf = np.log2(pSelf)
+				logpOther = np.log2(pOther)
+				
+				return  ( pSelf * logpSelf ).sum() + ( pOther * logpOther ).sum() - ( pSelf * logpOther ).sum() - ( pOther * logpSelf ).sum()		
 			
-		pSelf = self._Pr( X )
-		pOther = other._Pr( X )
-		logpSelf = np.log2(pSelf)
-		logpOther = np.log2(pOther)
-		
-		print pSelf.shape
-		print pOther.shape
-		print logpSelf.shape
-		print logpOther.shape
-		
-		return  ( pSelf * logpSelf ).sum() + ( pOther * logpOther ).sum() - ( pSelf * logpOther ).sum() - ( pOther * logpSelf ).sum()
+		raise StandardError, 'This type of subtraction not implemented'
+
 	
 	def _Pr(self,X):
 		N,d1 = X.shape
 		M,d2 = self.X.shape
 		
 		if N and M:
-			return ( 1./N ) * self._K(
+			sum =  self._K(
 				X.reshape([N,1,d1]), np.transpose( self.X.reshape([M,1,d2]), [1,0,2] ) 
 			).prod(2).reshape(N,M).sum(1)
+			
+			return ( 1./N ) * sum
 		else:
 			return X
 
@@ -167,8 +179,7 @@ class svm(kMachine):
 	# @param X				Set of training observations
 	# @param X				[Nxd] array of points for which to calculate the PDF
 		
-		diffS = np.array(S) - self.SV.T
-		diffX = X - self.SV.T
+		diff = S.e_union(X) - self.SV.T
 		
 		return np.ma.dot( self._K( diffS + diffX ), self.beta )
 		
