@@ -73,8 +73,9 @@ class subset(kMachine):
 		super(subset, self).__init__(gamma)
 		
 		if tStart and theta:
-			self.t = np.ma.masked_outside( t, self.tStart, (self.tStart+self.theta) )
-			self.x = np.ma.array(data,mask=(self.t.mask))
+			mask = np.ma.mask_or( (self.tStart < t), ( t >= (self.tStart+self.theta) ) )
+			self.t = np.ma.array(data,mask=mask)
+			self.x = np.ma.array(data,mask=mask)
 		else:
 			self.t = np.ma.array(t)
 			self.x = np.ma.array(data)
@@ -83,24 +84,27 @@ class subset(kMachine):
 		
 	def __sub__(self,other):
 	# difference - for comparing two subsets using symmetric KL divergence
+
+		print other.__class__
 		
-		if other.__class__ == np.ndarray or class.__class__ == np.ma.core.MaskedArray:
-			if other.dtype == object:
-			# other is an array of subsets
-				X = np.vstack( [self.X, other.X] )
-				
-				pSelf = self._Pr( X )
-				pOther = other._Pr( X )
-				logpSelf = np.log2(pSelf)
-				logpOther = np.log2(pOther)
-				
-				return  ( pSelf * logpSelf ).sum() + ( pOther * logpOther ).sum() - ( pSelf * logpOther ).sum() - ( pOther * logpSelf ).sum()
-			elif other.dtype == float:
+		#if other.__class__ == np.ndarray or other.__class__ == np.ma.core.MaskedArray:
+		if other.__class__ == subset:
+		# other is an array of subsets
+			X = np.vstack( [self.X, other.X] )
+			
+			pSelf = self._Pr( X )
+			pOther = other._Pr( X )
+			logpSelf = np.log2(pSelf)
+			logpOther = np.log2(pOther)
+			
+			return  ( pSelf * logpSelf ).sum() + ( pOther * logpOther ).sum() - ( pSelf * logpOther ).sum() - ( pOther * logpSelf ).sum()
+		if other.__class__ == np.ndarray or other.__class__ == np.ma.core.MaskedArray:
+			if other.dtype == float:
 			# other is an array of floats
 				X = np.vstack( [self.X, other] )
 				
 				pSelf = self._Pr( X )
-				#pOther = other._Pr( X )		#This needs to be modified, since X won't have a Pr measure - possible use self's
+				pOther = other._Pr( X,other )
 				logpSelf = np.log2(pSelf)
 				logpOther = np.log2(pOther)
 				
@@ -109,18 +113,21 @@ class subset(kMachine):
 		raise StandardError, 'This type of subtraction not implemented'
 
 	
-	def _Pr(self,X):
+	def _Pr(self,X,Y=None):
+		if not Y:
+			Y = self.X
 		N,d1 = X.shape
-		M,d2 = self.X.shape
+		M,d2 = Y.shape
 		
+		# PROBLEM: This isn't accounting for t
 		if N and M:
 			sum =  self._K(
-				X.reshape([N,1,d1]), np.transpose( self.X.reshape([M,1,d2]), [1,0,2] ) 
+				X.reshape([N,1,d1]), np.transpose( Y.reshape([M,1,d2]), [1,0,2] ) 
 			).prod(2).reshape(N,M).sum(1)
 			
 			return ( 1./N ) * sum
 		else:
-			return X
+			return 0.
 
 class svm(kMachine):
 	def __init__(self,t=list(),data=list(),Lambda=.1, gamma =.5, theta=None ):
@@ -165,21 +172,30 @@ class svm(kMachine):
 		
 	def _S(self):
 		
-		return np.ma.vstack( 
+		S = np.ma.vstack( 
 			[ 
 				np.ma.vstack( 
-					[ subset(self.t,self.X,tStart,theta,self.gamma) for tStart in self.t ] 
+					[ subset(t=self.t,data=self.X,tStart=tStart,theta=theta,gamma=self.gamma) for tStart in self.t ] 
 				) for theta in self.theta 
 			]
 		)
 		
-	def pdf(self,S,X):
+		return S
+		
+	def pdf(self,S,t,x):
 	# Probability distribution function
 	#
 	# @param X				Set of training observations
 	# @param X				[Nxd] array of points for which to calculate the PDF
 		
-		diff = S.e_union(X) - self.SV.T
+
+		X = np.hstack([t,x])
+		
+		# FUCK THIS SHIT
+		Sx = np.vstack( [ subset( t=row[0],data=row[1:],gamma=self.gamma ) for row in np.vsplit(X,X.shape[0]) ] )
+			
+		diffS = np.array([S,]) - self.SV
+		diffX = Sx - self.SV
 		
 		return np.ma.dot( self._K( diffS + diffX ), self.beta )
 		
@@ -218,12 +234,14 @@ class svm(kMachine):
 	def contourPlot(self, S, fig, xrange, yrange, xstep, ystep, axes=(0,1) ):
 		xN = int((xrange[1]-xrange[0])/xstep)
 		yN =  int((yrange[1]-yrange[0])/ystep)
-		X = np.dstack(np.mgrid[xrange[0]:xrange[1]:xstep,yrange[0]:yrange[1]:ystep]).reshape([ xN *yN,2])
+		X = np.dstack(np.mgrid[xrange[0]:xrange[1]:xstep,yrange[0]:yrange[1]:ystep]).reshape([ xN * yN,2])
 		x = np.arange(xrange[0],xrange[1],xstep)
 		y = np.arange(yrange[0],yrange[1],ystep)
 
-		CS1 = fig.contourf(x,y,self.pdf(S,X).reshape([xN,yN]).T,200, antialiased=True, cmap=cm.gray )
-		CS2 = plt.contour(x,y,self.pdf(S,X).reshape([xN,yN]).T, [.1,], colors='r' )
+		t = x.repeat(yN).reshape( [xN * yN, 1] )
+
+		CS1 = fig.contourf(x,y,self.pdf(S,t,X).reshape([xN,yN]).T,200, antialiased=True, cmap=cm.gray )
+		CS2 = plt.contour(x,y,self.pdf(S,t,X).reshape([xN,yN]).T, [.1,], colors='r' )
 		fig.plot( S.t,np.hsplit( S.x,S.d )[ axes[1] ], 'r+' )
 		fig.axis( [ xrange[0],xrange[1],yrange[0],yrange[1] ] )
 		return (CS1,CS2)
@@ -233,13 +251,13 @@ def run():
 	
 	Xtrain = np.arange(0,20,2)
 	Ytrain = np.sin(Xtrain) + (np.random.randn( Xtrain.shape[0] )/10.)
-	
+	mod = svm( Xtrain.reshape([Xtrain.shape[0],1]), Ytrain.reshape([Ytrain.shape[0],1]), gamma=.5, Lambda=.5, theta=[.1] )
+
+
 	Xtest = np.arange(5,15,.1)
 	Ytest = np.sin(Xtest)+ (np.random.randn( Xtest.shape[0] )/10.)
 	S = subset(Xtest,Ytest,gamma=.5)
 	
-	mod = svm( Xtrain.reshape([Xtrain.shape[0],1]), Ytrain.reshape([Ytrain.shape[0],1]), gamma=.5, Lambda=.5, theta=[5.] )
-
 	(c1,c2) = mod.contourPlot( S, plt, (0,20), (-2,2),.1,.01 )
 
 	plt.show()
