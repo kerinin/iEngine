@@ -79,9 +79,6 @@ class subset(kMachine):
 		else:
 			self.t = np.ma.array(t)
 			self.x = np.ma.array(data)
-			
-		print self.t.shape
-		print self.x.shape
 		
 		# Why is t [1xn]?  this seems stupid - just make t a column vector and you eliminate the .T down there
 		
@@ -193,9 +190,9 @@ class svm(kMachine):
 	# @param X				Set of training observations
 	# @param X				[Nxd] array of points for which to calculate the PDF
 		
-		Sx = np.vstack([ subset( t=row[0],data=row[1:], gamma=self.gamma ) for row in np.vsplit(X,X.shape[0]) ])
+		Sx = np.vstack([ subset( t=row.T[0],data=row.T[1:].T, gamma=self.gamma ) for row in np.vsplit(X,X.shape[0]) ])
 		
-		diffS = S - self.SV.T
+		diffS = np.array([S,]) - self.SV.T
 		diffX = Sx - self.SV.T
 		
 		return np.ma.dot( self._K( diffS + diffX ), self.beta )
@@ -241,7 +238,7 @@ class svm(kMachine):
 
 		CS1 = fig.contourf(x,y,self.pdf(S,X).reshape([xN,yN]).T,200, antialiased=True, cmap=cm.gray )
 		CS2 = plt.contour(x,y,self.pdf(S,X).reshape([xN,yN]).T, [.1,], colors='r' )
-		fig.plot( S.t,np.hsplit( S.x,S.d )[ axes[1] ], 'r+' )
+		fig.plot( S.t,np.hsplit( S.x,S.d )[ axes[1]-1 ], 'r+' )
 		fig.axis( [ xrange[0],xrange[1],yrange[0],yrange[1] ] )
 		return (CS1,CS2)
 		
