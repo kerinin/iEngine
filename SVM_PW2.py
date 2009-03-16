@@ -86,8 +86,6 @@ class subset(kMachine):
 		
 	def __sub__(self,other):
 	# difference - for comparing two subsets using symmetric KL divergence
-
-		print other.__class__
 		
 		#if other.__class__ == np.ndarray or other.__class__ == np.ma.core.MaskedArray:
 		if other.__class__ == subset:
@@ -184,15 +182,16 @@ class svm(kMachine):
 		
 		return S
 		
-	def pdf(self,S,X):
+	def pdf(self,S,x):
 	# Probability distribution function
 	#
 	# @param X				Set of training observations
 	# @param X				[Nxd] array of points for which to calculate the PDF
 		
-		Sx = np.vstack([ subset( t=row.T[0],data=row.T[1:].T, gamma=self.gamma ) for row in np.vsplit(X,X.shape[0]) ])
-		
 		diffS = np.array([S,]) - self.SV.T
+
+		Sx = np.vstack( [ subset( t=np.split(row,[1])[0], data = np.split(row,[1])[1], gamma=self.gamma) for row in x ] )
+
 		diffX = Sx - self.SV.T
 		
 		return np.ma.dot( self._K( diffS + diffX ), self.beta )
