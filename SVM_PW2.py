@@ -59,75 +59,48 @@ class kMachine(object):
 		#return ( 1.0 / ( 1.0 + np.exp( -self.gamma * diff ) ) ).prod(2).reshape(N,M)
 	
 class subset(kMachine):
-	def __init__(self,t,data,gamma,tStart=None,theta=None):
+	def __init__(self,data,gamma,K,tStart=None,theta=None):
 
 		try:
 			self.N,self.d = data.shape
 		except ValueError:
 			self.N,self.d = (len(data),1)
-			
-		self.xTest = None
 		
 		self.tStart = tStart
 		self.theta = theta
 		super(subset, self).__init__(gamma)
+		self.K = K
 		
 		if tStart and theta:
-			mask = np.ma.mask_or( (self.tStart < t), ( t >= (self.tStart+self.theta) ) )
-			self.t = np.ma.array(data,mask=mask)
-			self.x = np.ma.array(data,mask=mask)
+			self.mask = (self.tStart < t) + ( t >= (self.tStart+self.theta)
+			self.X = data
 		else:
-			self.t = np.ma.array(t)
-			self.x = np.ma.array(data)
-		
-		# Why is t [1xn]?  this seems stupid - just make t a column vector and you eliminate the .T down there
-		
-		self.X = np.vstack( [self.t.compressed(), self.x.compressed()] ).T
+			self.mask = None
+			self.X = data
 		
 	def __sub__(self,other):
 	# difference - for comparing two subsets using symmetric KL divergence
 		
-		#if other.__class__ == np.ndarray or other.__class__ == np.ma.core.MaskedArray:
+		N = self.N
+		
 		if other.__class__ == subset:
 		# other is an array of subsets
-			X = np.vstack( [self.X, other.X] )
+			M = other.N
+			diff = np.ma.array(self.K,mask=np.ma.mask_or( self.mask, other.mask.T ), copy=False )
 			
-			pSelf = self._Pr( X )
-			pOther = other._Pr( X )
-			logpSelf = np.log2(pSelf)
-			logpOther = np.log2(pOther)
-			
-			return  ( pSelf * logpSelf ).sum() + ( pOther * logpOther ).sum() - ( pSelf * logpOther ).sum() - ( pOther * logpSelf ).sum()
 		if other.__class__ == np.ndarray or other.__class__ == np.ma.core.MaskedArray:
 			if other.dtype == float:
 			# other is an array of floats
-				X = np.vstack( [self.X, other] )
+				M = other.shape[0]
+				#self.X.reshape([self.N,1,self.d]) - self.X.T.reshape([1,self.N,self.d])
+				diff = np.ma.array( self.X.reshape([self.N,1,self.d]) - other.T.reshape([1,M,self.d]), mask = self.mask )
 				
-				pSelf = self._Pr( X )
-				pOther = other._Pr( X,other )
-				logpSelf = np.log2(pSelf)
-				logpOther = np.log2(pOther)
-				
-				return  ( pSelf * logpSelf ).sum() + ( pOther * logpOther ).sum() - ( pSelf * logpOther ).sum() - ( pOther * logpSelf ).sum()		
-			
-		raise StandardError, 'This type of subtraction not implemented'
-
-	
-	def _Pr(self,X,Y=None):
-		if not Y:
-			Y = self.X
-		N,d1 = X.shape
-		M,d2 = Y.shape
+		pSelf = self._K( diff.sum(0) ).prod(2) / (N*M )
+		pOther = self._K( diff.sum(1) ).prod(2) / (N*M )
+		logpSelf = np.log2(pSelf)
+		logpOther = np.log2(pOther)			
 		
-		# PROBLEM: This isn't accounting for t
-		if N and M:
-			sum =  self._K(
-				X.reshape([N,1,d1]), np.transpose( Y.reshape([M,1,d2]), [1,0,2] ) 
-			).prod(2).reshape(N,M).sum(1)
-			
-			return ( 1./N ) * sum
-		else:
-			return 0.
+		return  ( pSelf * logpSelf ).sum() + ( pOther * logpOther ).sum() - ( pSelf * logpOther ).sum() - ( pOther * logpSelf ).sum()
 
 class svm(kMachine):
 	def __init__(self,t=list(),data=list(),Lambda=.1, gamma =.5, theta=None ):
@@ -138,20 +111,18 @@ class svm(kMachine):
 	# @param gamma		List of gamma values which define the kernel smoothness
 	
 		try:
-			self.t = t
 			self.N,self.d = data.shape
 		except ValueError:
-			self.t = t
-			self.N,self.d = (len(self.X),1)
+			self.N,self.d = (len(data),1)
 			self.X = data.reshape([ self.N, self.d ])
 		else:
-			self.t = t
 			self.X = data
 		
 		self.theta = theta
 		self.Lambda = Lambda
 		super(svm, self).__init__(gamma)
 		
+		self.K = self.X.reshape([self.N,1,self.d]) - self.X.T.reshape([1,self.N,self.d])
 		self.S = self._S()
 		self.Y = None				# empirical CDF of X
 		self.SV = None			# X value array of SV
@@ -175,7 +146,7 @@ class svm(kMachine):
 		S = np.ma.vstack( 
 			[ 
 				np.ma.vstack( 
-					[ subset(t=self.t,data=self.X,tStart=tStart,theta=theta,gamma=self.gamma) for tStart in self.t ] 
+					[ subset(data=self.X,K=self.K,tStart=tStart,theta=theta,gamma=self.gamma) for tStart in self.t ] 
 				) for theta in self.theta 
 			]
 		)
