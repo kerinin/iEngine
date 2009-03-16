@@ -57,7 +57,7 @@ class kMachine(object):
 		
 		# Sigmoid
 		#return ( 1.0 / ( 1.0 + np.exp( -self.gamma * diff ) ) ).prod(2).reshape(N,M)
-
+	
 class subset(kMachine):
 	def __init__(self,t,data,gamma,tStart=None,theta=None):
 
@@ -80,6 +80,11 @@ class subset(kMachine):
 			self.t = np.ma.array(t)
 			self.x = np.ma.array(data)
 			
+		print self.t.shape
+		print self.x.shape
+		
+		# Why is t [1xn]?  this seems stupid - just make t a column vector and you eliminate the .T down there
+		
 		self.X = np.vstack( [self.t.compressed(), self.x.compressed()] ).T
 		
 	def __sub__(self,other):
@@ -182,20 +187,16 @@ class svm(kMachine):
 		
 		return S
 		
-	def pdf(self,S,t,x):
+	def pdf(self,S,X):
 	# Probability distribution function
 	#
 	# @param X				Set of training observations
 	# @param X				[Nxd] array of points for which to calculate the PDF
 		
-
-		X = np.hstack([t,x])
+		Sx = np.vstack([ subset( t=row[0],data=row[1:], gamma=self.gamma ) for row in np.vsplit(X,X.shape[0]) ])
 		
-		# FUCK THIS SHIT
-		Sx = np.vstack( [ subset( t=row[0],data=row[1:],gamma=self.gamma ) for row in np.vsplit(X,X.shape[0]) ] )
-			
-		diffS = np.array([S,]) - self.SV
-		diffX = Sx - self.SV
+		diffS = S - self.SV.T
+		diffX = Sx - self.SV.T
 		
 		return np.ma.dot( self._K( diffS + diffX ), self.beta )
 		
@@ -238,10 +239,8 @@ class svm(kMachine):
 		x = np.arange(xrange[0],xrange[1],xstep)
 		y = np.arange(yrange[0],yrange[1],ystep)
 
-		t = x.repeat(yN).reshape( [xN * yN, 1] )
-
-		CS1 = fig.contourf(x,y,self.pdf(S,t,X).reshape([xN,yN]).T,200, antialiased=True, cmap=cm.gray )
-		CS2 = plt.contour(x,y,self.pdf(S,t,X).reshape([xN,yN]).T, [.1,], colors='r' )
+		CS1 = fig.contourf(x,y,self.pdf(S,X).reshape([xN,yN]).T,200, antialiased=True, cmap=cm.gray )
+		CS2 = plt.contour(x,y,self.pdf(S,X).reshape([xN,yN]).T, [.1,], colors='r' )
 		fig.plot( S.t,np.hsplit( S.x,S.d )[ axes[1] ], 'r+' )
 		fig.axis( [ xrange[0],xrange[1],yrange[0],yrange[1] ] )
 		return (CS1,CS2)
