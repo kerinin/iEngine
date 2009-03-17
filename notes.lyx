@@ -46,6 +46,7 @@
 \tracking_changes false
 \output_changes false
 \author "" 
+\author "" 
 \end_header
 
 \begin_body
@@ -73,10 +74,8 @@ Parzen Window Vector Estimate
 \noun off
 \color none
 \begin_inset Formula \begin{align}
-\varphi_{P}(\mathbf{x},S) & =\sum_{i\in\mathcal{S}}\frac{1}{|\mathcal{S}|}K_{\gamma}(S_{\mathbf{x}},S_{i})\\
-K_{\gamma}(S_{i},S_{j}) & =\prod_{c}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|S_{i}^{c}-S_{j}^{c}\|_{KL}^{2}}\\
-\|S_{n}-S_{m}\|_{KL} & =D_{KL}(S_{n}\|S_{m})+D_{KL}(S_{m}\|S_{n})\\
-D_{KL}(S_{n}\|S_{m}) & =-\sum_{\mathbf{x}\in\{S_{n}\cup S_{m}\}}\phi_{n}(\mathbf{x})\log\phi_{m}(\mathbf{x})+\sum_{\mathbf{x}\in\{S_{n}\cup S_{m}\}}\phi_{n}(\mathbf{x})\log\phi_{n}(\mathbf{x})\end{align}
+\phi_{P}(\mathbf{x},X) & =\sum_{x\in X}\frac{1}{|X|}k_{\gamma}(\mathbf{x},x)\label{eq:phiParzen}\\
+k_{\gamma}(x,y) & =\prod_{c}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|x^{c}-y^{c}\|^{2}}\label{eq:KParzen}\end{align}
 
 \end_inset
 
@@ -89,11 +88,11 @@ Random Vector Estimate
 
 \begin_layout Standard
 \begin_inset Formula \begin{align}
-\phi(x) & =\sum_{i=1}^{\ell}\left(\beta_{i}^{1}\mathcal{K}_{1}(x_{i},x)+...+\beta_{i}^{\kappa}\mathcal{K}_{\kappa}(x_{i},x)\right)\\
- & \min\left(\sum_{i=1}^{\ell}\left(y_{i}-\sum_{j=1}^{\ell}\sum_{n=1}^{\kappa}\beta_{j}^{n}k_{n}(x_{i},x_{j})\right)^{2}+\lambda\sum_{i=1}^{\ell}\sum_{n=1}^{\kappa}\frac{1}{\gamma_{n}}\beta_{i}^{n}\right)\\
- & \text{subject to}\quad\sum_{i=1}^{\ell}\sum_{n=1}^{\kappa}\beta_{i}^{n}=1,\quad\beta_{i}\ge0\\
-k(x,x') & =\frac{1}{1+e^{-\gamma(x-x')}}\\
-\mathcal{K}(x,x') & =-\frac{\gamma}{2+e^{\gamma(x-x')}+e^{-\gamma(x-x')}}\end{align}
+\phi(x) & =\sum_{i=1}^{\ell}\left(\beta_{i}^{1}\mathcal{K}_{1}(x_{i},x)+...+\beta_{i}^{\kappa}\mathcal{K}_{\kappa}(x_{i},x)\right)\label{eq:phiSV}\\
+W(\beta) & =\sum_{i=1}^{\ell}\left(y_{i}-\sum_{j=1}^{\ell}\sum_{n=1}^{\kappa}\beta_{j}^{n}k_{n}(x_{i},x_{j})\right)^{2}+\lambda\sum_{i=1}^{\ell}\sum_{n=1}^{\kappa}\frac{1}{\gamma_{n}}\beta_{i}^{n}\label{eq:WVector}\\
+ & \text{subject to}\quad\sum_{i=1}^{\ell}\sum_{n=1}^{\kappa}\beta_{i}^{n}=1,\quad\beta_{i}\ge0\label{eq:VectorConstraints}\\
+k(x,x') & =\frac{1}{1+e^{-\gamma(x-x')}}\label{eq:KVector}\\
+\mathcal{K}(x,x') & =-\frac{\gamma}{2+e^{\gamma(x-x')}+e^{-\gamma(x-x')}}\label{eq:xKVector}\end{align}
 
 \end_inset
 
@@ -106,17 +105,217 @@ Support Vector Random Process Estimate
 
 \begin_layout Standard
 \begin_inset Formula \begin{align}
-\varphi_{SV}(\mathbf{x},S:\beta) & =\sum_{i\in\mathcal{S}}\beta_{i}K_{\gamma}(S_{\mathbf{x}},S_{i})\\
+\varphi_{SV}(\mathbf{x},S:\beta) & =\sum_{i\in\mathcal{S}}\beta_{i}K_{\gamma}(S_{\mathbf{x}},S_{i})\label{eq:varphiSV}\\
 S_{\mathbf{x}} & =\{S\cup\mathbf{x}\}\\
-W(\beta) & =\sum_{i,j\in\mathcal{S}}\beta_{i}\beta_{j}\sum_{\mathbf{x}\in X}K_{\gamma}(S_{\mathbf{x}},S_{i})K_{\gamma}(S_{\mathbf{x}},S_{j})\\
- & \qquad\qquad\qquad\qquad+\sum_{i\in\mathcal{S}}\beta_{i}\sum_{\mathbf{x}\in X}\left(\lambda K_{\gamma}(S_{\mathbf{x}},S_{i})^{-1}-\frac{2}{|\mathcal{S}|}\sum_{j\in\mathcal{S}}K_{\gamma}(S_{\mathbf{x}},S_{i})K_{\gamma}(S_{\mathbf{x}},S_{j})\right)\\
- & \text{subject to}\quad\sum_{i}\beta_{i}=1,\quad\beta_{i}\ge0,\ i=1,\hdots,|\mathcal{S}|\\
-K_{\gamma}(X,S_{i}) & =\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|X-S_{i}\|_{H}^{2}}\\
-\|X-S_{n}\|_{H} & =\sum_{x\in X}\phi_{n}(x)\ \log\phi_{n}(x)\end{align}
+W(\beta) & =\sum_{i,j\in\mathcal{S}}\beta_{i}\beta_{j}\sum_{S\in\mathcal{S}}\sum_{\mathbf{x}\in X}K_{\gamma}(S_{\mathbf{x}},S_{i})K_{\gamma}(S_{\mathbf{x}},S_{j})\label{eq:WProcess}\\
+ & \qquad\qquad\qquad\qquad+\sum_{i\in\mathcal{S}}\beta_{i}\sum_{S\in\mathcal{S}}\sum_{\mathbf{x}\in X}\left(\lambda K_{\gamma}(S_{\mathbf{x}},S_{i})^{-1}-\frac{2}{|\mathcal{S}|}\sum_{j\in\mathcal{S}}K_{\gamma}(S_{\mathbf{x}},S_{i})K_{\gamma}(S_{\mathbf{x}},S_{j})\right)\\
+ & \text{subject to}\quad\sum_{i}\beta_{i}=1,\quad\beta_{i}\ge0,\ i=1,\hdots,|\mathcal{S}|\label{eq:ProcessConstraints}\\
+K_{\gamma}(S_{n},S_{m}) & =\prod_{c}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|S_{n}^{c}-S_{m}^{c}\|_{H}^{2}}\label{eq:KProcessSS}\\
+\|S_{n}-S_{m}\|_{H} & =\sum_{\mathbf{x}\in S_{n}}\phi_{m}(\mathbf{x})\ \log\phi_{m}(\mathbf{x})\label{eq:DistKL}\\
+K_{\gamma}(X,S_{n}) & =\prod_{c}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|X^{c}-S_{n}^{c}\|_{H}^{2}}\label{eq:KProcessXS}\\
+\|X-S_{n}\|_{H} & =\sum_{\mathbf{x}\in X}\phi_{n}(\mathbf{x})\ \log\phi_{n}(\mathbf{x})\label{eq:DistH}\end{align}
 
 \end_inset
 
 
+\end_layout
+
+\begin_layout Section
+Random Vector Estimate Implementation
+\end_layout
+
+\begin_layout Standard
+From 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:WProcess"
+
+\end_inset
+
+we know that we need to calculate
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \[
+\mathbf{K_{i,j}=}\sum_{S\in\mathcal{S}}\sum_{\mathbf{x}\in X}K_{\gamma}(S_{\mathbf{x}},S_{i})K_{\gamma}(S_{\mathbf{x}},S_{j})\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+It would be helpful if this could take advantage of the fact that many subsets
+ have overlaps, and it isn't useful to re-calculate each one.
+ Looking at our kernel 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:KProcessSS"
+
+\end_inset
+
+, I don't think we calculate a single kernel matrix, however we might be
+ able to calculate a single distance matrix:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\mathbf{D}_{i,j} & =k_{\gamma}(x_{i},x_{j})\\
+\mathbf{\bar{D}}_{i,j} & =\sum_{\mathbf{D}}\mathbf{D}_{i,j}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+And sample from this matrix to generate 
+\begin_inset Formula $\mathbf{K}$
+\end_inset
+
+.
+ Let's play with some equations:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\phi_{n}(\mathbf{x}) & =\sum_{x\in S_{n}}\frac{1}{|S_{n}|}k_{\gamma}(\mathbf{x},x)\\
+ & =\frac{1}{|S_{n}|}\mathbf{\bar{D}}_{\mathbf{x},S_{n}}\\
+D_{KL}(S_{n}\|S_{m}) & =-\sum_{\mathbf{x}\in\{S_{n}\cup S_{m}\}}\phi_{n}(\mathbf{x})\log\phi_{m}(\mathbf{x})+\sum_{\mathbf{x}\in\{S_{n}\cup S_{m}\}}\phi_{n}(\mathbf{x})\log\phi_{n}(\mathbf{x})\\
+ & =-\sum_{\mathbf{x}\in\{S_{n}\cup S_{m}\}}\frac{\mathbf{\mathbf{\bar{D}}}_{\mathbf{x},S_{n}}}{|S_{n}|}\log\frac{\mathbf{\mathbf{\bar{D}}}_{\mathbf{x},S_{m}}}{|S_{m}|}+\sum_{\mathbf{x}\in\{S_{n}\cup S_{m}\}}\frac{\mathbf{\mathbf{\bar{D}}}_{\mathbf{x},S_{n}}}{|S_{n}|}\log\frac{\mathbf{\mathbf{\bar{D}}}_{\mathbf{x},S_{n}}}{|S_{n}|}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In this case, if we treat 
+\begin_inset Formula $\mathbf{\bar{D}}_{\mathbf{x},S_{i}}$
+\end_inset
+
+ as a column vector, we can evaluate that last line as a simple equation.
+ Lets take a look at what happens when we have a set of test data.
+ In this case, we have test subset 
+\begin_inset Formula $S_{\hat{x}}$
+\end_inset
+
+, and we want to determine the probability of a set of points 
+\begin_inset Formula $\hat{X}$
+\end_inset
+
+.
+ To do so we must evaluate equation
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:varphiSV"
+
+\end_inset
+
+, which includes evaluating the kernel distance from 
+\begin_inset Formula $S_{\hat{x}}$
+\end_inset
+
+ to each of the support vector subsets.
+ There is a possibility that elements of 
+\begin_inset Formula $S_{SV}$
+\end_inset
+
+ overlap, so let's treat this situation in a similar manner:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\mathbf{D}_{i,j} & =k_{\gamma}(\hat{x},x_{SV})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Let's review where we're going:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\varphi_{SV}(\mathbf{x},S:\beta) & =\sum_{i\in\mathcal{S}}\beta_{i}K_{\gamma}(S_{\mathbf{x}},S_{i})\\
+S_{\mathbf{x}} & =\{S\cup\mathbf{x}\}\\
+K_{\gamma}(S_{\mathbf{x}},S_{i}) & =\prod_{c}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|S_{\mathbf{x}}^{c}-S_{i}^{c}\|_{H}^{2}}\\
+\|S-S_{n}\|_{H} & =\sum_{\mathbf{x}\in S}\phi_{n}(\mathbf{x})\ \log\phi_{n}(\mathbf{x})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This should clarify that we can simply add the entropy of 
+\begin_inset Formula $\hat{X}$
+\end_inset
+
+ to the entropy of 
+\begin_inset Formula $S_{\hat{x}}$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \[
+\|S_{\mathbf{x}}-S_{i}\|_{H}=\|S-S_{i}\|_{H}+\|\mathbf{x}-S_{i}\|_{H}\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This allows us to start working with our distance matrix:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\phi_{n}(\mathbf{x}) & =\frac{1}{|S_{n}|}\mathbf{\bar{D}}_{\mathbf{x},S_{n}}\\
+\|S_{\mathbf{x}}-S_{n}\|_{H} & =\phi_{n}(\mathbf{x})\log\phi_{n}(\mathbf{x})+\sum_{\mathbf{\hat{x}}\in S}\phi_{n}(\mathbf{\hat{x}})\log\phi_{n}(\mathbf{\hat{x})}\\
+ & =\frac{\mathbf{\mathbf{\bar{D}}_{\mathbf{x},S_{n}}}}{|S_{n}|}\log\frac{\mathbf{\mathbf{\bar{D}}_{\mathbf{x},S_{n}}}}{|S_{n}|}+\sum_{\mathbf{\hat{x}}\in S}\frac{\mathbf{\mathbf{\bar{D}}_{\mathbf{\hat{x}},S_{n}}}}{|S_{n}|}\log\frac{\mathbf{\mathbf{\bar{D}}_{\mathbf{\hat{x}},S_{n}}}}{|S_{n}|}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Which again can be treated as a column vector in the latter case and is
+ a scalar in the former.
+ In the multi-dimensional case, we stack each dimension along the depth
+ of 
+\begin_inset Formula $\mathbf{D}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+So, to summarize.
+ When calculating 
+\begin_inset Formula $\beta$
+\end_inset
+
+, we start be calculating a kernel matrix using 
+\begin_inset Formula $k_{\gamma}(\cdot,\cdot)$
+\end_inset
+
+ and use this kernel matrix to calculate 
+\begin_inset Formula $\|S_{i}-S_{j}\|$
+\end_inset
+
+, which generates a new kernel matrix using 
+\begin_inset Formula $K_{\gamma}(\cdot,\cdot)$
+\end_inset
+
+.
+ 
 \end_layout
 
 \end_body

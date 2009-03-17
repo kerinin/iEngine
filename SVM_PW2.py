@@ -58,8 +58,13 @@ class kMachine(object):
 		# Sigmoid
 		#return ( 1.0 / ( 1.0 + np.exp( -self.gamma * diff ) ) ).prod(2).reshape(N,M)
 	
+class predictionPoints:
+	def __init__(self,data,K):
+		self.X = data
+		self.K = K
+
 class subset(kMachine):
-	def __init__(self,data,gamma,K,tStart=None,theta=None):
+	def __init__(self,data,K,tStart=None,theta=None):
 
 		try:
 			self.N,self.d = data.shape
@@ -68,39 +73,42 @@ class subset(kMachine):
 		
 		self.tStart = tStart
 		self.theta = theta
-		super(subset, self).__init__(gamma)
+		self.X = data
 		self.K = K
 		
 		if tStart and theta:
-			self.mask = (self.tStart < t) + ( t >= (self.tStart+self.theta)
-			self.X = data
+			self.argStart = 
+			self.argEnd = 
 		else:
-			self.mask = None
-			self.X = data
+			self.argStart = 0
+			self.argEnd = -1
 		
 	def __sub__(self,other):
-	# difference - for comparing two subsets using symmetric KL divergence
+	# difference - for comparing two subsets using Entropy
 		
-		N = self.N
+		#NOTE: change this to conform to the entropy kernel
 		
 		if other.__class__ == subset:
 		# other is an array of subsets
-			M = other.N
-			diff = np.ma.array(self.K,mask=np.ma.mask_or( self.mask, other.mask.T ), copy=False )
-			
-		if other.__class__ == np.ndarray or other.__class__ == np.ma.core.MaskedArray:
-			if other.dtype == float:
-			# other is an array of floats
-				M = other.shape[0]
-				#self.X.reshape([self.N,1,self.d]) - self.X.T.reshape([1,self.N,self.d])
-				diff = np.ma.array( self.X.reshape([self.N,1,self.d]) - other.T.reshape([1,M,self.d]), mask = self.mask )
-				
-		pSelf = self._K( diff.sum(0) ).prod(2) / (N*M )
-		pOther = self._K( diff.sum(1) ).prod(2) / (N*M )
-		logpSelf = np.log2(pSelf)
-		logpOther = np.log2(pOther)			
 		
-		return  ( pSelf * logpSelf ).sum() + ( pOther * logpOther ).sum() - ( pSelf * logpOther ).sum() - ( pOther * logpSelf ).sum()
+			pSelf = self.K[self.argStart:self.argEnd,other.argStart:other.argEnd].sum(1)
+			#+self.K[other.argStart:other.argEnd,other.argStart:other.argEnd].sum(1)
+			pOther = self.K[other.argStart:other.argEnd,self.argStart:self.argEnd].sum(1)
+			#+self.K[self.argStart:self.argEnd,self.argStart:self.argEnd].sum(1)
+		
+			logpSelf = np.log2(pSelf)
+			logpOther = np.log2(pOther)
+			
+			return  ( ( pSelf * logpSelf ) + ( pOther * logpOther ) - ( pSelf * logpOther ) - ( pOther * logpSelf ) ).sum(0)
+			
+		elif other.__class__ == predictionPoints:
+			pSelf = other.K[self.argStart:self.argEnd].sum(1)
+			
+			logpSelf = np.log2(pSelf)
+			
+			return pSelf * plogSelf
+		
+		raise StandardError, 'This type of subtraction not implemented'
 
 class svm(kMachine):
 	def __init__(self,t=list(),data=list(),Lambda=.1, gamma =.5, theta=None ):
