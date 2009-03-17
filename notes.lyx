@@ -1,0 +1,123 @@
+#LyX 1.6.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\language english
+\inputencoding auto
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\paperfontsize default
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks false
+\pdf_backref false
+\pdf_pdfusetitle true
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation skip
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Working Notes
+\end_layout
+
+\begin_layout Section
+Algorithms
+\end_layout
+
+\begin_layout Subsection
+Parzen Window Vector Estimate
+\end_layout
+
+\begin_layout Standard
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+\begin_inset Formula \begin{align}
+\varphi_{P}(\mathbf{x},S) & =\sum_{i\in\mathcal{S}}\frac{1}{|\mathcal{S}|}K_{\gamma}(S_{\mathbf{x}},S_{i})\\
+K_{\gamma}(S_{i},S_{j}) & =\prod_{c}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|S_{i}^{c}-S_{j}^{c}\|_{KL}^{2}}\\
+\|S_{n}-S_{m}\|_{KL} & =D_{KL}(S_{n}\|S_{m})+D_{KL}(S_{m}\|S_{n})\\
+D_{KL}(S_{n}\|S_{m}) & =-\sum_{\mathbf{x}\in\{S_{n}\cup S_{m}\}}\phi_{n}(\mathbf{x})\log\phi_{m}(\mathbf{x})+\sum_{\mathbf{x}\in\{S_{n}\cup S_{m}\}}\phi_{n}(\mathbf{x})\log\phi_{n}(\mathbf{x})\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Random Vector Estimate
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align}
+\phi(x) & =\sum_{i=1}^{\ell}\left(\beta_{i}^{1}\mathcal{K}_{1}(x_{i},x)+...+\beta_{i}^{\kappa}\mathcal{K}_{\kappa}(x_{i},x)\right)\\
+ & \min\left(\sum_{i=1}^{\ell}\left(y_{i}-\sum_{j=1}^{\ell}\sum_{n=1}^{\kappa}\beta_{j}^{n}k_{n}(x_{i},x_{j})\right)^{2}+\lambda\sum_{i=1}^{\ell}\sum_{n=1}^{\kappa}\frac{1}{\gamma_{n}}\beta_{i}^{n}\right)\\
+ & \text{subject to}\quad\sum_{i=1}^{\ell}\sum_{n=1}^{\kappa}\beta_{i}^{n}=1,\quad\beta_{i}\ge0\\
+k(x,x') & =\frac{1}{1+e^{-\gamma(x-x')}}\\
+\mathcal{K}(x,x') & =-\frac{\gamma}{2+e^{\gamma(x-x')}+e^{-\gamma(x-x')}}\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Support Vector Random Process Estimate
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align}
+\varphi_{SV}(\mathbf{x},S:\beta) & =\sum_{i\in\mathcal{S}}\beta_{i}K_{\gamma}(S_{\mathbf{x}},S_{i})\\
+S_{\mathbf{x}} & =\{S\cup\mathbf{x}\}\\
+W(\beta) & =\sum_{i,j\in\mathcal{S}}\beta_{i}\beta_{j}\sum_{\mathbf{x}\in X}K_{\gamma}(S_{\mathbf{x}},S_{i})K_{\gamma}(S_{\mathbf{x}},S_{j})\\
+ & \qquad\qquad\qquad\qquad+\sum_{i\in\mathcal{S}}\beta_{i}\sum_{\mathbf{x}\in X}\left(\lambda K_{\gamma}(S_{\mathbf{x}},S_{i})^{-1}-\frac{2}{|\mathcal{S}|}\sum_{j\in\mathcal{S}}K_{\gamma}(S_{\mathbf{x}},S_{i})K_{\gamma}(S_{\mathbf{x}},S_{j})\right)\\
+ & \text{subject to}\quad\sum_{i}\beta_{i}=1,\quad\beta_{i}\ge0,\ i=1,\hdots,|\mathcal{S}|\\
+K_{\gamma}(X,S_{i}) & =\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|X-S_{i}\|_{H}^{2}}\\
+\|X-S_{n}\|_{H} & =\sum_{x\in X}\phi_{n}(x)\ \log\phi_{n}(x)\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

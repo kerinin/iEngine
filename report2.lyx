@@ -1,0 +1,2042 @@
+#LyX file created by tex2lyx 1.6.2
+\lyxformat 247
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+
+
+
+\usepackage{amsfonts}
+
+
+
+\end_preamble
+\language english
+\inputencoding auto
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\paperfontsize 10
+\spacing single
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+
+Parzen-SVM: An Approach to Timeseries Analysis Using Support Vector Machines based on Parzen Windows
+\end_layout
+
+\begin_layout Author
+
+Ryan Michael
+\newline
+ 
+\family typewriter
+kerinin@gmail.com
+\family default
+
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset LatexCommand \tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+
+Introduction
+\end_layout
+
+\begin_layout Subsection
+
+Existing Work
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+%http://en.wikipedia.org/wiki/Expectation-maximization_algorithm
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+%http://en.wikipedia.org/wiki/Stationary_process
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+%http://en.wikipedia.org/wiki/Ergodicity
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+%http://en.wikipedia.org/wiki/Mixing_(mathematics)
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+%http://en.wikipedia.org/wiki/Lyapunov_exponent
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+%http://en.wikipedia.org/wiki/Recurrence_quantification_analysis
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+%http://en.wikipedia.org/wiki/Recurrence_plot
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+%http://en.wikipedia.org/wiki/Autoregressive_fractionally_integrated_moving_average
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+%http://en.wikipedia.org/wiki/Autocorrelation
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+%
+\backslash
+url{http://en.wikipedia.org/wiki/Linear_discriminant_analysis}
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+
+Hidden Markov Model
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+% cannot account for future states - only capable of prediction
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+% weak, short-term memory
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+
+Box-Jenkins
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+% intended for simplistic processes with well-understood stationarity and periodicity
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+% http://en.wikipedia.org/wiki/Box-Jenkins
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+
+Spectral Analysis
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+% assumes some type of frequency-domain decomposition.  Frequency-domain signal representations do not do a very good job predicting time-domain values. 
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+
+Shrinking-
+\begin_inset Formula \(\epsilon\)
+\end_inset
+
+ SVM Regression
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+% theoretical foundation weak; only compensates for the relevance of recent data.  See Markhov problem
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+
+General Overview
+\end_layout
+
+\begin_layout Standard
+
+The goal is to create a method of statistical inference capable of processing timeseries data which is both multi-variate and exhibits different behaviors at different times. This type of data is common, and developing a robust method of analysis has applications in many domains. The general approach is to create a series of estimates using subsets of the observed data, and to then combine these estimates in an intelligent manner which captures the relevance of each estimate to the current prediction task. By using a set of 'typical' estimates, we are able to reduce the computational demands of the system, as each estimate is a condensed representation of the data from which it was derived. This approach also allows us to reduce data redundancy by only using distinct estimates.
+\end_layout
+
+\begin_layout Standard
+
+The most basic operation used in this system is the estimation of probability densities. Based on a set of observations drawn from some random process, we generate an estimate of the underlying probability distribution. This estimate tells us the probability of each point in the input space being observed. Areas of the input space in which a dense set of observations are observed are given high probability, while areas of the input space with few observations are given low probability.
+\end_layout
+
+\begin_layout Standard
+
+We assume that observations are pulled from multiple independent sources, all of which respond to some underlying phenomena. For instance one set of observations could be from a microphone and another from a light detector. We do not know how the inputs are related or to what extent their behavior changes over time. For example one input could be a steady sine wave and another could be based on the decay of a radioactive isotope. In the former case previous observations of the source are useful, in the latter they're not. Alternately two inputs could be light detectors in the same room or they could be on different continents; in the former their input would be highly similar, in the latter not as much.
+\end_layout
+
+\begin_layout Section
+
+Problem Setting
+\end_layout
+
+\begin_layout Standard
+
+We begin with a hidden random variable
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \[ X = (\Omega,\mathcal{F},\mathcal{P}) \]
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+Our knowledge of 
+\begin_inset Formula \( X \)
+\end_inset
+
+ comes from a set of independant sources which we treat as random processes generated by 
+\begin_inset Formula \( X \)
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \[ X^n : \Omega \mapsto \Omega^n \in \mathbb{R}^d \times \mathbb{R}_+  \]
+\end_inset
+
+ 
+\begin_inset Formula \[ X^n = (\Omega^n,\mathcal{F}^n,\mathcal{P}^n) \]
+\end_inset
+
+ 
+\begin_inset Formula \[ \mathbf{X} = [X^0,...,X^c]   \]
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+We refer to each of these sources as a channel, and refer to each channel as the 
+\begin_inset Formula \( i^\text{th} \)
+\end_inset
+
+ element of the set 
+\begin_inset Formula \( \mathbf{X} \)
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \[ C^n = [\Omega^n,\mathcal{F}^n,\mathcal{P}^n] \]
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+For each channel we are given a set of 
+\begin_inset Formula \( \ell \)
+\end_inset
+
+ observations of dimension 
+\begin_inset Formula \( d \)
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \[ \mathbf{x}_i^n = (x_i^n, t_i^n ) \]
+\end_inset
+
+ 
+\begin_inset Formula \[ X^n = \left[ \mathbf{x}_0^n,\hdots,\mathbf{x}_\ell^n \right] \in \mathbb{R}^d \times \mathbb{R}_+ \]
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+We define a set of time values and durations:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \[  \mathcal{T} = [ t_0,\hdots,t_\ell ] \]
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \[ \Theta = [ \theta_0,\hdots,\theta_z ] \]
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+We assume that 
+\begin_inset Formula \( \mathcal{P} \)
+\end_inset
+
+ can be approximated in a given time window using a shifted set of weighted distributions defined over some set of time intervals.
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \begin{equation} \mathcal{P}(t,\theta) = \sum_i \delta_i \cdot f_i(t - t_i) \end{equation}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+where 
+\begin_inset Formula \( \delta_n \)
+\end_inset
+
+ is the weight corresponding to 
+\begin_inset Formula \( f_n \)
+\end_inset
+
+. Finally, we assume that a similar mixture of distributions can be determined for each channel:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \begin{equation} \mathcal{P}^n(t,\theta) = \sum_i \delta_i^n \cdot f_i^n(t - t_i) \end{equation}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+
+Single Channel Setting
+\end_layout
+
+\begin_layout Standard
+
+We begin by considering the case where only one channel exists, so for now we will omit the superscript and refer to 
+\begin_inset Formula \(X^n = (\Omega^n,\mathcal{F}^n,\mathcal{P}^n) \)
+\end_inset
+
+ as 
+\begin_inset Formula \(X = (\Omega, \mathcal{F},\mathcal{P}) \)
+\end_inset
+
+. Given a set of test data 
+\begin_inset Formula \( \hat{X} \)
+\end_inset
+
+, our goal is to estimate the probability distribution of 
+\begin_inset Formula \( X \)
+\end_inset
+
+ over some time window:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \begin{align*}
+\mathbf{\hat{x}}_i &= (\hat{x}_i,t_i) \\
+\hat{X} &= [ \mathbf{\hat{x}}_0,\hdots,\mathbf{\hat{x}}_k ] \\
+&(t_{\hat{x}}, \theta_{\hat{x}} ), \quad t_{\hat{x}} < \min_t \hat{X} < \max_t \hat{X} < t_{\hat{x}} + \theta_{\hat{x}}
+\end{align*}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+We begin by defining the subset of the training observations which fall into each time window, shifted to the interval 
+\begin_inset Formula \( t \in [0,\theta) \)
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \begin{equation} \label{eq:Ssingle} S_{t,\theta} = \left[ \left( x_i,t_i - t \right) | \quad x_i \in X, \ t \le t_i < t+\theta \right] \end{equation}
+\end_inset
+
+ 
+\begin_inset Formula \[ \mathcal{S} = 
+\begin{bmatrix} 
+S_{t_0,\theta_0} & \hdots & S_{t_0,\theta_z} \\
+\vdots & \ddots & \vdots \\
+S_{t_\ell, \theta_0} & \hdots & S_{t_\ell, \theta_z} \\
+\end{bmatrix}  
+\]
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+We treat 
+\begin_inset Formula \( \mathcal{S} \)
+\end_inset
+
+ as a random process:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \[ \mathcal{S} = [ \Omega^\mathcal{S}, \mathcal{F}^\mathcal{S},\mathcal{P}^\mathcal{S}] \]
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+and observe that 
+\begin_inset Formula \( \hat{X} \)
+\end_inset
+
+ can be treated as an observation of 
+\begin_inset Formula \( \mathcal{S} \)
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \begin{equation} \label{eq:SySingle} 
+S_{\hat{x}} =  \left[ \left( x_i,t_i - t_{\hat{x}} \right) | \quad (x_i,t_i) \in \hat{X} \right] 
+\end{equation}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+We can now frame the task of estimating the probability distribution of 
+\begin_inset Formula \( \hat{X} \)
+\end_inset
+
+ as a task of estimating a probability density function 
+\begin_inset Formula \( \varphi \)
+\end_inset
+
+ for the random process 
+\begin_inset Formula \( \mathcal{S} \)
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \begin{equation} \label{eq:PrS}
+\Pr( X = \mathbf{x} \ | \ \hat{X} ) \mapsto \ \Pr( \mathcal{S} = \{ S_{\hat{x}} \cup \mathbf{x} \} ) \ \simeq \ \varphi( \mathbf{x}, S_{\hat{x}} )
+\end{equation}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+
+Multiple Channel Setting
+\end_layout
+
+\begin_layout Standard
+
+In order to extend this result to settings in which multiple channels exist, we return to 
+\begin_inset LatexCommand \ref{eq:Ssingle}
+
+\end_inset
+
+ and extend the scope to multiple channels:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \begin{equation} \label{eq:Smultiple} S_{t,\theta} = \big[ \left( x_i^n,t_i - t \right) | \quad x_i^n \in \mathbf{X}, \ t \le t_i < t+\theta \big] \end{equation}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+In this case, we treat each channel as an orthonormal basis of the abstract space 
+\begin_inset Formula \( \Omega^\mathcal{S} \)
+\end_inset
+
+. Equation 
+\begin_inset LatexCommand \ref{eq:SySingle}
+
+\end_inset
+
+ is likewise extended in the same manner:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \begin{equation} \label{eq:SyMultiple} 
+S_{\hat{x}} =  \left[ \left( x_i^n,t_i - t_{\hat{x}} \right) | \quad (x_i^n,t_i) \in \mathbf{\hat{X}} \right] 
+\end{equation}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+
+ Parzen Window Estimation
+\end_layout
+
+\begin_layout Standard
+
+One method of evaluating 
+\begin_inset LatexCommand \ref{eq:PrS}
+
+\end_inset
+
+ is by using the Parzen Window method. We choose the Parzen Window method because it allows us to estimate probabilities of unordered sets, provided they have an addition operation and a kernel function exists to provide a distance metric.
+\end_layout
+
+\begin_layout Subsection
+
+ Single Channel Parzen Window
+\end_layout
+
+\begin_layout Standard
+
+We will again begin by considering the single-channel case, then extend the resulting equations as necessary. The Parzen Window method requires the definition of a metric over the abstract space 
+\begin_inset Formula \( \Omega^\mathcal{S} \)
+\end_inset
+
+. Such a metric can be defined using the symmetric Kullbeck Liebler divergence with probability measures 
+\begin_inset Formula \( \phi_n(\mathbf{x}) \simeq Pr(X = \mathbf{x} \ | \ S_n) \)
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \begin{align} \label{eq:KLsingle}
+D_{KL}(S_n\|S_m) &= \sum_{\mathbf{x} \in \{ S_n \cup S_m \} } \phi_n( \mathbf{x} ) \log \frac{ \phi_n(\mathbf{x}) }{ \phi_m( \mathbf{x} ) } \nonumber \\
+&= -\sum_{\mathbf{x} \in \{ S_n \cup S_m \} } \phi_n(\mathbf{x}) \log \phi_m(\mathbf{x}) + \sum_{\mathbf{x} \in \{ S_n \cup S_m \} } \phi_n(\mathbf{x}) \log \phi_n(\mathbf{x}) \\
+\|S_n - S_m\|_{KL} &= D_{KL}(S_n\|S_m) + D_{KL}(S_m\|S_n)
+\end{align}
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+% Need to discuss why the union of n&m is sufficient to evaluate the KL divergence
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+The Parzen Window estimation of 
+\begin_inset Formula \( \mathcal{P}^\mathcal{S} \)
+\end_inset
+
+ is defined as:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \begin{equation} \label{eq:PrSParzenSingle}
+\Pr( \mathcal{S} = S ) \simeq \sum_{i \in \mathcal{S}}  \frac{1}{|\mathcal{S}| } K_\gamma( S, S_i ) 
+\end{equation}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+where 
+\begin_inset Formula \( | \cdot | \)
+\end_inset
+
+ denotes the cardinality of 
+\begin_inset Formula \( ( \cdot ) \)
+\end_inset
+
+ and 
+\begin_inset Formula \( K \)
+\end_inset
+
+ is some kernel function, for instance the Radial Basis Function:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \begin{equation} \label{eq:KRBFparzen}
+K_\gamma( S_i, S_j ) =  \frac{1}{\gamma \sqrt{2\pi} } e^{-\frac{1}{\gamma} \|S_i - S_j \|_{KL}^2}
+\end{equation}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+The same method can be used to estimate 
+\begin_inset Formula \( \phi_n(\mathbf{x}) \)
+\end_inset
+
+ for a given subset 
+\begin_inset Formula \( S_n \)
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \begin{equation} \label{eq:PhiSingle}
+\phi_n( \mathbf{x} ) = \sum_{\mathbf{x}_i \in S_n} \frac{1}{|S_n|}  K_\gamma (\mathbf{x}, \mathbf{x}_i ) 
+\end{equation}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+Substituting 
+\begin_inset LatexCommand \ref{eq:PrSParzenSingle}
+
+\end_inset
+
+ into 
+\begin_inset LatexCommand \ref{eq:PrS}
+
+\end_inset
+
+ our probability distribution estimate becomes:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \begin{equation} \label{eq:VarphiParzenSingle}
+\varphi_P(\mathbf{x}, S) = \sum_{i \in \mathcal{S}} \frac{1}{|\mathcal{S}|} K_\gamma ( S_{\mathbf{x}}, S_i )
+\end{equation}
+\end_inset
+
+ 
+\begin_inset Formula \[ S_{\mathbf{x}} = \{ S \cup \mathbf{x} \}\]
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+
+ Multiple Channel Parzen Window
+\end_layout
+
+\begin_layout Standard
+
+Extending the Parzen Window approach requires the realization that 
+\begin_inset LatexCommand \ref{eq:KLsingle}
+
+\end_inset
+
+ requires that 
+\begin_inset Formula \( S_n \)
+\end_inset
+
+ and 
+\begin_inset Formula \( S_m \)
+\end_inset
+
+ both be defined over the same abstract space 
+\begin_inset Foot
+status collapsed
+
+
+\begin_layout Standard
+
+ For instance if 
+\begin_inset Formula \( X_n \in \mathbb{R}^2 \)
+\end_inset
+
+ and 
+\begin_inset Formula \( X_m \in \mathbb{R}^3 \)
+\end_inset
+
+, it is impossible to calculate 
+\begin_inset Formula \( \phi_n\big( (x_m,t) \big) \)
+\end_inset
+
+ because the quantituy 
+\begin_inset Formula \( \| x_m - x_n \|^2 \)
+\end_inset
+
+ from using 
+\begin_inset LatexCommand \ref{eq:PhiSingle}
+
+\end_inset
+
+ is ambiguous.
+\end_layout
+
+\end_inset
+
+. As mentioned earlier, in the Multiple Channel context each channel is treated as an orthonormal basis of 
+\begin_inset Formula \( \Omega^\mathcal{S} \)
+\end_inset
+
+. An obvious approach to defining a measure over 
+\begin_inset Formula \( \Omega^\mathcal{S} \)
+\end_inset
+
+ for mutliple channels is to use the Euclidean norm of the Kullbeck Liebler divergence of each channel considered independently:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \[ S_n^c = [ \mathbf{x} \ | \ \mathbf{x} \in \{ S_n \cap X^c \} ] \]
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+This requires the following minor extension of 
+\begin_inset LatexCommand \ref{eq:KRBFparzen}
+
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \begin{equation} \label{eq:KRBFParzenMultiple}
+K_\gamma( S_i, S_j ) =  \prod_c \frac{1}{\gamma \sqrt{2\pi} } e^{-\frac{1}{\gamma} \|S_i^c - S_j^c \|_{KL}^2 }
+\end{equation}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+
+Sliding Parzen Windows
+\end_layout
+
+\begin_layout Standard
+
+Observe that subsets do not exist in isolation; it is possible for the time windows defined for two subsets to overlap. This makes it possible for the estimates at at two such subsets to take advantage of this shared information. This can be accomplished by modifying 
+\begin_inset LatexCommand \ref{eq:PrSParzenSingle}
+
+\end_inset
+
+ to include not only sets offset to the beginnig of the window being predicted, but at each start point defined as well:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \[
+S_{t,\theta}^\tau =  \left[ \left( x_i, 2t_i - t - \tau \right) | \quad (x_i^n,t_i) \in S_{t,\theta} \right] 
+\]
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \[
+\mathcal{S}^{\mathcal{T}} = [ S_{t,\theta}^\tau | \quad \tau \in \mathcal{T}, \ (t,\theta) \in (\mathcal{T},\Theta) ]
+\]
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \begin{equation} \label{eq:PrSParzenSlidingSingle}
+\Pr( \mathcal{S} = S ) \simeq \sum_{i \in \mathcal{S}}  \frac{1}{|\mathcal{S}^{\mathcal{T}}| } K_\gamma( S, S_i ) 
+\end{equation}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+In the context of Parzen Windows, this defintion increases computational demands and provides little increase in predictive power, however we shall see that it provides an important starting point for improving system performance.
+\end_layout
+
+\begin_layout Section
+
+ Support Vector Estimation
+\end_layout
+
+\begin_layout Standard
+
+The Parzen Window method is neither sparse nor computationally efficient, and as the number of observations grows, these deficiencies quickly become prohibitive. We now investigate the use of Support Vector Machines to generate 
+\begin_inset Formula \( \varphi(\mathbf{x}, S) \)
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+
+ Random Process Estimation 
+\end_layout
+
+\begin_layout Standard
+
+Support Vector Machines are usually used to estimate probability distributions by solving the related problem of estimating the cumulative distribution function of the random variable in question. This reduces the problem to one of estimating a non-linear mapping from observations to cumulative distribution values, which can be formulated as an optimization problem over a linear operator equation. Unfortunately, these methods depend on the ability to calculate an empirical distribution for each observation:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \begin{equation} F_\ell(x) = \frac{1}{\ell} \sum_i \theta(x-x_i) \end{equation}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+where 
+\begin_inset Formula \( \theta(x) \)
+\end_inset
+
+ is the indicator function. To evaluate this function, the abstract space 
+\begin_inset Formula \( \Omega^\mathcal{S} \)
+\end_inset
+
+ must be ordered. While we have described a distance metric over 
+\begin_inset Formula \( \Omega^\mathcal{S} \)
+\end_inset
+
+, it is not clear what a meaningful ordering relation would be.
+\end_layout
+
+\begin_layout Standard
+
+Rather than calculating the cumulative probability distribution of 
+\begin_inset Formula \( \Omega^\mathcal{S} \)
+\end_inset
+
+, we begin with the assumption that the Parzen Window estimate of the probability distribution is accurate and attempt to minimize the square loss between the Support Vector estimate and the Parzen Window estimate. Because we are hoping to generate a sparse representation of the probability distribution, we add a regularizing term 
+\begin_inset Formula \( \Omega \)
+\end_inset
+
+ which penalizes similar 
+\begin_inset Formula \( S \)
+\end_inset
+
+. The Support Vector approach seeks a solution in the following form:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \begin{align} \label{eq:SVResultSingle}
+\varphi_{SV}( \mathbf{x}, S : \beta) &= \sum_{i \in \mathcal{S}} \beta_i K_\gamma( S_\mathbf{x}, S_i ) \\
+S_\mathbf{x} &= \{ S \cup \mathbf{x} \} \nonumber
+\end{align}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+So we can express the Support Vector optimization problem as:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \begin{align*}
+W(\beta) &= \sum_{\mathbf{x} \in X } \Big( \varphi_{P}(\mathbf{x}, S) - \varphi_{SV}(\mathbf{x}, S : \beta ) \Big)^2 + \lambda \Omega(\beta,S) \\
+&= \sum_{ \mathbf{x} \in X } \Big( \varphi_{SV}(\mathbf{x},S : \beta)^2 - 2 \varphi_{SV}(\mathbf{x},S : \beta) \varphi_P(\mathbf{x},S)  \Big)  + \lambda \Omega( \beta, S ) \\
+&= \sum_{ \mathbf{x} \in X } \left( \Big( \sum_{i \in \mathcal{S}} \beta_i K_\gamma( S_{\mathbf{x}}, S_i ) \Big) \cdot \Big( \sum_{j \in \mathcal{S}} \beta_j K_\gamma( S_{\mathbf{x}}, S_j ) \Big) \\
+& \qquad \qquad \qquad \qquad - 2 \Big( \sum_{i \in \mathcal{S}} \beta_i K_\gamma( S_{\mathbf{x}}, S_i ) \Big) \cdot \Big( \sum_{j \in \mathcal{S}} \frac{1}{|\mathcal{S}|} K_\gamma( S_{\mathbf{x}}, S_j ) \Big)   \right) + \lambda \Omega( \beta,S ) \\
+&= \sum_{i,j \in \mathcal{S}} \beta_i \beta_j \sum_{\mathbf{x} \in X} K_\gamma(S_{\mathbf{x}},S_i) K_\gamma(S_{\mathbf{x}},S_j) \\
+& \qquad \qquad \qquad \qquad + \sum_{i \in \mathcal{S}} \beta_i \sum_{\mathbf{x} \in X } \left( \lambda K_\gamma(S_{\mathbf{x}},S_i)^{-1} - \frac{2}{|\mathcal{S}|} \sum_{j \in \mathcal{S}} K_\gamma(S_{\mathbf{x}},S_i) K_\gamma(S_{\mathbf{x}},S_j) \right)
+\end{align*}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \begin{equation} \label{eq:SVProcessSingle} \text{subject to} \quad \sum_i \beta_i = 1, \quad \beta_i \ge 0, \ i=1,\hdots,|\mathcal{S}|
+\end{equation}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+Notice the regularizer selected is defined as:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \begin{equation}
+\Omega(\beta,S) = \sum_{i \in \mathcal{S}} \beta_i \sum_{\mathbf{x} \in X} K_\gamma(S_{\mathbf{x}},S_i)^{-1}
+\end{equation}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+Equation 
+\begin_inset LatexCommand \ref{eq:SVProcessSingle}
+
+\end_inset
+
+ is a quadratic optimiztion problem defined as:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \begin{align*}
+W(\beta) &= \frac{1}{2} \beta^T P \beta + q^T \beta \\
+P_{i,j} &= \sum_{\mathbf{x} \in X } K_\gamma(S_{\mathbf{x}},S_i) K_\gamma(S_{\mathbf{x}},S_j) \\
+q_i &= \sum_{\mathbf{x} \in X } \left( \lambda K_\gamma(S_{\mathbf{x}},S_i)^{-1} - \frac{1}{|\mathcal{S}|} \sum_{j \in \mathcal{S}} K_\gamma(S_{\mathbf{x}},S_i) K_\gamma(S_{\mathbf{x}},S_j) \right) \\
+\end{align*}
+\end_inset
+
+ 
+\begin_inset Formula \begin{align}
+P &= \langle \mathbf{K}^T \cdot \mathbf{K} \rangle  \label{eq:SVPSingle} \\
+q &= \lambda \langle \mathbf{K}^T \cdot \mathbf{1}_{( |K|, 1 )} \rangle^{-1} - \frac{1}{ | \mathcal{S} | } \langle \mathbf{K}^T \cdot \mathbf{K} \cdot \mathbf{1}_{( |K|, 1 )} \rangle
+\end{align}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+
+ Sliding Windows 
+\end_layout
+
+\begin_layout Standard
+
+Modifying the SV algorithm to use sliding time windows allows the system to take advantage of periodicity in the observed data and reduces redundancy. Adapting the earlier Parzen Window approach, we search for a solution in the following form:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \[
+\mathcal{S}^{\mathcal{T}} = [ S_{t,\theta}^\tau | \quad \tau \in \mathcal{T}, \ (t,\theta) \in (\mathcal{T},\Theta) ]
+\]
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \begin{align} \label{eq:SVResultSlidingSingle}
+\varphi_{SV}( \mathbf{x}, S : \beta) &= \sum_{i \in \mathcal{S}^\mathcal{T}} \beta_i K_\gamma( S_\mathbf{x}, S_i ) 
+\end{align}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+The optimization problem must be modified as follows:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \begin{align*}
+W(\beta) &= \sum_{ \mathbf{x} \in X } \Big( \varphi_{SV}(\mathbf{x},S : \beta)^2 - 2 \varphi_{SV}(\mathbf{x},S : \beta) \varphi_P(\mathbf{x},S)  \Big)  + \lambda \Omega( \beta, S ) \\
+&= \sum_{ \mathbf{x} \in X } \left( \sum_{i \in \mathcal{S}^{\mathcal{T}}} \beta_i K_\gamma( S_{\mathbf{x}}, S_i ) \right) \cdot \left( \sum_{j \in \mathcal{S}^{\mathcal{T}}} \beta_j K_\gamma( S_{\mathbf{x}}, S_j ) \right) \\
+& \qquad \qquad \qquad \qquad - 2 \left( \sum_{i \in \mathcal{S}^{\mathcal{T}}} \beta_i K_\gamma( S_{\mathbf{x}}, S_i ) \right) \cdot \left( \sum_{j \in \mathcal{S}^{\mathcal{T}}} \frac{1}{|\mathcal{S}^{\mathcal{T}}|} K_\gamma( S_{\mathbf{x}}, S_j ) \right)  + \lambda \Omega( \beta,S ) \\
+&= \sum_{i,j \in \mathcal{S}^{\mathcal{T}}} \beta_i \beta_j \sum_{\mathbf{x} \in X} K_\gamma(S_{\mathbf{x}},S_i) K_\gamma(S_{\mathbf{x}},S_j) \\
+& \qquad \qquad \qquad \qquad + \sum_{i \in \mathcal{S}^{\mathcal{T}}} \beta_i \sum_{\mathbf{x} \in X } \left( \lambda K_\gamma(S_{\mathbf{x}},S_i)^{-1} - \frac{2}{|\mathcal{S}^{\mathcal{T}}|} \sum_{j \in \mathcal{S}^{\mathcal{T}}} K_\gamma(S_{\mathbf{x}},S_i) K_\gamma(S_{\mathbf{x}},S_j) \right)
+\end{align*}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \begin{equation} \text{subject to} \quad \sum_i \beta_i = 1, \quad \beta_i \ge 0, \ i=1,\hdots,|\mathcal{S}^{\mathcal{T}}|
+\end{equation}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+This means that using sliding windows increases 
+\begin_inset Formula \( P \)
+\end_inset
+
+ by a factor of 
+\begin_inset Formula \( \ell^2 \)
+\end_inset
+
+ and 
+\begin_inset Formula \( q \)
+\end_inset
+
+ by a factor or 
+\begin_inset Formula \( \ell \)
+\end_inset
+
+. Fortunately, most of the added kernel values will be 
+\begin_inset Formula \(0\)
+\end_inset
+
+ if we restrict 
+\begin_inset Formula \(\theta_\text{max}\)
+\end_inset
+
+ to some reasonable subset of the observed duration.
+\end_layout
+
+\begin_layout Subsection
+
+ Parzen-SVM Decomposition 
+\end_layout
+
+\begin_layout Standard
+
+Due to the simplicity of the constraints in the optimization problem, it is possible to use the decomposition method of Osuna to reduce the memory requirements of the Parzen-SVM algorithm.
+\end_layout
+
+\begin_layout Subsubsection
+
+ Sub-Problem Definition 
+\end_layout
+
+\begin_layout Standard
+
+The decomposition algorithm breaks 
+\begin_inset Formula \(X\)
+\end_inset
+
+ into two working sets 
+\begin_inset Formula \(B,N\)
+\end_inset
+
+, and attempts to optimize 
+\begin_inset Formula \(B\)
+\end_inset
+
+ while keeping 
+\begin_inset Formula \(N\)
+\end_inset
+
+ fixed. This results in the following iterative optimization problem where 
+\begin_inset Formula \(\boldsymbol{\beta}^k\)
+\end_inset
+
+ denotes the result of the previous iteration:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \begin{align*}
+W(\boldsymbol{\beta}_B) &= \frac{1}{2} 
+\begin{bmatrix} \boldsymbol{\beta}_B^T & ( \boldsymbol{\beta}_N^k )^T \end{bmatrix} 
+\begin{bmatrix} P_{BB} & P_{BN} \\ P_{NB} & P_{NN} \end{bmatrix} 
+\begin{bmatrix} \boldsymbol{\beta}_B \\ \boldsymbol{\beta}_N^k \end{bmatrix} - 
+\begin{bmatrix} q_B^T & q_N^T \end{bmatrix} 
+\begin{bmatrix} \boldsymbol{\beta}_B \\ \boldsymbol{\beta}_N^k \end{bmatrix} \\
+&= \frac{1}{2} \boldsymbol{\beta}_B^T P_{BB} \boldsymbol{\beta}_B - ( -q_B + P_{BN} \boldsymbol{\beta}_N^k )^T \boldsymbol{\beta}_B 
+\\
+&= \frac{1}{2} 
+\begin{bmatrix} \beta_i & \beta_j \end{bmatrix}
+\begin{bmatrix} P_{ii} & P_{ij} \\ P_{ij} & P_{jj} \end{bmatrix}
+\begin{bmatrix} \beta_i \\ \beta_j \end{bmatrix}
+- ( -q_B + P_{BN} \boldsymbol{\beta}_N^k )^T
+\begin{bmatrix} \beta_i \\ \beta_j \end{bmatrix}
+\end{align*}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \begin{equation}
+\text{subject to} \quad 0 \le \beta_i, \beta_j, \quad \beta_i + \beta_j = 1 - \mathbf{1}^T \boldsymbol{\beta}_N^k
+\end{equation}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+
+ Working Set Selection 
+\end_layout
+
+\begin_layout Standard
+
+Select
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \begin{align}
+& i \in \text{arg} \max_t \left\{ -\nabla f( \boldsymbol{\beta}^k )_t \ | \quad t \in I( \boldsymbol{\beta}^k ) \right\} \\
+& j \in \text{arg} \min_t \left\{ -\frac{b_{it}^2}{a_{it}} \ | \quad t \in I( \boldsymbol{\beta}^k ), \quad -\nabla f(\boldsymbol{\beta}^k)_t < -\nabla f(\boldsymbol{\beta}^k)_i \right\}
+\end{align}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+Where 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+% This needs to be checked for the new optimization scenario
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \begin{align}
+I( \boldsymbol{\beta} ) & \equiv \{ t \ | \quad \beta_t < 1 \quad \text{or} \quad \beta_t > 0 \} \\
+& a_{it} = P_{ii} + P_{tt} - 2P_{it} \\
+& \bar{a}_{it} = \begin{cases}
+a_{it} & \text{if} \ a_{it} > 0 \\
+\delta & \text{otherwise} \\
+\end{cases} \\
+& b_{it} = -\nabla f(\boldsymbol{\beta}^k)_i + \nabla f(\boldsymbol{\beta}^k)_t \\
+\nabla f( \boldsymbol{\beta} )_i & \equiv P_i \boldsymbol{\beta} - q_i
+\end{align}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+
+ Stopping Condition 
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \begin{equation}
+\max_{i \in I(\boldsymbol{\alpha}^k)} -\nabla f( \boldsymbol{\alpha} )_i + \min_{j \in I(\boldsymbol{\alpha}^k)} \nabla f( \boldsymbol{\alpha} )_j \le \epsilon
+\end{equation}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+
+ Random Process Kernel Definition 
+\end_layout
+
+\begin_layout Standard
+
+When developing the Parzen Window algorithm, we used kernel function 
+\begin_inset LatexCommand \ref{eq:KLsingle}
+
+\end_inset
+
+ which is based on the Kullbeck Liebler divergence of a probability estimate 
+\begin_inset LatexCommand \ref{eq:PhiSingle}
+
+\end_inset
+
+ defined at the sets being evaluated. Our motivation in developing a Support Vector approach is to generate sparse representations of 
+\begin_inset Formula \( \mathcal{P}^{\mathcal{S}} \)
+\end_inset
+
+, in part to reduce the computational demands of evaluating 
+\begin_inset Formula \( \varphi( \mathbf{x}, S) \)
+\end_inset
+
+ for test data sets. Unfortunately, kernel function 
+\begin_inset LatexCommand \ref{eq:KLsingle}
+
+\end_inset
+
+ requires probability estimates of both sets being compared - it would be helpful to develop a kernel function capable of evaluating a distance between a test set 
+\begin_inset Formula \( S_{\hat{X}} \)
+\end_inset
+
+ and a training set 
+\begin_inset Formula \( S_i \)
+\end_inset
+
+ without first calculating an estimate of the probability distribution of 
+\begin_inset Formula \( S_{\hat{X}} \)
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+
+Note that 
+\begin_inset LatexCommand \ref{eq:SVProcessSingle}
+
+\end_inset
+
+ is formulated in such a way that the first kernel argument is always 
+\begin_inset Formula \( S_{\mathbf{x}} \)
+\end_inset
+
+, which allows us to define a kernel which takes a set of points as its first argument and a probability distribution as its second. The definition of 
+\begin_inset LatexCommand \ref{eq:SVPSingle}
+
+\end_inset
+
+ also allows us to define non-symmetric kernels without sacrificing convexity or monotonicity in the optimization objective function. We can therefore use any measure of the divergence between a set of points and a probability distribution. We consider the Renyi entropy with 
+\begin_inset Formula \( \alpha = 1 \)
+\end_inset
+
+ and select the Shannon Entropy as our kernel metric, as it is equivalent the the Kullback Lieblier divergence.
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \begin{equation}
+\| X - \phi \|_{H} = \sum_{x \in X} \phi(x) \log \phi(x)
+\end{equation}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+Recalling that 
+\begin_inset Formula \( S_\mathbf{x} = \{ S \cup \mathbf{x} \} \)
+\end_inset
+
+, we observe that:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \begin{equation}
+\| S_{\mathbf{x}} - S_i \|_{H} = \| S - S_i \|_{H} + \| \mathbf{x} - S_i \|_{H}
+\end{equation}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+We restate the kernel function as:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \begin{equation}
+K_\gamma( X, S_i ) =  \frac{1}{\gamma \sqrt{2\pi} } e^{-\frac{1}{\gamma} \|X - S_i \|_{H}^2}
+\end{equation}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+In situations where probabilities are being calculated for a uniform set of points in 
+\begin_inset Formula \( \Omega^{\mathcal{S}} \)
+\end_inset
+
+, this can considerably reduce the computational time needed to evaluate 
+\begin_inset Formula \( \mathbf{K} \)
+\end_inset
+
+, as 
+\begin_inset Formula \( \|\mathbf{x} - S_i \|_H \)
+\end_inset
+
+ can be computed once and then added to each 
+\begin_inset Formula \( \|S - S_i\|_H, S \in \mathcal{S} \)
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+
+ Random Vector Estimation 
+\end_layout
+
+\begin_layout Standard
+
+Evaluating 
+\begin_inset LatexCommand \ref{eq:SVProcessSingle}
+
+\end_inset
+
+ over a training set 
+\begin_inset Formula \( X \)
+\end_inset
+
+ produces a set 
+\begin_inset Formula \( \mathcal{S}_{SV} \in \mathcal{S} \)
+\end_inset
+
+ referred to as Support Vectors. While 
+\begin_inset LatexCommand \ref{eq:SVProcessSingle}
+
+\end_inset
+
+ produces a sparse representation of 
+\begin_inset Formula \( \mathcal{P}^\mathcal{S} \)
+\end_inset
+
+ by eliminating some 
+\begin_inset Formula \( S \)
+\end_inset
+
+, further sparseness can be achieved by refining the definition of 
+\begin_inset Formula \( \phi(\mathbf{x}) \)
+\end_inset
+
+ to allow the elimination of some 
+\begin_inset Formula \( \mathbf{x} \)
+\end_inset
+
+ in each 
+\begin_inset Formula \( S \in \mathcal{S}_{SV} \)
+\end_inset
+
+. In the context of computing the kernel matrices used in optimizing 
+\begin_inset LatexCommand \ref{eq:SVProcessSingle}
+
+\end_inset
+
+ the Parzen Window definition of 
+\begin_inset Formula \( \phi(\mathbf{x}) \)
+\end_inset
+
+ is computationally acceptable, as it results in a good approximation with a minimal amount of computation 
+\begin_inset Foot
+status collapsed
+
+
+\begin_layout Standard
+
+ The Parzen Window estimate at a point requires distance computations for each observation and a summation. By contrast, the SV estimate requires the same number of distance computations as well as the solving of a quadratic optimization problem whose complexity increases exponentially with the number of observations. 
+\end_layout
+
+\end_inset
+
+. In the context of evaluating 
+\begin_inset LatexCommand \ref{eq:SVResultSingle}
+
+\end_inset
+
+ over a testing set 
+\begin_inset Formula \( \hat{X} \)
+\end_inset
+
+, the Parzen Window algorithm for 
+\begin_inset Formula \( \phi(\mathbf{x}) \)
+\end_inset
+
+ is sub-optimal due to the fact that it requires the full set of observations for each 
+\begin_inset Formula \( S \in \mathcal{S}_{SV} \)
+\end_inset
+
+. In this context, a sparse algorithm for 
+\begin_inset Formula \( \phi(\mathbf{x}) \)
+\end_inset
+
+ would reduce both the data required to store 
+\begin_inset Formula \( \mathcal{S}_{SV} \)
+\end_inset
+
+ and the computational resources required to evaluate 
+\begin_inset LatexCommand \ref{eq:DKLemp}
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+
+We return now to the empirical cumulative distribution function method of Support Vector density estimation and search for a solution in the following form, which is able to use multiple non-symmetric kernel functions simultaneously:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \begin{equation} \label{eq:SVDensity}
+\phi(x) = \sum_{i=1}^\ell \left( \beta_i^1 \mathcal{K}_1(x_i,x) + ... + \beta_i^\kappa \mathcal{K}_\kappa( x_i,x) \right)
+\end{equation}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+We select values of 
+\begin_inset Formula \( \beta \)
+\end_inset
+
+ which minimize the square loss of the empirical cumulative probability distribution using some regularizer:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \begin{align}
+&\min \left( \sum_{i=1}^\ell \left( y_i - \sum_{j=1}^\ell \sum_{n=1}^\kappa \beta_j^n k_n(x_i, x_j) \right)^2 + \lambda \sum_{i=1}^\ell \sum_{n=1}^\kappa \frac{1}{\gamma_n} \beta_i^n \right) \\
+&\text{subject to} \quad \sum_{i=1}^\ell \sum_{n=1}^\kappa \beta_i^n = 1, \quad \beta_i \ge 0 \\
+\end{align}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+given a kernel function 
+\begin_inset Formula \( k(x,x') \)
+\end_inset
+
+ from the sigmoid family to approximate the cumulative probability distribution and it's derivative which we refer to as the cross-kernel 
+\begin_inset Formula \( \mathcal{K}(x,x') \)
+\end_inset
+
+ which we use to construct an estimate of the probability distribution:
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Formula \begin{align}
+&k(x,x') = \frac{1}{1+e^{-\gamma(x-x')} } \\
+&\mathcal{K}(x,x') = -\frac{\gamma}{2 + e^{\gamma(x-x')} + e^{-\gamma(x-x')} } 
+\end{align}
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+
+Results
+\end_layout
+
+\begin_layout Standard
+
+The architecture has been tested against several data sets. In all cases the system parameters are left unchanged to eliminate the possbility of optimizing the system performance to best match the known outcomes.
+\end_layout
+
+\begin_layout Subsection
+
+Eunite Competition Data
+\end_layout
+
+\begin_layout Subsection
+
+Santa Fe Data
+\end_layout
+
+\begin_layout Subsection
+
+CATS Benchmark Data
+\end_layout
+
+\begin_layout Subsection
+
+Results Summary
+\end_layout
+
+\begin_layout Section
+
+Further Research
+\end_layout
+
+\begin_layout Subsection
+
+Data Pre-Processing
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+% logistic function using mean and sd to put most training points between .1 and .9
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+% upper and lower bounds on 
+\backslash
+(
+\backslash
+int 
+\backslash
+Delta 
+\backslash
+) as non-stationary data detections mechanism
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+% logistic function from delta using mean and sd in same way if data non-stationary
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+% iterative integration process until stationary data found ?
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+
+Ensemble System
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+% more analysis of recent data, some type of transfer from short to long-term 'memory'
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+% heirarchical system?
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+% what parameters change?
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+
+Weighted Influence
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+% a weight term could be added to the regularizer to control the influence of specific sets.  This could provide more information in 'important' situations, which could be useful in motivated learning.
+\end_layout
+
+\begin_layout Standard
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+
+Conclusion
+\end_layout
+
+\begin_layout Standard
+
+Eat it, bitches
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+nocite{Moreno03}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Standard
+
+
+\backslash
+bibliographystyle{plain}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset LatexCommand \bibtex[plain]{Research/research.bib}
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
