@@ -1,4 +1,4 @@
-#LyX 1.6.2 created this file. For more info see http://www.lyx.org/
+#LyX 1.6.1 created this file. For more info see http://www.lyx.org/
 \lyxformat 345
 \begin_document
 \begin_header
@@ -109,7 +109,7 @@ Support Vector Random Process Estimate
 S_{\mathbf{x}} & =\{S\cup\mathbf{x}\}\\
 W(\beta) & =\sum_{i,j\in\mathcal{S}}\beta_{i}\beta_{j}\sum_{S\in\mathcal{S}}\sum_{\mathbf{x}\in X}K_{\gamma}(S_{\mathbf{x}},S_{i})K_{\gamma}(S_{\mathbf{x}},S_{j})\label{eq:WProcess}\\
  & \qquad\qquad\qquad\qquad+\sum_{i\in\mathcal{S}}\beta_{i}\sum_{S\in\mathcal{S}}\sum_{\mathbf{x}\in X}\left(\lambda K_{\gamma}(S_{\mathbf{x}},S_{i})^{-1}-\frac{2}{|\mathcal{S}|}\sum_{j\in\mathcal{S}}K_{\gamma}(S_{\mathbf{x}},S_{i})K_{\gamma}(S_{\mathbf{x}},S_{j})\right)\\
- & \text{subject to}\quad\sum_{i}\beta_{i}=1,\quad\beta_{i}\ge0,\ i=1,\hdots,|\mathcal{S}|\label{eq:ProcessConstraints}\\
+ & \text{subject to}\quad\sum_{i}\beta_{i}=1,\quad\beta_{i}\ge0,\ i=1,\ldots,|\mathcal{S}|\label{eq:ProcessConstraints}\\
 K_{\gamma}(S_{n},S_{m}) & =\prod_{c}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|S_{n}^{c}-S_{m}^{c}\|_{H}^{2}}\label{eq:KProcessSS}\\
 \|S_{n}-S_{m}\|_{H} & =\sum_{\mathbf{x}\in S_{n}}\phi_{m}(\mathbf{x})\ \log\phi_{m}(\mathbf{x})\label{eq:DistKL}\\
 K_{\gamma}(X,S_{n}) & =\prod_{c}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|X^{c}-S_{n}^{c}\|_{H}^{2}}\label{eq:KProcessXS}\\
@@ -180,9 +180,7 @@ And sample from this matrix to generate
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
 \phi_{n}(\mathbf{x}) & =\sum_{x\in S_{n}}\frac{1}{|S_{n}|}k_{\gamma}(\mathbf{x},x)\\
- & =\frac{1}{|S_{n}|}\mathbf{\bar{D}}_{\mathbf{x},S_{n}}\\
-D_{KL}(S_{n}\|S_{m}) & =-\sum_{\mathbf{x}\in\{S_{n}\cup S_{m}\}}\phi_{n}(\mathbf{x})\log\phi_{m}(\mathbf{x})+\sum_{\mathbf{x}\in\{S_{n}\cup S_{m}\}}\phi_{n}(\mathbf{x})\log\phi_{n}(\mathbf{x})\\
- & =-\sum_{\mathbf{x}\in\{S_{n}\cup S_{m}\}}\frac{\mathbf{\mathbf{\bar{D}}}_{\mathbf{x},S_{n}}}{|S_{n}|}\log\frac{\mathbf{\mathbf{\bar{D}}}_{\mathbf{x},S_{m}}}{|S_{m}|}+\sum_{\mathbf{x}\in\{S_{n}\cup S_{m}\}}\frac{\mathbf{\mathbf{\bar{D}}}_{\mathbf{x},S_{n}}}{|S_{n}|}\log\frac{\mathbf{\mathbf{\bar{D}}}_{\mathbf{x},S_{n}}}{|S_{n}|}\end{align*}
+ & =\frac{1}{|S_{n}|}\mathbf{\bar{D}}_{\mathbf{x},S_{n}}\end{align*}
 
 \end_inset
 
