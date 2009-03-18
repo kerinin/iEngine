@@ -45,15 +45,15 @@ class kMachine(object):
 		
 		# Subset difference
 		if not Y==None:
-			diff = np.asfarray( X - Y )
+			diff = ( X - Y )
 		else:
-			diff = np.asfarray( X )
-		
+			diff =X
+			
 		# Gaussian
 		#return (1.0/(self.gamma*math.sqrt(math.pi))) * np.exp( (diff**2)/-self.gamma).prod(2).reshape(N,M)
 		
 		# Subset Gaussian
-		return (1.0/(self.gamma*math.sqrt(math.pi))) * np.exp( (diff**2)/-self.gamma)
+		return (1.0/(self.gamma*math.sqrt(math.pi))) * np.ma.exp( (diff**2)/-self.gamma)
 		
 		# Sigmoid
 		#return ( 1.0 / ( 1.0 + np.exp( -self.gamma * diff ) ) ).prod(2).reshape(N,M)
@@ -86,9 +86,12 @@ class subset(kMachine):
 		self.X = data
 		self.D = D
 		
+		print tStart
+		print theta
+		
 		if tStart and theta:
-			self.argStart = np.ma.masked_less(self.data,tStart,copy=False).argmin()
-			self.argEnd = np.ma.masked_greater(self.data,tStart+theta,copy=False).argmax()
+			self.argStart = np.ma.masked_less(self.X,tStart,copy=False).argmin()
+			self.argEnd = np.ma.masked_greater(self.X,tStart+theta,copy=False).argmax()
 			
 			self.N = self.argStart - self.argEnd
 		else:
@@ -97,7 +100,7 @@ class subset(kMachine):
 			
 			self.N = self.data.shape[0]
 			
-	def __rsub__(self,other):
+	def __sub__(self,other):
 	# difference - for comparing two subsets using Entropy
 		
 		#NOTE: change this to conform to the entropy kernel
@@ -126,12 +129,13 @@ class svm(kMachine):
 			self.X = data.reshape([ self.N, self.d ])
 		else:
 			self.X = data
+		self.t = np.split(self.X,[1,])[0]
 		
 		self.theta = theta
 		self.Lambda = Lambda
 		super(svm, self).__init__(gamma)
 		
-		self.D = self._k( self.X.reshape([self.N,1,self.d]) - self.X.T.reshape([1,self.N,self.d]) )
+		self.D = self._K( self.X.reshape([self.N,1,self.d]) - self.X.T.reshape([1,self.N,self.d]) )
 		self.S = self._S()
 		self.Y = None				# empirical CDF of X
 		self.SV = None			# X value array of SV
