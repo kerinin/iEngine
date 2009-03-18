@@ -104,6 +104,24 @@ Support Vector Random Process Estimate
 \end_layout
 
 \begin_layout Standard
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
+Why are we calculating for all S and all X? Wouldn't it be sufficient to
+ simply use all S? After all, we're treating S as a random variable.
+ The x subscript was added primarily to allow testing, not for selecting
+ SV S's.
+ Think it over - if it makes sense it would substantially reduce the computation
+al demands
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula \begin{align}
 \varphi_{SV}(\mathbf{x},S:\beta) & =\sum_{i\in\mathcal{S}}\beta_{i}K_{\gamma}(S_{\mathbf{x}},S_{i})\label{eq:varphiSV}\\
 S_{\mathbf{x}} & =\{S\cup\mathbf{x}\}\\
@@ -147,15 +165,13 @@ we know that we need to calculate
 \begin_layout Standard
 It would be helpful if this could take advantage of the fact that many subsets
  have overlaps, and it isn't useful to re-calculate each one.
- Looking at our kernel 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:KProcessSS"
-
+ For starters, we can calculate a shared kernel matrix for subset comparisons,
+ which will reduce the amount of computation (and memory) required to calculate
+ 
+\begin_inset Formula $\|S_{n}-S_{m}\|$
 \end_inset
 
-, I don't think we calculate a single kernel matrix, however we might be
- able to calculate a single distance matrix:
+:
 \end_layout
 
 \begin_layout Standard
@@ -169,15 +185,6 @@ reference "eq:KProcessSS"
 \end_layout
 
 \begin_layout Standard
-And sample from this matrix to generate 
-\begin_inset Formula $\mathbf{K}$
-\end_inset
-
-.
- Let's play with some equations:
-\end_layout
-
-\begin_layout Standard
 \begin_inset Formula \begin{align*}
 \phi_{n}(\mathbf{x}) & =\sum_{x\in S_{n}}\frac{1}{|S_{n}|}k_{\gamma}(\mathbf{x},x)\\
  & =\frac{1}{|S_{n}|}\mathbf{\bar{D}}_{\mathbf{x},S_{n}}\end{align*}
@@ -188,12 +195,121 @@ And sample from this matrix to generate
 \end_layout
 
 \begin_layout Standard
-In this case, if we treat 
+\begin_inset Formula \begin{align*}
+\|S-S_{n}\|_{H} & =\sum_{\mathbf{x}\in S}\phi_{n}(\mathbf{x})\ \log\phi_{n}(\mathbf{x})\\
+ & =\sum_{\mathbf{x}\in S}\frac{\mathbf{\mathbf{\bar{D}}}_{\mathbf{x},S_{n}}}{|S_{n}|}\ \log\frac{\mathbf{\mathbf{\bar{D}}}_{\mathbf{x},S_{n}}}{|S_{n}|}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In this case, we treat 
 \begin_inset Formula $\mathbf{\bar{D}}_{\mathbf{x},S_{i}}$
 \end_inset
 
- as a column vector, we can evaluate that last line as a simple equation.
- Lets take a look at what happens when we have a set of test data.
+ as a column vector for all 
+\begin_inset Formula $\mathbf{x}\in X$
+\end_inset
+
+.
+ If we observe that the distance 
+\begin_inset Formula $\|S_{\mathbf{x}}-S_{n}\|$
+\end_inset
+
+ is a sum over each element of 
+\begin_inset Formula $S_{\mathbf{x}}$
+\end_inset
+
+, it becomes obvious that
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\|S_{\mathbf{x}}-S_{n}\|_{H} & =\|S-S_{n}\|_{H}+\|\mathbf{x}-S_{n}\|_{H}\\
+ & =\frac{\mathbf{\mathbf{\bar{D}}}_{\mathbf{x},S_{n}}}{|S_{n}|}\ \log\frac{\mathbf{\mathbf{\bar{D}}}_{\mathbf{x},S_{n}}}{|S_{n}|}+\sum_{x\in X}\frac{\mathbf{\mathbf{\bar{D}}}_{x,S_{n}}}{|S_{n}|}\ \log\frac{\mathbf{\mathbf{\bar{D}}}_{x,S_{n}}}{|S_{n}|}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We're now ready to bring the back to the kernel equation.
+ For clarity, we'll represent the kernel matrix as follows:
+\end_layout
+
+\begin_layout Standard
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+\begin_inset Formula \begin{align*}
+K_{\gamma}(S_{\mathbf{x}},S_{m}) & =\prod_{c}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|S_{\mathbf{x}}^{c}-S_{\mathbf{x}}^{c}\|_{H}^{2}}\\
+ & =\left|S_{\mathbf{x}}-S_{m}\right|_{K,\gamma}\\
+ & =\left|\frac{\mathbf{\mathbf{\bar{D}}}_{\mathbf{x},S_{n}}}{|S_{n}|}\ \log\frac{\mathbf{\mathbf{\bar{D}}}_{\mathbf{x},S_{n}}}{|S_{n}|}+\sum_{x\in X}\frac{\mathbf{\mathbf{\bar{D}}}_{x,S_{n}}}{|S_{n}|}\ \log\frac{\mathbf{\mathbf{\bar{D}}}_{x,S_{n}}}{|S_{n}|}\right|_{K,\gamma}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Based on our objective function, it would appear that that we need to construct
+ a kernel matrix:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\mathbf{K}_{i,S} & =\sum_{\mathbf{x}\in X}K_{\gamma}(S_{\mathbf{x}},S_{i})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Notice that this summation is unique only for the first half of the difference
+ equation.
+ This allows us to calculate 
+\begin_inset Formula $\|S-S_{i}\|$
+\end_inset
+
+ once, and add it to a colum vector defined by 
+\begin_inset Formula $\|\mathbf{x}-S_{i}\|$
+\end_inset
+
+ which we evaluate for 
+\begin_inset Formula $K_{\gamma}$
+\end_inset
+
+and then sum.
+ We can now generate our objective function:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+W(\beta) & =\sum_{i,j\in\mathcal{S}}\beta_{i}\beta_{j}\sum_{S\in\mathcal{S}}\sum_{\mathbf{x}\in X}K_{\gamma}(S_{\mathbf{x}},S_{i})K_{\gamma}(S_{\mathbf{x}},S_{j})\\
+ & \qquad\qquad\qquad\qquad+\sum_{i\in\mathcal{S}}\beta_{i}\sum_{S\in\mathcal{S}}\sum_{\mathbf{x}\in X}\left(\lambda K_{\gamma}(S_{\mathbf{x}},S_{i})^{-1}-\frac{2}{|\mathcal{S}|}\sum_{j\in\mathcal{S}}K_{\gamma}(S_{\mathbf{x}},S_{i})K_{\gamma}(S_{\mathbf{x}},S_{j})\right)\\
+ & =\beta^{T}\left\langle \mathbf{K}\cdot\mathbf{K}^{T}\right\rangle \beta+\beta^{T}\left(\lambda\left\langle \mathbf{K}\cdot\mathbf{1}\right\rangle ^{-1}-\frac{2}{\mathcal{S}}\left\langle \mathbf{K}\cdot\mathbf{K}\cdot\mathbf{1}\right\rangle \right)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Random Vector Testing Implementation
+\end_layout
+
+\begin_layout Standard
+Lets take a look at what happens when we have a set of test data.
  In this case, we have test subset 
 \begin_inset Formula $S_{\hat{x}}$
 \end_inset
