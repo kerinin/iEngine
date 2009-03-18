@@ -63,50 +63,51 @@ class predictionPoints:
 		self.X = data
 		self.K = K
 
+class subsetSV:
+	def __init__(self,S):
+		self.S = S
+		
+	def __sub__(self,other):
+		if other.__class__ == subset:
+			D = self.S._K( other.X - self.S.X.T ) / self.S.N
+			
+			return ( D * log2(D) ).sum(1)
+			
+		elif other.__class__ == np.ndarray:
+			D = self.S._K( other - self.S.X.T ) / self.S.N
+			
+			return ( D * log2(D) ).sum(1)
+	
 class subset(kMachine):
-	def __init__(self,data,K,tStart=None,theta=None):
-
-		try:
-			self.N,self.d = data.shape
-		except ValueError:
-			self.N,self.d = (len(data),1)
+	def __init__(self,data,D,tStart=None,theta=None):
 		
 		self.tStart = tStart
 		self.theta = theta
 		self.X = data
-		self.K = K
+		self.D = D
 		
 		if tStart and theta:
-			self.argStart = 
-			self.argEnd = 
+			self.argStart = np.ma.masked_less(self.data,tStart,copy=False).argmin()
+			self.argEnd = np.ma.masked_greater(self.data,tStart+theta,copy=False).argmax()
+			
+			self.N = self.argStart - self.argEnd
 		else:
 			self.argStart = 0
 			self.argEnd = -1
-		
-	def __sub__(self,other):
+			
+			self.N = self.data.shape[0]
+			
+	def __rsub__(self,other):
 	# difference - for comparing two subsets using Entropy
 		
 		#NOTE: change this to conform to the entropy kernel
 		
 		if other.__class__ == subset:
 		# other is an array of subsets
-		
-			pSelf = self.K[self.argStart:self.argEnd,other.argStart:other.argEnd].sum(1)
-			#+self.K[other.argStart:other.argEnd,other.argStart:other.argEnd].sum(1)
-			pOther = self.K[other.argStart:other.argEnd,self.argStart:self.argEnd].sum(1)
-			#+self.K[self.argStart:self.argEnd,self.argStart:self.argEnd].sum(1)
-		
-			logpSelf = np.log2(pSelf)
-			logpOther = np.log2(pOther)
 			
-			return  ( ( pSelf * logpSelf ) + ( pOther * logpOther ) - ( pSelf * logpOther ) - ( pOther * logpSelf ) ).sum(0)
+			D = self.D[other.argStart:other.argEnd,self.argStart:self.argEnd]/self.N
 			
-		elif other.__class__ == predictionPoints:
-			pSelf = other.K[self.argStart:self.argEnd].sum(1)
-			
-			logpSelf = np.log2(pSelf)
-			
-			return pSelf * plogSelf
+			return ( D * np.log2(D) ).sum(1)
 		
 		raise StandardError, 'This type of subtraction not implemented'
 
@@ -130,7 +131,7 @@ class svm(kMachine):
 		self.Lambda = Lambda
 		super(svm, self).__init__(gamma)
 		
-		self.K = self.X.reshape([self.N,1,self.d]) - self.X.T.reshape([1,self.N,self.d])
+		self.D = self._k( self.X.reshape([self.N,1,self.d]) - self.X.T.reshape([1,self.N,self.d]) )
 		self.S = self._S()
 		self.Y = None				# empirical CDF of X
 		self.SV = None			# X value array of SV
@@ -154,7 +155,7 @@ class svm(kMachine):
 		S = np.ma.vstack( 
 			[ 
 				np.ma.vstack( 
-					[ subset(data=self.X,K=self.K,tStart=tStart,theta=theta,gamma=self.gamma) for tStart in self.t ] 
+					[ subset(data=self.X,D=self.D,tStart=tStart,theta=theta) for tStart in self.t ] 
 				) for theta in self.theta 
 			]
 		)
@@ -167,13 +168,10 @@ class svm(kMachine):
 	# @param X				Set of training observations
 	# @param X				[Nxd] array of points for which to calculate the PDF
 		
-		diffS = np.array([S,]) - self.SV.T
-
-		Sx = np.vstack( [ subset( t=np.split(row,[1])[0], data = np.split(row,[1])[1], gamma=self.gamma) for row in x ] )
-
-		diffX = Sx - self.SV.T
+		R = ( S - self.SV.T ) + ( X - self.SV.T )
 		
-		return np.ma.dot( self._K( diffS + diffX ), self.beta )
+		return np.ma.dot( R, self.beta )
+		
 		
 	def __iadd__(self, points):
 		# overloaded '+=', used for adding a vector list to the module's data
@@ -185,7 +183,7 @@ class svm(kMachine):
 	def _compute(self):
 		start = datetime.datetime.now()
 
-		self.K = self._K( self.S, self.S.T )
+		self.K = self._K( self.S - self.S.T )
 		
 		P = cvxopt.matrix( np.dot(self.K.T,self.K), (self.N,self.N) )
 		q = cvxopt.matrix( ( self.Lambda / self.K.T.sum(0) ) - ( ( 1./self.N ) * ( np.dot( self.K.T, self.K ).sum(0) ) ) )
@@ -202,7 +200,7 @@ class svm(kMachine):
 		self.NSV = beta.count()
 		self.alpha = beta
 		self.beta = beta.compressed().reshape([self.NSV,1])
-		self.SV = np.ma.array( self.S, mask=mask).compressed().reshape([self.NSV,1])
+		self.SV = np.array( [ subsetSV( S=S ) for S in np.ma.array( self.S, mask=mask).compressed() ] )
 
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % ( duration.seconds + float(duration.microseconds)/1000000)
