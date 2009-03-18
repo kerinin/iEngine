@@ -113,7 +113,8 @@ Why are we calculating for all S and all X? Wouldn't it be sufficient to
  The x subscript was added primarily to allow testing, not for selecting
  SV S's.
  Think it over - if it makes sense it would substantially reduce the computation
-al demands
+al demands.
+ The entropy function calculates for all X, this is redundant...
 \end_layout
 
 \end_inset
@@ -125,8 +126,8 @@ al demands
 \begin_inset Formula \begin{align}
 \varphi_{SV}(\mathbf{x},S:\beta) & =\sum_{i\in\mathcal{S}}\beta_{i}K_{\gamma}(S_{\mathbf{x}},S_{i})\label{eq:varphiSV}\\
 S_{\mathbf{x}} & =\{S\cup\mathbf{x}\}\\
-W(\beta) & =\sum_{i,j\in\mathcal{S}}\beta_{i}\beta_{j}\sum_{S\in\mathcal{S}}\sum_{\mathbf{x}\in X}K_{\gamma}(S_{\mathbf{x}},S_{i})K_{\gamma}(S_{\mathbf{x}},S_{j})\label{eq:WProcess}\\
- & \qquad\qquad\qquad\qquad+\sum_{i\in\mathcal{S}}\beta_{i}\sum_{S\in\mathcal{S}}\sum_{\mathbf{x}\in X}\left(\lambda K_{\gamma}(S_{\mathbf{x}},S_{i})^{-1}-\frac{2}{|\mathcal{S}|}\sum_{j\in\mathcal{S}}K_{\gamma}(S_{\mathbf{x}},S_{i})K_{\gamma}(S_{\mathbf{x}},S_{j})\right)\\
+W(\beta) & =\sum_{i,j\in\mathcal{S}}\beta_{i}\beta_{j}\sum_{S\in\mathcal{S}}K_{\gamma}(S,S_{i})K_{\gamma}(S,S_{j})\label{eq:WProcess}\\
+ & \qquad\qquad\qquad\qquad+\sum_{i\in\mathcal{S}}\beta_{i}\sum_{S\in\mathcal{S}}\left(\lambda K_{\gamma}(S,S_{i})^{-1}-\frac{2}{|\mathcal{S}|}\sum_{j\in\mathcal{S}}K_{\gamma}(S,S_{i})K_{\gamma}(S,S_{j})\right)\\
  & \text{subject to}\quad\sum_{i}\beta_{i}=1,\quad\beta_{i}\ge0,\ i=1,\ldots,|\mathcal{S}|\label{eq:ProcessConstraints}\\
 K_{\gamma}(S_{n},S_{m}) & =\prod_{c}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|S_{n}^{c}-S_{m}^{c}\|_{H}^{2}}\label{eq:KProcessSS}\\
 \|S_{n}-S_{m}\|_{H} & =\sum_{\mathbf{x}\in S_{n}}\phi_{m}(\mathbf{x})\ \log\phi_{m}(\mathbf{x})\label{eq:DistKL}\\
@@ -155,7 +156,7 @@ we know that we need to calculate
 
 \begin_layout Standard
 \begin_inset Formula \[
-\mathbf{K_{i,j}=}\sum_{S\in\mathcal{S}}\sum_{\mathbf{x}\in X}K_{\gamma}(S_{\mathbf{x}},S_{i})K_{\gamma}(S_{\mathbf{x}},S_{j})\]
+\mathbf{K_{i,j}=}\sum_{S\in\mathcal{S}}K_{\gamma}(S,S_{i})K_{\gamma}(S,S_{j})\]
 
 \end_inset
 
@@ -176,8 +177,10 @@ It would be helpful if this could take advantage of the fact that many subsets
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\mathbf{D}_{i,j} & =k_{\gamma}(x_{i},x_{j})\\
-\mathbf{\bar{D}}_{i,j} & =\sum_{\mathbf{D}}\mathbf{D}_{i,j}\end{align*}
+\mathbf{D}_{i,j} & =k_{\gamma}(\mathbf{x}_{i},\mathbf{x}_{j})\\
+\mathbf{\bar{D}}_{A,B} & =\sum_{\begin{array}{c}
+i\in A\\
+j\in B\end{array}}\mathbf{D}_{i,j}\end{align*}
 
 \end_inset
 
@@ -186,7 +189,7 @@ It would be helpful if this could take advantage of the fact that many subsets
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\phi_{n}(\mathbf{x}) & =\sum_{x\in S_{n}}\frac{1}{|S_{n}|}k_{\gamma}(\mathbf{x},x)\\
+\phi_{n}(\mathbf{x}) & =\sum_{i\in S_{n}}\frac{1}{|S_{n}|}k_{\gamma}(\mathbf{x},\mathbf{x}_{i})\\
  & =\frac{1}{|S_{n}|}\mathbf{\bar{D}}_{\mathbf{x},S_{n}}\end{align*}
 
 \end_inset
@@ -210,11 +213,103 @@ In this case, we treat
 \end_inset
 
  as a column vector for all 
-\begin_inset Formula $\mathbf{x}\in X$
+\begin_inset Formula $\mathbf{x}\in S$
 \end_inset
 
 .
- If we observe that the distance 
+ We're now ready to bring the back to the kernel equation.
+ For clarity, we'll represent the kernel matrix as follows:
+\end_layout
+
+\begin_layout Standard
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+\begin_inset Formula \begin{align*}
+K_{\gamma}(S_{n},S_{m}) & =\prod_{c}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|S_{n}^{c}-S_{m}^{c}\|_{H}^{2}}\\
+ & =\left|S_{n}-S_{m}\right|_{K,\gamma}\\
+ & =\left|\sum_{x\in S_{n}}\frac{\mathbf{\mathbf{\bar{D}}}_{x,S_{m}}}{|S_{m}|}\ \log\frac{\mathbf{\mathbf{\bar{D}}}_{x,S_{m}}}{|S_{m}|}\right|_{K,\gamma}\\
+\mathbf{K}_{n,m} & =K_{\gamma}(S_{n},S_{m})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We can now restate our objective function:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+W(\beta) & =\sum_{i,j\in\mathcal{S}}\beta_{i}\beta_{j}\sum_{S\in\mathcal{S}}K_{\gamma}(S,S_{i})K_{\gamma}(S,S_{j})\\
+ & \qquad\qquad\qquad\qquad+\sum_{i\in\mathcal{S}}\beta_{i}\sum_{S\in\mathcal{S}}\left(\lambda K_{\gamma}(S,S_{i})^{-1}-\frac{2}{|\mathcal{S}|}\sum_{j\in\mathcal{S}}K_{\gamma}(S,S_{i})K_{\gamma}(S,S_{j})\right)\\
+\\ & =\frac{1}{2}\beta^{T}P\beta+q^{T}\beta\\
+P_{i,j} & =\sum_{\mathbf{x}\in X}K_{\gamma}(S_{\mathbf{x}},S_{i})K_{\gamma}(S_{\mathbf{x}},S_{j})\\
+q_{i} & =\sum_{\mathbf{x}\in X}\left(\lambda K_{\gamma}(S_{\mathbf{x}},S_{i})^{-1}-\frac{1}{|\mathcal{S}|}\sum_{j\in\mathcal{S}}K_{\gamma}(S_{\mathbf{x}},S_{i})K_{\gamma}(S_{\mathbf{x}},S_{j})\right)\\
+\\P & =\left\langle \mathbf{K}^{T}\cdot\mathbf{K}\right\rangle \\
+q & =\lambda\left\langle \mathbf{K}^{T}\cdot\mathbf{1}_{(|\mathcal{S}|,1)}\right\rangle ^{-1}-\frac{1}{\mathcal{S}}\left\langle \mathbf{K}^{T}\cdot\mathbf{K}\cdot\mathbf{1}_{(|\mathcal{S}|,1)}\right\rangle \end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Random Vector Testing Implementation
+\end_layout
+
+\begin_layout Standard
+Lets take a look at what happens when we have a set of test data.
+ In this case, we have test subset 
+\begin_inset Formula $S$
+\end_inset
+
+, and we want to determine the probability of a set of points based on existing
+ support vectors 
+\begin_inset Formula $\mathbf{\hat{x}}\in\mathcal{\hat{S}}$
+\end_inset
+
+.
+ To do so we must evaluate equation
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:varphiSV"
+
+\end_inset
+
+, which includes evaluating the kernel distance from 
+\begin_inset Formula $S$
+\end_inset
+
+ to each of the support vector subsets.
+ There is a possibility that elements of 
+\begin_inset Formula $\mathcal{\hat{S}}$
+\end_inset
+
+ overlap, so let's treat this situation in a similar manner:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\mathbf{D}_{i,j} & =k_{\gamma}(\mathbf{x},\mathbf{\hat{x}})\\
+\mathbf{\bar{D}}_{A,B} & =\sum_{\begin{array}{c}
+i\in A\\
+j\in B\end{array}}\mathbf{D}_{i,j}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+If we observe that the distance 
 \begin_inset Formula $\|S_{\mathbf{x}}-S_{n}\|$
 \end_inset
 
@@ -236,111 +331,30 @@ In this case, we treat
 \end_layout
 
 \begin_layout Standard
-We're now ready to bring the back to the kernel equation.
- For clarity, we'll represent the kernel matrix as follows:
-\end_layout
-
-\begin_layout Standard
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\noun off
-\color none
-\begin_inset Formula \begin{align*}
-K_{\gamma}(S_{\mathbf{x}},S_{m}) & =\prod_{c}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|S_{\mathbf{x}}^{c}-S_{\mathbf{x}}^{c}\|_{H}^{2}}\\
- & =\left|S_{\mathbf{x}}-S_{m}\right|_{K,\gamma}\\
- & =\left|\frac{\mathbf{\mathbf{\bar{D}}}_{\mathbf{x},S_{n}}}{|S_{n}|}\ \log\frac{\mathbf{\mathbf{\bar{D}}}_{\mathbf{x},S_{n}}}{|S_{n}|}+\sum_{x\in X}\frac{\mathbf{\mathbf{\bar{D}}}_{x,S_{n}}}{|S_{n}|}\ \log\frac{\mathbf{\mathbf{\bar{D}}}_{x,S_{n}}}{|S_{n}|}\right|_{K,\gamma}\end{align*}
-
+We can calculate 
+\begin_inset Formula $\|\mathbf{x}-S_{n}\|_{H}$
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
-Based on our objective function, it would appear that that we need to construct
- a kernel matrix:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-\mathbf{K}_{i,S} & =\sum_{\mathbf{x}\in X}K_{\gamma}(S_{\mathbf{x}},S_{i})\end{align*}
-
+ as a column vector and add 
+\begin_inset Formula $\|S-S_{n}\|_{H}$
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
-Notice that this summation is unique only for the first half of the difference
- equation.
- This allows us to calculate 
-\begin_inset Formula $\|S-S_{i}\|$
-\end_inset
-
- once, and add it to a colum vector defined by 
-\begin_inset Formula $\|\mathbf{x}-S_{i}\|$
-\end_inset
-
- which we evaluate for 
-\begin_inset Formula $K_{\gamma}$
-\end_inset
-
-and then sum.
- We can now generate our objective function:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-W(\beta) & =\sum_{i,j\in\mathcal{S}}\beta_{i}\beta_{j}\sum_{S\in\mathcal{S}}\sum_{\mathbf{x}\in X}K_{\gamma}(S_{\mathbf{x}},S_{i})K_{\gamma}(S_{\mathbf{x}},S_{j})\\
- & \qquad\qquad\qquad\qquad+\sum_{i\in\mathcal{S}}\beta_{i}\sum_{S\in\mathcal{S}}\sum_{\mathbf{x}\in X}\left(\lambda K_{\gamma}(S_{\mathbf{x}},S_{i})^{-1}-\frac{2}{|\mathcal{S}|}\sum_{j\in\mathcal{S}}K_{\gamma}(S_{\mathbf{x}},S_{i})K_{\gamma}(S_{\mathbf{x}},S_{j})\right)\\
- & =\beta^{T}\left\langle \mathbf{K}\cdot\mathbf{K}^{T}\right\rangle \beta+\beta^{T}\left(\lambda\left\langle \mathbf{K}\cdot\mathbf{1}\right\rangle ^{-1}-\frac{2}{\mathcal{S}}\left\langle \mathbf{K}\cdot\mathbf{K}\cdot\mathbf{1}\right\rangle \right)\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Section
-Random Vector Testing Implementation
-\end_layout
-
-\begin_layout Standard
-Lets take a look at what happens when we have a set of test data.
- In this case, we have test subset 
-\begin_inset Formula $S_{\hat{x}}$
-\end_inset
-
-, and we want to determine the probability of a set of points 
-\begin_inset Formula $\hat{X}$
+ to each element to get the column vector 
+\begin_inset Formula $\|S_{\mathbf{x}}-S_{n}\|_{H}$
 \end_inset
 
 .
- To do so we must evaluate equation
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:varphiSV"
-
+ We know that our estimate of 
+\begin_inset Formula $\mathbf{x}$
 \end_inset
 
-, which includes evaluating the kernel distance from 
-\begin_inset Formula $S_{\hat{x}}$
-\end_inset
-
- to each of the support vector subsets.
- There is a possibility that elements of 
-\begin_inset Formula $S_{SV}$
-\end_inset
-
- overlap, so let's treat this situation in a similar manner:
+ is defined as:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\mathbf{D}_{i,j} & =k_{\gamma}(\hat{x},x_{SV})\end{align*}
+\varphi_{SV}(S_{\mathbf{x}}:\beta) & =\sum_{i\in\mathcal{S}}\beta_{i}K_{\gamma}(S_{\mathbf{x}},\hat{S}_{i})\\
+S_{\mathbf{x}} & =\{S\cup\mathbf{x}\}\end{align*}
 
 \end_inset
 
@@ -348,51 +362,18 @@ reference "eq:varphiSV"
 \end_layout
 
 \begin_layout Standard
-Let's review where we're going:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-\varphi_{SV}(\mathbf{x},S:\beta) & =\sum_{i\in\mathcal{S}}\beta_{i}K_{\gamma}(S_{\mathbf{x}},S_{i})\\
-S_{\mathbf{x}} & =\{S\cup\mathbf{x}\}\\
-K_{\gamma}(S_{\mathbf{x}},S_{i}) & =\prod_{c}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|S_{\mathbf{x}}^{c}-S_{i}^{c}\|_{H}^{2}}\\
-\|S-S_{n}\|_{H} & =\sum_{\mathbf{x}\in S}\phi_{n}(\mathbf{x})\ \log\phi_{n}(\mathbf{x})\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-This should clarify that we can simply add the entropy of 
-\begin_inset Formula $\hat{X}$
-\end_inset
-
- to the entropy of 
-\begin_inset Formula $S_{\hat{x}}$
+We can calculate our results using a matrix 
+\begin_inset Formula $R$
 \end_inset
 
 :
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \[
-\|S_{\mathbf{x}}-S_{i}\|_{H}=\|S-S_{i}\|_{H}+\|\mathbf{x}-S_{i}\|_{H}\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-This allows us to start working with our distance matrix:
-\end_layout
-
-\begin_layout Standard
 \begin_inset Formula \begin{align*}
-\phi_{n}(\mathbf{x}) & =\frac{1}{|S_{n}|}\mathbf{\bar{D}}_{\mathbf{x},S_{n}}\\
-\|S_{\mathbf{x}}-S_{n}\|_{H} & =\phi_{n}(\mathbf{x})\log\phi_{n}(\mathbf{x})+\sum_{\mathbf{\hat{x}}\in S}\phi_{n}(\mathbf{\hat{x}})\log\phi_{n}(\mathbf{\hat{x})}\\
- & =\frac{\mathbf{\mathbf{\bar{D}}_{\mathbf{x},S_{n}}}}{|S_{n}|}\log\frac{\mathbf{\mathbf{\bar{D}}_{\mathbf{x},S_{n}}}}{|S_{n}|}+\sum_{\mathbf{\hat{x}}\in S}\frac{\mathbf{\mathbf{\bar{D}}_{\mathbf{\hat{x}},S_{n}}}}{|S_{n}|}\log\frac{\mathbf{\mathbf{\bar{D}}_{\mathbf{\hat{x}},S_{n}}}}{|S_{n}|}\end{align*}
+R_{\mathbf{x},n} & =\|S_{\mathbf{x}}-\hat{S}_{n}\|_{H}\\
+ & =\|S-\hat{S}_{n}\|_{H}+\|\mathbf{x}-\hat{S}_{n}\|_{H}\\
+\varphi_{SV}(S_{\mathbf{x}}:\beta) & =\left\langle R\cdot\beta\right\rangle \end{align*}
 
 \end_inset
 
@@ -400,32 +381,12 @@ This allows us to start working with our distance matrix:
 \end_layout
 
 \begin_layout Standard
-Which again can be treated as a column vector in the latter case and is
- a scalar in the former.
- In the multi-dimensional case, we stack each dimension along the depth
- of 
-\begin_inset Formula $\mathbf{D}$
+Again, observe that 
+\begin_inset Formula $\|S-S_{n}\|_{H}$
 \end_inset
 
-.
-\end_layout
-
-\begin_layout Standard
-So, to summarize.
- When calculating 
-\begin_inset Formula $\beta$
-\end_inset
-
-, we start be calculating a kernel matrix using 
-\begin_inset Formula $k_{\gamma}(\cdot,\cdot)$
-\end_inset
-
- and use this kernel matrix to calculate 
-\begin_inset Formula $\|S_{i}-S_{j}\|$
-\end_inset
-
-, which generates a new kernel matrix using 
-\begin_inset Formula $K_{\gamma}(\cdot,\cdot)$
+ is the same for any 
+\begin_inset Formula $\mathbf{x}|S$
 \end_inset
 
 .

@@ -1161,11 +1161,11 @@ So we can express the Support Vector optimization problem as:
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-W(\beta) & =\sum_{\mathbf{x}\in X}\left(\varphi_{P}(\mathbf{x},S)-\varphi_{SV}(\mathbf{x},S:\beta)\right)^{2}+\lambda\Omega(\beta,S)\\
- & =\sum_{\mathbf{x}\in X}\left(\varphi_{SV}(\mathbf{x},S:\beta)^{2}-2\varphi_{SV}(\mathbf{x},S:\beta)\varphi_{P}(\mathbf{x},S)\right)+\lambda\Omega(\beta,S)\\
- & =\sum_{\mathbf{x}\in X}\left(\left(\sum_{i\in\mathcal{S}}\beta_{i}K_{\gamma}(S_{\mathbf{x}},S_{i})\right)\cdot\left(\sum_{j\in\mathcal{S}}\beta_{j}K_{\gamma}(S_{\mathbf{x}},S_{j})\right)\right)+\lambda\Omega(\beta,S)\\
- & =\sum_{i,j\in\mathcal{S}}\beta_{i}\beta_{j}\sum_{\mathbf{x}\in X}K_{\gamma}(S_{\mathbf{x}},S_{i})K_{\gamma}(S_{\mathbf{x}},S_{j})\\
- & \qquad\qquad\qquad\qquad+\sum_{i\in\mathcal{S}}\beta_{i}\sum_{\mathbf{x}\in X}\left(\lambda K_{\gamma}(S_{\mathbf{x}},S_{i})^{-1}-\frac{2}{|\mathcal{S}|}\sum_{j\in\mathcal{S}}K_{\gamma}(S_{\mathbf{x}},S_{i})K_{\gamma}(S_{\mathbf{x}},S_{j})\right)\end{align*}
+W(\beta) & =\sum_{S\in\mathcal{S}}\left(\varphi_{P}(S)-\varphi_{SV}(S:\beta)\right)^{2}+\lambda\Omega(\beta,S)\\
+ & =\sum_{S\in S}\left(\varphi_{SV}(S:\beta)^{2}-2\varphi_{SV}(S:\beta)\varphi_{P}(S)\right)+\lambda\Omega(\beta,S)\\
+ & =\sum_{S\in\mathcal{S}}\left(\left(\sum_{i\in\mathcal{S}}\beta_{i}K_{\gamma}(S,S_{i})\right)\cdot\left(\sum_{j\in\mathcal{S}}\beta_{j}K_{\gamma}(S,S_{j})\right)\right)+\lambda\Omega(\beta,S)\\
+ & =\sum_{i,j\in\mathcal{S}}\beta_{i}\beta_{j}\sum_{S\in\mathcal{S}}K_{\gamma}(S,S_{i})K_{\gamma}(S,S_{j})\\
+ & \qquad\qquad\qquad\qquad+\sum_{i\in\mathcal{S}}\beta_{i}\sum_{S\in\mathcal{S}}\left(\lambda K_{\gamma}(S,S_{i})^{-1}-\frac{2}{|\mathcal{S}|}\sum_{j\in\mathcal{S}}K_{\gamma}(S,S_{i})K_{\gamma}(S,S_{j})\right)\end{align*}
 
 \end_inset
 
@@ -1187,7 +1187,7 @@ Notice the regularizer selected is defined as:
 
 \begin_layout Standard
 \begin_inset Formula \begin{equation}
-\Omega(\beta,S)=\sum_{i\in\mathcal{S}}\beta_{i}\sum_{\mathbf{x}\in X}K_{\gamma}(S_{\mathbf{x}},S_{i})^{-1}\end{equation}
+\Omega(\beta,S)=\sum_{i\in\mathcal{S}}\beta_{i}\sum_{S\in\mathcal{S}}K_{\gamma}(S,S_{i})^{-1}\end{equation}
 
 \end_inset
 
@@ -1208,15 +1208,15 @@ reference "eq:SVProcessSingle"
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
 W(\beta) & =\frac{1}{2}\beta^{T}P\beta+q^{T}\beta\\
-P_{i,j} & =\sum_{\mathbf{x}\in X}K_{\gamma}(S_{\mathbf{x}},S_{i})K_{\gamma}(S_{\mathbf{x}},S_{j})\\
-q_{i} & =\sum_{\mathbf{x}\in X}\left(\lambda K_{\gamma}(S_{\mathbf{x}},S_{i})^{-1}-\frac{1}{|\mathcal{S}|}\sum_{j\in\mathcal{S}}K_{\gamma}(S_{\mathbf{x}},S_{i})K_{\gamma}(S_{\mathbf{x}},S_{j})\right)\end{align*}
+P_{i,j} & =\sum_{S\in\mathcal{S}}K_{\gamma}(S,S_{i})K_{\gamma}(S,S_{j})\\
+q_{i} & =\sum_{S\in\mathcal{S}}\left(\lambda K_{\gamma}(S,S_{i})^{-1}-\frac{1}{|\mathcal{S}|}\sum_{j\in\mathcal{S}}K_{\gamma}(S,S_{i})K_{\gamma}(S,S_{j})\right)\end{align*}
 
 \end_inset
 
  
 \begin_inset Formula \begin{align}
 P & =\langle\mathbf{K}^{T}\cdot\mathbf{K}\rangle\label{eq:SVPSingle}\\
-q & =\lambda\langle\mathbf{K}^{T}\cdot\mathbf{1}_{(|K|,1)}\rangle^{-1}-\frac{1}{|\mathcal{S}|}\langle\mathbf{K}^{T}\cdot\mathbf{K}\cdot\mathbf{1}_{(|K|,1)}\rangle\end{align}
+q & =\lambda\langle\mathbf{K}^{T}\cdot\mathbf{1}_{(|\mathcal{S}|,1)}\rangle^{-1}-\frac{1}{|\mathcal{S}|}\langle\mathbf{K}^{T}\cdot\mathbf{K}\cdot\mathbf{1}_{(|\mathcal{S}|,1)}\rangle\end{align}
 
 \end_inset
 
@@ -1258,11 +1258,11 @@ The optimization problem must be modified as follows:
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-W(\beta) & =\sum_{\mathbf{x}\in X}\left(\varphi_{SV}(\mathbf{x},S:\beta)^{2}-2\varphi_{SV}(\mathbf{x},S:\beta)\varphi_{P}(\mathbf{x},S)\right)+\lambda\Omega(\beta,S)\\
- & =\sum_{\mathbf{x}\in X}\left(\sum_{i\in\mathcal{S}^{\mathcal{T}}}\beta_{i}K_{\gamma}(S_{\mathbf{x}},S_{i})\right)\cdot\left(\sum_{j\in\mathcal{S}^{\mathcal{T}}}\beta_{j}K_{\gamma}(S_{\mathbf{x}},S_{j})\right)\\
- & \qquad\qquad\qquad\qquad-2\left(\sum_{i\in\mathcal{S}^{\mathcal{T}}}\beta_{i}K_{\gamma}(S_{\mathbf{x}},S_{i})\right)\cdot\left(\sum_{j\in\mathcal{S}^{\mathcal{T}}}\frac{1}{|\mathcal{S}^{\mathcal{T}}|}K_{\gamma}(S_{\mathbf{x}},S_{j})\right)+\lambda\Omega(\beta,S)\\
- & =\sum_{i,j\in\mathcal{S}^{\mathcal{T}}}\beta_{i}\beta_{j}\sum_{\mathbf{x}\in X}K_{\gamma}(S_{\mathbf{x}},S_{i})K_{\gamma}(S_{\mathbf{x}},S_{j})\\
- & \qquad\qquad\qquad\qquad+\sum_{i\in\mathcal{S}^{\mathcal{T}}}\beta_{i}\sum_{\mathbf{x}\in X}\left(\lambda K_{\gamma}(S_{\mathbf{x}},S_{i})^{-1}-\frac{2}{|\mathcal{S}^{\mathcal{T}}|}\sum_{j\in\mathcal{S}^{\mathcal{T}}}K_{\gamma}(S_{\mathbf{x}},S_{i})K_{\gamma}(S_{\mathbf{x}},S_{j})\right)\end{align*}
+W(\beta) & =\sum_{S\in S}\left(\varphi_{SV}(S:\beta)^{2}-2\varphi_{SV}(S:\beta)\varphi_{P}(S)\right)+\lambda\Omega(\beta,S)\\
+ & =\sum_{S\in S}\left(\sum_{i\in\mathcal{S}^{\mathcal{T}}}\beta_{i}K_{\gamma}(S_{\mathbf{x}},S_{i})\right)\cdot\left(\sum_{j\in\mathcal{S}^{\mathcal{T}}}\beta_{j}K_{\gamma}(S,S_{j})\right)\\
+ & \qquad\qquad\qquad\qquad-2\left(\sum_{i\in\mathcal{S}^{\mathcal{T}}}\beta_{i}K_{\gamma}(S,S_{i})\right)\cdot\left(\sum_{j\in\mathcal{S}^{\mathcal{T}}}\frac{1}{|\mathcal{S}^{\mathcal{T}}|}K_{\gamma}(S,S_{j})\right)+\lambda\Omega(\beta,S)\\
+ & =\sum_{i,j\in\mathcal{S}^{\mathcal{T}}}\beta_{i}\beta_{j}\sum_{S\in S}K_{\gamma}(S,S_{i})K_{\gamma}(S,S_{j})\\
+ & \qquad\qquad\qquad\qquad+\sum_{i\in\mathcal{S}^{\mathcal{T}}}\beta_{i}\sum_{S\in S}\left(\lambda K_{\gamma}(S,S_{i})^{-1}-\frac{2}{|\mathcal{S}^{\mathcal{T}}|}\sum_{j\in\mathcal{S}^{\mathcal{T}}}K_{\gamma}(S,S_{i})K_{\gamma}(S,S_{j})\right)\end{align*}
 
 \end_inset
 
