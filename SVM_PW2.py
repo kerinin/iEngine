@@ -84,21 +84,19 @@ class subset(kMachine):
 		self.tStart = tStart
 		self.theta = theta
 		self.X = data
+		self.t = np.hsplit(self.X,[1,])[0]
 		self.D = D
 		
-		print tStart
-		print theta
-		
-		if tStart and theta:
-			self.argStart = np.ma.masked_less(self.X,tStart,copy=False).argmin()
-			self.argEnd = np.ma.masked_greater(self.X,tStart+theta,copy=False).argmax()
+		if tStart != None and theta != None:
+			self.argStart = np.ma.masked_less(self.t,tStart,copy=False).argmin()
+			self.argEnd = 1+ np.ma.masked_greater(self.t,tStart+theta,copy=False).argmax()
 			
 			self.N = self.argStart - self.argEnd
 		else:
 			self.argStart = 0
 			self.argEnd = -1
 			
-			self.N = self.data.shape[0]
+			self.N = self.X.shape[0]
 			
 	def __sub__(self,other):
 	# difference - for comparing two subsets using Entropy
@@ -129,7 +127,7 @@ class svm(kMachine):
 			self.X = data.reshape([ self.N, self.d ])
 		else:
 			self.X = data
-		self.t = np.split(self.X,[1,])[0]
+		self.t = np.hsplit(self.X,[1])[0]
 		
 		self.theta = theta
 		self.Lambda = Lambda
@@ -186,7 +184,11 @@ class svm(kMachine):
 	
 	def _compute(self):
 		start = datetime.datetime.now()
-
+		
+		diff = self.S - self.S.T
+		
+		print diff
+		
 		self.K = self._K( self.S - self.S.T )
 		
 		P = cvxopt.matrix( np.dot(self.K.T,self.K), (self.N,self.N) )
@@ -227,7 +229,7 @@ def run():
 	
 	Xtrain = np.arange(0,20,2)
 	Ytrain = np.sin(Xtrain) + (np.random.randn( Xtrain.shape[0] )/10.)
-	mod = svm( Xtrain.reshape([Xtrain.shape[0],1]), Ytrain.reshape([Ytrain.shape[0],1]), gamma=.5, Lambda=.5, theta=[.1] )
+	mod = svm( data=np.hstack([Xtrain.reshape([Xtrain.shape[0],1]),Ytrain.reshape([Ytrain.shape[0],1])]), gamma=.5, Lambda=.5, theta=[5.] )
 
 
 	Xtest = np.arange(5,15,.1)
