@@ -76,7 +76,7 @@ class subsetSV:
 		elif other.__class__ == np.ndarray:
 			D = self.S._K( other - self.S.X.T ) / self.S.N
 			
-			return ( D * log2(D) ).sum(1)
+			return ( D * log2(D) ).sum()
 	
 class subset(kMachine):
 	def __init__(self,data,D,tStart=None,theta=None):
@@ -108,7 +108,7 @@ class subset(kMachine):
 			
 			D = self.D[other.argStart:other.argEnd,self.argStart:self.argEnd]/self.N
 			
-			return ( D * np.log2(D) ).sum(1,dtype=float)
+			return ( D * np.log2(D) ).sum()
 		
 		raise StandardError, 'This type of subtraction not implemented'
 
@@ -185,11 +185,7 @@ class svm(kMachine):
 	def _compute(self):
 		start = datetime.datetime.now()
 		
-		diff = self.S - self.S.T
-		
-		# OK, so subtraction is returning an array, which is being placed into an array,
-		# rather than being added as dimensions or something.  :(
-		print diff[0,0].shape
+		diff = np.array( self.S - self.S.T, dtype=float, copy=False )
 		 
 		self.K = self._K( diff )
 		
@@ -232,7 +228,7 @@ def run():
 	Xtrain = np.arange(0,20,2)
 	Ytrain = np.sin(Xtrain) + (np.random.randn( Xtrain.shape[0] )/10.)
 	mod = svm( data=np.hstack([Xtrain.reshape([Xtrain.shape[0],1]),Ytrain.reshape([Ytrain.shape[0],1])]), gamma=.5, Lambda=.5, theta=[5.] )
-
+	print mod
 
 	Xtest = np.arange(5,15,.1)
 	Ytest = np.sin(Xtest)+ (np.random.randn( Xtest.shape[0] )/10.)
