@@ -64,19 +64,15 @@ class predictionPoints:
 		self.K = K
 
 class subsetSV:
-	def __init__(self,S):
+	def __init__(self,S,svm):
 		self.S = S
+		self.svm = svm
 		
 	def __sub__(self,other):
 		if other.__class__ == subset:
 			D = other.D[:,self.S.argStart:self.S.argEnd] / self.S.N
 			
 			return ( D * np.log2(D) ).sum()
-			
-		elif other.__class__ == np.ndarray:
-			D = self.S._K( other - self.S.X.T ) / self.S.N
-			
-			return ( D * log2(D) ).sum()
 	
 class subset(kMachine):
 	def __init__(self,data,D,tStart=None,theta=None):
@@ -175,10 +171,8 @@ class svm(kMachine):
 			N,d = Sx.shape
 			D = self._K( Sx.reshape([N,1,d]) - self.X.T.reshape([1,self.N,self.d]) )
 			S = subset( Sx, D )
-		
-		print X - self.SV.T
-		
-		R = ( S - self.SV.T ) + ( X - self.SV.T )
+			
+		R = ( S - self.SV.T ) + ( X.reshape([X.shape[0],1,X.shape[1]]) - self.SV.T )
 		
 		return np.ma.dot( R, self.beta )
 		
@@ -212,7 +206,7 @@ class svm(kMachine):
 		self.NSV = beta.count()
 		self.alpha = beta
 		self.beta = beta.compressed().reshape([self.NSV,1])
-		self.SV = np.array( [ subsetSV( S=S ) for S in np.ma.array( self.S, mask=mask).compressed() ],ndmin=2)
+		self.SV = np.array( [ subsetSV( S=S,svm=self ) for S in np.ma.array( self.S, mask=mask).compressed() ],ndmin=2)
 
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % ( duration.seconds + float(duration.microseconds)/1000000)
