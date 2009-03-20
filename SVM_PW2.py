@@ -69,9 +69,9 @@ class subsetSV:
 		
 	def __sub__(self,other):
 		if other.__class__ == subset:
-			D = self.S._K( other.X - self.S.X.T ) / self.S.N
+			D = other.D[:,self.S.argStart:self.S.argEnd] / self.S.N
 			
-			return ( D * log2(D) ).sum(1)
+			return ( D * np.log2(D) ).sum()
 			
 		elif other.__class__ == np.ndarray:
 			D = self.S._K( other - self.S.X.T ) / self.S.N
@@ -109,6 +109,8 @@ class subset(kMachine):
 			D = self.D[other.argStart:other.argEnd,self.argStart:self.argEnd]/self.N
 			
 			return ( D * np.log2(D) ).sum()
+		elif other.__class__ == np.ndarray:
+			return other - self
 		
 		raise StandardError, 'This type of subtraction not implemented'
 
@@ -164,11 +166,17 @@ class svm(kMachine):
 		
 		return S
 		
-	def pdf(self,S,x):
+	def pdf(self,Sx,X):
 	# Probability distribution function
 	#
-	# @param X				Set of training observations
-	# @param X				[Nxd] array of points for which to calculate the PDF
+		if Sx.__class__ == subset:
+			S = Sx
+		else:
+			N,d = Sx.shape
+			D = self._K( Sx.reshape([N,1,d]) - self.X.T.reshape([1,self.N,self.d]) )
+			S = subset( Sx, D )
+		
+		print X - self.SV.T
 		
 		R = ( S - self.SV.T ) + ( X - self.SV.T )
 		
@@ -204,7 +212,7 @@ class svm(kMachine):
 		self.NSV = beta.count()
 		self.alpha = beta
 		self.beta = beta.compressed().reshape([self.NSV,1])
-		self.SV = np.array( [ subsetSV( S=S ) for S in np.ma.array( self.S, mask=mask).compressed() ] )
+		self.SV = np.array( [ subsetSV( S=S ) for S in np.ma.array( self.S, mask=mask).compressed() ],ndmin=2)
 
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % ( duration.seconds + float(duration.microseconds)/1000000)
@@ -225,14 +233,14 @@ class svm(kMachine):
 def run():
 	fig = plt.figure()
 	
-	Xtrain = np.arange(0,20,2)
+	Xtrain = np.arange(0,20,1)
 	Ytrain = np.sin(Xtrain) + (np.random.randn( Xtrain.shape[0] )/10.)
-	mod = svm( data=np.hstack([Xtrain.reshape([Xtrain.shape[0],1]),Ytrain.reshape([Ytrain.shape[0],1])]), gamma=.5, Lambda=.5, theta=[5.] )
+	mod = svm( data=np.hstack([Xtrain.reshape([Xtrain.shape[0],1]),Ytrain.reshape([Ytrain.shape[0],1])]), gamma=.5, Lambda=.000005, theta=[5.] )
 	print mod
 
 	Xtest = np.arange(5,15,.1)
 	Ytest = np.sin(Xtest)+ (np.random.randn( Xtest.shape[0] )/10.)
-	S = subset(Xtest,Ytest,gamma=.5)
+	S=np.hstack([Xtrain.reshape([Xtrain.shape[0],1]),Ytrain.reshape([Ytrain.shape[0],1])])
 	
 	(c1,c2) = mod.contourPlot( S, plt, (0,20), (-2,2),.1,.01 )
 
