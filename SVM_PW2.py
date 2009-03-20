@@ -53,7 +53,7 @@ class kMachine(object):
 		#return (1.0/(self.gamma*math.sqrt(math.pi))) * np.exp( (diff**2)/-self.gamma).prod(2).reshape(N,M)
 		
 		# Subset Gaussian
-		return (1.0/(self.gamma*math.sqrt(math.pi))) * np.ma.exp( (diff**2)/-self.gamma)
+		return (-1.0/(self.gamma*math.sqrt(math.pi))) * np.ma.exp( (-1.*(np.ma.power(diff,2)))/self.gamma)
 		
 		# Sigmoid
 		#return ( 1.0 / ( 1.0 + np.exp( -self.gamma * diff ) ) ).prod(2).reshape(N,M)
@@ -108,7 +108,7 @@ class subset(kMachine):
 			
 			D = self.D[other.argStart:other.argEnd,self.argStart:self.argEnd]/self.N
 			
-			return ( D * np.log2(D) ).sum(1)
+			return ( D * np.log2(D) ).sum(1,dtype=float)
 		
 		raise StandardError, 'This type of subtraction not implemented'
 
@@ -187,9 +187,11 @@ class svm(kMachine):
 		
 		diff = self.S - self.S.T
 		
-		print diff
-		
-		self.K = self._K( self.S - self.S.T )
+		# OK, so subtraction is returning an array, which is being placed into an array,
+		# rather than being added as dimensions or something.  :(
+		print diff[0,0].shape
+		 
+		self.K = self._K( diff )
 		
 		P = cvxopt.matrix( np.dot(self.K.T,self.K), (self.N,self.N) )
 		q = cvxopt.matrix( ( self.Lambda / self.K.T.sum(0) ) - ( ( 1./self.N ) * ( np.dot( self.K.T, self.K ).sum(0) ) ) )
