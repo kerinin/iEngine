@@ -39,7 +39,7 @@ class kMachine(object):
 
 		
 		# Subset Gaussian
-		return (-1.0/(self.gamma*math.sqrt(math.pi))) * np.ma.exp( (-1.*(np.ma.power(diff,2)))/self.gamma)
+		return (1.0/(self.gamma*math.sqrt(math.pi))) * np.ma.exp( (-1.*(np.ma.power(diff,2)))/self.gamma)
 
 	
 class predictionPoints:
@@ -56,12 +56,12 @@ class subsetSV:
 		if other.__class__ == subset:
 			D = other.D[:,self.S.argStart:self.S.argEnd] / self.S.N
 			
-			return ( D * np.log2(D) ).sum()
+			return ( D * np.log2(D) ).sum(dtype=float)
 	def __rsub__(self,other):
 	# Subtraction from a set of points
 		D = self.S.svm._K( other.X.reshape([other.X.shape[0],1,other.X.shape[1]]) - self.S.X[self.S.argStart:self.S.argEnd].T.reshape([1,self.S.N,self.S.X.shape[1]]) )
-
-		return ( D * np.log2(D) ).sum(2).sum(1)
+		
+		return ( D * np.log2(D) ).sum(1).sum(1,dtype=float)
 	
 class subset:
 	def __init__(self,data,D,svm=None,tStart=None,theta=None):
@@ -115,15 +115,18 @@ class svm(kMachine):
 			self.X = data.reshape([ self.N, self.d ])
 		else:
 			self.X = data
-		self.t = np.hsplit(self.X,[1])[0]
-		
-		self.theta = theta
+
 		self.Lambda = Lambda
 		super(svm, self).__init__(gamma)
 		
-		self.D = self._K( self.X.reshape([self.N,1,self.d]) - self.X.T.reshape([1,self.N,self.d]) )
-		self.S = self._S()
-		self.Y = None				# empirical CDF of X
+		self.t = np.hsplit(self.X,[1])[0]
+		self.offset = np.tile( np.hsplit(self.X,[1])[0], len(theta) )
+		self.theta = np.repeat( np.array(theta), self.N )
+		
+		self.M = ( (self.t >= self.offset.T) * (self.t < (self.offset+self.theta).T ) ).reshape(len(theta)*self.N,1,self.N,1)
+		self.C = self.M.sum(2).sum(2)
+		self.D = self._K( self.X.reshape([self.N,1,self.d]) - self.X.T.reshape([1,self.N,self.d]) ).prod(2)
+		
 		self.SV = None			# X value array of SV
 		self.NSV = None			# cardinality of SV
 		self.alpha = None			# the full weight array for all observations
@@ -140,33 +143,29 @@ class svm(kMachine):
 		ret += "SV: %s (%s percent)\n" % ( self.NSV,100. * float(self.NSV) / float(self.N ) )
 		return ret
 		
-	def _S(self):
-		
-		S = np.ma.vstack( 
-			[ 
-				np.ma.vstack( 
-					[ subset(data=self.X,D=self.D,svm=self,tStart=tStart,theta=theta) for tStart in self.t ] 
-				) for theta in self.theta 
-			]
-		)
-		
-		return S
-		
 	def pdf(self,Sx,X):
 	# Probability distribution function
 	#
-		if Sx.__class__ == subset:
-			S = Sx
-		else:
-			N,d = Sx.shape
-			D = self._K( Sx.reshape([N,1,d]) - self.X.T.reshape([1,self.N,self.d]) )
-			S = subset( Sx, D )
-			
-		points = predictionPoints(X)
+		Ns,ds = Sx.shape
+		Nx,dx = X.shape
 		
-		R = ( S - self.SV.T ) + ( points - self.SV.T )
+		# |Sx| x N
+		Ds = self._K( Sx.reshape([Ns,1,ds]) - self.X.T.reshape([1,self.N,self.d]) ).prod(2)
+		# |X| x N
+		Dx = self._K( X.reshape([Nx,1,dx]) - self.X.T.reshape([1,self.N,self.d]) ).prod(2)
+
+		# 1 x N
+		phis = ( Ds * np.transpose( np.repeat(self.M,Ns,axis=3),[1,0,3,2]) ).sum(2).sum(2) / self.C.T
 		
-		return np.ma.dot( R, self.beta )
+		#|X| x N
+		phix = ( Dx * np.repeat( np.transpose( self.M,[1,0,3,2] ), Nx, axis=0 ) ).sum(2).sum(2) / self.C.T
+		
+		phi = phis + phix
+		diff = phi * np.log2( phi )
+		
+		K = self._K( diff )
+		
+		return np.dot( K, self.beta )
 		
 		
 	def __iadd__(self, points):
@@ -178,9 +177,11 @@ class svm(kMachine):
 	
 	def _compute(self):
 		start = datetime.datetime.now()
+
+		phi = ( self.D * ( self.M * np.transpose(self.M,[1,0,3,2] ) ) ).sum(2).sum(2) / self.C
 		
-		diff = np.array( self.S - self.S.T, dtype=float, copy=False )
-		 
+		diff = phi * np.log2( phi )
+
 		self.K = self._K( diff )
 		
 		P = cvxopt.matrix( np.dot(self.K.T,self.K), (self.N,self.N) )
@@ -197,13 +198,15 @@ class svm(kMachine):
 		mask = np.ma.getmask(beta)
 		self.NSV = beta.count()
 		self.alpha = beta
-		self.beta = beta.compressed().reshape([self.NSV,1])
-		self.SV = np.array( [ subsetSV( S=S,svm=self ) for S in np.ma.array( self.S, mask=mask).compressed() ],ndmin=2)
+		self.beta = beta
+		#self.beta = beta.compressed().reshape([self.NSV,1])
+		#self.SV = np.array( [ subsetSV( S=S,svm=self ) for S in np.ma.array( self.S, mask=mask).compressed() ],ndmin=2)
 
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % ( duration.seconds + float(duration.microseconds)/1000000)
 		
 	def contourPlot(self, S, fig, xrange, yrange, xstep, ystep, axes=(0,1) ):
+		N,d=S.shape
 		xN = int((xrange[1]-xrange[0])/xstep)
 		yN =  int((yrange[1]-yrange[0])/ystep)
 		X = np.dstack(np.mgrid[xrange[0]:xrange[1]:xstep,yrange[0]:yrange[1]:ystep]).reshape([ xN * yN,2])
@@ -212,7 +215,7 @@ class svm(kMachine):
 
 		CS1 = fig.contourf(x,y,self.pdf(S,X).reshape([xN,yN]).T,200, antialiased=True, cmap=cm.gray )
 		CS2 = plt.contour(x,y,self.pdf(S,X).reshape([xN,yN]).T, [.1,], colors='r' )
-		fig.plot( S.t,np.hsplit( S.x,S.d )[ axes[1]-1 ], 'r+' )
+		fig.plot( np.hsplit( S,d )[0],np.hsplit( S,d )[ axes[1]-1 ], 'r+' )
 		fig.axis( [ xrange[0],xrange[1],yrange[0],yrange[1] ] )
 		return (CS1,CS2)
 		
@@ -226,9 +229,9 @@ def run():
 
 	Xtest = np.arange(5,15,.1)
 	Ytest = np.sin(Xtest)+ (np.random.randn( Xtest.shape[0] )/10.)
-	S=np.hstack([Xtrain.reshape([Xtrain.shape[0],1]),Ytrain.reshape([Ytrain.shape[0],1])])
+	S=np.hstack([Xtest.reshape([Xtest.shape[0],1]),Ytest.reshape([Ytest.shape[0],1])])
 	
-	(c1,c2) = mod.contourPlot( S, plt, (0,20), (-2,2),.1,.01 )
+	(c1,c2) = mod.contourPlot( S, plt, (0,20), (-2,2),2.,.5 )
 
 	plt.show()
 	

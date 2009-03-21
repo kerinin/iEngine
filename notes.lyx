@@ -254,11 +254,28 @@ W(\beta) & =\sum_{i,j\in\mathcal{S}}\beta_{i}\beta_{j}\sum_{S\in\mathcal{S}}K_{\
 P_{i,j} & =\sum_{\mathbf{x}\in X}K_{\gamma}(S_{\mathbf{x}},S_{i})K_{\gamma}(S_{\mathbf{x}},S_{j})\\
 q_{i} & =\sum_{\mathbf{x}\in X}\left(\lambda K_{\gamma}(S_{\mathbf{x}},S_{i})^{-1}-\frac{1}{|\mathcal{S}|}\sum_{j\in\mathcal{S}}K_{\gamma}(S_{\mathbf{x}},S_{i})K_{\gamma}(S_{\mathbf{x}},S_{j})\right)\\
 \\P & =\left\langle \mathbf{K}^{T}\cdot\mathbf{K}\right\rangle \\
-q & =\lambda\left\langle \mathbf{K}^{T}\cdot\mathbf{1}_{(|\mathcal{S}|,1)}\right\rangle ^{-1}-\frac{1}{\mathcal{S}}\left\langle \mathbf{K}^{T}\cdot\mathbf{K}\cdot\mathbf{1}_{(|\mathcal{S}|,1)}\right\rangle \end{align*}
+q & =\lambda\left\langle \mathbf{K}^{T}\cdot\mathbf{1}_{(|\mathcal{S}|,1)}\right\rangle ^{-1}-\frac{1}{|\mathcal{S}|}\left\langle \mathbf{K}^{T}\cdot\mathbf{K}\cdot\mathbf{1}_{(|\mathcal{S}|,1)}\right\rangle \end{align*}
 
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+To implement this, consider two matrices, the first a 2d matrix containing
+ observations 
+\begin_inset Formula $X$
+\end_inset
+
+ and the second a 2d matrix used to mask subsets; each 
+\begin_inset Formula $S$
+\end_inset
+
+ represented as a masking matrix where unmasked values are equal to 
+\begin_inset Formula $\frac{1}{|\mathcal{S}|}$
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Section
