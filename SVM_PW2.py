@@ -41,65 +41,6 @@ class kMachine(object):
 		# Subset Gaussian
 		return (1.0/(self.gamma*math.sqrt(math.pi))) * np.ma.exp( (-1.*(np.ma.power(diff,2)))/self.gamma)
 
-	
-class predictionPoints:
-	def __init__(self,data):
-		self.X = data
-
-class subsetSV:
-	def __init__(self,S,svm):
-		self.S = S
-		self.svm = svm
-		
-	def __sub__(self,other):
-	# subtraction from a subset
-		if other.__class__ == subset:
-			D = other.D[:,self.S.argStart:self.S.argEnd] / self.S.N
-			
-			return ( D * np.log2(D) ).sum(dtype=float)
-	def __rsub__(self,other):
-	# Subtraction from a set of points
-		D = self.S.svm._K( other.X.reshape([other.X.shape[0],1,other.X.shape[1]]) - self.S.X[self.S.argStart:self.S.argEnd].T.reshape([1,self.S.N,self.S.X.shape[1]]) )
-		
-		return ( D * np.log2(D) ).sum(1).sum(1,dtype=float)
-	
-class subset:
-	def __init__(self,data,D,svm=None,tStart=None,theta=None):
-		
-		self.tStart = tStart
-		self.theta = theta
-		self.X = data
-		self.t = np.hsplit(self.X,[1,])[0]
-		self.D = D
-		self.svm = svm
-		
-		if tStart != None and theta != None:
-			self.argStart = np.ma.masked_less(self.t,tStart,copy=False).argmin()
-			self.argEnd = 1+ np.ma.masked_greater(self.t,tStart+theta,copy=False).argmax()
-			
-			self.N = self.argStart - self.argEnd
-		else:
-			self.argStart = 0
-			self.argEnd = -1
-			
-			self.N = self.X.shape[0]
-			
-	def __sub__(self,other):
-	# difference - for comparing two subsets using Entropy
-		
-		#NOTE: change this to conform to the entropy kernel
-		
-		if other.__class__ == subset:
-		# other is an array of subsets
-			
-			D = self.D[other.argStart:other.argEnd,self.argStart:self.argEnd]/self.N
-			
-			return ( D * np.log2(D) ).sum()
-		elif other.__class__ == np.ndarray:
-			return other - self
-		
-		raise StandardError, 'This type of subtraction not implemented'
-
 class svm(kMachine):
 	def __init__(self,t=list(),data=list(),Lambda=.1, gamma =.5, theta=None ):
 	# SVM Class
@@ -149,18 +90,22 @@ class svm(kMachine):
 		Ns,ds = Sx.shape
 		Nx,dx = X.shape
 		
+		print X.shape
+		
+		
 		# |Sx| x N
 		Ds = self._K( Sx.reshape([Ns,1,ds]) - self.X.T.reshape([1,self.N,self.d]) ).prod(2)
 		# |X| x N
 		Dx = self._K( X.reshape([Nx,1,dx]) - self.X.T.reshape([1,self.N,self.d]) ).prod(2)
 		#NOTE: this is producing repetitive results ???
 		
+		#print( Dx.reshape([Nx,self.N,1,1]) * self.M.reshape([1,self.N,1,self.N] ) ).shape
 		
 		# 1 x N
-		phis = ( Ds * np.transpose( np.repeat(self.M,Ns,axis=3),[1,0,3,2]) ).sum(2).sum(2) / self.C.T
+		phis = ( Ds.reshape([1,1,Ns,self.N]) * self.M.reshape([1,self.N,1,self.N]) ).sum(2).sum(2) / self.C.T
 		
 		#|X| x N
-		phix = ( Dx * np.repeat( np.transpose( self.M,[1,0,3,2] ), Nx, axis=0 ) ).sum(2).sum(2) / self.C.T
+		phix = ( Dx.reshape([Nx,self.N,1,1]) * self.M.reshape([1,self.N,1,self.N]) ).sum(2).sum(2) / self.C.T
 		
 		phi = phis + phix
 		diff = phi * np.log2( phi )
@@ -216,7 +161,7 @@ class svm(kMachine):
 		y = np.arange(yrange[0],yrange[1],ystep)
 		
 		CS1 = fig.contourf(x,y,self.pdf(S,X).reshape([xN,yN]).T,200, antialiased=True, cmap=cm.gray )
-		CS2 = plt.contour(x,y,self.pdf(S,X).reshape([xN,yN]).T, [.1,], colors='r' )
+		#CS2 = plt.contour(x,y,self.pdf(S,X).reshape([xN,yN]).T, [.1,], colors='r' )
 		fig.plot( np.hsplit( S,d )[0],np.hsplit( S,d )[ axes[1] ], 'r+' )
 		fig.axis( [ xrange[0],xrange[1],yrange[0],yrange[1] ] )
 		#return (CS1,CS2)
