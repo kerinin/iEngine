@@ -30,38 +30,21 @@ class kMachine(object):
 		
 	def _K(self,X,Y=None):
 	# Kernel function
-	#
-	# @param X				[Nxd] array of observations
-	# @param Y				[Mxd] array of observations
-	# @param gamma			kernel width parameter
-	
-		#N,d1 = X.shape
-		#M,d2 = Y.shape
-		
-		#if d1 != self.d != d2:
-		#	raise StandardError, 'Matrices do not conform to the dimensionality of existing observations'
-		
-		#diff = X.reshape([N,1,self.d]) - np.transpose( Y.reshape([M,1,self.d]), [1,0,2] )
 		
 		# Subset difference
 		if not Y==None:
 			diff = ( X - Y )
 		else:
 			diff =X
-			
-		# Gaussian
-		#return (1.0/(self.gamma*math.sqrt(math.pi))) * np.exp( (diff**2)/-self.gamma).prod(2).reshape(N,M)
+
 		
 		# Subset Gaussian
 		return (-1.0/(self.gamma*math.sqrt(math.pi))) * np.ma.exp( (-1.*(np.ma.power(diff,2)))/self.gamma)
-		
-		# Sigmoid
-		#return ( 1.0 / ( 1.0 + np.exp( -self.gamma * diff ) ) ).prod(2).reshape(N,M)
+
 	
 class predictionPoints:
-	def __init__(self,data,K):
+	def __init__(self,data):
 		self.X = data
-		self.K = K
 
 class subsetSV:
 	def __init__(self,S,svm):
@@ -69,19 +52,26 @@ class subsetSV:
 		self.svm = svm
 		
 	def __sub__(self,other):
+	# subtraction from a subset
 		if other.__class__ == subset:
 			D = other.D[:,self.S.argStart:self.S.argEnd] / self.S.N
 			
 			return ( D * np.log2(D) ).sum()
+	def __rsub__(self,other):
+	# Subtraction from a set of points
+		D = self.S.svm._K( other.X.reshape([other.X.shape[0],1,other.X.shape[1]]) - self.S.X[self.S.argStart:self.S.argEnd].T.reshape([1,self.S.N,self.S.X.shape[1]]) )
+
+		return ( D * np.log2(D) ).sum(2).sum(1)
 	
-class subset(kMachine):
-	def __init__(self,data,D,tStart=None,theta=None):
+class subset:
+	def __init__(self,data,D,svm=None,tStart=None,theta=None):
 		
 		self.tStart = tStart
 		self.theta = theta
 		self.X = data
 		self.t = np.hsplit(self.X,[1,])[0]
 		self.D = D
+		self.svm = svm
 		
 		if tStart != None and theta != None:
 			self.argStart = np.ma.masked_less(self.t,tStart,copy=False).argmin()
@@ -155,7 +145,7 @@ class svm(kMachine):
 		S = np.ma.vstack( 
 			[ 
 				np.ma.vstack( 
-					[ subset(data=self.X,D=self.D,tStart=tStart,theta=theta) for tStart in self.t ] 
+					[ subset(data=self.X,D=self.D,svm=self,tStart=tStart,theta=theta) for tStart in self.t ] 
 				) for theta in self.theta 
 			]
 		)
@@ -172,7 +162,9 @@ class svm(kMachine):
 			D = self._K( Sx.reshape([N,1,d]) - self.X.T.reshape([1,self.N,self.d]) )
 			S = subset( Sx, D )
 			
-		R = ( S - self.SV.T ) + ( X.reshape([X.shape[0],1,X.shape[1]]) - self.SV.T )
+		points = predictionPoints(X)
+		
+		R = ( S - self.SV.T ) + ( points - self.SV.T )
 		
 		return np.ma.dot( R, self.beta )
 		
