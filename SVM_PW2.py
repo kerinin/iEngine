@@ -153,7 +153,9 @@ class svm(kMachine):
 		Ds = self._K( Sx.reshape([Ns,1,ds]) - self.X.T.reshape([1,self.N,self.d]) ).prod(2)
 		# |X| x N
 		Dx = self._K( X.reshape([Nx,1,dx]) - self.X.T.reshape([1,self.N,self.d]) ).prod(2)
-
+		#NOTE: this is producing repetitive results ???
+		
+		
 		# 1 x N
 		phis = ( Ds * np.transpose( np.repeat(self.M,Ns,axis=3),[1,0,3,2]) ).sum(2).sum(2) / self.C.T
 		
@@ -212,26 +214,27 @@ class svm(kMachine):
 		X = np.dstack(np.mgrid[xrange[0]:xrange[1]:xstep,yrange[0]:yrange[1]:ystep]).reshape([ xN * yN,2])
 		x = np.arange(xrange[0],xrange[1],xstep)
 		y = np.arange(yrange[0],yrange[1],ystep)
-
+		
 		CS1 = fig.contourf(x,y,self.pdf(S,X).reshape([xN,yN]).T,200, antialiased=True, cmap=cm.gray )
 		CS2 = plt.contour(x,y,self.pdf(S,X).reshape([xN,yN]).T, [.1,], colors='r' )
-		fig.plot( np.hsplit( S,d )[0],np.hsplit( S,d )[ axes[1]-1 ], 'r+' )
+		fig.plot( np.hsplit( S,d )[0],np.hsplit( S,d )[ axes[1] ], 'r+' )
 		fig.axis( [ xrange[0],xrange[1],yrange[0],yrange[1] ] )
-		return (CS1,CS2)
+		#return (CS1,CS2)
 		
 def run():
 	fig = plt.figure()
 	
-	Xtrain = np.arange(0,20,1)
+	Xtrain = np.arange(0,10,.2)
 	Ytrain = np.sin(Xtrain) + (np.random.randn( Xtrain.shape[0] )/10.)
-	mod = svm( data=np.hstack([Xtrain.reshape([Xtrain.shape[0],1]),Ytrain.reshape([Ytrain.shape[0],1])]), gamma=.5, Lambda=.000005, theta=[5.] )
+	mod = svm( data=np.hstack([Xtrain.reshape([Xtrain.shape[0],1]),Ytrain.reshape([Ytrain.shape[0],1])]), gamma=.5, Lambda=.000005, theta=[.1] )
 	print mod
 
-	Xtest = np.arange(5,15,.1)
+	Xtest = np.arange(5,11,.2)
 	Ytest = np.sin(Xtest)+ (np.random.randn( Xtest.shape[0] )/10.)
 	S=np.hstack([Xtest.reshape([Xtest.shape[0],1]),Ytest.reshape([Ytest.shape[0],1])])
 	
-	(c1,c2) = mod.contourPlot( S, plt, (0,20), (-2,2),2.,.5 )
+	mod.contourPlot( S, plt, (0,10), (-2,2),1.,.25 )
+	#(c1,c2) = mod.contourPlot( S, plt, (0,10), (-2,2),1.,.25 )
 
 	plt.show()
 	
