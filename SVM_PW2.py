@@ -39,7 +39,7 @@ class kMachine(object):
 
 		
 		# Subset Gaussian
-		return (-1.0/(self.gamma*math.sqrt(math.pi))) * np.ma.exp( (-1.*(np.ma.power(diff,2)))/self.gamma)
+		return (1.0/(self.gamma*math.sqrt(math.pi))) * np.ma.exp( (-1.*(np.ma.power(diff,2)))/self.gamma)
 
 	
 class predictionPoints:
@@ -156,27 +156,30 @@ class svm(kMachine):
 	def pdf(self,Sx,X):
 	# Probability distribution function
 	#
+		Ns,ds = Sx.shape
+		Nx,dx = X.shape
 		
 		K = np.array([
-			self._K( Sx - S[0].X )
+			self._K( Sx.reshape([Ns,1,ds]) - S[0].X[S[0].argStart:S[0].argEnd].T.reshape([1,(S[0].argEnd - S[0].argStart),S[0].d]) ).prod(2).sum() / (Ns * (S[0].argEnd - S[0].argStart ) )
 			for S in self.S
 		])
-		Ds = ( K * np.log2(K) ).sum(1).sum(1).reshape( [len(self.S),1])
+		Ds = ( K * np.log2(K) ).reshape([Ns,1])
 		
 		tmp = list()
 		for S in self.S:
 			shape1 = [ X.shape[0],1,X.shape[1] ]
 			shape2 = [1,( S[0].argEnd-S[0].argStart),S[0].d]
-			phi = self._K( X.reshape(shape1) - S[0].X[S[0].argStart:S[0].argEnd].reshape(shape2 ) )
-			tmp.append( ( phi * np.log2(phi) ).sum(1) )
-		Dx = np.array(tmp).sum(2)
+			phi = self._K( X.reshape(shape1) - S[0].X[S[0].argStart:S[0].argEnd].reshape(shape2 ) ).prod(2).sum(1) / ( Nx * (S[0].argEnd-S[0].argStart) ) 
+			tmp.append( ( phi * np.log2(phi) ) )
+		Dx = np.array(tmp)
+		
+		print Dx.shape
 		
 		R = Ds + Dx
 		
-		print R.T.shape
-		print self.beta.shape
+		pdf = np.ma.dot( R.T, self.beta )
 		
-		return np.ma.dot( R.T, self.beta )
+		return pdf
 		
 		
 	def __iadd__(self, points):
@@ -222,10 +225,10 @@ class svm(kMachine):
 		y = np.arange(yrange[0],yrange[1],ystep)
 
 		CS1 = fig.contourf(x,y,self.pdf(S,X).reshape([xN,yN]).T,200, antialiased=True, cmap=cm.gray )
-		CS2 = plt.contour(x,y,self.pdf(S,X).reshape([xN,yN]).T, [.1,], colors='r' )
-		fig.plot( np.hsplit( S,S.shape[1] )[0],np.hsplit( S,S.shape[1] )[ axes[1]-1 ], 'r+' )
-		fig.axis( [ xrange[0],xrange[1],yrange[0],yrange[1] ] )
-		return (CS1,CS2)
+		#CS2 = plt.contour(x,y,self.pdf(S,X).reshape([xN,yN]).T, [.1,], colors='r' )
+		fig.plot( np.hsplit( S,S.shape[1] )[0],np.hsplit( S,S.shape[1] )[ axes[1] ], 'r+' )
+		#fig.axis( [ xrange[0],xrange[1],yrange[0],yrange[1] ] )
+		#return (CS1,CS2)
 		
 def run():
 	fig = plt.figure()
@@ -239,7 +242,8 @@ def run():
 	Ytest = np.sin(Xtest)+ (np.random.randn( Xtest.shape[0] )/10.)
 	S=np.hstack([Xtrain.reshape([Xtrain.shape[0],1]),Ytrain.reshape([Ytrain.shape[0],1])])
 	
-	(c1,c2) = mod.contourPlot( S, plt, (0,20), (-2,2),.1,.01 )
+	mod.contourPlot( S, plt, (0,20), (-2,2),.1,.01 )
+	#(c1,c2) = mod.contourPlot( S, plt, (0,20), (-2,2),.1,.01 )
 
 	plt.show()
 	
