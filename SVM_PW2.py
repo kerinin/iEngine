@@ -215,7 +215,7 @@ def run():
 	Ytest = np.sin(Xtest)+ (np.random.randn( Xtest.shape[0] )/10.)
 	S=np.hstack([Xtest.reshape([Xtest.shape[0],1]),Ytest.reshape([Ytest.shape[0],1])])
 	
-	mod.contourPlot( S, plt, (0,20), (-2,2),1.,.1 )
+	mod.contourPlot( S, plt, (0,22), (-2,2),1.,.1 )
 	#(c1,c2) = mod.contourPlot( S, plt, (0,20), (-2,2),.1,.01 )
 
 	plt.show()
