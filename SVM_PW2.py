@@ -24,25 +24,25 @@ cvxopt.solvers.options['feastol'] = 1e-15
 
 _Functions = ['run']
 	
-class kMachine(object):
-	def __init__(self,gamma):
-		self.gamma = gamma
+class subset:
+	def __init__(self,X,D,tStart,theta):
+		self.N,self.d = X.shape
+		self.X = X
+		self.D = D
+		self.argStart = np.argmax( X * ( X == tStart ) )
+		self.argEnd = np.argmax( X * (X < (tStart + theta) ) ) + 1
+		print self.argEnd - self.argStart
 		
-	def _K(self,X,Y=None):
-	# Kernel function
+	def __sub__(self,S):
 		
-		# Subset difference
-		if not Y==None:
-			diff = ( X - Y )
-		else:
-			diff =X
+		phi = self.D[self.argStart:self.argEnd,S.argStart:S.argEnd].sum(1) / S.N
+		
+		diff = ( phi * np.log2(phi) ).sum()
+		#print self.D[self.argStart:self.argEnd,S.argStart:S.argEnd].shape
+		return diff
 
-		
-		# Subset Gaussian
-		return (1.0/(self.gamma*math.sqrt(math.pi))) * np.ma.exp( (-1.*(np.ma.power(diff,2)))/self.gamma)
-
-class svm(kMachine):
-	def __init__(self,t=list(),data=list(),Lambda=.1, gamma =.5, theta=None ):
+class svm:
+	def __init__(self,data=list(),Lambda=.1, gamma =.5, theta=None ):
 	# SVM Class
 	#
 	# @param data		[Nxd] array of observations where N is the number of observations and d is the dimensionality of the abstract space
@@ -58,15 +58,14 @@ class svm(kMachine):
 			self.X = data
 
 		self.Lambda = Lambda
-		super(svm, self).__init__(gamma)
+		self.gamma = gamma
 		
 		self.t = np.hsplit(self.X,[1])[0]
 		self.offset = np.tile( np.hsplit(self.X,[1])[0], len(theta) )
 		self.theta = np.repeat( np.array(theta), self.N )
 		
-		self.M = ( (self.t >= self.offset.T) * (self.t < (self.offset+self.theta).T ) ).reshape(len(theta)*self.N,1,self.N,1)
-		self.C = self.M.sum(2).sum(2)
-		self.D = self._K( self.X.reshape([self.N,1,self.d]) - self.X.T.reshape([1,self.N,self.d]) ).prod(2)
+		self.D = self._K( self.X.reshape([self.N,1,self.d]) - self.X.T.reshape([1,self.N,self.d]) )
+		self.S = np.array( [ [ subset(self.X,self.D, t, theta ) for t in self.t ] for theta in self.theta ] ).flatten()
 		
 		self.SV = None			# X value array of SV
 		self.NSV = None			# cardinality of SV
@@ -84,50 +83,28 @@ class svm(kMachine):
 		ret += "SV: %s (%s percent)\n" % ( self.NSV,100. * float(self.NSV) / float(self.N ) )
 		return ret
 		
+	def _K(self,X,Y=None):
+	# Kernel function
+		
+		# Subset difference
+		if not Y==None:
+			diff = ( X - Y )
+		else:
+			diff =X
+
+		
+		# Subset Gaussian
+		return (1.0/(self.gamma*math.sqrt(math.pi))) * np.ma.exp( (-1.*(np.ma.power(diff,2)))/self.gamma)
+		
 	def pdf(self,Sx,X):
 	# Probability distribution function
 	#
-		Ns,ds = Sx.shape
-		Nx,dx = X.shape
+		pass
 		
-		print X.shape
-		
-		
-		# |Sx| x N
-		Ds = self._K( Sx.reshape([Ns,1,ds]) - self.X.T.reshape([1,self.N,self.d]) ).prod(2)
-		# |X| x N
-		Dx = self._K( X.reshape([Nx,1,dx]) - self.X.T.reshape([1,self.N,self.d]) ).prod(2)
-		#NOTE: this is producing repetitive results ???
-		
-		#print( Dx.reshape([Nx,self.N,1,1]) * self.M.reshape([1,self.N,1,self.N] ) ).shape
-		
-		# 1 x N
-		phis = ( Ds.reshape([1,1,Ns,self.N]) * self.M.reshape([1,self.N,1,self.N]) ).sum(2).sum(2) / self.C.T
-		
-		#|X| x N
-		phix = ( Dx.reshape([Nx,self.N,1,1]) * self.M.reshape([1,self.N,1,self.N]) ).sum(2).sum(2) / self.C.T
-		
-		phi = phis + phix
-		diff = phi * np.log2( phi )
-		
-		K = self._K( diff )
-		
-		return np.dot( K, self.beta )
-		
-		
-	def __iadd__(self, points):
-		# overloaded '+=', used for adding a vector list to the module's data
-		# 
-		# @param points		A LIST of observation vectors (not a single ovservation)
-		raise StandardError, 'Not Implemented'
-		self.X += points
-	
 	def _compute(self):
 		start = datetime.datetime.now()
 
-		phi = ( self.D * ( self.M * np.transpose(self.M,[1,0,3,2] ) ) ).sum(2).sum(2) / self.C
-		
-		diff = phi * np.log2( phi )
+		diff = np.array( [ [ Si - Sj for Sj in self.S ] for Si in self.S ] )
 
 		self.K = self._K( diff )
 		
@@ -169,9 +146,9 @@ class svm(kMachine):
 def run():
 	fig = plt.figure()
 	
-	Xtrain = np.arange(0,10,.2)
+	Xtrain = np.arange(0,10,.5)
 	Ytrain = np.sin(Xtrain) + (np.random.randn( Xtrain.shape[0] )/10.)
-	mod = svm( data=np.hstack([Xtrain.reshape([Xtrain.shape[0],1]),Ytrain.reshape([Ytrain.shape[0],1])]), gamma=.5, Lambda=.000005, theta=[.1] )
+	mod = svm( data=np.hstack([Xtrain.reshape([Xtrain.shape[0],1]),Ytrain.reshape([Ytrain.shape[0],1])]), gamma=.005, Lambda=.05, theta=[.1] )
 	print mod
 
 	Xtest = np.arange(5,11,.2)
