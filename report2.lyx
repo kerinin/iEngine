@@ -986,7 +986,7 @@ reference "eq:PhiSingle"
 
 \begin_layout Standard
 \begin_inset Formula \[
-S_{n}^{c}=[\mathbf{x}\ |\ \mathbf{x}\in\{S_{n}\cap X^{c}\}]\]
+S_{n}^{c}=[\left(x,t-\min_{t}S\right)\ |\ \mathbf{x}\in\{S_{n}\cap X^{c}\}]\]
 
 \end_inset
 
@@ -1148,7 +1148,7 @@ y distribution is accurate and attempt to minimize the square loss between
 \begin_layout Standard
 \begin_inset Formula \begin{align}
 \varphi_{SV}(\mathbf{x},S:\beta) & =\sum_{i\in\mathcal{S}}\beta_{i}K_{\gamma}(S_{\mathbf{x}},S_{i})\label{eq:SVResultSingle}\\
-S_{\mathbf{x}} & =\{S\cup\mathbf{x}\}\end{align}
+S_{\mathbf{x}} & =\{S\cup\left(x,t-\min_{t}S\right)\}\end{align}
 
 \end_inset
 

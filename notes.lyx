@@ -104,25 +104,6 @@ Support Vector Random Process Estimate
 \end_layout
 
 \begin_layout Standard
-\begin_inset Note Comment
-status open
-
-\begin_layout Plain Layout
-Why are we calculating for all S and all X? Wouldn't it be sufficient to
- simply use all S? After all, we're treating S as a random variable.
- The x subscript was added primarily to allow testing, not for selecting
- SV S's.
- Think it over - if it makes sense it would substantially reduce the computation
-al demands.
- The entropy function calculates for all X, this is redundant...
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
 \begin_inset Formula \begin{align}
 \varphi_{SV}(\mathbf{x},S:\beta) & =\sum_{i\in\mathcal{S}}\beta_{i}K_{\gamma}(S_{\mathbf{x}},S_{i})\label{eq:varphiSV}\\
 S_{\mathbf{x}} & =\{S\cup\mathbf{x}\}\\
@@ -448,6 +429,30 @@ Again, observe that
 
 .
  
+\end_layout
+
+\begin_layout Section
+Random Thoughts
+\end_layout
+
+\begin_layout Standard
+What if instead of using 
+\begin_inset Formula $\theta$
+\end_inset
+
+, we simply specified a number of observations to include.
+ This would allow us to represent each subset with a 3rd dimension in the
+ array, since the 3rd dimension would have a set number of values.
+ I'm not sure if that helps though - we get back to the data duplication
+ issue.
+ I think we need to either duplicate the data or mask it - the combination
+ of the two seems like the worst of both worlds.
+\end_layout
+
+\begin_layout Standard
+I'm still leaning towards masking, especially as we start to get into longer
+ window lengths.
+ How can this be done efficiently?
 \end_layout
 
 \end_body

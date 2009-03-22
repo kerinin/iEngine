@@ -40,11 +40,6 @@ class kMachine(object):
 		
 		# Subset Gaussian
 		return (1.0/(self.gamma*math.sqrt(math.pi))) * np.ma.exp( (-1.*(np.ma.power(diff,2)))/self.gamma)
-
-	
-class predictionPoints:
-	def __init__(self,data):
-		self.X = data
 	
 class subset:
 	def __init__(self,data,D,svm=None,tStart=None,theta=None):
@@ -75,10 +70,9 @@ class subset:
 		
 		if other.__class__ == subset:
 		# other is an array of subsets
-			
-			D = self.D[other.argStart:other.argEnd,self.argStart:self.argEnd]/self.N
-			
+			D = self.D[other.argStart:other.argEnd,self.argStart:self.argEnd]/( self.N * other.N )
 			return -( D * np.log2(D) ).sum()
+			#NOTE: when comparing a point to itself, the kernel value is 0, which produces NaN in Log
 		
 		raise StandardError, 'This type of subtraction not implemented'
 
@@ -103,7 +97,7 @@ class svm(kMachine):
 		self.Lambda = Lambda
 		super(svm, self).__init__(gamma)
 		
-		self.D = self._K( self.X.reshape([self.N,1,self.d]) - self.X.T.reshape([1,self.N,self.d]) )
+		self.D = self._K( self.X.reshape([self.N,1,self.d]) - self.X.T.reshape([1,self.N,self.d]) ).prod(2)
 		self.S = self._S()
 		self.Y = None				# empirical CDF of X
 		self.SV = None			# X value array of SV
@@ -134,15 +128,17 @@ class svm(kMachine):
 		
 		return S
 		
-	def pdf(self,Sx,X):
+	def pdf(self,S,X):
 	# Probability distribution function
 	#
-		Ns,ds = Sx.shape
+		Ns,ds = S.shape
 		Nx,dx = X.shape
 		
-		#for S in self.S:
-		#	print self._K( Sx.reshape([Ns,1,ds]) - S[0].X[S[0].argStart:S[0].argEnd].T.reshape([1,(S[0].argEnd - S[0].argStart),S[0].d]) ).prod(2).sum().shape
-		
+		shift = np.array([S[0,0],]+([0,]*(ds-1))).reshape([1,ds])
+		print shift.shape
+		Sx = S - np.repeat( shift, Ns, axis=0 )
+		Xshifted = X - np.repeat( shift, Nx, axis=0 )
+
 		K = np.array([
 			self._K( Sx.reshape([Ns,1,ds]) - S[0].X[S[0].argStart:S[0].argEnd].T.reshape([1,(S[0].argEnd - S[0].argStart),S[0].d]) ).prod(2).sum() / (Ns * (S[0].argEnd - S[0].argStart ) )
 			for S in self.S
@@ -153,7 +149,7 @@ class svm(kMachine):
 		for S in self.S:
 			shape1 = [ X.shape[0],1,X.shape[1] ]
 			shape2 = [1,( S[0].argEnd-S[0].argStart),S[0].d]
-			phi = self._K( X.reshape(shape1) - S[0].X[S[0].argStart:S[0].argEnd].reshape(shape2 ) ).prod(2).sum(1) / ( Nx * (S[0].argEnd-S[0].argStart) ) 
+			phi = self._K( Xshifted.reshape(shape1) - S[0].X[S[0].argStart:S[0].argEnd].reshape(shape2 ) ).prod(2).sum(1) / ( Nx * (S[0].argEnd-S[0].argStart) ) 
 			tmp.append( -( phi * np.log2(phi) ) )
 		Dx = np.array(tmp)
 				
@@ -162,19 +158,12 @@ class svm(kMachine):
 		pdf = np.ma.dot( R.T, self.beta )
 		
 		return pdf
-		
-	def __iadd__(self, points):
-		# overloaded '+=', used for adding a vector list to the module's data
-		# 
-		# @param points		A LIST of observation vectors (not a single ovservation)
-		raise StandardError, 'Not Implemented'
-		self.X += points
 	
 	def _compute(self):
 		start = datetime.datetime.now()
 		
 		diff = np.array( self.S - self.S.T, dtype=float, copy=False )
-		 
+		
 		self.K = self._K( diff )
 		
 		P = cvxopt.matrix( np.dot(self.K.T,self.K), (self.N,self.N) )
@@ -192,8 +181,8 @@ class svm(kMachine):
 		self.NSV = beta.count()
 		self.alpha = beta
 		self.beta = beta
+		
 		#self.beta = beta.compressed().reshape([self.NSV,1])
-		#self.SV = np.array( [ subsetSV( S=S,svm=self ) for S in np.ma.array( self.S, mask=mask).compressed() ],ndmin=2)
 
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % ( duration.seconds + float(duration.microseconds)/1000000)
@@ -216,7 +205,7 @@ def run():
 	
 	Xtrain = np.arange(0,20,.25)
 	Ytrain = np.sin(Xtrain) + (np.random.randn( Xtrain.shape[0] )/10.)
-	mod = svm( data=np.hstack([Xtrain.reshape([Xtrain.shape[0],1]),Ytrain.reshape([Ytrain.shape[0],1])]), gamma=.05, Lambda=.00005, theta=[5.] )
+	mod = svm( data=np.hstack([Xtrain.reshape([Xtrain.shape[0],1]),Ytrain.reshape([Ytrain.shape[0],1])]), gamma=.5, Lambda=.005, theta=[5.] )
 	print mod
 
 	Xtest = np.arange(5,15,.25)
