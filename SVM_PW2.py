@@ -137,10 +137,11 @@ class svm(kMachine):
 		Nx,dx = X.shape
 		
 		shift = np.array([S[0,0],]+([0,]*(ds-1))).reshape([1,ds])
-		print shift.shape
+		floor = np.array([0,]+([1,]*(ds-1))).reshape([1,ds])
+		
 		Sx = S - np.repeat( shift, Ns, axis=0 )
-		Xshifted = X - np.repeat( shift, Nx, axis=0 )
-
+		Xshifted = X
+		
 		K = np.array([
 			self._K( Sx.reshape([Ns,1,ds]) - S[0].X[S[0].argStart:S[0].argEnd].T.reshape([1,(S[0].argEnd - S[0].argStart),S[0].d]) ).prod(2).sum() / (Ns * (S[0].argEnd - S[0].argStart ) )
 			for S in self.S
