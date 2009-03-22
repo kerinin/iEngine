@@ -254,7 +254,62 @@ W(\beta) & =\sum_{i,j\in\mathcal{S}}\beta_{i}\beta_{j}\sum_{S\in\mathcal{S}}K_{\
 P_{i,j} & =\sum_{\mathbf{x}\in X}K_{\gamma}(S_{\mathbf{x}},S_{i})K_{\gamma}(S_{\mathbf{x}},S_{j})\\
 q_{i} & =\sum_{\mathbf{x}\in X}\left(\lambda K_{\gamma}(S_{\mathbf{x}},S_{i})^{-1}-\frac{1}{|\mathcal{S}|}\sum_{j\in\mathcal{S}}K_{\gamma}(S_{\mathbf{x}},S_{i})K_{\gamma}(S_{\mathbf{x}},S_{j})\right)\\
 \\P & =\left\langle \mathbf{K}^{T}\cdot\mathbf{K}\right\rangle \\
-q & =\lambda\left\langle \mathbf{K}^{T}\cdot\mathbf{1}_{(|\mathcal{S}|,1)}\right\rangle ^{-1}-\frac{1}{\mathcal{S}}\left\langle \mathbf{K}^{T}\cdot\mathbf{K}\cdot\mathbf{1}_{(|\mathcal{S}|,1)}\right\rangle \end{align*}
+q & =\lambda\left\langle \mathbf{K}^{T}\cdot\mathbf{1}_{(|\mathcal{S}|,1)}\right\rangle ^{-1}-\frac{1}{|\mathcal{S}|}\left\langle \mathbf{K}^{T}\cdot\mathbf{K}\cdot\mathbf{1}_{(|\mathcal{S}|,1)}\right\rangle \end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+To implement this, consider two matrices, the first a 2d matrix 
+\begin_inset Formula $X$
+\end_inset
+
+ containing observations and the second a 2d matrix 
+\begin_inset Formula $M$
+\end_inset
+
+ used to mask subsets; each 
+\begin_inset Formula $S$
+\end_inset
+
+ represented as a masking matrix where unmasked values are equal to 
+\begin_inset Formula $\frac{1}{|\mathcal{S}|}$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+M_{i,j} & =\begin{cases}
+0 & \quad X_{j}<t_{i}\\
+0 & \quad t_{i}+\theta_{i}\le X_{j}\\
+\frac{1}{|S_{i}|} & \quad\text{otherwise}\end{cases}\\
+X_{i,0} & =t_{i}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This allows us to change how we think of 
+\begin_inset Formula $\mathbf{D}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\mathbf{D}_{i,j} & =k_{\gamma}(\mathbf{x}_{i},\mathbf{x}_{j})\\
+\mathbf{\bar{D}}_{n,m} & =\sum_{\begin{array}{c}
+i=S_{n}\\
+j=S_{m}\end{array}}\mathbf{D}_{i,j}\\
+ & =\mathbf{D}\times\left\langle M_{n}\cdot M_{m}^{T}\right\rangle \end{align*}
 
 \end_inset
 
@@ -301,7 +356,9 @@ reference "eq:varphiSV"
 \mathbf{D}_{i,j} & =k_{\gamma}(\mathbf{x},\mathbf{\hat{x}})\\
 \mathbf{\bar{D}}_{A,B} & =\sum_{\begin{array}{c}
 i\in A\\
-j\in B\end{array}}\mathbf{D}_{i,j}\end{align*}
+j\in B\end{array}}\mathbf{D}_{i,j}\\
+ & =\mathbf{D}\times\left\langle M_{n}\cdot M_{m}^{T}\right\rangle \\
+\mathbf{\bar{D}}_{x,B} & =\mathbf{D}_{x}\times M_{B}\end{align*}
 
 \end_inset
 

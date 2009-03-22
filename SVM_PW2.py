@@ -69,6 +69,7 @@ class subset:
 		self.tStart = tStart
 		self.theta = theta
 		self.X = data
+		self.N,self.d = data.shape
 		self.t = np.hsplit(self.X,[1,])[0]
 		self.D = D
 		self.svm = svm
@@ -155,18 +156,27 @@ class svm(kMachine):
 	def pdf(self,Sx,X):
 	# Probability distribution function
 	#
-		if Sx.__class__ == subset:
-			S = Sx
-		else:
-			N,d = Sx.shape
-			D = self._K( Sx.reshape([N,1,d]) - self.X.T.reshape([1,self.N,self.d]) )
-			S = subset( Sx, D )
-			
-		points = predictionPoints(X)
 		
-		R = ( S - self.SV.T ) + ( points - self.SV.T )
+		K = np.array([
+			self._K( Sx - S[0].X )
+			for S in self.S
+		])
+		Ds = ( K * np.log2(K) ).sum(1).sum(1).reshape( [len(self.S),1])
 		
-		return np.ma.dot( R, self.beta )
+		tmp = list()
+		for S in self.S:
+			shape1 = [ X.shape[0],1,X.shape[1] ]
+			shape2 = [1,( S[0].argEnd-S[0].argStart),S[0].d]
+			phi = self._K( X.reshape(shape1) - S[0].X[S[0].argStart:S[0].argEnd].reshape(shape2 ) )
+			tmp.append( ( phi * np.log2(phi) ).sum(1) )
+		Dx = np.array(tmp).sum(2)
+		
+		R = Ds + Dx
+		
+		print R.T.shape
+		print self.beta.shape
+		
+		return np.ma.dot( R.T, self.beta )
 		
 		
 	def __iadd__(self, points):
@@ -197,8 +207,9 @@ class svm(kMachine):
 		mask = np.ma.getmask(beta)
 		self.NSV = beta.count()
 		self.alpha = beta
-		self.beta = beta.compressed().reshape([self.NSV,1])
-		self.SV = np.array( [ subsetSV( S=S,svm=self ) for S in np.ma.array( self.S, mask=mask).compressed() ],ndmin=2)
+		self.beta = beta
+		#self.beta = beta.compressed().reshape([self.NSV,1])
+		#self.SV = np.array( [ subsetSV( S=S,svm=self ) for S in np.ma.array( self.S, mask=mask).compressed() ],ndmin=2)
 
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % ( duration.seconds + float(duration.microseconds)/1000000)
@@ -212,7 +223,7 @@ class svm(kMachine):
 
 		CS1 = fig.contourf(x,y,self.pdf(S,X).reshape([xN,yN]).T,200, antialiased=True, cmap=cm.gray )
 		CS2 = plt.contour(x,y,self.pdf(S,X).reshape([xN,yN]).T, [.1,], colors='r' )
-		fig.plot( S.t,np.hsplit( S.x,S.d )[ axes[1]-1 ], 'r+' )
+		fig.plot( np.hsplit( S,S.shape[1] )[0],np.hsplit( S,S.shape[1] )[ axes[1]-1 ], 'r+' )
 		fig.axis( [ xrange[0],xrange[1],yrange[0],yrange[1] ] )
 		return (CS1,CS2)
 		
