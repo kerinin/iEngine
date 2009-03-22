@@ -70,7 +70,9 @@ class subset:
 		
 		if other.__class__ == subset:
 		# other is an array of subsets
-			D = self.D[other.argStart:other.argEnd,self.argStart:self.argEnd]/( self.N * other.N )
+			Dx = self.D[self.argStart:self.argEnd,other.argStart:other.argEnd,1:].prod(2)
+			Dt = self.svm._K( (self.t[self.argStart:self.argEnd] - self.t[self.argStart] ) - (other.t[other.argStart:other.argEnd] - other.t[other.argStart] ).T )
+			D = ( Dx * Dt )/( self.N * other.N )
 			return -( D * np.log2(D) ).sum()
 			#NOTE: when comparing a point to itself, the kernel value is 0, which produces NaN in Log
 		
@@ -97,7 +99,7 @@ class svm(kMachine):
 		self.Lambda = Lambda
 		super(svm, self).__init__(gamma)
 		
-		self.D = self._K( self.X.reshape([self.N,1,self.d]) - self.X.T.reshape([1,self.N,self.d]) ).prod(2)
+		self.D = self._K( self.X.reshape([self.N,1,self.d]) - self.X.T.reshape([1,self.N,self.d]) )
 		self.S = self._S()
 		self.Y = None				# empirical CDF of X
 		self.SV = None			# X value array of SV
