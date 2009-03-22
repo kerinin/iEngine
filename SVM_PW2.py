@@ -45,23 +45,6 @@ class kMachine(object):
 class predictionPoints:
 	def __init__(self,data):
 		self.X = data
-
-class subsetSV:
-	def __init__(self,S,svm):
-		self.S = S
-		self.svm = svm
-		
-	def __sub__(self,other):
-	# subtraction from a subset
-		if other.__class__ == subset:
-			D = other.D[:,self.S.argStart:self.S.argEnd] / self.S.N
-			
-			return ( D * np.log2(D) ).sum()
-	def __rsub__(self,other):
-	# Subtraction from a set of points
-		D = self.S.svm._K( other.X.reshape([other.X.shape[0],1,other.X.shape[1]]) - self.S.X[self.S.argStart:self.S.argEnd].T.reshape([1,self.S.N,self.S.X.shape[1]]) )
-
-		return ( D * np.log2(D) ).sum(2).sum(1)
 	
 class subset:
 	def __init__(self,data,D,svm=None,tStart=None,theta=None):
@@ -95,9 +78,7 @@ class subset:
 			
 			D = self.D[other.argStart:other.argEnd,self.argStart:self.argEnd]/self.N
 			
-			return ( D * np.log2(D) ).sum()
-		elif other.__class__ == np.ndarray:
-			return other - self
+			return -( D * np.log2(D) ).sum()
 		
 		raise StandardError, 'This type of subtraction not implemented'
 
@@ -159,28 +140,28 @@ class svm(kMachine):
 		Ns,ds = Sx.shape
 		Nx,dx = X.shape
 		
+		#for S in self.S:
+		#	print self._K( Sx.reshape([Ns,1,ds]) - S[0].X[S[0].argStart:S[0].argEnd].T.reshape([1,(S[0].argEnd - S[0].argStart),S[0].d]) ).prod(2).sum().shape
+		
 		K = np.array([
 			self._K( Sx.reshape([Ns,1,ds]) - S[0].X[S[0].argStart:S[0].argEnd].T.reshape([1,(S[0].argEnd - S[0].argStart),S[0].d]) ).prod(2).sum() / (Ns * (S[0].argEnd - S[0].argStart ) )
 			for S in self.S
 		])
-		Ds = ( K * np.log2(K) ).reshape([Ns,1])
+		Ds = -( K * np.log2(K) ).reshape([self.S.shape[0],1])
 		
 		tmp = list()
 		for S in self.S:
 			shape1 = [ X.shape[0],1,X.shape[1] ]
 			shape2 = [1,( S[0].argEnd-S[0].argStart),S[0].d]
 			phi = self._K( X.reshape(shape1) - S[0].X[S[0].argStart:S[0].argEnd].reshape(shape2 ) ).prod(2).sum(1) / ( Nx * (S[0].argEnd-S[0].argStart) ) 
-			tmp.append( ( phi * np.log2(phi) ) )
+			tmp.append( -( phi * np.log2(phi) ) )
 		Dx = np.array(tmp)
-		
-		print Dx.shape
-		
+				
 		R = Ds + Dx
 		
 		pdf = np.ma.dot( R.T, self.beta )
 		
 		return pdf
-		
 		
 	def __iadd__(self, points):
 		# overloaded '+=', used for adding a vector list to the module's data
@@ -233,16 +214,16 @@ class svm(kMachine):
 def run():
 	fig = plt.figure()
 	
-	Xtrain = np.arange(0,20,1)
+	Xtrain = np.arange(0,20,.25)
 	Ytrain = np.sin(Xtrain) + (np.random.randn( Xtrain.shape[0] )/10.)
-	mod = svm( data=np.hstack([Xtrain.reshape([Xtrain.shape[0],1]),Ytrain.reshape([Ytrain.shape[0],1])]), gamma=.5, Lambda=.000005, theta=[5.] )
+	mod = svm( data=np.hstack([Xtrain.reshape([Xtrain.shape[0],1]),Ytrain.reshape([Ytrain.shape[0],1])]), gamma=.05, Lambda=.00005, theta=[5.] )
 	print mod
 
-	Xtest = np.arange(5,15,.1)
+	Xtest = np.arange(5,15,.25)
 	Ytest = np.sin(Xtest)+ (np.random.randn( Xtest.shape[0] )/10.)
-	S=np.hstack([Xtrain.reshape([Xtrain.shape[0],1]),Ytrain.reshape([Ytrain.shape[0],1])])
+	S=np.hstack([Xtest.reshape([Xtest.shape[0],1]),Ytest.reshape([Ytest.shape[0],1])])
 	
-	mod.contourPlot( S, plt, (0,20), (-2,2),.1,.01 )
+	mod.contourPlot( S, plt, (0,20), (-2,2),1.,.1 )
 	#(c1,c2) = mod.contourPlot( S, plt, (0,20), (-2,2),.1,.01 )
 
 	plt.show()
