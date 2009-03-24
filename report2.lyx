@@ -1029,22 +1029,18 @@ reference "eq:PrSParzenSingle"
 
 \end_inset
 
- to include not only sets offset to the beginnig of the window being predicted,
- but at each start point defined as well:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-This may need to be revised to work with the SV formulation - Why not just
- add an integral to the Pr() function?
-\end_layout
-
+ to include sets with arbitrary offsets 
+\begin_inset Formula $\tau$
 \end_inset
 
+.
+ For computational reasons we establish the following bounds on the offset
+ which essentially require that the two subsets share at least one point
+ in 
+\begin_inset Formula $t$
+\end_inset
 
+.
 \end_layout
 
 \begin_layout Standard
@@ -1067,8 +1063,21 @@ S_{t,\theta}^{\tau}=\left[\left(x_{i},t_{i}-t+\tau\right)|\quad(x_{i}^{n},t_{i})
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{equation}
-\Pr(\mathcal{S}=S)\simeq\int_{\tau_{\min}}^{\tau_{\max}}\sum_{i\in\mathcal{S}}\frac{1}{|\mathcal{S}|}K_{\gamma}(S,S_{i})\ d\tau\label{eq:PrSParzenSlidingSingle}\end{equation}
+Within these bounds, we can evaluate our kernel function at each step of
+ arbitrarily small value 
+\begin_inset Formula $\eta$
+\end_inset
+
+ and average the results:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Do we really want to average these results? If so why?
+\end_layout
 
 \end_inset
 
@@ -1076,14 +1085,34 @@ S_{t,\theta}^{\tau}=\left[\left(x_{i},t_{i}-t+\tau\right)|\quad(x_{i}^{n},t_{i})
 \end_layout
 
 \begin_layout Standard
-In the context of Parzen Windows, this defintion increases computational
- demands and provides little increase in predictive power, however we shall
- see that it provides an important starting point for improving system performan
-ce.
+\begin_inset Formula \begin{align*}
+\varphi_{P}(\mathbf{x},S) & =\frac{1}{\Xi}\sum_{i=0}^{\Xi}\sum_{j\in\mathcal{S}}\frac{1}{|\mathcal{S}|}K_{\gamma}(S_{\mathbf{x}},S_{j}^{\tau_{\min}+i\eta}),\quad\Xi=\frac{\tau_{\max}-\tau_{\min}}{\eta}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Taking the limit as 
+\begin_inset Formula $\eta\mapsto0$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\lim_{\eta\mapsto0}\varphi_{P}(\mathbf{x},S) & =\int_{\tau_{\min}}^{\tau_{\max}}\sum_{j\in\mathcal{S}}\frac{1}{|\mathcal{S}|}K_{\gamma}(S_{\mathbf{x}},S_{j}^{\eta})d\eta\\
+ & =\sum_{j\in\mathcal{S}}\frac{1}{|\mathcal{S}|}\int_{\tau_{\min}}^{\tau_{\max}}K_{\gamma}(S_{\mathbf{x}},S_{j}^{\eta})d\eta\end{align*}
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
- Support Vector Estimation
+Support Vector Estimation
 \end_layout
 
 \begin_layout Standard
@@ -1331,6 +1360,12 @@ One thing I'm not sure of is the extent to which we can treat the KL divergence
  as a difference operator and ignore any further details.
  It may be possible, although it might be necessary for the operator to
  be symmetric and all that.
+\end_layout
+
+\begin_layout Plain Layout
+According to Wikipedia, KL is a non-commutative measure, and Lesbegue integratio
+n requires a measure.
+ 
 \end_layout
 
 \end_inset
