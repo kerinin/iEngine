@@ -34,7 +34,7 @@
 \paperorientation portrait
 \secnumdepth 3
 \tocdepth 3
-\paragraph_separation indent
+\paragraph_separation skip
 \defskip medskip
 \quotes_language english
 \papercolumns 1
@@ -624,7 +624,7 @@ We begin by defining the subset of the training observations which fall
 
 \begin_layout Standard
 \begin_inset Formula \begin{equation}
-S_{t,\theta}=\left[\left(x_{i},t_{i}-t\right)|\quad x_{i}\in X,\ t\le t_{i}<t+\theta\right]\label{eq:Ssingle}\end{equation}
+S_{t,\theta}=\left[\left(x_{i},t_{i}-t\right)|\quad x_{i}\in X,\ 0\le t_{i}-t<\theta\right]\label{eq:Ssingle}\end{equation}
 
 \end_inset
 
@@ -670,7 +670,7 @@ and observe that
 
 \begin_layout Standard
 \begin_inset Formula \begin{equation}
-S_{\hat{x}}=\left[\left(x_{i},t_{i}-t_{\hat{x}}\right)|\quad(x_{i},t_{i})\in\hat{X}\right]\label{eq:SySingle}\end{equation}
+S_{\hat{x}}=\left[\left(x_{i},t_{i}-\min_{t}\hat{X}\right)|\quad(x_{i},t_{i})\in\hat{X}\right]\label{eq:SySingle}\end{equation}
 
 \end_inset
 
@@ -721,7 +721,7 @@ reference "eq:Ssingle"
 
 \begin_layout Standard
 \begin_inset Formula \begin{equation}
-S_{t,\theta}=\left[\left(x_{i}^{n},t_{i}-t\right)|\quad x_{i}^{n}\in\mathbf{X},\ t\le t_{i}<t+\theta\right]\label{eq:Smultiple}\end{equation}
+S_{t,\theta}=\left[\left(x_{i}^{n},t_{i}-t\right)|\quad x_{i}^{n}\in\mathbf{X},\ 0\le t_{i}-t<\theta\right]\label{eq:Smultiple}\end{equation}
 
 \end_inset
 
@@ -747,7 +747,7 @@ reference "eq:SySingle"
 
 \begin_layout Standard
 \begin_inset Formula \begin{equation}
-S_{\hat{x}}=\left[\left(x_{i}^{n},t_{i}-t_{\hat{x}}\right)|\quad(x_{i}^{n},t_{i})\in\mathbf{\hat{X}}\right]\label{eq:SyMultiple}\end{equation}
+S_{\hat{x}}=\left[\left(x_{i}^{n},t_{i}-\min_{t}\hat{X}\right)|\quad(x_{i}^{n},t_{i})\in\mathbf{\hat{X}}\right]\label{eq:SyMultiple}\end{equation}
 
 \end_inset
 
@@ -986,7 +986,7 @@ reference "eq:PhiSingle"
 
 \begin_layout Standard
 \begin_inset Formula \[
-S_{n}^{c}=[\left(x,t-\min_{t}S\right)\ |\ \mathbf{x}\in\{S_{n}\cap X^{c}\}]\]
+S_{n}^{c}=S_{n}\cap X^{c}\]
 
 \end_inset
 
@@ -1034,8 +1034,23 @@ reference "eq:PrSParzenSingle"
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \[
-S_{t,\theta}^{\tau}=\left[\left(x_{i},2t_{i}-t-\tau\right)|\quad(x_{i}^{n},t_{i})\in S_{t,\theta}\right]\]
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+This may need to be revised to work with the SV formulation - Why not just
+ add an integral to the Pr() function?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\tau_{\min} & =\min_{t}X-\max_{\theta}\Theta\\
+\tau_{\max} & =\max_{t}X+\max_{\theta}\Theta\end{align*}
 
 \end_inset
 
@@ -1044,7 +1059,7 @@ S_{t,\theta}^{\tau}=\left[\left(x_{i},2t_{i}-t-\tau\right)|\quad(x_{i}^{n},t_{i}
 
 \begin_layout Standard
 \begin_inset Formula \[
-\mathcal{S}^{\mathcal{T}}=[S_{t,\theta}^{\tau}|\quad\tau\in\mathcal{T},\ (t,\theta)\in(\mathcal{T},\Theta)]\]
+S_{t,\theta}^{\tau}=\left[\left(x_{i},t_{i}-t+\tau\right)|\quad(x_{i}^{n},t_{i})\in S_{t,\theta}\right]\]
 
 \end_inset
 
@@ -1053,7 +1068,7 @@ S_{t,\theta}^{\tau}=\left[\left(x_{i},2t_{i}-t-\tau\right)|\quad(x_{i}^{n},t_{i}
 
 \begin_layout Standard
 \begin_inset Formula \begin{equation}
-\Pr(\mathcal{S}=S)\simeq\sum_{i\in\mathcal{S}}\frac{1}{|\mathcal{S}^{\mathcal{T}}|}K_{\gamma}(S,S_{i})\label{eq:PrSParzenSlidingSingle}\end{equation}
+\Pr(\mathcal{S}=S)\simeq\int_{\tau_{\min}}^{\tau_{\max}}\sum_{i\in\mathcal{S}}\frac{1}{|\mathcal{S}|}K_{\gamma}(S,S_{i})\ d\tau\label{eq:PrSParzenSlidingSingle}\end{equation}
 
 \end_inset
 
@@ -1148,7 +1163,7 @@ y distribution is accurate and attempt to minimize the square loss between
 \begin_layout Standard
 \begin_inset Formula \begin{align}
 \varphi_{SV}(\mathbf{x},S:\beta) & =\sum_{i\in\mathcal{S}}\beta_{i}K_{\gamma}(S_{\mathbf{x}},S_{i})\label{eq:SVResultSingle}\\
-S_{\mathbf{x}} & =\{S\cup\left(x,t-\min_{t}S\right)\}\end{align}
+S_{\mathbf{x}} & =\{S\cup\mathbf{x}\}\end{align}
 
 \end_inset
 
@@ -1224,45 +1239,60 @@ q & =\lambda\langle\mathbf{K}^{T}\cdot\mathbf{1}_{(|\mathcal{S}|,1)}\rangle^{-1}
 \end_layout
 
 \begin_layout Subsection
- Sliding Windows 
+Sliding Windows 
 \end_layout
 
 \begin_layout Standard
-Modifying the SV algorithm to use sliding time windows allows the system
- to take advantage of periodicity in the observed data and reduces redundancy.
- Adapting the earlier Parzen Window approach, we search for a solution in
- the following form:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \[
-\mathcal{S}^{\mathcal{T}}=[S_{t,\theta}^{\tau}|\quad\tau\in\mathcal{T},\ (t,\theta)\in(\mathcal{T},\Theta)]\]
-
+The approach described thus far has some drawbacks.
+ The prediction horizon is limited to the interval 
+\begin_inset Formula $[\min_{t}\hat{X},\ \min_{t}\hat{X}+\theta)$
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align}
-\varphi_{SV}(\mathbf{x},S:\beta) & =\sum_{i\in\mathcal{S}^{\mathcal{T}}}\beta_{i}K_{\gamma}(S_{\mathbf{x}},S_{i})\label{eq:SVResultSlidingSingle}\end{align}
-
+.
+ This can be ameliorated by shifting the prediction horizon along the test
+ set 
+\begin_inset Formula $\hat{X}$
 \end_inset
 
+, however this requires a method of choosing which starting point to use.
+ A second limitation is that is fails to take advantage of the time-independent
+ distribution of 
+\begin_inset Formula $X$
+\end_inset
 
+ in situations where 
+\begin_inset Formula $\mathbf{x}+\theta<\min_{t}\hat{X},\ \min_{t}\hat{X}<\mathbf{x}-\theta$
+\end_inset
+
+, that is situations where we wish to predict values of 
+\begin_inset Formula $\mathbf{x}$
+\end_inset
+
+ which fall outside the potential prediction window.
+ 
 \end_layout
 
 \begin_layout Standard
-The optimization problem must be modified as follows:
+Modifying the SV algorithm to use sliding time windows addresses both of
+ these concerns, allows the system to take advantage of periodicity in the
+ observed data and reduces redundancy in the support vector sets.
+ If we choose a diffentiable kernel 
+\begin_inset Formula $K_{\gamma}$
+\end_inset
+
+ with corresponding cross-kernel 
+\begin_inset Formula $k_{\gamma}$
+\end_inset
+
+, we can search for a solution in the following form:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-W(\beta) & =\sum_{S\in S}\left(\varphi_{SV}(S:\beta)^{2}-2\varphi_{SV}(S:\beta)\varphi_{P}(S)\right)+\lambda\Omega(\beta,S)\\
- & =\sum_{S\in S}\left(\sum_{i\in\mathcal{S}^{\mathcal{T}}}\beta_{i}K_{\gamma}(S_{\mathbf{x}},S_{i})\right)\cdot\left(\sum_{j\in\mathcal{S}^{\mathcal{T}}}\beta_{j}K_{\gamma}(S,S_{j})\right)\\
- & \qquad\qquad\qquad\qquad-2\left(\sum_{i\in\mathcal{S}^{\mathcal{T}}}\beta_{i}K_{\gamma}(S,S_{i})\right)\cdot\left(\sum_{j\in\mathcal{S}^{\mathcal{T}}}\frac{1}{|\mathcal{S}^{\mathcal{T}}|}K_{\gamma}(S,S_{j})\right)+\lambda\Omega(\beta,S)\\
- & =\sum_{i,j\in\mathcal{S}^{\mathcal{T}}}\beta_{i}\beta_{j}\sum_{S\in S}K_{\gamma}(S,S_{i})K_{\gamma}(S,S_{j})\\
- & \qquad\qquad\qquad\qquad+\sum_{i\in\mathcal{S}^{\mathcal{T}}}\beta_{i}\sum_{S\in S}\left(\lambda K_{\gamma}(S,S_{i})^{-1}-\frac{2}{|\mathcal{S}^{\mathcal{T}}|}\sum_{j\in\mathcal{S}^{\mathcal{T}}}K_{\gamma}(S,S_{i})K_{\gamma}(S,S_{j})\right)\end{align*}
+\tau_{\min} & =\min_{t}S_{\mathbf{x}}-\max_{\theta}\Theta\\
+\tau_{\max} & =\max_{t}S_{\mathbf{x}}+\max_{\theta}\Theta\\
+\varphi_{SV}(\mathbf{x},S:\beta) & =\int_{\tau_{\min}}^{\tau_{\max}}\sum_{i\in\mathcal{S}}\beta_{i}K_{\gamma}(S_{\mathbf{x}},S_{i}^{\tau})\ d\tau\\
+ & =\sum_{i\in\mathcal{S}}\beta_{i}\left(k_{\gamma}(S_{\mathbf{x}},S_{i}^{\tau_{\max}})-k_{\gamma}(S_{\mathbf{x}},S_{i}^{\tau_{\min}})\right)\end{align*}
 
 \end_inset
 
@@ -1270,45 +1300,67 @@ W(\beta) & =\sum_{S\in S}\left(\varphi_{SV}(S:\beta)^{2}-2\varphi_{SV}(S:\beta)\
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{equation}
-\text{subject to}\quad\sum_{i}\beta_{i}=1,\quad\beta_{i}\ge0,\ i=1,\ldots,|\mathcal{S}^{\mathcal{T}}|\end{equation}
-
+In this case, we leave our optimization problem as previously defined and
+ search for 
+\begin_inset Formula $\beta$
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
-This means that using sliding windows increases 
-\begin_inset Formula $P$
-\end_inset
-
- by a factor of 
-\begin_inset Formula $\ell^{2}$
-\end_inset
-
- and 
-\begin_inset Formula $q$
-\end_inset
-
- by a factor or 
-\begin_inset Formula $\ell$
+ using the training data and 
+\begin_inset Formula $K_{\gamma}$
 \end_inset
 
 .
- Fortunately, most of the added kernel values will be 
-\begin_inset Formula $0$
+\end_layout
+
+\begin_layout Subsubsection
+Sliding Window Kernel Selection
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Is it possible to use the gaussian kernel and then KL divergence norm? This
+ seems unlikely, since the integration term affects the KL norm and thus
+ can't be factored out.
+\end_layout
+
+\begin_layout Plain Layout
+One thing I'm not sure of is the extent to which we can treat the KL divergence
+ as a difference operator and ignore any further details.
+ It may be possible, although it might be necessary for the operator to
+ be symmetric and all that.
+\end_layout
+
 \end_inset
 
- if we restrict 
-\begin_inset Formula $\theta_{\text{max}}$
+
+\end_layout
+
+\begin_layout Standard
+We know that the kernel function 
+\begin_inset Formula $K_{\gamma}$
 \end_inset
 
- to some reasonable subset of the observed duration.
+ is a probability density function, and that the integral of a probability
+ density function is its cumulative density function.
+ Borrowing from Vapnik then, we use the following kernel and cross-kernel
+ functions:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+K_{\gamma}(x,x') & =-\frac{\gamma}{2+e^{\gamma(x-x')}+e^{-\gamma(x-x')}}\\
+k_{\gamma}(x,x') & =\frac{1}{1+e^{-\gamma(x-x')}}\end{align*}
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
- Parzen-SVM Decomposition 
+Parzen-SVM Decomposition 
 \end_layout
 
 \begin_layout Standard
