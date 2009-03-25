@@ -1034,23 +1034,7 @@ reference "eq:PrSParzenSingle"
 \end_inset
 
 .
- For computational reasons we establish the following bounds on the offset
- which essentially require that the two subsets share at least one point
- in 
-\begin_inset Formula $t$
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-\tau_{\min} & =\min_{t}X-\max_{\theta}\Theta\\
-\tau_{\max} & =\max_{t}X+\max_{\theta}\Theta\end{align*}
-
-\end_inset
-
-
+ 
 \end_layout
 
 \begin_layout Standard
@@ -1068,25 +1052,21 @@ Within these bounds, we can evaluate our kernel function at each step of
 \begin_inset Formula $\eta$
 \end_inset
 
- and average the results:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Do we really want to average these results? If so why?
-\end_layout
-
+ and sum the results.
+ For computational reasons we establish the following bounds on the offset
+ which essentially require that the two subsets share at least one point
+ in 
+\begin_inset Formula $t$
 \end_inset
 
-
+:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\varphi_{P}(\mathbf{x},S) & =\frac{1}{\Xi}\sum_{i=0}^{\Xi}\sum_{j\in\mathcal{S}}\frac{1}{|\mathcal{S}|}K_{\gamma}(S_{\mathbf{x}},S_{j}^{\tau_{\min}+i\eta}),\quad\Xi=\frac{\tau_{\max}-\tau_{\min}}{\eta}\end{align*}
+\varphi_{Pslide}(\mathbf{x},S) & =\frac{1}{|\mathcal{S}|}\sum_{j\in\mathcal{S}}\frac{1}{|T|}\sum_{\tau\in T}\ K_{\gamma}(S_{\mathbf{x}},S_{j}^{\tau}),\\
+T & =\left[-\theta_{j},\ -\theta_{j}+\eta,\ -\theta_{j}+2n,\ldots,\ \theta_{S\cup\mathbf{x}}+\theta_{j}\right]\\
+\theta_{S\cup\mathbf{x}} & \ge\left(|S\cup\mathbf{x}|_{\max_{t}}-|S\cup\mathbf{x}|_{\min_{t}}\right)\end{align*}
 
 \end_inset
 
@@ -1094,7 +1074,7 @@ Do we really want to average these results? If so why?
 \end_layout
 
 \begin_layout Standard
-Taking the limit as 
+Where Taking the limit as 
 \begin_inset Formula $\eta\mapsto0$
 \end_inset
 
@@ -1103,8 +1083,49 @@ Taking the limit as
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\lim_{\eta\mapsto0}\varphi_{P}(\mathbf{x},S) & =\int_{\tau_{\min}}^{\tau_{\max}}\sum_{j\in\mathcal{S}}\frac{1}{|\mathcal{S}|}K_{\gamma}(S_{\mathbf{x}},S_{j}^{\eta})d\eta\\
- & =\sum_{j\in\mathcal{S}}\frac{1}{|\mathcal{S}|}\int_{\tau_{\min}}^{\tau_{\max}}K_{\gamma}(S_{\mathbf{x}},S_{j}^{\eta})d\eta\end{align*}
+\lim_{\eta\mapsto0}\varphi_{Pslide}(\mathbf{x},S) & =\frac{1}{|\mathcal{S}|}\sum_{j\in\mathcal{S}}\int_{-\theta_{j}}^{\theta_{S\cup\mathbf{x}}+\theta_{j}}K_{\gamma}(S_{\mathbf{x}},S_{j}^{\eta})d\eta\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+What if we define 
+\begin_inset Formula $|\mathcal{S}|$
+\end_inset
+
+ to contain a single S which encompasses the entire training set? In this
+ case our problem reduces to the integral of the kernel over the range of
+ X.
+ This seems like the ideal solution - it reduces computational demands for
+ any system with more than 2 window sizes and allows arbitrary pattern length.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+If we define a cross kernel function 
+\begin_inset Formula $k_{\gamma}$
+\end_inset
+
+ to be the antiderivative of 
+\begin_inset Formula $K_{\gamma}$
+\end_inset
+
+, this simplifies to:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\lim_{\eta\mapsto0}\varphi_{Pslide}(\mathbf{x},S) & =\frac{1}{|\mathcal{S}|}\sum_{j\in\mathcal{S}}k_{\gamma}\left(S_{\mathbf{x}},S_{j}^{\theta_{S\cup\mathbf{x}}+\theta_{j}}\right)-k_{\gamma}\left(S_{\mathbf{x}},S_{j}^{-\theta_{j}}\right)\end{align*}
 
 \end_inset
 
@@ -1284,44 +1305,39 @@ The approach described thus far has some drawbacks.
 \end_inset
 
 , however this requires a method of choosing which starting point to use.
- A second limitation is that is fails to take advantage of the time-independent
+ A second limitation is that it fails to take advantage of the time-independent
  distribution of 
 \begin_inset Formula $X$
 \end_inset
 
- in situations where 
-\begin_inset Formula $\mathbf{x}+\theta<\min_{t}\hat{X},\ \min_{t}\hat{X}<\mathbf{x}-\theta$
+ in for points outside the 'forecasting horizon' defined by the largest
+ time window and the extents of 
+\begin_inset Formula $X$
 \end_inset
 
-, that is situations where we wish to predict values of 
-\begin_inset Formula $\mathbf{x}$
-\end_inset
-
- which fall outside the potential prediction window.
+ in the time dimension.
  
 \end_layout
 
 \begin_layout Standard
 Modifying the SV algorithm to use sliding time windows addresses both of
- these concerns, allows the system to take advantage of periodicity in the
- observed data and reduces redundancy in the support vector sets.
- If we choose a diffentiable kernel 
+ these concerns.
+ As in the Sliding Parzen Window approach, we use a kernel function 
 \begin_inset Formula $K_{\gamma}$
 \end_inset
 
- with corresponding cross-kernel 
+ and a corresponding cross kernel 
 \begin_inset Formula $k_{\gamma}$
 \end_inset
 
-, we can search for a solution in the following form:
+ which is the kernel's antiderivative.
+ We search for a solution in the following form:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\tau_{\min} & =\min_{t}S_{\mathbf{x}}-\max_{\theta}\Theta\\
-\tau_{\max} & =\max_{t}S_{\mathbf{x}}+\max_{\theta}\Theta\\
-\varphi_{SV}(\mathbf{x},S:\beta) & =\int_{\tau_{\min}}^{\tau_{\max}}\sum_{i\in\mathcal{S}}\beta_{i}K_{\gamma}(S_{\mathbf{x}},S_{i}^{\tau})\ d\tau\\
- & =\sum_{i\in\mathcal{S}}\beta_{i}\left(k_{\gamma}(S_{\mathbf{x}},S_{i}^{\tau_{\max}})-k_{\gamma}(S_{\mathbf{x}},S_{i}^{\tau_{\min}})\right)\end{align*}
+\varphi_{SV}(\mathbf{x},S:\beta) & =\sum_{i\in\mathcal{S}}\beta_{i}\ \int_{-\theta_{j}}^{\theta_{S\cup\mathbf{x}}+\theta_{j}}K_{\gamma}(S_{\mathbf{x}},S_{i}^{\eta})\ d\eta\\
+ & =\sum_{i\in\mathcal{S}}\beta_{i}\left(k_{\gamma}\left(S_{\mathbf{x}},S_{i}^{\theta_{S\cup\mathbf{x}}+\theta_{i}}\right)-k_{\gamma}\left(S_{\mathbf{x}},S_{i}^{-\theta_{i}}\right)\right)\end{align*}
 
 \end_inset
 
@@ -1346,40 +1362,9 @@ Sliding Window Kernel Selection
 \end_layout
 
 \begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Is it possible to use the gaussian kernel and then KL divergence norm? This
- seems unlikely, since the integration term affects the KL norm and thus
- can't be factored out.
-\end_layout
-
-\begin_layout Plain Layout
-One thing I'm not sure of is the extent to which we can treat the KL divergence
- as a difference operator and ignore any further details.
- It may be possible, although it might be necessary for the operator to
- be symmetric and all that.
-\end_layout
-
-\begin_layout Plain Layout
-According to Wikipedia, KL is a non-commutative measure, and Lesbegue integratio
-n requires a measure.
- 
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-We know that the kernel function 
-\begin_inset Formula $K_{\gamma}$
-\end_inset
-
- is a probability density function, and that the integral of a probability
- density function is its cumulative density function.
+Our kernel should satisfy two primary constraints; it should provide an
+ adequate kernel for Parzen Window estimation and it should have a known
+ antiderivative.
  Borrowing from Vapnik then, we use the following kernel and cross-kernel
  functions:
 \end_layout
@@ -1388,6 +1373,64 @@ We know that the kernel function
 \begin_inset Formula \begin{align*}
 K_{\gamma}(x,x') & =-\frac{\gamma}{2+e^{\gamma(x-x')}+e^{-\gamma(x-x')}}\\
 k_{\gamma}(x,x') & =\frac{1}{1+e^{-\gamma(x-x')}}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+It is worth noting that 
+\begin_inset Formula $k_{\gamma}$
+\end_inset
+
+ can be interpreted as the cumulative distribution function of 
+\begin_inset Formula $\mathcal{S}$
+\end_inset
+
+, however without an ordering operation over 
+\begin_inset Formula $\Omega^{\mathcal{S}}$
+\end_inset
+
+, this interpretation cannot be justified formally.
+\end_layout
+
+\begin_layout Standard
+We can continue to use the Kullback Liebler divergence as our difference
+ function as it is a sufficient metric for Lebesgue integration.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Is there any reason we couldn't now consider the entire training set as
+ a single S with theta=infty? 
+\end_layout
+
+\begin_layout Plain Layout
+How would this affect the SVM optimization? In this case we would need a
+ condensed representation of the training set which retains sequence probability
+ (beta) and uniqueness (SV identity).
+ The real question is if this approach (single large window) affects the
+ optimization problem.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+It might be possible to sum the beta value of each subset on a per-observation
+ basis; the beta sum would remain 1 and points in multiple windows would
+ be made stronger and the result would be a single composite S w/ theta
+ = range(S).
+ This would need to be proven OK based on the solution function for the
+ SVM problem.
+\end_layout
+
+\begin_layout Plain Layout
+A better solution would be to change the SVM problem to take advantage of
+ the sliding window idea directly somehow.
+\end_layout
 
 \end_inset
 
