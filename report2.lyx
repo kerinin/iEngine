@@ -1177,10 +1177,10 @@ To accomodate this, we begin by observing that
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
 \|(x_{n},t_{n})-(x_{m},t_{m})\|_{H+}= & \begin{cases}
-0 & \quad t_{m}>t_{n}\\
+0 & \quad t_{m}\le t_{n}\\
 K_{\gamma}(\mathbf{x}_{n},\mathbf{x}_{m})\log K_{\gamma}(\mathbf{x}_{n},\mathbf{x}_{m}) & \quad\text{otherwise}\end{cases}\\
 \|(x_{n},t_{n})-(x_{m},t_{m})\|_{H-}= & \begin{cases}
-0 & \quad t_{m}<t_{n}\\
+0 & \quad t_{m}>t_{n}\\
 K_{\gamma}(\mathbf{x}_{n},\mathbf{x}_{m})\log K_{\gamma}(\mathbf{x}_{n},\mathbf{x}_{m}) & \quad\text{otherwise}\end{cases}\\
 \|S_{n}-S_{m}\|_{H+} & =\frac{1}{|S_{n}|\times|S_{m}|}\sum_{\begin{array}{c}
 \mathbf{x}_{n}\in S_{n}\\
