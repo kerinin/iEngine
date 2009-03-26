@@ -1191,9 +1191,7 @@ These divergences describe the 1-sided divergence between two sets.
  of the alignment of the two sets, we loose information about the divergence
  between the two sets in the process.
  Ideally our difference operator would preserve information about both the
- divergence and the alignment of two sets, we therefore propose that the
- output of the difference operator be a complex number, with the divergence
- defining the real part and the alignment defining the complex part: 
+ divergence and the alignment of two sets.
 \end_layout
 
 \begin_layout Standard
@@ -1203,26 +1201,6 @@ These divergences describe the 1-sided divergence between two sets.
 \end_inset
 
 
-\end_layout
-
-\begin_layout Standard
-The kernel functions 
-\begin_inset Formula $\mathcal{K}_{\gamma}$
-\end_inset
-
- and 
-\begin_inset Formula $k_{\gamma}$
-\end_inset
-
- are both based on exponetiation of the point difference; in the context
- of complex differences this produces a kernel based on the product of the
- real and complex parts of the difference.
- Since our kernel is limited to the range 
-\begin_inset Formula $[0,1)$
-\end_inset
-
-, this product will likewise be limited to that range.
- 
 \end_layout
 
 \begin_layout Section
