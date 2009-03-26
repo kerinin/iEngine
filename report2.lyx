@@ -1,4 +1,4 @@
-#LyX 1.6.1 created this file. For more info see http://www.lyx.org/
+#LyX 1.6.2 created this file. For more info see http://www.lyx.org/
 \lyxformat 345
 \begin_document
 \begin_header
@@ -1145,7 +1145,7 @@ Our kernel should satisfy two primary constraints; it should provide an
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-K_{\gamma}(x,x') & =-\frac{\gamma}{2+e^{\gamma(x-x')}+e^{-\gamma(x-x')}}\\
+\mathcal{K}_{\gamma}(x,x') & =-\frac{\gamma}{2+e^{\gamma(x-x')}+e^{-\gamma(x-x')}}\\
 k_{\gamma}(x,x') & =\frac{1}{1+e^{-\gamma(x-x')}}\end{align*}
 
 \end_inset
@@ -1176,18 +1176,17 @@ To accomodate this, we begin by observing that
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\|(x_{n},t_{n})-(x_{m},t_{m})\|_{H+}= & \begin{cases}
-0 & \quad t_{m}\le t_{n}\\
-K_{\gamma}(\mathbf{x}_{n},\mathbf{x}_{m})\log K_{\gamma}(\mathbf{x}_{n},\mathbf{x}_{m}) & \quad\text{otherwise}\end{cases}\\
-\|(x_{n},t_{n})-(x_{m},t_{m})\|_{H-}= & \begin{cases}
-0 & \quad t_{m}>t_{n}\\
-K_{\gamma}(\mathbf{x}_{n},\mathbf{x}_{m})\log K_{\gamma}(\mathbf{x}_{n},\mathbf{x}_{m}) & \quad\text{otherwise}\end{cases}\\
-\|S_{n}-S_{m}\|_{H+} & =\frac{1}{|S_{n}|\times|S_{m}|}\sum_{\begin{array}{c}
-\mathbf{x}_{n}\in S_{n}\\
-\mathbf{x}_{m}\in S_{m}\end{array}}\|\mathbf{x}_{n}-\mathbf{x}_{m}\|_{H+}\\
-\|S_{n}-S_{m}\|_{H-} & =\frac{1}{|S_{n}|\times|S_{m}|}\sum_{\begin{array}{c}
-\mathbf{x}_{n}\in S_{n}\\
-\mathbf{x}_{m}\in S_{m}\end{array}}\|\mathbf{x}_{n}-\mathbf{x}_{m}\|_{H-}\end{align*}
+K_{\gamma}^{+}(\mathbf{x}_{n},\mathbf{x}_{m}) & =\begin{cases}
+K_{\gamma}(\mathbf{x}_{n},\mathbf{x}_{m}) & \quad t_{n}\ge t_{m}\\
+0 & \quad t_{n}<t_{m}\end{cases}\\
+K_{\gamma}^{-}(\mathbf{x}_{n},\mathbf{x}_{m}) & =\begin{cases}
+K_{\gamma}(\mathbf{x}_{n},\mathbf{x}_{m}) & \quad t_{n}<t_{m}\\
+0 & \quad t_{n}\ge t_{m}\end{cases}\\
+\\\phi_{n}^{+}(\mathbf{x}) & =\sum_{\mathbf{x}_{i}\in S_{n}}\frac{1}{|S_{n}|}K_{\gamma}^{+}(\mathbf{x},\mathbf{x}_{i})\\
+\phi_{n}^{-}(\mathbf{x}) & =\sum_{\mathbf{x}_{i}\in S_{n}}\frac{1}{|S_{n}|}K_{\gamma}^{-}(\mathbf{x},\mathbf{x}_{i})\\
+\\\left\Vert S_{n}-S_{m}\right\Vert _{KL}^{+} & =\sum_{\mathbf{x}\in\{S_{n}\cup S_{m}\}}\phi_{n}^{+}(\mathbf{x})\log\frac{\phi_{n}^{+}(\mathbf{x})}{\phi_{m}^{+}(\mathbf{x})}\\
+\left\Vert S_{n}-S_{m}\right\Vert _{KL}^{-} & =\sum_{\mathbf{x}\in\{S_{n}\cup S_{m}\}}\phi_{n}^{-}(\mathbf{x})\log\frac{\phi_{n}^{-}(\mathbf{x})}{\phi_{m}^{-}(\mathbf{x})}\\
+\\\left|S_{n}-S_{m}\right|_{KL} & =\left(\left\Vert S_{n}-S_{m}\right\Vert _{KL}^{+}+\left\Vert S_{n}-S_{m}\right\Vert _{KL}^{-}\right)+i\left(\left\Vert S_{n}-S_{m}\right\Vert _{KL}^{+}-\left\Vert S_{n}-S_{m}\right\Vert _{KL}^{-}\right)\end{align*}
 
 \end_inset
 
