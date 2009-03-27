@@ -1137,48 +1137,51 @@ Sliding Window Kernel Selection
 \end_layout
 
 \begin_layout Standard
-Our kernel should satisfy two primary constraints; it should provide an
- adequate kernel for Parzen Window estimation and it should have a known
- antiderivative.
- One possibility is the following kernel and cross-kernel functions:
-\end_layout
+\begin_inset Note Note
+status open
 
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-\mathcal{K}_{\gamma}(x,x') & =-\frac{\gamma}{2+e^{\gamma(x-x')}+e^{-\gamma(x-x')}}\\
-k_{\gamma}(x,x') & =\frac{1}{1+e^{-\gamma(x-x')}}\end{align*}
-
+\begin_layout Plain Layout
+The kernel antiderivative will have to be calculated including the KL distance
+ measure, and thus the Parzen estimate of the underlying sets.
+ Since we're only changing the time dimension, you should be able to construct
+ a vector describing the kernel distance matrix between the sets (excluding
+ the time dimension), then multiply that by the kernel matrix for the time
+ dimension at a specific offset.
+ The magnitude of the resulting vector gives you 
+\begin_inset Formula $\phi_{n}$
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
-Note the critical difference between this kernel and the gaussian kernel:
- it uses a difference operator in place of a distance operator.
- The Kullback Liebler divergence is sufficient when we are interested only
- the distance between two sets, however it is insufficient if we wish to
- know both the distance and 'direction' along the time axis.
+ at the offset in question.
  
 \end_layout
 
-\begin_layout Standard
-We can describe the distance between two sets along the time axis by splitting
- the KL divergence into positive and negative divergences:
+\begin_layout Plain Layout
+My current line of thought is to consider these two vectors in polar space
+ (becase in this way their magnitude is always a coordinate), and then integrate
+ over the angular coordinates.
+ This can probably be done as a sum of partial integrations per coordinate
+ (which corresponds to integration by element in the kernel matrix).
+ To do this, we would need to calculate 
+\begin_inset Formula $2\int r\log rd\theta$
+\end_inset
+
+ in vector space.
+ The reason this is useful is that the integral is reduced to a function
+ of the time kernel vector times a constant.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-K_{\gamma}^{+}(\mathbf{x}_{n},\mathbf{x}_{m}) & =\begin{cases}
-K_{\gamma}(\mathbf{x}_{n},\mathbf{x}_{m}) & \quad t_{n}\ge t_{m}\\
-0 & \quad t_{n}<t_{m}\end{cases}\\
-K_{\gamma}^{-}(\mathbf{x}_{n},\mathbf{x}_{m}) & =\begin{cases}
-K_{\gamma}(\mathbf{x}_{n},\mathbf{x}_{m}) & \quad t_{n}<t_{m}\\
-0 & \quad t_{n}\ge t_{m}\end{cases}\\
-\\\phi_{n}^{+}(\mathbf{x}) & =\sum_{\mathbf{x}_{i}\in S_{n}}\frac{1}{|S_{n}|}K_{\gamma}^{+}(\mathbf{x},\mathbf{x}_{i})\\
-\phi_{n}^{-}(\mathbf{x}) & =\sum_{\mathbf{x}_{i}\in S_{n}}\frac{1}{|S_{n}|}K_{\gamma}^{-}(\mathbf{x},\mathbf{x}_{i})\\
-\\\left\Vert S_{n}-S_{m}\right\Vert _{KL}^{+} & =\sum_{\mathbf{x}\in\{S_{n}\cup S_{m}\}}\phi_{n}^{+}(\mathbf{x})\log\frac{\phi_{n}^{+}(\mathbf{x})}{\phi_{m}^{+}(\mathbf{x})}\\
-\left\Vert S_{n}-S_{m}\right\Vert _{KL}^{-} & =\sum_{\mathbf{x}\in\{S_{n}\cup S_{m}\}}\phi_{n}^{-}(\mathbf{x})\log\frac{\phi_{n}^{-}(\mathbf{x})}{\phi_{m}^{-}(\mathbf{x})}\end{align*}
+\|S_{n}-S_{m}^{\tau}\|_{KL}\mapsto\vec{S}^{\tau}:\quad\vec{S}_{n}^{\tau} & =\phi_{m}^{\tau}(\mathbf{x}_{n})\log\phi_{m}^{\tau}(\mathbf{x}_{n})\\
+K_{\gamma}(\mathbf{x}_{n},\mathbf{x}_{m}) & =K_{\gamma}(t_{n},t_{m})\times K_{\gamma}(x_{n},x_{m})\\
+K_{\gamma}(\mathbf{x}_{n},\mathbf{x}_{m}^{\tau}) & =K_{\gamma}(t_{n},t_{m}+\tau)\times K_{\gamma}(x_{n},x_{m})\\
+K_{\gamma}(t_{n},t_{m}+\tau) & =\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma^{2}}\left(t_{n}-t_{m}-\tau\right)^{2}}\\
+\phi_{m}^{\tau}(\mathbf{x}_{n})\log\phi_{m}^{\tau}(\mathbf{x}_{n}) & =\left(\frac{1}{|S_{m}|}\sum_{\mathbf{x}_{i}\in S_{m}}K_{\gamma}(t_{n},t_{i}+\tau)\times K_{\gamma}(x_{n},x_{i})\right)\log\left(\frac{1}{|S_{m}|}\sum_{\mathbf{x}_{i}\in S_{m}}K_{\gamma}(t_{n},t_{i}+\tau)\times K_{\gamma}(x_{n},x_{i})\right)\end{align*}
 
 \end_inset
 
@@ -1186,21 +1189,24 @@ K_{\gamma}(\mathbf{x}_{n},\mathbf{x}_{m}) & \quad t_{n}<t_{m}\\
 \end_layout
 
 \begin_layout Standard
-These divergences describe the 1-sided divergence between two sets.
- Taking the difference of these divergences results in a signed measure
- of the alignment of the two sets, we loose information about the divergence
- between the two sets in the process.
- Ideally our difference operator would preserve information about both the
- divergence and the alignment of two sets.
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \[
-\left|S_{n}-S_{m}\right|_{KL}=\left(\left\Vert S_{n}-S_{m}\right\Vert _{KL}^{+}+\left\Vert S_{n}-S_{m}\right\Vert _{KL}^{-}\right)+i\left(\left\Vert S_{n}-S_{m}\right\Vert _{KL}^{+}-\left\Vert S_{n}-S_{m}\right\Vert _{KL}^{-}\right)\]
+\begin_inset Formula \begin{align*}
+\int K_{\gamma}(S_{n},S_{m}^{\tau})d\tau & =\int\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma^{2}}\left\Vert S_{n}-S_{m}^{\tau}\right\Vert ^{2}}d\tau\\
+ & =\frac{1}{\gamma\sqrt{2\pi}}\int e^{-\frac{1}{\gamma^{2}}\left(\sum_{\mathbf{x}_{n}\in S_{n}}\phi_{m}^{\tau}(\mathbf{x}_{n})\log\phi_{m}^{\tau}(\mathbf{x}_{n})\right)^{2}}d\tau\\
+ & =\frac{1}{\gamma\sqrt{2\pi}}\int e^{-\frac{1}{\gamma^{2}}\sum_{\begin{array}{c}
+\mathbf{x}_{i}\in S_{n}\\
+\mathbf{x}_{j}\in S_{n}\end{array}}\phi_{m}^{\tau}(\mathbf{x}_{i})\log\phi_{m}^{\tau}(\mathbf{x}_{i})\phi_{m}^{\tau}(\mathbf{x}_{j})\log\phi_{m}^{\tau}(\mathbf{x}_{j})}d\tau\\
+ & =\frac{1}{\gamma\sqrt{2\pi}}\int\prod_{\begin{array}{c}
+\mathbf{x}_{i}\in S_{n}\\
+\mathbf{x}_{j}\in S_{n}\end{array}}e^{-\frac{\phi_{m}^{\tau}(\mathbf{x}_{i})\log\phi_{m}^{\tau}(\mathbf{x}_{i})\phi_{m}^{\tau}(\mathbf{x}_{j})\log\phi_{m}^{\tau}(\mathbf{x}_{j})}{\gamma^{2}}}d\tau\end{align*}
 
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+Look into the Renyi entropy, alpha=2 as a substitute for KL.
+ It might simplify this integration
 \end_layout
 
 \begin_layout Section
