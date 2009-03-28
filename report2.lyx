@@ -1137,16 +1137,18 @@ Sliding Window Kernel Selection
 \end_layout
 
 \begin_layout Standard
-Begin by defining the Renyi entropy with 
-\begin_inset Formula $\alpha=2$
-\end_inset
-
-:
+Using the chain rule, we see that the indefinite integral of the kernel
+ is equal to the gaussian cumulative distribution function times the derivative
+ of the divergence function:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\|\mathbf{x}-S_{m}\|_{R2} & =-\log\left(\phi_{m}(\mathbf{x})^{2}\right)\end{align*}
+\int_{a}^{b}\mathcal{K}_{\gamma}(\mathbf{x},S_{n}^{\tau})d\tau & =\int_{\|\mathbf{x}-S_{n}^{a}\|}^{\|\mathbf{x}-S_{n}^{b}\|}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}x^{2}}dx\\
+ & =\int_{a}^{b}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|\mathbf{x}-S_{n}^{\tau}\|^{2}}\left(\frac{d}{d\tau}\|\mathbf{x}-S_{n}^{\tau}\|\right)d\tau\\
+ & =\left[\frac{\|\mathbf{x}-S_{n}^{\tau}\|}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|\mathbf{x}-S_{n}^{\tau}\|^{2}}\right]_{a}^{b}-\int_{a}^{b}\|\mathbf{x}-S_{n}^{\tau}\|\left(\frac{d}{d\tau}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|\mathbf{x}-S_{n}^{\tau}\|^{2}}\right)d\tau\\
+ & =\left[\frac{\|\mathbf{x}-S_{n}^{\tau}\|}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|\mathbf{x}-S_{n}^{\tau}\|^{2}}\right]_{a}^{b}-\left(\|\mathbf{x}-S_{n}^{\tau}\|\int_{a}^{b}\left(\frac{d}{d\tau}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|\mathbf{x}-S_{n}^{\tau}\|^{2}}\right)d\tau-\int_{a}^{b}\left(\frac{d}{d\tau}\|\mathbf{x}-S_{n}^{\tau}\|\right)\int_{a}^{b}\left(\frac{d}{d\tau}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|\mathbf{x}-S_{n}^{\tau}\|^{2}}d\tau\right)d\tau\right)\\
+ & =\left[\frac{\|\mathbf{x}-S_{n}^{\tau}\|}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|\mathbf{x}-S_{n}^{\tau}\|^{2}}\right]_{a}^{b}-\left(\frac{\|\mathbf{x}-S_{n}^{\tau}\|}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|\mathbf{x}-S_{n}^{\tau}\|^{2}}-\int_{a}^{b}\left(\frac{d}{d\tau}\|\mathbf{x}-S_{n}^{\tau}\|\right)\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|\mathbf{x}-S_{n}^{\tau}\|^{2}}d\tau\right)\end{align*}
 
 \end_inset
 
@@ -1154,78 +1156,40 @@ Begin by defining the Renyi entropy with
 \end_layout
 
 \begin_layout Standard
-Which allows us to redefine the kernel function:
+Using the Kullback Liebler divergence, we use the following integral:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\mathcal{K}_{\gamma}(\mathbf{x},S_{n}) & =\frac{1}{\gamma^{2}\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|\mathbf{x}-S_{n}\|_{R2}^{2}}\\
- & =\frac{1}{\gamma^{2}\sqrt{2\pi}}\left(e^{-\|\mathbf{x}-S_{n}\|_{R2}}\right)^{\frac{1}{\gamma}\|\mathbf{x}-S_{n}\|_{R2}}\\
- & =\frac{1}{\gamma^{2}\sqrt{2\pi}}\left(e^{\log\left(\phi_{n}(\mathbf{x})^{2}\right)}\right)^{-\frac{1}{\gamma}\log\left(\phi_{n}(\mathbf{x})^{2}\right)}\\
- & =\frac{1}{\gamma^{2}\sqrt{2\pi}}\left(e^{2\log\left(\phi_{n}(\mathbf{x})\right)}\right)^{-\frac{2}{\gamma}\log\left(\phi_{n}(\mathbf{x})\right)}\\
- & =\frac{1}{\gamma^{2}\sqrt{2\pi}}\left(e^{\log\left(\phi_{nm}(\mathbf{x})\right)}\right)^{-\frac{4}{\gamma}\log\phi_{n}(\mathbf{x})}\\
- & =\frac{1}{\gamma^{2}\sqrt{2\pi}}\left(\phi_{n}(\mathbf{x})\right)^{-\frac{4}{\gamma}\log\phi_{n}(\mathbf{x})}\\
- & =\frac{1}{\gamma^{2}\sqrt{2\pi}}\left(\left(\phi_{n}(\mathbf{x})\right)^{\log\left(\phi_{n}(\mathbf{x})\right)}\right)^{-\frac{4}{\gamma}}\end{align*}
+\int\|\mathbf{x}-S_{n}^{\tau}\|d\tau & =\int\phi_{n}^{\tau}(\mathbf{x})\log\phi_{n}^{\tau}(\mathbf{x})d\tau\\
+ & =\int\sum_{i=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i}^{\tau})\log\sum_{j=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{j}^{\tau})d\tau\\
+ & =\sum_{i=1}^{|S_{n}|}\int\ K_{\gamma}(\mathbf{x},\mathbf{x}_{i}^{\tau})\log\sum_{j=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{j}^{\tau})d\tau\\
+ & =\sum_{i=1}^{|S_{n}|}\left(\log\sum_{j=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{j}^{\tau})\int\left(K_{\gamma}(\mathbf{x},\mathbf{x}_{i}^{\tau})d\tau\right)-\int\left(\frac{d}{d\tau}\log\sum_{j=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{j}^{\tau})\int\left(K_{\gamma}(\mathbf{x},\mathbf{x}_{i}^{\tau})d\tau\right)d\tau\right)\right)\\
+ & =\sum_{i=1}^{|S_{n}|}\left(\log\sum_{j=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{j}^{\tau})\Phi(\mathbf{x}-\mathbf{x}_{i}^{\tau})-\int\left(\frac{\Phi(\mathbf{x}-\mathbf{x}_{i}^{\tau})}{\sum_{j=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{j}^{\tau})}\int\sum_{j=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{j}^{\tau})d\tau\right)\right)\\
+ & =\sum_{i=1}^{|S_{n}|}\left(\log\sum_{j=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{j}^{\tau})\Phi(\mathbf{x}-\mathbf{x}_{i}^{\tau})-\int\left(\frac{\sum_{j=1}^{|S_{n}|}\Phi(\mathbf{x}-\mathbf{x}_{j}^{\tau})\Phi(\mathbf{x}-\mathbf{x}_{i}^{\tau})}{\sum_{j=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{j}^{\tau})}\right)\right)\end{align*}
 
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+Since we know the kernel function is a probability distribution with integral
+ 1 over the interval 
+\begin_inset Formula $(-\infty,\infty)$
+\end_inset
+
+, we can eliminate some terms:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\log\phi_{n}(\mathbf{x}) & =\log\left(\frac{1}{|S_{n}|}\sum_{\mathbf{x}_{i}\in S_{n}}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})\right)\\
- & =\log\frac{1}{|S_{n}|}+\log\left(\sum_{i=0}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})\right)\\
- & =\log L_{\textrm{Ø}}+\log K_{\gamma}(\mathbf{x},\mathbf{x}_{0})+\log\left(1+\sum_{i=1}^{|S_{n}|}\frac{K_{\gamma}(\mathbf{x},\mathbf{x}_{i})}{K_{\gamma}(\mathbf{x},\mathbf{x}_{0})}\right)\\
- & =\log L_{\textrm{Ø}}+\log L_{0}+\log\left(\sum_{i=1}^{|S_{n}|}\frac{K_{\gamma}(\mathbf{x},\mathbf{x}_{i})}{L_{0}}+\frac{1}{|S_{n}|}\right)\\
- & =\log L_{\textrm{Ø}}+\log L_{0}+\log\left(\sum_{i=1}^{|S_{n}|}\frac{K_{\gamma}(\mathbf{x},\mathbf{x}_{i})|S_{n}|+L_{0}}{L_{0}|S_{n}|}\right)\\
- & =\log L_{\textrm{Ø}}+\log L_{0}+\log\left(\frac{K_{\gamma}(\mathbf{x},\mathbf{x}_{1})|S_{n}|+L_{0}}{L_{0}|S_{n}|}\right)\\
- & \qquad\qquad+\log\left(1+\sum_{i=2}^{|S_{n}|}\frac{K_{\gamma}(\mathbf{x},\mathbf{x}_{i})|S_{n}|+L_{0}}{L_{0}|S_{n}|}\cdot\frac{L_{0}|S_{n}|}{K_{\gamma}(\mathbf{x},\mathbf{x}_{1})|S_{n}|+L_{0}}\right)\\
- & =\log L_{\textrm{Ø}}+\log L_{0}+\log L_{1}+\log\left(\sum_{i=2}^{|S_{n}|}\frac{K_{\gamma}(\mathbf{x},\mathbf{x}_{i})|S_{n}|+L_{0}}{L_{0}L_{1}|S_{n}|}+\frac{1}{|S_{n}|}\right)\\
- & =\log L_{\textrm{Ø}}+\log L_{0}+\log L_{1}+\log\left(\sum_{i=2}^{|S_{n}|}\frac{K_{\gamma}(\mathbf{x},\mathbf{x}_{i})|S_{n}|^{2}+L_{0}|S_{n}|+L_{0}L_{1}|S_{n}|}{L_{0}L_{1}|S_{n}|^{2}}\right)\\
- & =\log L_{\textrm{Ø}}+\log L_{0}+\log L_{1}+\log\left(\frac{K_{\gamma}(\mathbf{x},\mathbf{x}_{2})|S_{n}|^{2}+L_{0}|S_{n}|+|S_{n}|}{L_{0}L_{1}|S_{n}|^{2}}\right)\\
- & \qquad\qquad+\log\left(1+\sum_{i=3}^{|S_{n}|}\frac{K_{\gamma}(\mathbf{x},\mathbf{x}_{i})|S_{n}|^{2}+L_{0}|S_{n}|+|S_{n}|}{L_{0}L_{1}|S_{n}|^{2}}\cdot\frac{L_{0}L_{1}|S_{n}|^{2}}{K_{\gamma}(\mathbf{x},\mathbf{x}_{2})|S_{n}|^{2}+L_{0}|S_{n}|+|S_{n}|}\right)\\
- & =\log L_{\textrm{Ø}}+\log L_{0}+\log L_{1}+\log L_{2}+\log\left(\sum_{i=3}^{|S_{n}|}\frac{K_{\gamma}(\mathbf{x},\mathbf{x}_{i})|S_{n}|^{2}+L_{0}|S_{n}|+L_{0}L_{1}|S_{n}|}{L_{0}L_{1}L_{2}|S_{n}|^{2}}+\frac{1}{|S_{n}|}\right)\\
- & =\log L_{\textrm{Ø}}+\log L_{0}+\log L_{1}+\log L_{2}+\log\left(\sum_{i=3}^{|S_{n}|}\frac{K_{\gamma}(\mathbf{x},\mathbf{x}_{i})|S_{n}|^{3}+L_{0}|S_{n}|^{2}+L_{0}L_{1}|S_{n}|^{2}+L_{0}L_{1}L_{2}|S_{n}|^{2}}{L_{0}L_{1}L_{2}|S_{n}|^{3}}\right)\\
- & =\log L_{\textrm{Ø}}+\sum_{i=0}^{|S_{n}|}\log L_{i}\\
- & =\sum_{i=0}^{|S_{n}|}\log L_{i}+\frac{1}{|S_{n}|}\log\frac{1}{|S_{n}|}\end{align*}
+\int_{-\infty}^{\infty}\|\mathbf{x}-S_{n}^{\tau}\|d\tau & =\sum_{i=1}^{|S_{n}|}\left(\frac{K_{\gamma}(\mathbf{x},\mathbf{x}_{i}^{\tau})}{\sum_{j=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{j}^{\tau})}\left(\sum_{j=1}^{|S_{n}|}1\right)-\int_{-\infty}^{\infty}\left(\frac{\frac{d}{d\tau}K_{\gamma}(\mathbf{x},\mathbf{x}_{i}^{\tau})}{\sum_{j=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{j}^{\tau})}\left(\sum_{j=1}^{|S_{n}|}1\right)\right)d\tau\right)\\
+ & =\sum_{i=1}^{|S_{n}|}\left(\frac{|S_{n}|K_{\gamma}(\mathbf{x},\mathbf{x}_{i}^{\tau})}{\sum_{j=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{j}^{\tau})}-\int_{-\infty}^{\infty}\left(\frac{|S_{n}|\frac{d}{d\tau}K_{\gamma}(\mathbf{x},\mathbf{x}_{i}^{\tau})}{\sum_{j=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{j}^{\tau})}\right)d\tau\right)\end{align*}
 
 \end_inset
 
 
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-L_{i} & =\frac{K_{\gamma}(\mathbf{x},\mathbf{x}_{i})|S_{n}|^{i}}{|S_{n}|^{i}\prod_{k=0}^{i-1}L_{k}}+\sum_{j=0}^{i-1}\frac{|S_{n}|^{i-1}\prod_{k=0}^{j}L_{k}}{|S_{n}|^{i}\prod_{k=0}^{i-1}L_{k}}\\
- & =\frac{|S_{n}|K_{\gamma}(\mathbf{x},\mathbf{x}_{i})}{|S_{n}|\prod_{k=0}^{i-1}L_{k}}+\sum_{j=0}^{i-1}\frac{\prod_{k=0}^{j}L_{k}}{|S_{n}|\prod_{k=0}^{i-1}L_{k}}\\
- & =\frac{|S_{n}|K_{\gamma}(\mathbf{x},\mathbf{x}_{i})+\sum_{j=0}^{i-1}\prod_{k=0}^{j}L_{k}}{|S_{n}|\prod_{k=0}^{i-1}L_{k}}\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-\mathcal{K}_{\gamma}(\mathbf{x},S_{n}) & =\frac{1}{\gamma^{2}\sqrt{2\pi}}\left(\phi_{n}(\mathbf{x})^{\log\left(\phi_{n}(\mathbf{x})\right)}\right)^{-\frac{4}{\gamma}}\\
- & =\frac{1}{\gamma^{2}\sqrt{2\pi}}\left(\phi_{n}(\mathbf{x})^{\sum_{i=0}^{|S_{n}|}\log L_{i}+\frac{1}{|S_{n}|}\log\frac{1}{|S_{n}|}}\right)^{-\frac{4}{\gamma}}\\
- & =\frac{1}{\gamma^{2}\sqrt{2\pi}}\left(\prod_{t=0}^{|S_{n}|}\left(\phi_{n}(\mathbf{x})^{\log L_{i}+\frac{1}{|S_{n}|}\log\frac{1}{|S_{n}|}}\right)\right)^{-\frac{4}{\gamma}}\\
- & =\frac{1}{\gamma^{2}\sqrt{2\pi}}\left(\phi_{n}(\mathbf{x})^{\frac{1}{|S_{n}|}\log\frac{1}{|S_{n}|}}\ \prod_{t=0}^{|S_{n}|}\left(\phi_{n}(\mathbf{x})^{\log L_{i}}\right)\right)^{-\frac{4}{\gamma}}\\
- & =\frac{1}{\gamma^{2}\sqrt{2\pi}}\phi_{n}(\mathbf{x})^{-\frac{4}{\gamma|S_{n}|}\log\frac{1}{|S_{n}|}}\ \prod_{t=0}^{|S_{n}|}\left(\phi_{n}(\mathbf{x})^{-\frac{4}{\gamma}\log L_{t}}\right)\\
- & =\frac{1}{\gamma^{2}\sqrt{2\pi}}\phi_{n}(\mathbf{x})^{-\frac{4}{\gamma|S_{n}|}\log\frac{1}{|S_{n}|}}\ \prod_{t=0}^{|S_{n}|}\left(\phi_{n}(\mathbf{x})^{-\frac{4}{\gamma}\log\frac{|S_{n}|K_{\gamma}(\mathbf{x},\mathbf{x}_{t})+\sum_{j=0}^{t-1}\prod_{k=0}^{j}L_{k}}{|S_{n}|\prod_{k=0}^{t-1}L_{k}}}\right)\\
- & =\frac{1}{\gamma^{2}\sqrt{2\pi}}\phi_{n}(\mathbf{x})^{-\frac{4}{\gamma|S_{n}|}\log\frac{1}{|S_{n}|}}\ \prod_{t=0}^{|S_{n}|}\left(\phi_{n}(\mathbf{x})^{-\frac{4}{\gamma}\log\left(|S_{n}|K_{\gamma}(\mathbf{x},\mathbf{x}_{t})+\sum_{j=0}^{t-1}\prod_{k=0}^{j}L_{k}\right)+\frac{4}{\gamma}\log\left(|S_{n}|\prod_{k=0}^{t-1}L_{k}\right)}\right)\\
- & =\frac{1}{\gamma^{2}\sqrt{2\pi}}\phi_{n}(\mathbf{x})^{-\frac{4}{\gamma|S_{n}|}\log\frac{1}{|S_{n}|}}\ \prod_{t=0}^{|S_{n}|}\left(\phi_{n}(\mathbf{x})^{-\frac{4}{\gamma}\log\left(|S_{n}|K_{\gamma}(\mathbf{x},\mathbf{x}_{t})+\sum_{j=0}^{t-1}\prod_{k=0}^{j}L_{k}\right)}\right)\\
- & \qquad\qquad\times\prod_{t=0}^{|S_{n}|}\left(\phi_{n}(\mathbf{x})^{\frac{4}{\gamma}\log\left(|S_{n}|\prod_{k=0}^{t-1}L_{k}\right)}\right)\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Look into the Renyi entropy, alpha=2 as a substitute for KL.
- It might simplify this integration
 \end_layout
 
 \begin_layout Section
