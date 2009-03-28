@@ -1,4 +1,4 @@
-#LyX 1.6.2 created this file. For more info see http://www.lyx.org/
+#LyX 1.6.1 created this file. For more info see http://www.lyx.org/
 \lyxformat 345
 \begin_document
 \begin_header
@@ -1137,38 +1137,35 @@ Sliding Window Kernel Selection
 \end_layout
 
 \begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-The kernel antiderivative will have to be calculated including the KL distance
- measure, and thus the Parzen estimate of the underlying sets.
- Since we're only changing the time dimension, you should be able to construct
- a vector describing the kernel distance matrix between the sets (excluding
- the time dimension), then multiply that by the kernel matrix for the time
- dimension at a specific offset.
- The magnitude of the resulting vector gives you 
-\begin_inset Formula $\phi_{n}$
+Begin by defining the Renyi entropy with 
+\begin_inset Formula $\alpha=2$
 \end_inset
 
- at the offset in question.
- 
+:
 \end_layout
 
-\begin_layout Plain Layout
-My current line of thought is to consider these two vectors in polar space
- (becase in this way their magnitude is always a coordinate), and then integrate
- over the angular coordinates.
- This can probably be done as a sum of partial integrations per coordinate
- (which corresponds to integration by element in the kernel matrix).
- To do this, we would need to calculate 
-\begin_inset Formula $2\int r\log rd\theta$
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\|\mathbf{x}-S_{m}\|_{R2} & =-\log\left(\phi_{m}(\mathbf{x})^{2}\right)\end{align*}
+
 \end_inset
 
- in vector space.
- The reason this is useful is that the integral is reduced to a function
- of the time kernel vector times a constant.
+
 \end_layout
+
+\begin_layout Standard
+Which allows us to redefine the kernel function:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\mathcal{K}_{\gamma}(\mathbf{x},S_{n}) & =\frac{1}{\gamma^{2}\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|\mathbf{x}-S_{n}\|_{R2}^{2}}\\
+ & =\frac{1}{\gamma^{2}\sqrt{2\pi}}\left(e^{-\|\mathbf{x}-S_{n}\|_{R2}}\right)^{\frac{1}{\gamma}\|\mathbf{x}-S_{n}\|_{R2}}\\
+ & =\frac{1}{\gamma^{2}\sqrt{2\pi}}\left(e^{\log\left(\phi_{n}(\mathbf{x})^{2}\right)}\right)^{-\frac{1}{\gamma}\log\left(\phi_{n}(\mathbf{x})^{2}\right)}\\
+ & =\frac{1}{\gamma^{2}\sqrt{2\pi}}\left(e^{2\log\left(\phi_{n}(\mathbf{x})\right)}\right)^{-\frac{2}{\gamma}\log\left(\phi_{n}(\mathbf{x})\right)}\\
+ & =\frac{1}{\gamma^{2}\sqrt{2\pi}}\left(e^{\log\left(\phi_{nm}(\mathbf{x})\right)}\right)^{-\frac{4}{\gamma}\log\phi_{n}(\mathbf{x})}\\
+ & =\frac{1}{\gamma^{2}\sqrt{2\pi}}\left(\phi_{n}(\mathbf{x})\right)^{-\frac{4}{\gamma}\log\phi_{n}(\mathbf{x})}\\
+ & =\frac{1}{\gamma^{2}\sqrt{2\pi}}\left(\left(\phi_{n}(\mathbf{x})\right)^{\log\left(\phi_{n}(\mathbf{x})\right)}\right)^{-\frac{4}{\gamma}}\end{align*}
 
 \end_inset
 
@@ -1177,11 +1174,21 @@ My current line of thought is to consider these two vectors in polar space
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\|S_{n}-S_{m}^{\tau}\|_{KL}\mapsto\vec{S}^{\tau}:\quad\vec{S}_{n}^{\tau} & =\phi_{m}^{\tau}(\mathbf{x}_{n})\log\phi_{m}^{\tau}(\mathbf{x}_{n})\\
-K_{\gamma}(\mathbf{x}_{n},\mathbf{x}_{m}) & =K_{\gamma}(t_{n},t_{m})\times K_{\gamma}(x_{n},x_{m})\\
-K_{\gamma}(\mathbf{x}_{n},\mathbf{x}_{m}^{\tau}) & =K_{\gamma}(t_{n},t_{m}+\tau)\times K_{\gamma}(x_{n},x_{m})\\
-K_{\gamma}(t_{n},t_{m}+\tau) & =\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma^{2}}\left(t_{n}-t_{m}-\tau\right)^{2}}\\
-\phi_{m}^{\tau}(\mathbf{x}_{n})\log\phi_{m}^{\tau}(\mathbf{x}_{n}) & =\left(\frac{1}{|S_{m}|}\sum_{\mathbf{x}_{i}\in S_{m}}K_{\gamma}(t_{n},t_{i}+\tau)\times K_{\gamma}(x_{n},x_{i})\right)\log\left(\frac{1}{|S_{m}|}\sum_{\mathbf{x}_{i}\in S_{m}}K_{\gamma}(t_{n},t_{i}+\tau)\times K_{\gamma}(x_{n},x_{i})\right)\end{align*}
+\log\phi_{n}(\mathbf{x}) & =\log\left(\frac{1}{|S_{n}|}\sum_{\mathbf{x}_{i}\in S_{n}}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})\right)\\
+ & =\log\frac{1}{|S_{n}|}+\log\left(\sum_{i=0}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})\right)\\
+ & =\log L_{\textrm{Ø}}+\log K_{\gamma}(\mathbf{x},\mathbf{x}_{0})+\log\left(1+\sum_{i=1}^{|S_{n}|}\frac{K_{\gamma}(\mathbf{x},\mathbf{x}_{i})}{K_{\gamma}(\mathbf{x},\mathbf{x}_{0})}\right)\\
+ & =\log L_{\textrm{Ø}}+\log L_{0}+\log\left(\sum_{i=1}^{|S_{n}|}\frac{K_{\gamma}(\mathbf{x},\mathbf{x}_{i})}{L_{0}}+\frac{1}{|S_{n}|}\right)\\
+ & =\log L_{\textrm{Ø}}+\log L_{0}+\log\left(\sum_{i=1}^{|S_{n}|}\frac{K_{\gamma}(\mathbf{x},\mathbf{x}_{i})|S_{n}|+L_{0}}{L_{0}|S_{n}|}\right)\\
+ & =\log L_{\textrm{Ø}}+\log L_{0}+\log\left(\frac{K_{\gamma}(\mathbf{x},\mathbf{x}_{1})|S_{n}|+L_{0}}{L_{0}|S_{n}|}\right)\\
+ & \qquad\qquad+\log\left(1+\sum_{i=2}^{|S_{n}|}\frac{K_{\gamma}(\mathbf{x},\mathbf{x}_{i})|S_{n}|+L_{0}}{L_{0}|S_{n}|}\cdot\frac{L_{0}|S_{n}|}{K_{\gamma}(\mathbf{x},\mathbf{x}_{1})|S_{n}|+L_{0}}\right)\\
+ & =\log L_{\textrm{Ø}}+\log L_{0}+\log L_{1}+\log\left(\sum_{i=2}^{|S_{n}|}\frac{K_{\gamma}(\mathbf{x},\mathbf{x}_{i})|S_{n}|+L_{0}}{L_{0}L_{1}|S_{n}|}+\frac{1}{|S_{n}|}\right)\\
+ & =\log L_{\textrm{Ø}}+\log L_{0}+\log L_{1}+\log\left(\sum_{i=2}^{|S_{n}|}\frac{K_{\gamma}(\mathbf{x},\mathbf{x}_{i})|S_{n}|^{2}+L_{0}|S_{n}|+L_{0}L_{1}|S_{n}|}{L_{0}L_{1}|S_{n}|^{2}}\right)\\
+ & =\log L_{\textrm{Ø}}+\log L_{0}+\log L_{1}+\log\left(\frac{K_{\gamma}(\mathbf{x},\mathbf{x}_{2})|S_{n}|^{2}+L_{0}|S_{n}|+|S_{n}|}{L_{0}L_{1}|S_{n}|^{2}}\right)\\
+ & \qquad\qquad+\log\left(1+\sum_{i=3}^{|S_{n}|}\frac{K_{\gamma}(\mathbf{x},\mathbf{x}_{i})|S_{n}|^{2}+L_{0}|S_{n}|+|S_{n}|}{L_{0}L_{1}|S_{n}|^{2}}\cdot\frac{L_{0}L_{1}|S_{n}|^{2}}{K_{\gamma}(\mathbf{x},\mathbf{x}_{2})|S_{n}|^{2}+L_{0}|S_{n}|+|S_{n}|}\right)\\
+ & =\log L_{\textrm{Ø}}+\log L_{0}+\log L_{1}+\log L_{2}+\log\left(\sum_{i=3}^{|S_{n}|}\frac{K_{\gamma}(\mathbf{x},\mathbf{x}_{i})|S_{n}|^{2}+L_{0}|S_{n}|+L_{0}L_{1}|S_{n}|}{L_{0}L_{1}L_{2}|S_{n}|^{2}}+\frac{1}{|S_{n}|}\right)\\
+ & =\log L_{\textrm{Ø}}+\log L_{0}+\log L_{1}+\log L_{2}+\log\left(\sum_{i=3}^{|S_{n}|}\frac{K_{\gamma}(\mathbf{x},\mathbf{x}_{i})|S_{n}|^{3}+L_{0}|S_{n}|^{2}+L_{0}L_{1}|S_{n}|^{2}+L_{0}L_{1}L_{2}|S_{n}|^{2}}{L_{0}L_{1}L_{2}|S_{n}|^{3}}\right)\\
+ & =\log L_{\textrm{Ø}}+\sum_{i=0}^{|S_{n}|}\log L_{i}\\
+ & =\sum_{i=0}^{|S_{n}|}\log L_{i}+\frac{1}{|S_{n}|}\log\frac{1}{|S_{n}|}\end{align*}
 
 \end_inset
 
@@ -1190,14 +1197,26 @@ K_{\gamma}(t_{n},t_{m}+\tau) & =\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma^{
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\int K_{\gamma}(S_{n},S_{m}^{\tau})d\tau & =\int\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma^{2}}\left\Vert S_{n}-S_{m}^{\tau}\right\Vert ^{2}}d\tau\\
- & =\frac{1}{\gamma\sqrt{2\pi}}\int e^{-\frac{1}{\gamma^{2}}\left(\sum_{\mathbf{x}_{n}\in S_{n}}\phi_{m}^{\tau}(\mathbf{x}_{n})\log\phi_{m}^{\tau}(\mathbf{x}_{n})\right)^{2}}d\tau\\
- & =\frac{1}{\gamma\sqrt{2\pi}}\int e^{-\frac{1}{\gamma^{2}}\sum_{\begin{array}{c}
-\mathbf{x}_{i}\in S_{n}\\
-\mathbf{x}_{j}\in S_{n}\end{array}}\phi_{m}^{\tau}(\mathbf{x}_{i})\log\phi_{m}^{\tau}(\mathbf{x}_{i})\phi_{m}^{\tau}(\mathbf{x}_{j})\log\phi_{m}^{\tau}(\mathbf{x}_{j})}d\tau\\
- & =\frac{1}{\gamma\sqrt{2\pi}}\int\prod_{\begin{array}{c}
-\mathbf{x}_{i}\in S_{n}\\
-\mathbf{x}_{j}\in S_{n}\end{array}}e^{-\frac{\phi_{m}^{\tau}(\mathbf{x}_{i})\log\phi_{m}^{\tau}(\mathbf{x}_{i})\phi_{m}^{\tau}(\mathbf{x}_{j})\log\phi_{m}^{\tau}(\mathbf{x}_{j})}{\gamma^{2}}}d\tau\end{align*}
+L_{i} & =\frac{K_{\gamma}(\mathbf{x},\mathbf{x}_{i})|S_{n}|^{i}}{|S_{n}|^{i}\prod_{k=0}^{i-1}L_{k}}+\sum_{j=0}^{i-1}\frac{|S_{n}|^{i-1}\prod_{k=0}^{j}L_{k}}{|S_{n}|^{i}\prod_{k=0}^{i-1}L_{k}}\\
+ & =\frac{|S_{n}|K_{\gamma}(\mathbf{x},\mathbf{x}_{i})}{|S_{n}|\prod_{k=0}^{i-1}L_{k}}+\sum_{j=0}^{i-1}\frac{\prod_{k=0}^{j}L_{k}}{|S_{n}|\prod_{k=0}^{i-1}L_{k}}\\
+ & =\frac{|S_{n}|K_{\gamma}(\mathbf{x},\mathbf{x}_{i})+\sum_{j=0}^{i-1}\prod_{k=0}^{j}L_{k}}{|S_{n}|\prod_{k=0}^{i-1}L_{k}}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\mathcal{K}_{\gamma}(\mathbf{x},S_{n}) & =\frac{1}{\gamma^{2}\sqrt{2\pi}}\left(\phi_{n}(\mathbf{x})^{\log\left(\phi_{n}(\mathbf{x})\right)}\right)^{-\frac{4}{\gamma}}\\
+ & =\frac{1}{\gamma^{2}\sqrt{2\pi}}\left(\phi_{n}(\mathbf{x})^{\sum_{i=0}^{|S_{n}|}\log L_{i}+\frac{1}{|S_{n}|}\log\frac{1}{|S_{n}|}}\right)^{-\frac{4}{\gamma}}\\
+ & =\frac{1}{\gamma^{2}\sqrt{2\pi}}\left(\prod_{t=0}^{|S_{n}|}\left(\phi_{n}(\mathbf{x})^{\log L_{i}+\frac{1}{|S_{n}|}\log\frac{1}{|S_{n}|}}\right)\right)^{-\frac{4}{\gamma}}\\
+ & =\frac{1}{\gamma^{2}\sqrt{2\pi}}\left(\phi_{n}(\mathbf{x})^{\frac{1}{|S_{n}|}\log\frac{1}{|S_{n}|}}\ \prod_{t=0}^{|S_{n}|}\left(\phi_{n}(\mathbf{x})^{\log L_{i}}\right)\right)^{-\frac{4}{\gamma}}\\
+ & =\frac{1}{\gamma^{2}\sqrt{2\pi}}\phi_{n}(\mathbf{x})^{-\frac{4}{\gamma|S_{n}|}\log\frac{1}{|S_{n}|}}\ \prod_{t=0}^{|S_{n}|}\left(\phi_{n}(\mathbf{x})^{-\frac{4}{\gamma}\log L_{t}}\right)\\
+ & =\frac{1}{\gamma^{2}\sqrt{2\pi}}\phi_{n}(\mathbf{x})^{-\frac{4}{\gamma|S_{n}|}\log\frac{1}{|S_{n}|}}\ \prod_{t=0}^{|S_{n}|}\left(\phi_{n}(\mathbf{x})^{-\frac{4}{\gamma}\log\frac{|S_{n}|K_{\gamma}(\mathbf{x},\mathbf{x}_{t})+\sum_{j=0}^{t-1}\prod_{k=0}^{j}L_{k}}{|S_{n}|\prod_{k=0}^{t-1}L_{k}}}\right)\\
+ & =\frac{1}{\gamma^{2}\sqrt{2\pi}}\phi_{n}(\mathbf{x})^{-\frac{4}{\gamma|S_{n}|}\log\frac{1}{|S_{n}|}}\ \prod_{t=0}^{|S_{n}|}\left(\phi_{n}(\mathbf{x})^{-\frac{4}{\gamma}\log\left(|S_{n}|K_{\gamma}(\mathbf{x},\mathbf{x}_{t})+\sum_{j=0}^{t-1}\prod_{k=0}^{j}L_{k}\right)+\frac{4}{\gamma}\log\left(|S_{n}|\prod_{k=0}^{t-1}L_{k}\right)}\right)\\
+ & =\frac{1}{\gamma^{2}\sqrt{2\pi}}\phi_{n}(\mathbf{x})^{-\frac{4}{\gamma|S_{n}|}\log\frac{1}{|S_{n}|}}\ \prod_{t=0}^{|S_{n}|}\left(\phi_{n}(\mathbf{x})^{-\frac{4}{\gamma}\log\left(|S_{n}|K_{\gamma}(\mathbf{x},\mathbf{x}_{t})+\sum_{j=0}^{t-1}\prod_{k=0}^{j}L_{k}\right)}\right)\\
+ & \qquad\qquad\times\prod_{t=0}^{|S_{n}|}\left(\phi_{n}(\mathbf{x})^{\frac{4}{\gamma}\log\left(|S_{n}|\prod_{k=0}^{t-1}L_{k}\right)}\right)\end{align*}
 
 \end_inset
 
