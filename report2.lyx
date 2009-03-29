@@ -1137,18 +1137,12 @@ Sliding Window Kernel Selection
 \end_layout
 
 \begin_layout Standard
-Using the chain rule, we see that the indefinite integral of the kernel
- is equal to the gaussian cumulative distribution function times the derivative
- of the divergence function:
+New kernel function:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\int_{a}^{b}\mathcal{K}_{\gamma}(\mathbf{x},S_{n}^{\tau})d\tau & =\int_{\|\mathbf{x}-S_{n}^{a}\|}^{\|\mathbf{x}-S_{n}^{b}\|}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}x^{2}}dx\\
- & =\int_{a}^{b}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|\mathbf{x}-S_{n}^{\tau}\|^{2}}\left(\frac{d}{d\tau}\|\mathbf{x}-S_{n}^{\tau}\|\right)d\tau\\
- & =\left[\frac{\|\mathbf{x}-S_{n}^{\tau}\|}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|\mathbf{x}-S_{n}^{\tau}\|^{2}}\right]_{a}^{b}-\int_{a}^{b}\|\mathbf{x}-S_{n}^{\tau}\|\left(\frac{d}{d\tau}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|\mathbf{x}-S_{n}^{\tau}\|^{2}}\right)d\tau\\
- & =\left[\frac{\|\mathbf{x}-S_{n}^{\tau}\|}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|\mathbf{x}-S_{n}^{\tau}\|^{2}}\right]_{a}^{b}-\left(\|\mathbf{x}-S_{n}^{\tau}\|\int_{a}^{b}\left(\frac{d}{d\tau}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|\mathbf{x}-S_{n}^{\tau}\|^{2}}\right)d\tau-\int_{a}^{b}\left(\frac{d}{d\tau}\|\mathbf{x}-S_{n}^{\tau}\|\right)\int_{a}^{b}\left(\frac{d}{d\tau}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|\mathbf{x}-S_{n}^{\tau}\|^{2}}d\tau\right)d\tau\right)\\
- & =\left[\frac{\|\mathbf{x}-S_{n}^{\tau}\|}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|\mathbf{x}-S_{n}^{\tau}\|^{2}}\right]_{a}^{b}-\left(\frac{\|\mathbf{x}-S_{n}^{\tau}\|}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|\mathbf{x}-S_{n}^{\tau}\|^{2}}-\int_{a}^{b}\left(\frac{d}{d\tau}\|\mathbf{x}-S_{n}^{\tau}\|\right)\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|\mathbf{x}-S_{n}^{\tau}\|^{2}}d\tau\right)\end{align*}
+\mathcal{K}_{\gamma}(\mathbf{x},S_{n}) & =\text{sech }(\|\mathbf{x}-S_{n}\|_{R})\end{align*}
 
 \end_inset
 
@@ -1156,17 +1150,13 @@ Using the chain rule, we see that the indefinite integral of the kernel
 \end_layout
 
 \begin_layout Standard
-Using the Kullback Liebler divergence, we use the following integral:
+Two new distance functions, Hellenger and Pearson:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\int\|\mathbf{x}-S_{n}^{\tau}\|d\tau & =\int\phi_{n}^{\tau}(\mathbf{x})\log\phi_{n}^{\tau}(\mathbf{x})d\tau\\
- & =\int\sum_{i=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i}^{\tau})\log\sum_{j=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{j}^{\tau})d\tau\\
- & =\sum_{i=1}^{|S_{n}|}\int\ K_{\gamma}(\mathbf{x},\mathbf{x}_{i}^{\tau})\log\sum_{j=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{j}^{\tau})d\tau\\
- & =\sum_{i=1}^{|S_{n}|}\left(\log\sum_{j=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{j}^{\tau})\int\left(K_{\gamma}(\mathbf{x},\mathbf{x}_{i}^{\tau})d\tau\right)-\int\left(\frac{d}{d\tau}\log\sum_{j=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{j}^{\tau})\int\left(K_{\gamma}(\mathbf{x},\mathbf{x}_{i}^{\tau})d\tau\right)d\tau\right)\right)\\
- & =\sum_{i=1}^{|S_{n}|}\left(\log\sum_{j=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{j}^{\tau})\Phi(\mathbf{x}-\mathbf{x}_{i}^{\tau})-\int\left(\frac{\Phi(\mathbf{x}-\mathbf{x}_{i}^{\tau})}{\sum_{j=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{j}^{\tau})}\int\sum_{j=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{j}^{\tau})d\tau\right)\right)\\
- & =\sum_{i=1}^{|S_{n}|}\left(\log\sum_{j=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{j}^{\tau})\Phi(\mathbf{x}-\mathbf{x}_{i}^{\tau})-\int\left(\frac{\sum_{j=1}^{|S_{n}|}\Phi(\mathbf{x}-\mathbf{x}_{j}^{\tau})\Phi(\mathbf{x}-\mathbf{x}_{i}^{\tau})}{\sum_{j=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{j}^{\tau})}\right)\right)\end{align*}
+\|\mathbf{x}-S_{n}\|_{H} & =\left(\sqrt{\phi_{n}(\mathbf{x})}-1\right)^{2}\\
+\|\mathbf{x}-S_{n}\|_{P} & =\left(\phi_{n}(\mathbf{x})-1\right)^{2}\end{align*}
 
 \end_inset
 
@@ -1174,18 +1164,25 @@ Using the Kullback Liebler divergence, we use the following integral:
 \end_layout
 
 \begin_layout Standard
-Since we know the kernel function is a probability distribution with integral
- 1 over the interval 
-\begin_inset Formula $(-\infty,\infty)$
-\end_inset
-
-, we can eliminate some terms:
+Hopefully this can be integrated
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\int_{-\infty}^{\infty}\|\mathbf{x}-S_{n}^{\tau}\|d\tau & =\sum_{i=1}^{|S_{n}|}\left(\frac{K_{\gamma}(\mathbf{x},\mathbf{x}_{i}^{\tau})}{\sum_{j=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{j}^{\tau})}\left(\sum_{j=1}^{|S_{n}|}1\right)-\int_{-\infty}^{\infty}\left(\frac{\frac{d}{d\tau}K_{\gamma}(\mathbf{x},\mathbf{x}_{i}^{\tau})}{\sum_{j=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{j}^{\tau})}\left(\sum_{j=1}^{|S_{n}|}1\right)\right)d\tau\right)\\
- & =\sum_{i=1}^{|S_{n}|}\left(\frac{|S_{n}|K_{\gamma}(\mathbf{x},\mathbf{x}_{i}^{\tau})}{\sum_{j=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{j}^{\tau})}-\int_{-\infty}^{\infty}\left(\frac{|S_{n}|\frac{d}{d\tau}K_{\gamma}(\mathbf{x},\mathbf{x}_{i}^{\tau})}{\sum_{j=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{j}^{\tau})}\right)d\tau\right)\end{align*}
+\int\mathcal{K}_{\gamma}(\mathbf{x},S_{n}) & =\int\text{sech }(\|\mathbf{x}-S_{n}\|_{P})\\
+ & =\int\text{sech}\left(\phi_{n}(\mathbf{x})-1\right)^{2}\\
+ & =\int\text{sech}\left(\sum_{i=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})-1\right)^{2}\\
+ & =\int\text{sech}\left(\sum_{\begin{array}{c}
+i=1\\
+j=1\end{array}}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})K_{\gamma}(\mathbf{x},\mathbf{x}_{j})-2\sum_{i=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})+1\right)\\
+ & =\int\text{cosh}\left(\sum_{\begin{array}{c}
+i=1\\
+j=1\end{array}}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})K_{\gamma}(\mathbf{x},\mathbf{x}_{j})-2\sum_{i=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})+1\right)^{-1}\\
+ & =\int\left(\prod_{\begin{array}{c}
+i=1\\
+j=1\end{array}}^{|S_{n}|}\text{cosh}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})K_{\gamma}(\mathbf{x},\mathbf{x}_{j})\ \prod_{i=1}^{|S_{n}|}\text{cosh}2K_{\gamma}(\mathbf{x},\mathbf{x}_{i})+\prod_{\begin{array}{c}
+i=1\\
+j=1\end{array}}^{|S_{n}|}\text{sinh}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})K_{\gamma}(\mathbf{x},\mathbf{x}_{j})\ \prod_{i=1}^{|S_{n}|}\text{sinh}2K_{\gamma}(\mathbf{x},\mathbf{x}_{i})\right)^{-1}\end{align*}
 
 \end_inset
 
