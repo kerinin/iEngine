@@ -1137,12 +1137,12 @@ Sliding Window Kernel Selection
 \end_layout
 
 \begin_layout Standard
-New kernel function:
+kernel function:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\mathcal{K}_{\gamma}(\mathbf{x},S_{n}) & =\text{sech }(\|\mathbf{x}-S_{n}\|_{R})\end{align*}
+\mathcal{K}_{\gamma}(\mathbf{x},S_{n}) & =\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|S_{i}-S_{j}\|_{P}^{2}}\end{align*}
 
 \end_inset
 
@@ -1169,20 +1169,11 @@ Hopefully this can be integrated
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\int\mathcal{K}_{\gamma}(\mathbf{x},S_{n}) & =\int\text{sech }(\|\mathbf{x}-S_{n}\|_{P})\\
- & =\int\text{sech}\left(\phi_{n}(\mathbf{x})-1\right)^{2}\\
- & =\int\text{sech}\left(\sum_{i=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})-1\right)^{2}\\
- & =\int\text{sech}\left(\sum_{\begin{array}{c}
-i=1\\
-j=1\end{array}}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})K_{\gamma}(\mathbf{x},\mathbf{x}_{j})-2\sum_{i=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})+1\right)\\
- & =\int\text{cosh}\left(\sum_{\begin{array}{c}
-i=1\\
-j=1\end{array}}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})K_{\gamma}(\mathbf{x},\mathbf{x}_{j})-2\sum_{i=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})+1\right)^{-1}\\
- & =\int\left(\prod_{\begin{array}{c}
-i=1\\
-j=1\end{array}}^{|S_{n}|}\text{cosh}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})K_{\gamma}(\mathbf{x},\mathbf{x}_{j})\ \prod_{i=1}^{|S_{n}|}\text{cosh}2K_{\gamma}(\mathbf{x},\mathbf{x}_{i})+\prod_{\begin{array}{c}
-i=1\\
-j=1\end{array}}^{|S_{n}|}\text{sinh}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})K_{\gamma}(\mathbf{x},\mathbf{x}_{j})\ \prod_{i=1}^{|S_{n}|}\text{sinh}2K_{\gamma}(\mathbf{x},\mathbf{x}_{i})\right)^{-1}\end{align*}
+\int\mathcal{K}_{\gamma}(\mathbf{x},S_{n}) & =\int\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|\mathbf{x}-S_{n}\|_{P}^{2}}\\
+ & =\int\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\left(\phi_{n}(\mathbf{x})-1\right)^{2}}\\
+ & =\int\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\left(\sum_{i=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})-1\right)^{2}}\\
+ & =\int\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\left(\left(\sum_{i=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})\right)^{2}-2\sum_{i=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})+1\right)}\\
+ & =\int\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\left(\sum_{i=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})\right)^{2}}e^{\frac{2}{\gamma}\sum_{i=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})}e^{-\frac{1}{\gamma}}\end{align*}
 
 \end_inset
 
