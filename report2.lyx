@@ -1,4 +1,4 @@
-#LyX 1.6.1 created this file. For more info see http://www.lyx.org/
+#LyX 1.6.2 created this file. For more info see http://www.lyx.org/
 \lyxformat 345
 \begin_document
 \begin_header
@@ -1142,7 +1142,9 @@ kernel function:
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\mathcal{K}_{\gamma}(\mathbf{x},S_{n}) & =\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|S_{i}-S_{j}\|_{P}^{2}}\end{align*}
+\mathcal{K}_{\gamma}(\mathbf{x},S_{n}) & =\begin{cases}
+\gamma\left(1-\|\mathbf{x}-S_{n}\|^{2}\right) & \|\mathbf{x}-S_{n}\|\le1\\
+0 & \text{otherwise}\end{cases}\end{align*}
 
 \end_inset
 
@@ -1169,11 +1171,18 @@ Hopefully this can be integrated
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\int\mathcal{K}_{\gamma}(\mathbf{x},S_{n}) & =\int\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|\mathbf{x}-S_{n}\|_{P}^{2}}\\
- & =\int\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\left(\phi_{n}(\mathbf{x})-1\right)^{2}}\\
- & =\int\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\left(\sum_{i=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})-1\right)^{2}}\\
- & =\int\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\left(\left(\sum_{i=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})\right)^{2}-2\sum_{i=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})+1\right)}\\
- & =\int\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\left(\sum_{i=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})\right)^{2}}e^{\frac{2}{\gamma}\sum_{i=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})}e^{-\frac{1}{\gamma}}\end{align*}
+\int\mathcal{K}_{\gamma}(\mathbf{x},S_{n}) & =\int\gamma\left(1-\|\mathbf{x}-S_{n}\|_{P}^{2}\right)\\
+ & =\int\gamma\left(1-\left(\phi_{n}(\mathbf{x})-1\right)^{2}\right)\\
+ & =\int\gamma\left(1-\left(\sum_{i=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})-1\right)^{2}\right)\\
+ & =\int\gamma\left(1-\left(\sum_{\begin{array}{c}
+i=1\\
+j=1\end{array}}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})K_{\gamma}(\mathbf{x},\mathbf{x}_{j})-2\sum_{i=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})+1\right)\right)\\
+ & =\int\gamma2\sum_{i=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})-\gamma\sum_{\begin{array}{c}
+i=1\\
+j=1\end{array}}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})K_{\gamma}(\mathbf{x},\mathbf{x}_{j})\\
+ & =\gamma2\sum_{i=1}^{|S_{n}|}\int K_{\gamma}(\mathbf{x},\mathbf{x}_{i})-\gamma\sum_{\begin{array}{c}
+i=1\\
+j=1\end{array}}^{|S_{n}|}\int K_{\gamma}(\mathbf{x},\mathbf{x}_{i})K_{\gamma}(\mathbf{x},\mathbf{x}_{j})\end{align*}
 
 \end_inset
 
