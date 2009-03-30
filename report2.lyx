@@ -1189,6 +1189,23 @@ j=1\end{array}}^{|S_{n}|}\int K_{\gamma}(\mathbf{x},\mathbf{x}_{i})K_{\gamma}(\m
 
 \end_layout
 
+\begin_layout Standard
+Note that 
+\begin_inset Formula $e^{x}$
+\end_inset
+
+ can be expressed as a limit:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+e^{x} & =\lim_{n\rightarrow\infty}\left(1+\frac{x}{n}\right)^{n}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Section
 Support Vector Estimation
 \end_layout
