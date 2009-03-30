@@ -1,4 +1,4 @@
-#LyX 1.6.1 created this file. For more info see http://www.lyx.org/
+#LyX 1.6.2 created this file. For more info see http://www.lyx.org/
 \lyxformat 345
 \begin_document
 \begin_header
@@ -1210,7 +1210,33 @@ j=1\end{array}}^{|S_{n}|}\int\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\lef
  & =\gamma2\sum_{i=1}^{|S_{n}|}\frac{1}{\gamma^{2}2\pi}e^{-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}}\int e^{-\frac{1}{\gamma}\left(t-t_{i}^{\tau}\right)^{2}}d\tau\\
  & \qquad\qquad-\gamma\sum_{\begin{array}{c}
 i=1\\
-j=1\end{array}}^{|S_{n}|}\frac{1}{\gamma^{4}4\pi^{2}}e^{-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}-\frac{1}{\gamma}\left(x-x_{j}\right)^{2}}\int e^{-\frac{1}{\gamma}\left(t-t_{i}^{\tau}\right)^{2}-\frac{1}{\gamma}\left(t-t_{j}^{\tau}\right)^{2}}d\tau\end{align*}
+j=1\end{array}}^{|S_{n}|}\frac{1}{\gamma^{4}4\pi^{2}}e^{-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}-\frac{1}{\gamma}\left(x-x_{j}\right)^{2}}\int e^{-\frac{1}{\gamma}\left(t-t_{i}^{\tau}\right)^{2}-\frac{1}{\gamma}\left(t-t_{j}^{\tau}\right)^{2}}d\tau\\
+ & =\gamma2\sum_{i=1}^{|S_{n}|}\frac{1}{\gamma^{2}2\pi}e^{-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}}\int e^{-\frac{1}{\gamma}\left(t-t_{i}+\tau\right)^{2}}d\tau\\
+ & \qquad\qquad-\gamma\sum_{\begin{array}{c}
+i=1\\
+j=1\end{array}}^{|S_{n}|}\frac{1}{\gamma^{4}4\pi^{2}}e^{-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}-\frac{1}{\gamma}\left(x-x_{j}\right)^{2}}\int e^{-\frac{1}{\gamma}\left(t-t_{i}+\tau\right)^{2}-\frac{1}{\gamma}\left(t-t_{j}+\tau\right)^{2}}d\tau\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Now, thanks to Wolfram Integrator:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\int\mathcal{K}_{\gamma}(\mathbf{x},S_{n}^{\tau})d\tau & =\gamma2\sum_{i=1}^{|S_{n}|}\frac{1}{\gamma^{2}2\pi}e^{-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}}\left(-\frac{1}{2\sqrt{\gamma\pi}}\text{erf}\left(\frac{t-t_{i}+\tau}{\sqrt{\gamma}}\right)\right)\\
+ & \qquad\qquad-\gamma\sum_{\begin{array}{c}
+i=1\\
+j=1\end{array}}^{|S_{n}|}\frac{1}{\gamma^{4}4\pi^{2}}e^{-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}-\frac{1}{\gamma}\left(x-x_{j}\right)^{2}}\left(\frac{1}{2}e^{-\frac{\left(t_{i}+t_{j}\right)^{2}}{\gamma}}\sqrt{\frac{\gamma\pi}{2}}\text{erf}\left(\frac{2t-t_{i}-t_{j}+2\tau}{\sqrt{2\gamma}}\right)\right)\end{align*}
+
+\end_inset
+
+
+\begin_inset Formula \begin{align*}
+\end{align*}
 
 \end_inset
 
