@@ -1018,6 +1018,117 @@ Sliding Parzen Windows
 \end_layout
 
 \begin_layout Standard
+Thus far we have been dealing with discrete subsets with specific starting
+ points and durations.
+ We have compared these against test sets by shifting them along the time
+ axis so their starting points align.
+ Another approach is to treat the time difference between a training set
+ and our test set as a variable 
+\begin_inset Formula $\tau$
+\end_inset
+
+ and to investigate the divergence between the two sets at different values
+ of 
+\begin_inset Formula $\tau$
+\end_inset
+
+.
+ In this approach, rather than evaluating the divergence at the single value
+ of 
+\begin_inset Formula $\tau=0$
+\end_inset
+
+, we evaluate the cumulative value of the divergence over the range 
+\begin_inset Formula $\tau\in(-\infty,\infty)$
+\end_inset
+
+, which is to say we evaluate the following integral:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\|S_{\mathbf{x}}-S_{n}\|_{S} & =\int_{-\infty}^{\infty}\|S_{x}-S_{n}^{\tau}\|d\tau\\
+S_{t,\theta}^{\tau} & =\left[\left(x_{i},t_{i}-t+\tau\right)\ |\quad(x_{i},t_{i})\in S_{t,\theta}\right]\\
+\phi_{n}^{\tau}(\mathbf{x}) & =\sum_{\mathbf{x}_{i}\in S_{n}^{\tau}}\frac{1}{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This integration requires a combination of divergence measure and kernel
+ function which can be integrated.
+ We use the Pearson divergence:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\int\sum_{\mathbf{x}\in S_{\mathbf{x}}}\|\mathbf{x}-S_{n}\|_{P}\ d\tau & =\int\sum_{\mathbf{x}\in S_{\mathbf{x}}}\left(\phi_{n}^{\tau}(\mathbf{x})-1\right)^{2}d\tau\\
+ & =\sum_{\mathbf{x}\in S_{\mathbf{x}}}\int\phi_{n}^{\tau}(\mathbf{x})^{2}-2\int\phi_{n}^{\tau}(\mathbf{x})+\int1d\tau\\
+ & =\sum_{\mathbf{x}\in S_{\mathbf{x}}}\int\sum_{\begin{array}{c}
+\mathbf{x}_{i}\in S_{n}^{\tau}\\
+\mathbf{x}_{j}\in S_{n}^{\tau}\end{array}}\frac{1}{|S_{n}|^{2}}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})K_{\gamma}(\mathbf{x},\mathbf{x}_{j})d\tau-2\int\sum_{\mathbf{x}_{i}\in S_{n}^{\tau}}\frac{1}{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})d\tau+\int1d\tau\\
+ & =\sum_{\mathbf{x}\in S_{\mathbf{x}}}\sum_{\begin{array}{c}
+\mathbf{x}_{i}\in S_{n}^{\tau}\\
+\mathbf{x}_{j}\in S_{n}^{\tau}\end{array}}\frac{1}{|S_{n}|^{2}}\ \int K_{\gamma}(\mathbf{x},\mathbf{x}_{i})K_{\gamma}(\mathbf{x},\mathbf{x}_{j})d\tau-2\int\sum_{\mathbf{x}_{i}\in S_{n}^{\tau}}\frac{1}{|S_{n}|}\ \int K_{\gamma}(\mathbf{x},\mathbf{x}_{i})d\tau+\int1d\tau\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Because we know the integral of the kernel function of the real line is
+ 1, we can eliminate that term over the range 
+\begin_inset Formula $(-\infty,\infty)$
+\end_inset
+
+, and because our kernel function uses the tensor product of each dimension
+ of 
+\begin_inset Formula $\mathbf{x}$
+\end_inset
+
+, we can separate the kernel function into a portion dependant on 
+\begin_inset Formula $\tau$
+\end_inset
+
+ and an independant portion:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\int\sum_{\mathbf{x}\in S_{\mathbf{x}}}\|\mathbf{x}-S_{n}\|_{P}\ d\tau & =\sum_{\mathbf{x}\in S_{\mathbf{x}}}\sum_{\begin{array}{c}
+\mathbf{x}_{i}\in S_{n}^{\tau}\\
+\mathbf{x}_{j}\in S_{n}^{\tau}\end{array}}\frac{1}{|S_{n}|^{2}}K_{\gamma}(x,x_{i})K_{\gamma}(x,x_{j})\ \int K_{\gamma}(t,t_{i})K_{\gamma}(t,t_{j})d\tau-2+\int1d\tau\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Substituting the Gaussian kernel, our divergence measure become:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\int\sum_{\mathbf{x}\in S_{\mathbf{x}}}\|\mathbf{x}-S_{n}\|_{P}\ d\tau & =\sum_{\mathbf{x}\in S_{\mathbf{x}}}\sum_{\begin{array}{c}
+\mathbf{x}_{i}\in S_{n}^{\tau}\\
+\mathbf{x}_{j}\in S_{n}^{\tau}\end{array}}\frac{1}{|S_{n}|^{2}\gamma^{2}2\pi}e^{-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}}e^{-\frac{1}{\gamma}\left(x-x_{j}\right)^{2}}\ \int e^{-\frac{1}{\gamma}\left(t-t_{i}\right)^{2}}e^{-\frac{1}{\gamma}\left(t-t_{j}\right)^{2}}d\tau-2+\int1d\tau\\
+ & =\sum_{\mathbf{x}\in S_{\mathbf{x}}}\sum_{\begin{array}{c}
+\mathbf{x}_{i}\in S_{n}^{\tau}\\
+\mathbf{x}_{j}\in S_{n}^{\tau}\end{array}}\frac{1}{|S_{n}|^{2}\gamma^{2}2\pi}e^{-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}-\frac{1}{\gamma}\left(x-x_{j}\right)^{2}}\ \int e^{-\frac{1}{\gamma}\left(t-t_{i}\right)^{2}-\frac{1}{\gamma}\left(t-t_{j}\right)^{2}}d\tau-2+\int1d\tau\\
+ & =\sum_{\mathbf{x}\in S_{\mathbf{x}}}\sum_{\begin{array}{c}
+\mathbf{x}_{i}\in S_{n}^{\tau}\\
+\mathbf{x}_{j}\in S_{n}^{\tau}\end{array}}\frac{1}{|S_{n}|^{2}\gamma^{2}2\pi}e^{-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}-\frac{1}{\gamma}\left(x-x_{j}\right)^{2}}-\frac{e^{-\frac{1}{2\gamma}(t_{i}-t_{j})^{2}}\sqrt{\frac{\pi}{2}}\text{erfi}\left(\frac{\sqrt{-\frac{1}{\gamma}}(2t+t_{i}+t_{j}-2\tau)}{\sqrt{2}}\right)}{2\sqrt{a}}-2+\int1d\tau\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 Observe that subsets do not exist in isolation; it is possible for the time
  windows defined for two subsets to overlap.
  This makes it possible for the estimates at at two such subsets to take
