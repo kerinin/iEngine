@@ -1,4 +1,4 @@
-#LyX 1.6.1 created this file. For more info see http://www.lyx.org/
+#LyX 1.6.2 created this file. For more info see http://www.lyx.org/
 \lyxformat 345
 \begin_document
 \begin_header
@@ -855,7 +855,7 @@ where
 
 \begin_layout Standard
 \begin_inset Formula \begin{equation}
-K_{\gamma}(S_{i},S_{j})=\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|S_{i}-S_{j}\|_{KL}^{2}}\label{eq:KRBFparzen}\end{equation}
+\mathcal{K}_{\gamma}(S_{i},S_{j})=\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|S_{i}-S_{j}\|_{KL}^{2}}\label{eq:KRBFparzen}\end{equation}
 
 \end_inset
 
@@ -876,7 +876,7 @@ The same method can be used to estimate
 
 \begin_layout Standard
 \begin_inset Formula \begin{equation}
-\phi_{n}(\mathbf{x})=\sum_{\mathbf{x}_{i}\in S_{n}}\frac{1}{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})\label{eq:PhiSingle}\end{equation}
+\phi_{n}(\mathbf{x})=\sum_{\mathbf{x}_{i}\in S_{n}}\frac{1}{|S_{n}|}k_{\gamma}(\mathbf{x},\mathbf{x}_{i})\label{eq:PhiSingle}\end{equation}
 
 \end_inset
 
@@ -1006,7 +1006,7 @@ reference "eq:KRBFparzen"
 
 \begin_layout Standard
 \begin_inset Formula \begin{equation}
-K_{\gamma}(S_{i},S_{j})=\prod_{c}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|S_{i}^{c}-S_{j}^{c}\|_{KL}^{2}}\label{eq:KRBFParzenMultiple}\end{equation}
+\mathcal{K}_{\gamma}(S_{i},S_{j})=\prod_{c}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|S_{i}^{c}-S_{j}^{c}\|_{KL}^{2}}\label{eq:KRBFParzenMultiple}\end{equation}
 
 \end_inset
 
@@ -1047,9 +1047,8 @@ Thus far we have been dealing with discrete subsets with specific starting
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\|S_{\mathbf{x}}-S_{n}\|_{S} & =\int_{-\infty}^{\infty}\|S_{x}-S_{n}^{\tau}\|d\tau\\
-S_{t,\theta}^{\tau} & =\left[\left(x_{i},t_{i}-t+\tau\right)\ |\quad(x_{i},t_{i})\in S_{t,\theta}\right]\\
-\phi_{n}^{\tau}(\mathbf{x}) & =\sum_{\mathbf{x}_{i}\in S_{n}^{\tau}}\frac{1}{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})\end{align*}
+\|S_{\mathbf{x}}-S_{n}\|_{S} & =\int_{-\infty}^{\infty}\|S_{x}-S_{n}\|d\tau\\
+\phi_{n}^{\tau}(\mathbf{x}) & =\sum_{\mathbf{x}_{i}\in S_{n}}\frac{1}{|S_{n}|}K_{\gamma}(\mathbf{x},(x_{i},t_{i}+\tau))\end{align*}
 
 \end_inset
 
@@ -1059,19 +1058,19 @@ S_{t,\theta}^{\tau} & =\left[\left(x_{i},t_{i}-t+\tau\right)\ |\quad(x_{i},t_{i}
 \begin_layout Standard
 This integration requires a combination of divergence measure and kernel
  function which can be integrated.
- We use the Pearson divergence:
+ We use the Pearson divergence :
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\int\sum_{\mathbf{x}\in S_{\mathbf{x}}}\|\mathbf{x}-S_{n}\|_{P}\ d\tau & =\int\sum_{\mathbf{x}\in S_{\mathbf{x}}}\left(\phi_{n}^{\tau}(\mathbf{x})-1\right)^{2}d\tau\\
- & =\sum_{\mathbf{x}\in S_{\mathbf{x}}}\int\phi_{n}^{\tau}(\mathbf{x})^{2}-2\int\phi_{n}^{\tau}(\mathbf{x})+\int1d\tau\\
- & =\sum_{\mathbf{x}\in S_{\mathbf{x}}}\int\sum_{\begin{array}{c}
-\mathbf{x}_{i}\in S_{n}^{\tau}\\
-\mathbf{x}_{j}\in S_{n}^{\tau}\end{array}}\frac{1}{|S_{n}|^{2}}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})K_{\gamma}(\mathbf{x},\mathbf{x}_{j})d\tau-2\int\sum_{\mathbf{x}_{i}\in S_{n}^{\tau}}\frac{1}{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i})d\tau+\int1d\tau\\
- & =\sum_{\mathbf{x}\in S_{\mathbf{x}}}\sum_{\begin{array}{c}
-\mathbf{x}_{i}\in S_{n}^{\tau}\\
-\mathbf{x}_{j}\in S_{n}^{\tau}\end{array}}\frac{1}{|S_{n}|^{2}}\ \int K_{\gamma}(\mathbf{x},\mathbf{x}_{i})K_{\gamma}(\mathbf{x},\mathbf{x}_{j})d\tau-2\int\sum_{\mathbf{x}_{i}\in S_{n}^{\tau}}\frac{1}{|S_{n}|}\ \int K_{\gamma}(\mathbf{x},\mathbf{x}_{i})d\tau+\int1d\tau\end{align*}
+\int\|S_{\mathbf{x}}-S_{n}\|_{P}\ d\tau & =\int\sum_{\mathbf{\bar{x}}\in S_{\mathbf{x}}}\left(\frac{\phi_{n}^{\tau}(\mathbf{\bar{x}})}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})}-1\right)^{2}d\tau\\
+ & =\sum_{\mathbf{\bar{x}}\in S_{\mathbf{x}}}\int\frac{\phi_{n}^{\tau}(\mathbf{\bar{x}})}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})}^{2}-2\int\frac{\phi_{n}^{\tau}(\mathbf{\bar{x}})}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})}+\int1d\tau\\
+ & =\sum_{\mathbf{\bar{x}}\in S_{\mathbf{x}}}\int\sum_{\begin{array}{c}
+\mathbf{x}_{i}\in S_{n}\\
+\mathbf{x}_{j}\in S_{n}\end{array}}\frac{1}{|S_{n}|^{2}\phi_{\mathbf{x}}(\mathbf{\bar{x}})^{2}}K_{\gamma}(\mathbf{\bar{x}},(x_{i},t_{i}+\tau))K_{\gamma}(\mathbf{\bar{x}},(x_{j},t_{j}+\tau))d\tau-2\int\sum_{\mathbf{x}_{i}\in S_{n}^{\tau}}\frac{1}{|S_{n}|\phi_{\mathbf{x}}(\mathbf{\bar{x}})}K_{\gamma}(\mathbf{\bar{x}},(x_{i},t_{i}+\tau))d\tau+\int1d\tau\\
+ & =\sum_{\mathbf{\bar{x}}\in S_{\mathbf{x}}}\sum_{\begin{array}{c}
+\mathbf{x}_{i}\in S_{n}\\
+\mathbf{x}_{j}\in S_{n}\end{array}}\frac{1}{|S_{n}|^{2}\phi_{\mathbf{x}}(\mathbf{\bar{x}})^{2}}\ \int K_{\gamma}(\mathbf{\bar{x}},(x_{i},t_{i}+\tau))K_{\gamma}(\mathbf{\bar{x}},(x_{j},t_{j}+\tau))d\tau-2\int\sum_{\mathbf{x}_{i}\in S_{n}^{\tau}}\frac{1}{|S_{n}|\phi_{\mathbf{x}}(\mathbf{\bar{x}})}\ \int K_{\gamma}(\mathbf{\bar{x}},(x_{i},t_{i}+\tau))d\tau+\int1d\tau\end{align*}
 
 \end_inset
 
@@ -1093,14 +1092,16 @@ Because we know the integral of the kernel function of the real line is
 \begin_inset Formula $\tau$
 \end_inset
 
- and an independant portion:
+ and an independant portion.
+ Finally, because this divergence is intended as a comparison, we eliminate
+ the constant terms:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\int\sum_{\mathbf{x}\in S_{\mathbf{x}}}\|\mathbf{x}-S_{n}\|_{P}\ d\tau & =\sum_{\mathbf{x}\in S_{\mathbf{x}}}\sum_{\begin{array}{c}
-\mathbf{x}_{i}\in S_{n}^{\tau}\\
-\mathbf{x}_{j}\in S_{n}^{\tau}\end{array}}\frac{1}{|S_{n}|^{2}}K_{\gamma}(x,x_{i})K_{\gamma}(x,x_{j})\ \int K_{\gamma}(t,t_{i})K_{\gamma}(t,t_{j})d\tau-2+\int1d\tau\end{align*}
+\int\sum_{\mathbf{x}\in S_{\mathbf{x}}}\|S_{\mathbf{x}}-S_{n}\|_{P}\ d\tau & =\sum_{\mathbf{x}\in S_{\mathbf{x}}}\sum_{\begin{array}{c}
+\mathbf{x}_{i}\in S_{n}\\
+\mathbf{x}_{j}\in S_{n}\end{array}}\frac{1}{|S_{n}|^{2}\phi_{\mathbf{x}}(\mathbf{\bar{x}})^{2}}K_{\gamma}(x,x_{i})K_{\gamma}(x,x_{j})\ \int K_{\gamma}(t,t_{i}+\tau)K_{\gamma}(t,t_{j}+\tau)d\tau\end{align*}
 
 \end_inset
 
@@ -1113,19 +1114,19 @@ Substituting the Gaussian kernel, our divergence measure become:
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\int\sum_{\mathbf{x}\in S_{\mathbf{x}}}\|\mathbf{x}-S_{n}\|_{P}\ d\tau & =\sum_{\mathbf{x}\in S_{\mathbf{x}}}\sum_{\begin{array}{c}
-\mathbf{x}_{i}\in S_{n}^{\tau}\\
-\mathbf{x}_{j}\in S_{n}^{\tau}\end{array}}\frac{1}{|S_{n}|^{2}\gamma^{2}2\pi}e^{-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}}e^{-\frac{1}{\gamma}\left(x-x_{j}\right)^{2}}\ \int_{-\infty}^{\infty}e^{-\frac{1}{\gamma}\left(t-t_{i}\right)^{2}}e^{-\frac{1}{\gamma}\left(t-t_{j}\right)^{2}}d\tau-2+\int1d\tau\\
- & =\sum_{\mathbf{x}\in S_{\mathbf{x}}}\sum_{\begin{array}{c}
-\mathbf{x}_{i}\in S_{n}^{\tau}\\
-\mathbf{x}_{j}\in S_{n}^{\tau}\end{array}}\frac{1}{|S_{n}|^{2}\gamma^{2}2\pi}e^{-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}-\frac{1}{\gamma}\left(x-x_{j}\right)^{2}}\ \int_{-\infty}^{\infty}e^{-\frac{1}{\gamma}\left(t-t_{i}\right)^{2}-\frac{1}{\gamma}\left(t-t_{j}\right)^{2}}d\tau-2+\int1d\tau\\
- & =\sum_{\mathbf{x}\in S_{\mathbf{x}}}\sum_{\begin{array}{c}
-\mathbf{x}_{i}\in S_{n}^{\tau}\\
-\mathbf{x}_{j}\in S_{n}^{\tau}\end{array}}\frac{1}{|S_{n}|^{2}\gamma^{2}2\pi}e^{-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}-\frac{1}{\gamma}\left(x-x_{j}\right)^{2}}-\lim_{\tau\rightarrow\infty}\frac{e^{-\frac{1}{2\gamma}(t_{i}-t_{j})^{2}}\sqrt{\frac{\pi}{2}}\text{erf}\left(\frac{\sqrt{\frac{1}{\gamma}}(2t+t_{i}+t_{j}-2\tau)}{\sqrt{2}}\right)}{2\sqrt{\frac{1}{\gamma}}}\\
- & \qquad\qquad\qquad+\lim_{\tau\rightarrow-\infty}\frac{e^{-\frac{1}{2\gamma}(t_{i}-t_{j})^{2}}\sqrt{\frac{\pi}{2}}\text{erf}\left(\frac{\sqrt{\frac{1}{\gamma}}(2t+t_{i}+t_{j}-2\tau)}{\sqrt{2}}\right)}{2\sqrt{\frac{1}{\gamma}}}-2+\int1d\tau\\
- & =\sum_{\mathbf{x}\in S_{\mathbf{x}}}\sum_{\begin{array}{c}
-\mathbf{x}_{i}\in S_{n}^{\tau}\\
-\mathbf{x}_{j}\in S_{n}^{\tau}\end{array}}\frac{1}{|S_{n}|^{2}\gamma^{2}2\pi}e^{-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}-\frac{1}{\gamma}\left(x-x_{j}\right)^{2}}+2\sqrt{\frac{\pi}{2\gamma}}e^{-\frac{1}{2\gamma}(t_{i}-t_{j})^{2}}-2+\int1d\tau\end{align*}
+\int\sum_{\mathbf{x}\in S_{\mathbf{x}}}\|S_{\mathbf{x}}-S_{n}\|_{P}\ d\tau & =\sum_{\mathbf{\bar{x}}\in S_{\mathbf{x}}}\sum_{\begin{array}{c}
+\mathbf{x}_{i}\in S_{n}\\
+\mathbf{x}_{j}\in S_{n}\end{array}}\frac{1}{|S_{n}|^{2}\gamma^{2}2\pi\phi_{\mathbf{x}}(\mathbf{\bar{x}})^{2}}e^{-\frac{1}{\gamma}\left(\bar{x}-x_{i}\right)^{2}}e^{-\frac{1}{\gamma}\left(\bar{x}-x_{j}\right)^{2}}\ \int_{-\infty}^{\infty}e^{-\frac{1}{\gamma}\left(\bar{t}-t_{i}-\tau\right)^{2}}e^{-\frac{1}{\gamma}\left(\bar{t}-t_{j}-\tau\right)^{2}}d\tau\\
+ & =\sum_{\mathbf{\bar{x}}\in S_{\mathbf{x}}}\sum_{\begin{array}{c}
+\mathbf{x}_{i}\in S_{n}\\
+\mathbf{x}_{j}\in S_{n}\end{array}}\frac{1}{|S_{n}|^{2}\gamma^{2}2\pi\phi_{\mathbf{x}}(\mathbf{\bar{x}})^{2}}e^{-\frac{1}{\gamma}\left(\bar{x}-x_{i}\right)^{2}-\frac{1}{\gamma}\left(\bar{x}-x_{j}\right)^{2}}\ \int_{-\infty}^{\infty}e^{-\frac{1}{\gamma}\left(\bar{t}-t_{i}-\tau\right)^{2}-\frac{1}{\gamma}\left(\bar{t}-t_{j}-\tau\right)^{2}}d\tau\\
+ & =\sum_{\mathbf{\bar{x}}\in S_{\mathbf{x}}}\sum_{\begin{array}{c}
+\mathbf{x}_{i}\in S_{n}\\
+\mathbf{x}_{j}\in S_{n}\end{array}}\frac{1}{|S_{n}|^{2}\gamma^{2}2\pi\phi_{\mathbf{x}}(\mathbf{\bar{x}})^{2}}e^{-\frac{1}{\gamma}\left(\bar{x}-x_{i}\right)^{2}-\frac{1}{\gamma}\left(\bar{x}-x_{j}\right)^{2}}-\lim_{\tau\rightarrow\infty}\frac{e^{-\frac{1}{2\gamma}(t_{i}-t_{j})^{2}}\sqrt{\frac{\pi}{2}}\text{erf}\left(\frac{\sqrt{\frac{1}{\gamma}}(2\bar{t}+t_{i}+t_{j}-2\tau)}{\sqrt{2}}\right)}{2\sqrt{\frac{1}{\gamma}}}\\
+ & \qquad\qquad\qquad+\lim_{\tau\rightarrow-\infty}\frac{e^{-\frac{1}{2\gamma}(t_{i}-t_{j})^{2}}\sqrt{\frac{\pi}{2}}\text{erf}\left(\frac{\sqrt{\frac{1}{\gamma}}(2\bar{t}+t_{i}+t_{j}-2\tau)}{\sqrt{2}}\right)}{2\sqrt{\frac{1}{\gamma}}}\\
+ & =\sum_{\mathbf{\bar{x}}\in S_{\mathbf{x}}}\sum_{\begin{array}{c}
+\mathbf{x}_{i}\in S_{n}\\
+\mathbf{x}_{j}\in S_{n}\end{array}}\frac{1}{|S_{n}|^{2}\gamma^{2}2\pi\phi_{\mathbf{x}}(\mathbf{\bar{x}})^{2}}e^{-\frac{1}{\gamma}\left(\bar{x}-x_{i}\right)^{2}-\frac{1}{\gamma}\left(\bar{x}-x_{j}\right)^{2}}+2\sqrt{\frac{\pi}{2\gamma}}e^{-\frac{1}{2\gamma}(t_{i}-t_{j})^{2}}\end{align*}
 
 \end_inset
 
@@ -1133,45 +1134,12 @@ Substituting the Gaussian kernel, our divergence measure become:
 \end_layout
 
 \begin_layout Standard
-Observe that subsets do not exist in isolation; it is possible for the time
- windows defined for two subsets to overlap.
- This makes it possible for the estimates at at two such subsets to take
- advantage of this shared information.
- This can be accomplished by modifying 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:PrSParzenSingle"
-
+Our new divergence measure 
+\begin_inset Formula $\|S_{\mathbf{x}}-S_{n}\|_{S}$
 \end_inset
 
- to include sets with arbitrary offsets 
-\begin_inset Formula $\tau$
-\end_inset
-
-.
- 
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \[
-S_{t,\theta}^{\tau}=\left[\left(x_{i},t_{i}-t+\tau\right)|\quad(x_{i}^{n},t_{i})\in S_{t,\theta}\right]\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Within these bounds, we can evaluate our kernel function at each step of
- arbitrarily small value 
-\begin_inset Formula $\eta$
-\end_inset
-
- and sum the results.
- For computational reasons we establish the following bounds on the offset
- which essentially require that the two subsets share at least one point
- in 
-\begin_inset Formula $t$
+ can now be substituted into 
+\begin_inset Formula $\varphi(\mathbf{x})$
 \end_inset
 
 :
@@ -1179,323 +1147,15 @@ Within these bounds, we can evaluate our kernel function at each step of
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\varphi_{Pslide}(\mathbf{x},S) & =\frac{1}{|\mathcal{S}|}\sum_{j\in\mathcal{S}}\frac{1}{|T|}\sum_{\tau\in T}\ K_{\gamma}(S_{\mathbf{x}},S_{j}^{\tau}),\\
-T & =\left[-\theta_{j},\ -\theta_{j}+\eta,\ -\theta_{j}+2n,\ldots,\ \theta_{S\cup\mathbf{x}}+\theta_{j}\right]\\
-\theta_{S\cup\mathbf{x}} & \ge\left(|S\cup\mathbf{x}|_{\max_{t}}-|S\cup\mathbf{x}|_{\min_{t}}\right)\end{align*}
+\varphi_{P}(\mathbf{x},S) & =\sum_{i\in\mathcal{S}}\frac{1}{|\mathcal{S}|}\mathcal{K}_{\gamma}(S_{\mathbf{x}},S_{i})\\
+K_{\gamma}(S_{i},S_{j}) & =\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|S_{i}-S_{j}\|_{KL}^{2}}\\
+\|S_{n}-S_{m}\|_{S} & =\sum_{\mathbf{\bar{x}}\in S_{n}}\sum_{\begin{array}{c}
+\mathbf{x}_{i}\in S_{m}\\
+\mathbf{x}_{j}\in S_{m}\end{array}}\frac{1}{|S_{m}|^{2}\gamma^{2}2\pi\phi_{\mathbf{x}}(\mathbf{\bar{x}})^{2}}e^{-\frac{1}{\gamma}\left(\bar{x}-x_{i}\right)^{2}-\frac{1}{\gamma}\left(\bar{x}-x_{j}\right)^{2}}+2\sqrt{\frac{\pi}{2\gamma}}e^{-\frac{1}{2\gamma}(t_{i}-t_{j})^{2}}\end{align*}
 
 \end_inset
 
 
-\end_layout
-
-\begin_layout Standard
-Where Taking the limit as 
-\begin_inset Formula $\eta\mapsto0$
-\end_inset
-
-:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-\lim_{\eta\mapsto0}\varphi_{Pslide}(\mathbf{x},S) & =\frac{1}{|\mathcal{S}|}\sum_{j\in\mathcal{S}}\int_{-\theta_{j}}^{\theta_{S\cup\mathbf{x}}+\theta_{j}}K_{\gamma}(S_{\mathbf{x}},S_{j}^{\eta})d\eta\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-What if we define 
-\begin_inset Formula $|\mathcal{S}|$
-\end_inset
-
- to contain a single S which encompasses the entire training set? In this
- case our problem reduces to the integral of the kernel over the range of
- X.
- This seems like the ideal solution - it reduces computational demands for
- any system with more than 2 window sizes and allows arbitrary pattern length.
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-If we define a cross kernel function 
-\begin_inset Formula $k_{\gamma}$
-\end_inset
-
- to be the antiderivative of 
-\begin_inset Formula $K_{\gamma}$
-\end_inset
-
-, this simplifies to:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-\lim_{\eta\mapsto0}\varphi_{Pslide}(\mathbf{x},S) & =\frac{1}{|\mathcal{S}|}\sum_{j\in\mathcal{S}}k_{\gamma}\left(S_{\mathbf{x}},S_{j}^{\theta_{S\cup\mathbf{x}}+\theta_{j}}\right)-k_{\gamma}\left(S_{\mathbf{x}},S_{j}^{-\theta_{j}}\right)\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Subsubsection
-Sliding Window Kernel Selection
-\end_layout
-
-\begin_layout Standard
-kernel function:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-\mathcal{K}_{\gamma}(\mathbf{x},S_{n}) & =\begin{cases}
-\gamma\left(1-\left(\frac{\|\mathbf{x}-S_{n}\|}{\gamma}\right)^{2}\right) & \quad\|x-S_{n}\|\le\gamma\\
-0 & \text{\quad otherwise}\end{cases}\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Two new distance functions, Hellenger and Pearson.
- The exponent has been omitted as the kernel function squares the distance
- - doing so twice seems redundant:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-\|\mathbf{x}-S_{n}\|_{H} & =\left(\sqrt{\phi_{n}(\mathbf{x})}-1\right)\\
-\|\mathbf{x}-S_{n}\|_{P} & =\left(\phi_{n}(\mathbf{x})-1\right)\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Hopefully this can be integrated
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-\int\mathcal{K}_{\gamma}(\mathbf{x},S_{n}^{\tau})d\tau & =\int\gamma\left(1-\|\mathbf{x}-S_{n}^{\tau}\|_{P}^{2}\right)d\tau\\
- & =\int\gamma\left(1-\left(\phi_{n}^{\tau}(\mathbf{x})-1\right)^{2}\right)d\tau\\
- & =\int\gamma\left(1-\left(\frac{1}{|S_{n}|}\sum_{i=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i}^{\tau})-1\right)^{2}\right)d\tau\\
- & =\int\gamma\left(1-\left(\frac{1}{|S_{n}|^{2}}\sum_{\begin{array}{c}
-i=1\\
-j=1\end{array}}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i}^{\tau})K_{\gamma}(\mathbf{x},\mathbf{x}_{j}^{\tau})-\frac{2}{|S_{n}|}\sum_{i=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i}^{\tau})+1\right)\right)d\tau\\
- & =\int\frac{\gamma2}{|S_{n}|}\sum_{i=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i}^{\tau})-\frac{\gamma}{|S_{n}|^{2}}\sum_{\begin{array}{c}
-i=1\\
-j=1\end{array}}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i}^{\tau})K_{\gamma}(\mathbf{x},\mathbf{x}_{j}^{\tau})d\tau\\
- & =\frac{\gamma2}{|S_{n}|}\sum_{i=1}^{|S_{n}|}\int K_{\gamma}(\mathbf{x},\mathbf{x}_{i}^{\tau})d\tau-\frac{\gamma}{|S_{n}|^{2}}\sum_{\begin{array}{c}
-i=1\\
-j=1\end{array}}^{|S_{n}|}\int K_{\gamma}(\mathbf{x},\mathbf{x}_{i}^{\tau})K_{\gamma}(\mathbf{x},\mathbf{x}_{j}^{\tau})d\tau\end{align*}
-
-\end_inset
-
-
-\backslash
-
-\end_layout
-
-\begin_layout Standard
-If we use the gaussian kernel for our parzen estimates this reduces nicely
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-\int\mathcal{K}_{\gamma}(\mathbf{x},S_{n}^{\tau})d\tau & =\frac{\gamma2}{|S_{n}|}\sum_{i=1}^{|S_{n}|}\int K_{\gamma}(\mathbf{x},\mathbf{x}_{i}^{\tau})d\tau-\frac{\gamma}{|S_{n}|^{2}}\sum_{\begin{array}{c}
-i=1\\
-j=1\end{array}}^{|S_{n}|}\int K_{\gamma}(\mathbf{x},\mathbf{x}_{i}^{\tau})K_{\gamma}(\mathbf{x},\mathbf{x}_{j}^{\tau})d\tau\\
- & =\frac{\gamma2}{|S_{n}|}\sum_{i=1}^{|S_{n}|}\int K_{\gamma}(t,t_{i}^{\tau})K_{\gamma}(x,x_{i})d\tau-\frac{\gamma}{|S_{n}|^{2}}\sum_{\begin{array}{c}
-i=1\\
-j=1\end{array}}^{|S_{n}|}\int K_{\gamma}(t,t_{i}^{\tau})K_{\gamma}(x,x_{i})K_{\gamma}(t,t_{j}^{\tau})K_{\gamma}(x,x_{j})d\tau\\
- & =\frac{\gamma2}{|S_{n}|}\sum_{i=1}^{|S_{n}|}\int\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\left(t-t_{i}^{\tau}\right)^{2}}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}}d\tau\\
- & \qquad\qquad-\frac{\gamma}{|S_{n}|^{2}}\sum_{\begin{array}{c}
-i=1\\
-j=1\end{array}}^{|S_{n}|}\int\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\left(t-t_{i}^{\tau}\right)^{2}}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\left(t-t_{j}^{\tau}\right)^{2}}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\left(x-x_{ji}\right)^{2}}d\tau\\
- & =\frac{1}{\gamma\pi|S_{n}|}\sum_{i=1}^{|S_{n}|}e^{-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}}\int e^{-\frac{1}{\gamma}\left(t-t_{i}^{\tau}\right)^{2}}d\tau\\
- & \qquad\qquad-\frac{1}{\gamma^{3}4\pi^{2}|S_{n}|^{2}}\sum_{\begin{array}{c}
-i=1\\
-j=1\end{array}}^{|S_{n}|}e^{-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}-\frac{1}{\gamma}\left(x-x_{j}\right)^{2}}\int e^{-\frac{1}{\gamma}\left(t-t_{i}^{\tau}\right)^{2}-\frac{1}{\gamma}\left(t-t_{j}^{\tau}\right)^{2}}d\tau\\
- & =\frac{1}{\gamma\pi|S_{n}|}\sum_{i=1}^{|S_{n}|}e^{-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}}\int e^{-\frac{1}{\gamma}\left(t-t_{i}+\tau\right)^{2}}d\tau\\
- & \qquad\qquad-\frac{1}{\gamma^{3}4\pi^{2}|S_{n}|^{2}}\sum_{\begin{array}{c}
-i=1\\
-j=1\end{array}}^{|S_{n}|}e^{-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}-\frac{1}{\gamma}\left(x-x_{j}\right)^{2}}\int e^{-\frac{1}{\gamma}\left(t-t_{i}+\tau\right)^{2}-\frac{1}{\gamma}\left(t-t_{j}+\tau\right)^{2}}d\tau\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Now, thanks to Wolfram Integrator:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-\int\mathcal{K}_{\gamma}(\mathbf{x},S_{n}^{\tau})d\tau & =\frac{1}{\gamma\pi|S_{n}|}\sum_{i=1}^{|S_{n}|}e^{-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}}\left(-\frac{1}{2\sqrt{\gamma\pi}}\text{erf}\left(\frac{t-t_{i}+\tau}{\sqrt{\gamma}}\right)\right)\\
- & \qquad\qquad-\frac{1}{\gamma^{3}4\pi^{2}|S_{n}|^{2}}\sum_{\begin{array}{c}
-i=1\\
-j=1\end{array}}^{|S_{n}|}e^{-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}-\frac{1}{\gamma}\left(x-x_{j}\right)^{2}}\left(\frac{1}{2}e^{-\frac{\left(t_{i}+t_{j}\right)^{2}}{\gamma}}\sqrt{\frac{\gamma\pi}{2}}\text{erf}\left(\frac{2t-t_{i}-t_{j}+2\tau}{\sqrt{2\gamma}}\right)\right)\\
- & =-\frac{1}{2\gamma\pi|S_{n}|\sqrt{\gamma\pi}}\sum_{i=1}^{|S_{n}|}e^{-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}}\text{erf}\left(\frac{t-t_{i}+\tau}{\sqrt{\gamma}}\right)\\
- & \qquad\qquad-\frac{1}{\gamma^{3}8\pi^{2}|S_{n}|^{2}}\cdot\sqrt{\frac{\gamma\pi}{2}}\sum_{\begin{array}{c}
-i=1\\
-j=1\end{array}}^{|S_{n}|}e^{-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}-\frac{1}{\gamma}\left(x-x_{j}\right)^{2}-\frac{1}{\gamma}\left(t_{i}+t_{j}\right)^{2}}\text{erf}\left(\frac{2t-t_{i}-t_{j}+2\tau}{\sqrt{2\gamma}}\right)\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-This can be separated into a set of equations:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-f_{1}(\mathbf{x},\mathbf{x}_{i}) & =-\frac{1}{2\gamma\pi\sqrt{\gamma\pi}}e^{-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}}\text{erf}\left(\frac{t-t_{i}+\tau}{\sqrt{\gamma}}\right)\\
-f_{2}(\mathbf{x},\mathbf{x}_{i},\mathbf{x}_{j}) & =\frac{1}{\gamma^{3}8\pi^{2}}\cdot\sqrt{\frac{\gamma\pi}{2}}e^{-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}-\frac{1}{\gamma}\left(x-x_{j}\right)^{2}-\frac{1}{\gamma}\left(t_{i}+t_{j}\right)^{2}}\text{erf}\left(\frac{2t-t_{i}-t_{j}+2\tau}{\sqrt{2\gamma}}\right)\\
-\int_{a}^{b}\mathcal{K}_{\gamma}(\mathbf{x},S_{n}^{\tau})d\tau & =\frac{1}{|S_{n}|}\sum_{i=1}^{|S_{n}|}f_{1}(\mathbf{x},\mathbf{x}_{i}^{a})+\frac{1}{|S_{n}|^{2}}\sum_{\begin{array}{c}
-i=1\\
-j=1\end{array}}^{|S_{n}|}f_{2}(\mathbf{x},\mathbf{x}_{i}^{a},\mathbf{x}_{j}^{a})-\frac{1}{|S_{n}|}\sum_{i=1}^{|S_{n}|}f_{1}(\mathbf{x},\mathbf{x}_{j}^{b})-\frac{1}{|S_{n}|^{2}}\sum_{\begin{array}{c}
-i=1\\
-j=1\end{array}}^{|S_{n}|}f_{2}(\mathbf{x},\mathbf{x}_{i}^{b},\mathbf{x}_{j}^{b})\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Recall that our kernel function 
-\begin_inset Formula $\mathcal{K}_{\gamma}$
-\end_inset
-
- is limited to the range 
-\begin_inset Formula $0\le|\mathbf{x}-S_{n}|\le\gamma$
-\end_inset
-
-, and that in fact outside this range the kernel function is non-zero.
- We must constrain our integral to this range to avoid erroneously including
- the values outside the range.
- Knowing that our ultimate goal is to evaluate the integral 
-\begin_inset Formula $\int_{-\infty}^{\infty}\mathcal{K}_{\gamma}$
-\end_inset
-
-, we can evaluate functions 
-\begin_inset Formula $f_{1}$
-\end_inset
-
- and 
-\begin_inset Formula $f_{2}$
-\end_inset
-
- over the inteval 
-\begin_inset Formula $(-\infty,\infty)$
-\end_inset
-
- by evaluating the valid range of 
-\begin_inset Formula $\tau$
-\end_inset
-
- for each pair of points 
-\begin_inset Formula $(\mathbf{x},\mathbf{x}_{i})$
-\end_inset
-
- and each set of points 
-\begin_inset Formula $(\mathbf{x},\mathbf{x}_{i},\mathbf{x}_{j})$
-\end_inset
-
-:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-\int_{-\infty}^{\infty}\mathcal{K}_{\gamma}(\mathbf{x},S_{n}^{\tau})d\tau & =\sum_{i=1}^{|S_{n}|}f_{1}(\mathbf{x},\mathbf{x}_{i}^{\tau_{i}^{\max}})+\sum_{\begin{array}{c}
-i=1\\
-j=1\end{array}}^{|S_{n}|}f_{2}(\mathbf{x},\mathbf{x}_{i}^{\tau_{i}^{\max}},\mathbf{x}_{j}^{\tau_{j}^{\max}})-\sum_{i=1}^{|S_{n}|}f_{1}(\mathbf{x},\mathbf{x}_{i}^{\tau_{i}^{\min}})-\sum_{\begin{array}{c}
-i=1\\
-j=1\end{array}}^{|S_{n}|}f_{2}(\mathbf{x},\mathbf{x}_{i}^{\tau_{i}^{\min}},\mathbf{x}_{j}^{\tau_{j}^{\min}})\\
-u & =\|\mathbf{x}-S_{n}\|_{P}\\
- & =\sum_{i=1}^{|S_{n}|}K_{\gamma}(\mathbf{x},\mathbf{x}_{i}^{\tau})-1\\
-u_{\mathbf{x},\mathbf{x}_{i}^{\tau}} & =K_{\gamma}(\mathbf{x},\mathbf{x}_{i}^{\tau})-1\\
- & =\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\left(\mathbf{x}-\mathbf{x}_{i}^{\tau}\right)^{2}}\\
-\gamma & =u_{\mathbf{x},\mathbf{x}_{i}^{\tau_{i}^{\max}}}\\
- & =\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\left(t-t_{i}+\tau_{i}^{\max}\right)^{2}}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}}\\
- & =\frac{1}{\gamma^{2}2\pi}e^{-\frac{1}{\gamma}\left(t-t_{i}+\tau_{i}^{\max}\right)^{2}}e^{-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}}\\
-\pm\sqrt{-\gamma\log\gamma^{3}2\pi e^{\frac{1}{\gamma}\left(x-x_{i}\right)^{2}}} & =t-t_{i}+\tau_{i}^{\max}\\
-\tau_{i}^{\max} & =t_{i}-t+\sqrt{-(x-x_{i})^{2}-\gamma\log\gamma^{3}2\pi}\\
-\tau_{i}^{\min} & =t_{i}-t-\sqrt{-(x-x_{i})^{2}-\gamma\log\gamma^{3}2\pi}\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-We have a couple issues that need to be addressed here.
- 
-\end_layout
-
-\begin_layout Itemize
-Can we simply split 
-\begin_inset Formula $u$
-\end_inset
-
- into 
-\begin_inset Formula $u_{\mathbf{x},\mathbf{x}_{i}}$
-\end_inset
-
-
-\bar under
- 
-\bar default
-without causing problems.
- 
-\end_layout
-
-\begin_layout Itemize
-How this does this take the test set 
-\begin_inset Formula $S_{\mathbf{x}}$
-\end_inset
-
- into account (it currently seems to only handle single observations).
- I believe this is OK *if* the entropy measure we're using is additive,
- but it needs to be looked into.
- 
-\end_layout
-
-\begin_layout Itemize
-The range of 
-\begin_inset Formula $f_{2}$
-\end_inset
-
-: we're using two points so we must choose between their ranges - my guess
- is it should be taken over their intersection.
- 
-\end_layout
-
-\begin_layout Itemize
-See if removing the double squaring (divergence and kernel) is OK.
-\end_layout
-
-\begin_layout Itemize
-Check the 
-\begin_inset Formula $\tau^{\max}$
-\end_inset
-
- equations and make sure your algebra is correct
 \end_layout
 
 \begin_layout Section
