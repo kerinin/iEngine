@@ -1115,13 +1115,17 @@ Substituting the Gaussian kernel, our divergence measure become:
 \begin_inset Formula \begin{align*}
 \int\sum_{\mathbf{x}\in S_{\mathbf{x}}}\|\mathbf{x}-S_{n}\|_{P}\ d\tau & =\sum_{\mathbf{x}\in S_{\mathbf{x}}}\sum_{\begin{array}{c}
 \mathbf{x}_{i}\in S_{n}^{\tau}\\
-\mathbf{x}_{j}\in S_{n}^{\tau}\end{array}}\frac{1}{|S_{n}|^{2}\gamma^{2}2\pi}e^{-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}}e^{-\frac{1}{\gamma}\left(x-x_{j}\right)^{2}}\ \int e^{-\frac{1}{\gamma}\left(t-t_{i}\right)^{2}}e^{-\frac{1}{\gamma}\left(t-t_{j}\right)^{2}}d\tau-2+\int1d\tau\\
+\mathbf{x}_{j}\in S_{n}^{\tau}\end{array}}\frac{1}{|S_{n}|^{2}\gamma^{2}2\pi}e^{-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}}e^{-\frac{1}{\gamma}\left(x-x_{j}\right)^{2}}\ \int_{-\infty}^{\infty}e^{-\frac{1}{\gamma}\left(t-t_{i}\right)^{2}}e^{-\frac{1}{\gamma}\left(t-t_{j}\right)^{2}}d\tau-2+\int1d\tau\\
  & =\sum_{\mathbf{x}\in S_{\mathbf{x}}}\sum_{\begin{array}{c}
 \mathbf{x}_{i}\in S_{n}^{\tau}\\
-\mathbf{x}_{j}\in S_{n}^{\tau}\end{array}}\frac{1}{|S_{n}|^{2}\gamma^{2}2\pi}e^{-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}-\frac{1}{\gamma}\left(x-x_{j}\right)^{2}}\ \int e^{-\frac{1}{\gamma}\left(t-t_{i}\right)^{2}-\frac{1}{\gamma}\left(t-t_{j}\right)^{2}}d\tau-2+\int1d\tau\\
+\mathbf{x}_{j}\in S_{n}^{\tau}\end{array}}\frac{1}{|S_{n}|^{2}\gamma^{2}2\pi}e^{-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}-\frac{1}{\gamma}\left(x-x_{j}\right)^{2}}\ \int_{-\infty}^{\infty}e^{-\frac{1}{\gamma}\left(t-t_{i}\right)^{2}-\frac{1}{\gamma}\left(t-t_{j}\right)^{2}}d\tau-2+\int1d\tau\\
  & =\sum_{\mathbf{x}\in S_{\mathbf{x}}}\sum_{\begin{array}{c}
 \mathbf{x}_{i}\in S_{n}^{\tau}\\
-\mathbf{x}_{j}\in S_{n}^{\tau}\end{array}}\frac{1}{|S_{n}|^{2}\gamma^{2}2\pi}e^{-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}-\frac{1}{\gamma}\left(x-x_{j}\right)^{2}}-\frac{e^{-\frac{1}{2\gamma}(t_{i}-t_{j})^{2}}\sqrt{\frac{\pi}{2}}\text{erfi}\left(\frac{\sqrt{-\frac{1}{\gamma}}(2t+t_{i}+t_{j}-2\tau)}{\sqrt{2}}\right)}{2\sqrt{a}}-2+\int1d\tau\end{align*}
+\mathbf{x}_{j}\in S_{n}^{\tau}\end{array}}\frac{1}{|S_{n}|^{2}\gamma^{2}2\pi}e^{-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}-\frac{1}{\gamma}\left(x-x_{j}\right)^{2}}-\lim_{\tau\rightarrow\infty}\frac{e^{-\frac{1}{2\gamma}(t_{i}-t_{j})^{2}}\sqrt{\frac{\pi}{2}}\text{erf}\left(\frac{\sqrt{\frac{1}{\gamma}}(2t+t_{i}+t_{j}-2\tau)}{\sqrt{2}}\right)}{2\sqrt{\frac{1}{\gamma}}}\\
+ & \qquad\qquad\qquad+\lim_{\tau\rightarrow-\infty}\frac{e^{-\frac{1}{2\gamma}(t_{i}-t_{j})^{2}}\sqrt{\frac{\pi}{2}}\text{erf}\left(\frac{\sqrt{\frac{1}{\gamma}}(2t+t_{i}+t_{j}-2\tau)}{\sqrt{2}}\right)}{2\sqrt{\frac{1}{\gamma}}}-2+\int1d\tau\\
+ & =\sum_{\mathbf{x}\in S_{\mathbf{x}}}\sum_{\begin{array}{c}
+\mathbf{x}_{i}\in S_{n}^{\tau}\\
+\mathbf{x}_{j}\in S_{n}^{\tau}\end{array}}\frac{1}{|S_{n}|^{2}\gamma^{2}2\pi}e^{-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}-\frac{1}{\gamma}\left(x-x_{j}\right)^{2}}+2\sqrt{\frac{\pi}{2\gamma}}e^{-\frac{1}{2\gamma}(t_{i}-t_{j})^{2}}-2+\int1d\tau\end{align*}
 
 \end_inset
 
