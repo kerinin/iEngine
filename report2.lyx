@@ -1,4 +1,4 @@
-#LyX 1.6.2 created this file. For more info see http://www.lyx.org/
+#LyX 1.6.1 created this file. For more info see http://www.lyx.org/
 \lyxformat 345
 \begin_document
 \begin_header
@@ -1064,7 +1064,7 @@ This integration requires a combination of divergence measure and kernel
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
 \int\|S_{\mathbf{x}}-S_{n}\|_{P}\ d\tau & =\int\sum_{\mathbf{\bar{x}}\in S_{\mathbf{x}}}\left(\frac{\phi_{n}^{\tau}(\mathbf{\bar{x}})}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})}-1\right)^{2}d\tau\\
- & =\sum_{\mathbf{\bar{x}}\in S_{\mathbf{x}}}\int\frac{\phi_{n}^{\tau}(\mathbf{\bar{x}})}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})}^{2}-2\int\frac{\phi_{n}^{\tau}(\mathbf{\bar{x}})}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})}+\int1d\tau\\
+ & =\sum_{\mathbf{\bar{x}}\in S_{\mathbf{x}}}\int\frac{\phi_{n}^{\tau}(\mathbf{\bar{x}})}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})}^{2}d\tau-2\int\frac{\phi_{n}^{\tau}(\mathbf{\bar{x}})}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})}d\tau+\int1d\tau\\
  & =\sum_{\mathbf{\bar{x}}\in S_{\mathbf{x}}}\int\sum_{\begin{array}{c}
 \mathbf{x}_{i}\in S_{n}\\
 \mathbf{x}_{j}\in S_{n}\end{array}}\frac{1}{|S_{n}|^{2}\phi_{\mathbf{x}}(\mathbf{\bar{x}})^{2}}K_{\gamma}(\mathbf{\bar{x}},(x_{i},t_{i}+\tau))K_{\gamma}(\mathbf{\bar{x}},(x_{j},t_{j}+\tau))d\tau-2\int\sum_{\mathbf{x}_{i}\in S_{n}^{\tau}}\frac{1}{|S_{n}|\phi_{\mathbf{x}}(\mathbf{\bar{x}})}K_{\gamma}(\mathbf{\bar{x}},(x_{i},t_{i}+\tau))d\tau+\int1d\tau\\
@@ -1078,7 +1078,7 @@ This integration requires a combination of divergence measure and kernel
 \end_layout
 
 \begin_layout Standard
-Because we know the integral of the kernel function of the real line is
+Because we know the integral of the kernel function over the real line is
  1, we can eliminate that term over the range 
 \begin_inset Formula $(-\infty,\infty)$
 \end_inset
@@ -1099,9 +1099,9 @@ Because we know the integral of the kernel function of the real line is
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\int\sum_{\mathbf{x}\in S_{\mathbf{x}}}\|S_{\mathbf{x}}-S_{n}\|_{P}\ d\tau & =\sum_{\mathbf{x}\in S_{\mathbf{x}}}\sum_{\begin{array}{c}
+\int\sum_{\mathbf{x}\in S_{\mathbf{x}}}\|S_{\mathbf{x}}-S_{n}\|_{P}\ d\tau & =\sum_{\bar{\mathbf{x}}\in S_{\mathbf{x}}}\sum_{\begin{array}{c}
 \mathbf{x}_{i}\in S_{n}\\
-\mathbf{x}_{j}\in S_{n}\end{array}}\frac{1}{|S_{n}|^{2}\phi_{\mathbf{x}}(\mathbf{\bar{x}})^{2}}K_{\gamma}(x,x_{i})K_{\gamma}(x,x_{j})\ \int K_{\gamma}(t,t_{i}+\tau)K_{\gamma}(t,t_{j}+\tau)d\tau\end{align*}
+\mathbf{x}_{j}\in S_{n}\end{array}}\frac{1}{|S_{n}|^{2}\phi_{\mathbf{x}}(\mathbf{\bar{x}})^{2}}K_{\gamma}(x,x_{i})K_{\gamma}(x,x_{j})\ \int K_{\gamma}(t,t_{i}+\tau)K_{\gamma}(t,t_{j}+\tau)d\tau-\frac{2}{\phi_{\mathbf{x}}(\bar{\mathbf{x}})}\end{align*}
 
 \end_inset
 
@@ -1109,7 +1109,16 @@ Because we know the integral of the kernel function of the real line is
 \end_layout
 
 \begin_layout Standard
-Substituting the Gaussian kernel, our divergence measure become:
+The final term can be eliminated as the probability 
+\begin_inset Formula $\phi_{\mathbf{x}}$
+\end_inset
+
+ over the range 
+\begin_inset Formula $S_{\mathbf{x}}$
+\end_inset
+
+ must be 1, reducing the rinal term to a constant.
+ Substituting the Gaussian kernel, our divergence measure become:
 \end_layout
 
 \begin_layout Standard
@@ -1122,11 +1131,11 @@ Substituting the Gaussian kernel, our divergence measure become:
 \mathbf{x}_{j}\in S_{n}\end{array}}\frac{1}{|S_{n}|^{2}\gamma^{2}2\pi\phi_{\mathbf{x}}(\mathbf{\bar{x}})^{2}}e^{-\frac{1}{\gamma}\left(\bar{x}-x_{i}\right)^{2}-\frac{1}{\gamma}\left(\bar{x}-x_{j}\right)^{2}}\ \int_{-\infty}^{\infty}e^{-\frac{1}{\gamma}\left(\bar{t}-t_{i}-\tau\right)^{2}-\frac{1}{\gamma}\left(\bar{t}-t_{j}-\tau\right)^{2}}d\tau\\
  & =\sum_{\mathbf{\bar{x}}\in S_{\mathbf{x}}}\sum_{\begin{array}{c}
 \mathbf{x}_{i}\in S_{n}\\
-\mathbf{x}_{j}\in S_{n}\end{array}}\frac{1}{|S_{n}|^{2}\gamma^{2}2\pi\phi_{\mathbf{x}}(\mathbf{\bar{x}})^{2}}e^{-\frac{1}{\gamma}\left(\bar{x}-x_{i}\right)^{2}-\frac{1}{\gamma}\left(\bar{x}-x_{j}\right)^{2}}-\lim_{\tau\rightarrow\infty}\frac{e^{-\frac{1}{2\gamma}(t_{i}-t_{j})^{2}}\sqrt{\frac{\pi}{2}}\text{erf}\left(\frac{\sqrt{\frac{1}{\gamma}}(2\bar{t}+t_{i}+t_{j}-2\tau)}{\sqrt{2}}\right)}{2\sqrt{\frac{1}{\gamma}}}\\
- & \qquad\qquad\qquad+\lim_{\tau\rightarrow-\infty}\frac{e^{-\frac{1}{2\gamma}(t_{i}-t_{j})^{2}}\sqrt{\frac{\pi}{2}}\text{erf}\left(\frac{\sqrt{\frac{1}{\gamma}}(2\bar{t}+t_{i}+t_{j}-2\tau)}{\sqrt{2}}\right)}{2\sqrt{\frac{1}{\gamma}}}\\
+\mathbf{x}_{j}\in S_{n}\end{array}}\frac{1}{|S_{n}|^{2}\gamma^{2}2\pi\phi_{\mathbf{x}}(\mathbf{\bar{x}})^{2}}e^{-\frac{1}{\gamma}\left(\bar{x}-x_{i}\right)^{2}-\frac{1}{\gamma}\left(\bar{x}-x_{j}\right)^{2}}-\lim_{\tau\rightarrow\infty}\frac{1}{2}e^{-\frac{1}{2\gamma}(t_{j}-t_{i})^{2}}\sqrt{\frac{\gamma\pi}{2}}\text{erf}\left(\frac{(2\bar{t}-t_{i}-t_{j}-2\tau)}{\sqrt{2\gamma}}\right)\\
+ & \qquad\qquad\qquad+\lim_{\tau\rightarrow-\infty}\frac{1}{2}e^{-\frac{1}{2\gamma}(t_{j}-t_{i})^{2}}\sqrt{\frac{\gamma\pi}{2}}\text{erf}\left(\frac{(2\bar{t}-t_{i}-t_{j}-2\tau)}{\sqrt{2\gamma}}\right)\\
  & =\sum_{\mathbf{\bar{x}}\in S_{\mathbf{x}}}\sum_{\begin{array}{c}
 \mathbf{x}_{i}\in S_{n}\\
-\mathbf{x}_{j}\in S_{n}\end{array}}\frac{1}{|S_{n}|^{2}\gamma^{2}2\pi\phi_{\mathbf{x}}(\mathbf{\bar{x}})^{2}}e^{-\frac{1}{\gamma}\left(\bar{x}-x_{i}\right)^{2}-\frac{1}{\gamma}\left(\bar{x}-x_{j}\right)^{2}}+2\sqrt{\frac{\pi}{2\gamma}}e^{-\frac{1}{2\gamma}(t_{i}-t_{j})^{2}}\end{align*}
+\mathbf{x}_{j}\in S_{n}\end{array}}\frac{1}{|S_{n}|^{2}\gamma^{2}2\pi\phi_{\mathbf{x}}(\mathbf{\bar{x}})^{2}}e^{-\frac{1}{\gamma}\left(\bar{x}-x_{i}\right)^{2}-\frac{1}{\gamma}\left(\bar{x}-x_{j}\right)^{2}}+\frac{1}{2}\sqrt{\frac{\pi}{2\gamma}}e^{-\frac{1}{2\gamma}(t_{j}-t_{i})^{2}}\end{align*}
 
 \end_inset
 
@@ -1142,16 +1151,32 @@ Our new divergence measure
 \begin_inset Formula $\varphi(\mathbf{x})$
 \end_inset
 
+.
+ We can make a fundamental change to the Parzen density estimation approach
+ by observing that we can set 
+\begin_inset Formula $S_{n}=X$
+\end_inset
+
+ without any loss of predictive ability.
+ The continuous sliding window approach eliminates the need for specific
+ windows, allowing us to evaluate the probability of a test set 
+\begin_inset Formula $\hat{X}$
+\end_inset
+
+ based on a training set 
+\begin_inset Formula $X$
+\end_inset
+
 :
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\varphi_{P}(\mathbf{x},S) & =\sum_{i\in\mathcal{S}}\frac{1}{|\mathcal{S}|}\mathcal{K}_{\gamma}(S_{\mathbf{x}},S_{i})\\
-K_{\gamma}(S_{i},S_{j}) & =\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|S_{i}-S_{j}\|_{KL}^{2}}\\
-\|S_{n}-S_{m}\|_{S} & =\sum_{\mathbf{\bar{x}}\in S_{n}}\sum_{\begin{array}{c}
-\mathbf{x}_{i}\in S_{m}\\
-\mathbf{x}_{j}\in S_{m}\end{array}}\frac{1}{|S_{m}|^{2}\gamma^{2}2\pi\phi_{\mathbf{x}}(\mathbf{\bar{x}})^{2}}e^{-\frac{1}{\gamma}\left(\bar{x}-x_{i}\right)^{2}-\frac{1}{\gamma}\left(\bar{x}-x_{j}\right)^{2}}+2\sqrt{\frac{\pi}{2\gamma}}e^{-\frac{1}{2\gamma}(t_{i}-t_{j})^{2}}\end{align*}
+\varphi_{P}(\hat{X}) & =\mathcal{K}_{\gamma}(\hat{X},X)\\
+K_{\gamma}(\hat{X},X) & =\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|\hat{X}-X\|_{KL}^{2}}\\
+\|\hat{X}-X\|_{S} & =\sum_{\mathbf{\bar{x}}\in\hat{X}}\sum_{\begin{array}{c}
+\mathbf{x}_{i}\in X\\
+\mathbf{x}_{j}\in X\end{array}}\frac{1}{|X|^{2}\gamma^{2}2\pi\phi_{\hat{X}}(\mathbf{\bar{x}})^{2}}e^{-\frac{1}{\gamma}\left(\bar{x}-x_{i}\right)^{2}-\frac{1}{\gamma}\left(\bar{x}-x_{j}\right)^{2}}+\frac{1}{2}\sqrt{\frac{\pi}{2\gamma}}e^{-\frac{1}{2\gamma}(t_{j}-t_{i})^{2}}\end{align*}
 
 \end_inset
 
@@ -1319,51 +1344,12 @@ Sliding Windows
 \end_layout
 
 \begin_layout Standard
-The approach described thus far has some drawbacks.
- The prediction horizon is limited to the interval 
-\begin_inset Formula $[\min_{t}\hat{X},\ \min_{t}\hat{X}+\theta)$
-\end_inset
-
-.
- This can be ameliorated by shifting the prediction horizon along the test
- set 
-\begin_inset Formula $\hat{X}$
-\end_inset
-
-, however this requires a method of choosing which starting point to use.
- A second limitation is that it fails to take advantage of the time-independent
- distribution of 
-\begin_inset Formula $X$
-\end_inset
-
- in for points outside the 'forecasting horizon' defined by the largest
- time window and the extents of 
-\begin_inset Formula $X$
-\end_inset
-
- in the time dimension.
- 
-\end_layout
-
-\begin_layout Standard
-Modifying the SV algorithm to use sliding time windows addresses both of
- these concerns.
- As in the Sliding Parzen Window approach, we use a kernel function 
-\begin_inset Formula $K_{\gamma}$
-\end_inset
-
- and a corresponding cross kernel 
-\begin_inset Formula $k_{\gamma}$
-\end_inset
-
- which is the kernel's antiderivative.
- We search for a solution in the following form:
-\end_layout
-
-\begin_layout Standard
 \begin_inset Formula \begin{align*}
-\varphi_{SV}(\mathbf{x},S:\beta) & =\sum_{i\in\mathcal{S}}\beta_{i}\ \int_{-\theta_{j}}^{\theta_{S\cup\mathbf{x}}+\theta_{j}}K_{\gamma}(S_{\mathbf{x}},S_{i}^{\eta})\ d\eta\\
- & =\sum_{i\in\mathcal{S}}\beta_{i}\left(k_{\gamma}\left(S_{\mathbf{x}},S_{i}^{\theta_{S\cup\mathbf{x}}+\theta_{i}}\right)-k_{\gamma}\left(S_{\mathbf{x}},S_{i}^{-\theta_{i}}\right)\right)\end{align*}
+\varphi_{P}(\hat{X}) & =\mathcal{K}_{\gamma}(\hat{X},X)\\
+K_{\gamma}(\hat{X},X) & =\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|\hat{X}-X\|_{KL}^{2}}\\
+\|\hat{X}-X\|_{S} & =\sum_{\mathbf{\bar{x}}\in\hat{X}}\sum_{\begin{array}{c}
+\mathbf{x}_{i}\in X\\
+\mathbf{x}_{j}\in X\end{array}}\frac{1}{|X|^{2}\gamma^{2}2\pi\phi_{\hat{X}}(\mathbf{\bar{x}})^{2}}e^{-\frac{1}{\gamma}\left(\bar{x}-x_{i}\right)^{2}-\frac{1}{\gamma}\left(\bar{x}-x_{j}\right)^{2}}+\frac{1}{2}\sqrt{\frac{\pi}{2\gamma}}e^{-\frac{1}{2\gamma}(t_{j}-t_{i})^{2}}\end{align*}
 
 \end_inset
 
@@ -1371,53 +1357,12 @@ Modifying the SV algorithm to use sliding time windows addresses both of
 \end_layout
 
 \begin_layout Standard
-In this case, we leave our optimization problem as previously defined and
- search for 
-\begin_inset Formula $\beta$
+Using the sliding Parzen approach as a starting point, our objective is
+ to determine which points 
+\begin_inset Formula $\mathbf{x}\in X$
 \end_inset
 
- using the training data and 
-\begin_inset Formula $K_{\gamma}$
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Is there any reason we couldn't now consider the entire training set as
- a single S with theta=infty? 
-\end_layout
-
-\begin_layout Plain Layout
-How would this affect the SVM optimization? In this case we would need a
- condensed representation of the training set which retains sequence probability
- (beta) and uniqueness (SV identity).
- The real question is if this approach (single large window) affects the
- optimization problem.
- 
-\end_layout
-
-\begin_layout Plain Layout
-It might be possible to sum the beta value of each subset on a per-observation
- basis; the beta sum would remain 1 and points in multiple windows would
- be made stronger and the result would be a single composite S w/ theta
- = range(S).
- This would need to be proven OK based on the solution function for the
- SVM problem.
-\end_layout
-
-\begin_layout Plain Layout
-A better solution would be to change the SVM problem to take advantage of
- the sliding window idea directly somehow.
-\end_layout
-
-\end_inset
-
-
+ should be selected as SV's.
 \end_layout
 
 \begin_layout Subsection
