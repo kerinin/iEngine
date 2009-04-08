@@ -1,4 +1,4 @@
-#LyX 1.6.1 created this file. For more info see http://www.lyx.org/
+#LyX 1.6.2 created this file. For more info see http://www.lyx.org/
 \lyxformat 345
 \begin_document
 \begin_header
@@ -1345,7 +1345,7 @@ Sliding Windows
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\varphi_{P}(\hat{X}) & =\mathcal{K}_{\gamma}(\hat{X},X)\\
+\varphi_{sP}(\hat{X}) & =\mathcal{K}_{\gamma}(\hat{X},X)\\
 K_{\gamma}(\hat{X},X) & =\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|\hat{X}-X\|_{KL}^{2}}\\
 \|\hat{X}-X\|_{S} & =\sum_{\mathbf{\bar{x}}\in\hat{X}}\sum_{\begin{array}{c}
 \mathbf{x}_{i}\in X\\
@@ -1363,6 +1363,33 @@ Using the sliding Parzen approach as a starting point, our objective is
 \end_inset
 
  should be selected as SV's.
+ Because we are not explicitly designating subset windows, we must use a
+ different starting point for minimizing the Parzen and SV estimates.
+ Continuing our earlier approach of seeking solutions as integrals, we can
+ use the following:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+W(\beta) & =\int\sum_{\mathbf{x}_{i}\in\hat{X}}\omega(t-t_{i})\left(\varphi_{sP}(\mathbf{x}_{i})-\varphi_{sSV}(\mathbf{x}_{i}:\beta)\right)^{2}dt+\lambda\Omega(\beta,\hat{X})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Where 
+\begin_inset Formula $\omega(\cdot)$
+\end_inset
+
+ is some kernel function controlling sequence length.
+\begin_inset Formula \begin{align*}
+\end{align*}
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
