@@ -1,4 +1,4 @@
-#LyX 1.6.2 created this file. For more info see http://www.lyx.org/
+#LyX 1.6.1 created this file. For more info see http://www.lyx.org/
 \lyxformat 345
 \begin_document
 \begin_header
@@ -1047,7 +1047,7 @@ Thus far we have been dealing with discrete subsets with specific starting
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\|S_{\mathbf{x}}-S_{n}\|_{S} & =\int_{-\infty}^{\infty}\|S_{x}-S_{n}\|d\tau\\
+\|S_{\mathbf{x}}-S_{n}\|_{S} & =\int_{-\infty}^{\infty}\|S_{\mathbf{x}}-S_{n}\|d\tau\\
 \phi_{n}^{\tau}(\mathbf{x}) & =\sum_{\mathbf{x}_{i}\in S_{n}}\frac{1}{|S_{n}|}K_{\gamma}(\mathbf{x},(x_{i},t_{i}+\tau))\end{align*}
 
 \end_inset
@@ -1357,15 +1357,59 @@ K_{\gamma}(\hat{X},X) & =\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|\hat{X
 \end_layout
 
 \begin_layout Standard
-Using the sliding Parzen approach as a starting point, our objective is
- to determine which points 
+Extending the sliding Parzen approach, our objective is to determine which
+ points 
 \begin_inset Formula $\mathbf{x}\in X$
 \end_inset
 
  should be selected as SV's.
  Because we are not explicitly designating subset windows, we must use a
  different starting point for minimizing the Parzen and SV estimates.
- Continuing our earlier approach of seeking solutions as integrals, we can
+ We begin by taking a different approach to window definitions.
+ Thus far we have thought of windows as discreet subsets of the trainins
+ set and treated them as points.
+ An equivalent framing of this situation treats each window as a function
+ 
+\begin_inset Formula $\omega(\cdot)$
+\end_inset
+
+ which is used to weight points based on their time value.
+ We can treat the following as equivalent:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\sum_{\mathbf{\bar{x}}\in S_{t,\theta}}\left(\frac{\phi_{t,\theta}^{\tau}(\mathbf{\bar{x}})}{\phi_{X}(\mathbf{\bar{x}})}-1\right)^{2} & =\sum_{\mathbf{\bar{x}}\in X}\omega(\bar{t}:t,\theta)\left(\frac{\phi_{t,\theta}^{\tau}(\mathbf{\bar{x}})}{\phi_{X}(\mathbf{\bar{x}})}-1\right)^{2}\\
+\omega(t_{i}:t,\theta) & =\begin{cases}
+1 & \quad t\le t_{i}<t+\theta\\
+0 & \quad\text{otherwise}\end{cases}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The strength of this method of framing the problem is that 
+\begin_inset Formula $\omega$
+\end_inset
+
+ can be any function.
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Explain how we get to the integral
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Continuing our earlier approach of seeking solutions as integrals, we can
  use the following:
 \end_layout
 
