@@ -1378,8 +1378,30 @@ Extending the sliding Parzen approach, our objective is to determine which
 \end_layout
 
 \begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+What are 
+\begin_inset Formula $\phi_{t,\theta}$
+\end_inset
+
+ and 
+\begin_inset Formula $\phi_{X}$
+\end_inset
+
+ in this equation?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula \begin{align*}
-\sum_{\mathbf{\bar{x}}\in S_{t,\theta}}\left(\frac{\phi_{t,\theta}^{\tau}(\mathbf{\bar{x}})}{\phi_{X}(\mathbf{\bar{x}})}-1\right)^{2} & =\sum_{\mathbf{\bar{x}}\in X}\omega(\bar{t}:t,\theta)\left(\frac{\phi_{t,\theta}^{\tau}(\mathbf{\bar{x}})}{\phi_{X}(\mathbf{\bar{x}})}-1\right)^{2}\\
+\|S_{t,\theta}-S_{X}\|_{S} & =\int\sum_{\mathbf{\bar{x}}\in S_{t,\theta}}\left(\frac{\phi_{t,\theta}^{\tau}(\mathbf{\bar{x}})}{\phi_{X}(\mathbf{\bar{x}})}-1\right)^{2}d\tau\\
+\|X:\omega\|_{S} & =\int\sum_{\mathbf{\bar{x}}\in X}\omega(\bar{t}:t,\theta)\left(\frac{\phi_{t,\theta}^{\tau}(\mathbf{\bar{x}})}{\phi_{X}(\mathbf{\bar{x}})}-1\right)^{2}d\tau\\
 \omega(t_{i}:t,\theta) & =\begin{cases}
 1 & \quad t\le t_{i}<t+\theta\\
 0 & \quad\text{otherwise}\end{cases}\end{align*}
@@ -1395,13 +1417,27 @@ The strength of this method of framing the problem is that
 \end_inset
 
  can be any function.
- 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Explain how we get to the integral
+ To see how this is useful, consider the result of using multiple window
+ durations as before.
+ If we treat the window as a function, we can represent this situation as
+ a sum of window functions, each function being defined by a start time
+ and duration.
+ Clearly, using a single weighting function is more efficient than multiple
+ subsets of different durations.
+ Let us modify the sliding window divergence for support vectors:
 \end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\int\|S_{\mathbf{x}}-S_{n}\|_{P}\ d\tau & =\int\sum_{\mathbf{\bar{x}}\in S_{\mathbf{x}}}\left(\frac{\phi_{n}^{\tau}(\mathbf{\bar{x}})}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})}-1\right)^{2}d\tau\\
+ & =\sum_{\mathbf{\bar{x}}\in S_{\mathbf{x}}}\int\frac{\phi_{n}^{\tau}(\mathbf{\bar{x}})}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})}^{2}d\tau-2\int\frac{\phi_{n}^{\tau}(\mathbf{\bar{x}})}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})}d\tau+\int1d\tau\\
+ & =\sum_{\mathbf{\bar{x}}\in S_{\mathbf{x}}}\sum_{\begin{array}{c}
+\mathbf{x}_{i}\in S_{n}\\
+\mathbf{x}_{j}\in S_{n}\end{array}}\frac{1}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})^{2}}\beta_{i}\beta_{j}\int K_{\gamma}(\mathbf{\bar{x}},(x_{i},t_{i}+\tau))K_{\gamma}(\mathbf{\bar{x}},(x_{j},t_{j}+\tau))d\tau\\
+ & \qquad\qquad-2\sum_{\mathbf{x}_{i}\in S_{n}^{\tau}}\frac{1}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})}\beta_{i}\int K_{\gamma}(\mathbf{\bar{x}},(x_{i},t_{i}+\tau))d\tau+\int1d\tau\\
+ & =\sum_{\mathbf{\bar{x}}\in S_{\mathbf{x}}}\sum_{\begin{array}{c}
+\mathbf{x}_{i}\in S_{n}\\
+\mathbf{x}_{j}\in S_{n}\end{array}}\frac{1}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})^{2}}\beta_{i}\beta_{j}K_{\gamma}(\bar{x},x_{i})K_{\gamma}(\bar{x},x_{j})\int K_{\gamma}(\bar{t},t_{i}+\tau)K_{\gamma}(\bar{t},t_{j}+\tau)d\tau-\frac{2}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})}\end{align*}
 
 \end_inset
 
@@ -1409,13 +1445,17 @@ Explain how we get to the integral
 \end_layout
 
 \begin_layout Standard
-Continuing our earlier approach of seeking solutions as integrals, we can
- use the following:
+Let us now continue our earlier approach of seeking solutions as integrals,
+ we can use the following as our optimization problem:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-W(\beta) & =\int\sum_{\mathbf{x}_{i}\in\hat{X}}\omega(t-t_{i})\left(\varphi_{sP}(\mathbf{x}_{i})-\varphi_{sSV}(\mathbf{x}_{i}:\beta)\right)^{2}dt+\lambda\Omega(\beta,\hat{X})\end{align*}
+W(\beta) & =\int\sum_{\mathbf{\bar{x}}\in\hat{X}}\omega(t-\bar{t})\left(\varphi_{sP}(\mathbf{\bar{x}})-\varphi_{sSV}(\mathbf{\bar{x}}:\beta)\right)^{2}dt+\lambda\Omega(\beta,\hat{X})\\
+ & =\sum_{\mathbf{\bar{x}}\in\hat{X}}\int\omega(t-t_{i})\left(\varphi_{sP}(\mathbf{\bar{x}})^{2}-2\varphi_{sP}(\mathbf{\bar{x}})\varphi_{sSV}(\mathbf{\bar{x}}:\beta)+\varphi_{sSV}(\mathbf{\bar{x}}:\beta)^{2}\right)dt+\lambda\Omega(\beta,\hat{X})\\
+\int\omega(t-t_{i})\varphi_{sP}(\mathbf{\bar{x}})^{2}dt & =\\
+\int\omega(t-t_{i})\varphi_{sP}(\mathbf{\bar{x}})\varphi_{sSV}(\mathbf{\bar{x}}:\beta)dt & =\\
+\int\omega(t-t_{i})\varphi_{sSV}(\mathbf{\bar{x}}:\beta)^{2}dt & =\end{align*}
 
 \end_inset
 
