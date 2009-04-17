@@ -1401,10 +1401,23 @@ What are
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
 \|S_{t,\theta}-S_{X}\|_{S} & =\int\sum_{\mathbf{\bar{x}}\in S_{t,\theta}}\left(\frac{\phi_{t,\theta}^{\tau}(\mathbf{\bar{x}})}{\phi_{X}(\mathbf{\bar{x}})}-1\right)^{2}d\tau\\
-\|X:\omega\|_{S} & =\int\sum_{\mathbf{\bar{x}}\in X}\omega(\bar{t}:t,\theta)\left(\frac{\phi_{t,\theta}^{\tau}(\mathbf{\bar{x}})}{\phi_{X}(\mathbf{\bar{x}})}-1\right)^{2}d\tau\\
-\omega(t_{i}:t,\theta) & =\begin{cases}
-1 & \quad t\le t_{i}<t+\theta\\
+ & =\int\sum_{\mathbf{\bar{x}}\in X}\omega(\bar{t}-t:\theta)\left(\frac{\phi_{t,\theta}^{\tau}(\mathbf{\bar{x}})}{\phi_{X}(\mathbf{\bar{x}})}-1\right)^{2}d\tau\\
+\omega(\Delta t:\theta) & =\begin{cases}
+1 & \quad0\le\Delta t<\theta\\
 0 & \quad\text{otherwise}\end{cases}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We will define this function as:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\|X,t,\alpha\| & =\sum_{\mathbf{\bar{x}}\in X}\omega(\bar{t}-t:\alpha)\int\left(\frac{\phi^{\tau}(\mathbf{\bar{x}})}{\phi(\mathbf{\bar{x}})}-1\right)^{2}d\tau\end{align*}
 
 \end_inset
 
@@ -1445,17 +1458,34 @@ The strength of this method of framing the problem is that
 \end_layout
 
 \begin_layout Standard
-Let us now continue our earlier approach of seeking solutions as integrals,
- we can use the following as our optimization problem:
+Let us now develop our SV optimization problem by seeking the least squared
+ error between the Parzen and SV divergences:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Check the integral multiplication and nesting rules to make sure that 4th
+ line is correct
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-W(\beta) & =\int\sum_{\mathbf{\bar{x}}\in\hat{X}}\omega(t-\bar{t})\left(\varphi_{sP}(\mathbf{\bar{x}})-\varphi_{sSV}(\mathbf{\bar{x}}:\beta)\right)^{2}dt+\lambda\Omega(\beta,\hat{X})\\
- & =\sum_{\mathbf{\bar{x}}\in\hat{X}}\int\omega(t-t_{i})\left(\varphi_{sP}(\mathbf{\bar{x}})^{2}-2\varphi_{sP}(\mathbf{\bar{x}})\varphi_{sSV}(\mathbf{\bar{x}}:\beta)+\varphi_{sSV}(\mathbf{\bar{x}}:\beta)^{2}\right)dt+\lambda\Omega(\beta,\hat{X})\\
-\int\omega(t-t_{i})\varphi_{sP}(\mathbf{\bar{x}})^{2}dt & =\\
-\int\omega(t-t_{i})\varphi_{sP}(\mathbf{\bar{x}})\varphi_{sSV}(\mathbf{\bar{x}}:\beta)dt & =\\
-\int\omega(t-t_{i})\varphi_{sSV}(\mathbf{\bar{x}}:\beta)^{2}dt & =\end{align*}
+W(\beta) & =\int\sum_{\mathbf{\bar{x}}\in\hat{X}}\left(\|X,t,\alpha\|_{P}-\|X,t,\alpha,\beta\|_{SV}\right)^{2}dt+\lambda\Omega(\beta,\hat{X})\\
+ & =\sum_{\mathbf{\bar{x}}\in\hat{X}}\int\left(\|X,t,\alpha\|_{P}^{2}-2\|X,t,\alpha\|_{P}\|X,t,\alpha,\beta\|_{SV}+\|X,t,\alpha,\beta\|_{SV}^{2}\right)dt+\lambda\Omega(\beta,\hat{X})\\
+\int\|X,t,\alpha\|_{P}^{2}dt & =\int\sum_{\mathbf{\bar{x}}\in X}\omega(\bar{t}-t:\alpha)\int\left(\frac{\phi^{\tau}(\mathbf{\bar{x}})}{\phi(\mathbf{\bar{x}})}-1\right)^{2}d\tau\sum_{\mathbf{\bar{x}}\in X}\omega(\bar{t}-t:\alpha)\int\left(\frac{\phi^{\tau}(\mathbf{\bar{x}})}{\phi(\mathbf{\bar{x}})}-1\right)^{2}d\tau dt\\
+ & =\sum_{\begin{array}{c}
+\mathbf{\bar{x}}_{i}\in X\\
+\mathbf{\bar{x}}_{j}\in X\end{array}}\int\omega(\bar{t}_{i}-t:\alpha)\omega(\bar{t}_{j}-t:\alpha)dt\ \int\left(\frac{\phi^{\tau}(\mathbf{\bar{x}}_{i})}{\phi(\mathbf{\bar{x}}_{i})}-1\right)^{2}\left(\frac{\phi^{\tau}(\mathbf{\bar{x}}_{j})}{\phi(\mathbf{\bar{x}}_{ji})}-1\right)^{2}d\tau\\
+\int\|X,t,\alpha\|_{P}\|X,t,\alpha,\beta\|_{SV}dt & =\int\sum_{\mathbf{\bar{x}}\in X}\omega(\bar{t}-t:\alpha)\int\left(\frac{\phi^{\tau}(\mathbf{\bar{x}})}{\phi(\mathbf{\bar{x}})}-1\right)^{2}d\tau\sum_{\mathbf{\bar{x}}\in X}\omega(\bar{t}-t:\alpha)\int\left(\frac{\phi^{\tau}(\mathbf{\bar{x}}:\beta)}{\phi(\mathbf{\bar{x}}:\beta)}-1\right)^{2}d\tau dt\\
+\int\|X,t,\alpha,\beta\|_{SV}^{2}dt & =\int\sum_{\mathbf{\bar{x}}\in X}\omega(\bar{t}-t:\alpha)\int\left(\frac{\phi^{\tau}(\mathbf{\bar{x}}:\beta)}{\phi(\mathbf{\bar{x}}:\beta)}-1\right)^{2}d\tau\sum_{\mathbf{\bar{x}}\in X}\omega(\bar{t}-t:\alpha)\int\left(\frac{\phi^{\tau}(\mathbf{\bar{x}}:\beta)}{\phi(\mathbf{\bar{x}}:\beta)}-1\right)^{2}d\tau dt\end{align*}
 
 \end_inset
 
