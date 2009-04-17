@@ -1442,15 +1442,17 @@ The strength of this method of framing the problem is that
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
+\mathcal{K}_{\gamma}(\mathbf{x}_{i},\mathbf{x}_{j}) & =\int K_{\gamma}(\mathbf{x}_{i},\mathbf{x}_{j}^{\tau})d\tau\\
 \int\|S_{\mathbf{x}}-S_{n}\|_{P}\ d\tau & =\int\sum_{\mathbf{\bar{x}}\in S_{\mathbf{x}}}\left(\frac{\phi_{n}^{\tau}(\mathbf{\bar{x}})}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})}-1\right)^{2}d\tau\\
  & =\sum_{\mathbf{\bar{x}}\in S_{\mathbf{x}}}\int\frac{\phi_{n}^{\tau}(\mathbf{\bar{x}})}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})}^{2}d\tau-2\int\frac{\phi_{n}^{\tau}(\mathbf{\bar{x}})}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})}d\tau+\int1d\tau\\
  & =\sum_{\mathbf{\bar{x}}\in S_{\mathbf{x}}}\sum_{\begin{array}{c}
 \mathbf{x}_{i}\in S_{n}\\
-\mathbf{x}_{j}\in S_{n}\end{array}}\frac{1}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})^{2}}\beta_{i}\beta_{j}\int K_{\gamma}(\mathbf{\bar{x}},(x_{i},t_{i}+\tau))K_{\gamma}(\mathbf{\bar{x}},(x_{j},t_{j}+\tau))d\tau\\
- & \qquad\qquad-2\sum_{\mathbf{x}_{i}\in S_{n}^{\tau}}\frac{1}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})}\beta_{i}\int K_{\gamma}(\mathbf{\bar{x}},(x_{i},t_{i}+\tau))d\tau+\int1d\tau\\
- & =\sum_{\mathbf{\bar{x}}\in S_{\mathbf{x}}}\sum_{\begin{array}{c}
+\mathbf{x}_{j}\in S_{n}\end{array}}\frac{1}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})^{2}}\beta_{i}\beta_{j}\int K_{\gamma}(\mathbf{\bar{x}},\mathbf{x}_{i}^{\tau})K_{\gamma}(\mathbf{\bar{x}},\mathbf{x}_{j}^{\tau})d\tau\\
+ & \qquad\qquad-2\sum_{\mathbf{x}_{i}\in S_{n}^{\tau}}\frac{1}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})}\beta_{i}\int K_{\gamma}(\mathbf{\bar{x}},\mathbf{x}_{i}^{\tau})d\tau+\int1d\tau\\
+ & =\sum_{\begin{array}{c}
+\mathbf{\bar{x}}\in S_{\mathbf{x}}\\
 \mathbf{x}_{i}\in S_{n}\\
-\mathbf{x}_{j}\in S_{n}\end{array}}\frac{1}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})^{2}}\beta_{i}\beta_{j}K_{\gamma}(\bar{x},x_{i})K_{\gamma}(\bar{x},x_{j})\int K_{\gamma}(\bar{t},t_{i}+\tau)K_{\gamma}(\bar{t},t_{j}+\tau)d\tau-\frac{2}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})}\end{align*}
+\mathbf{x}_{j}\in S_{n}\end{array}}\frac{1}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})^{2}}\beta_{i}\beta_{j}\mathcal{K}_{\gamma}(\bar{\mathbf{x}},\mathbf{x}_{i})\mathcal{K}_{\gamma}(\bar{\mathbf{x}},\mathbf{x}_{j})-\frac{2}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})}\end{align*}
 
 \end_inset
 
@@ -1463,13 +1465,14 @@ Let us now develop our SV optimization problem by seeking the least squared
 \end_layout
 
 \begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Check the integral multiplication and nesting rules to make sure that 4th
- line is correct
-\end_layout
+\begin_inset Formula \begin{align*}
+\|X,t,\alpha\| & =\sum_{\mathbf{\bar{x}}\in X}\omega(\bar{t}-t:\alpha)\int\left(\frac{\phi^{\tau}(\mathbf{\bar{x}})}{\phi(\mathbf{\bar{x}})}-1\right)^{2}d\tau\\
+ & =\sum_{\mathbf{\bar{x}}\in X}\omega(\bar{t}-t:\alpha)\left(\sum_{\begin{array}{c}
+\mathbf{x}_{i}\in S_{n}\\
+\mathbf{x}_{j}\in S_{n}\end{array}}\frac{1}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})^{2}}\beta_{i}\beta_{j}\mathcal{K}_{\gamma}(\bar{\mathbf{x}},\mathbf{x}_{i})\mathcal{K}_{\gamma}(\bar{\mathbf{x}},\mathbf{x}_{j})-\frac{2}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})}\right)\\
+ & =\sum_{\mathbf{\bar{x}}\in X}\sum_{\begin{array}{c}
+\mathbf{x}_{i}\in S_{n}\\
+\mathbf{x}_{j}\in S_{n}\end{array}}\frac{\omega(\bar{t}-t:\alpha)}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})^{2}}\beta_{i}\beta_{j}\mathcal{K}_{\gamma}(\bar{\mathbf{x}},\mathbf{x}_{i})\mathcal{K}_{\gamma}(\bar{\mathbf{x}},\mathbf{x}_{j})-\frac{2\omega(\bar{t}-t:\alpha)}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})}\end{align*}
 
 \end_inset
 
@@ -1480,11 +1483,23 @@ Check the integral multiplication and nesting rules to make sure that 4th
 \begin_inset Formula \begin{align*}
 W(\beta) & =\int\sum_{\mathbf{\bar{x}}\in\hat{X}}\left(\|X,t,\alpha\|_{P}-\|X,t,\alpha,\beta\|_{SV}\right)^{2}dt+\lambda\Omega(\beta,\hat{X})\\
  & =\sum_{\mathbf{\bar{x}}\in\hat{X}}\int\left(\|X,t,\alpha\|_{P}^{2}-2\|X,t,\alpha\|_{P}\|X,t,\alpha,\beta\|_{SV}+\|X,t,\alpha,\beta\|_{SV}^{2}\right)dt+\lambda\Omega(\beta,\hat{X})\\
-\int\|X,t,\alpha\|_{P}^{2}dt & =\int\sum_{\mathbf{\bar{x}}\in X}\omega(\bar{t}-t:\alpha)\int\left(\frac{\phi^{\tau}(\mathbf{\bar{x}})}{\phi(\mathbf{\bar{x}})}-1\right)^{2}d\tau\sum_{\mathbf{\bar{x}}\in X}\omega(\bar{t}-t:\alpha)\int\left(\frac{\phi^{\tau}(\mathbf{\bar{x}})}{\phi(\mathbf{\bar{x}})}-1\right)^{2}d\tau dt\\
- & =\sum_{\begin{array}{c}
-\mathbf{\bar{x}}_{i}\in X\\
-\mathbf{\bar{x}}_{j}\in X\end{array}}\int\omega(\bar{t}_{i}-t:\alpha)\omega(\bar{t}_{j}-t:\alpha)dt\ \int\left(\frac{\phi^{\tau}(\mathbf{\bar{x}}_{i})}{\phi(\mathbf{\bar{x}}_{i})}-1\right)^{2}\left(\frac{\phi^{\tau}(\mathbf{\bar{x}}_{j})}{\phi(\mathbf{\bar{x}}_{ji})}-1\right)^{2}d\tau\\
-\int\|X,t,\alpha\|_{P}\|X,t,\alpha,\beta\|_{SV}dt & =\int\sum_{\mathbf{\bar{x}}\in X}\omega(\bar{t}-t:\alpha)\int\left(\frac{\phi^{\tau}(\mathbf{\bar{x}})}{\phi(\mathbf{\bar{x}})}-1\right)^{2}d\tau\sum_{\mathbf{\bar{x}}\in X}\omega(\bar{t}-t:\alpha)\int\left(\frac{\phi^{\tau}(\mathbf{\bar{x}}:\beta)}{\phi(\mathbf{\bar{x}}:\beta)}-1\right)^{2}d\tau dt\\
+\\\int\|X,t,\alpha\|_{P}^{2}dt & =\int\left(\sum_{\begin{array}{c}
+\mathbf{\bar{x}}\in S_{\mathbf{x}}\\
+\mathbf{x}_{i}\in S_{n}\\
+\mathbf{x}_{j}\in S_{n}\end{array}}\frac{\omega(\bar{t}-t:\alpha)}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})^{2}}\beta_{i}\beta_{j}\mathcal{K}_{\gamma}(\bar{\mathbf{x}},\mathbf{x}_{i})\mathcal{K}_{\gamma}(\bar{\mathbf{x}},\mathbf{x}_{j})-\frac{2\omega(\bar{t}-t:\alpha)}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})}\right)^{2}dt\\
+ & =\int\sum_{\begin{array}{c}
+\mathbf{\bar{x}}\in S_{\mathbf{x}}\\
+\mathbf{x}_{i}\in S_{n}\\
+\mathbf{x}_{j}\in S_{n}\end{array}}\sum_{\begin{array}{c}
+\mathbf{\bar{y}}\in S_{\mathbf{x}}\\
+\mathbf{y}_{i}\in S_{n}\\
+\mathbf{y}_{j}\in S_{n}\end{array}}\frac{\omega(\bar{t}-t:\alpha)}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})^{2}}\beta_{i}\beta_{j}\mathcal{K}_{\gamma}(\bar{\mathbf{x}},\mathbf{x}_{i})\mathcal{K}_{\gamma}(\bar{\mathbf{x}},\mathbf{x}_{j})\frac{\omega(\bar{t}-t:\alpha)}{\phi_{\mathbf{x}}(\mathbf{\bar{y}})^{2}}\beta_{i}\beta_{j}\mathcal{K}_{\gamma}(\bar{\mathbf{y}},\mathbf{y}_{i})\mathcal{K}_{\gamma}(\bar{\mathbf{y}},\mathbf{y}_{j})dt\\
+ & \qquad\qquad\qquad-\int\frac{4\omega(\bar{t}-t:\alpha)}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})}\sum_{\begin{array}{c}
+\mathbf{\bar{x}}\in S_{\mathbf{x}}\\
+\mathbf{x}_{i}\in S_{n}\\
+\mathbf{x}_{j}\in S_{n}\end{array}}\frac{\omega(\bar{t}-t:\alpha)}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})^{2}}\beta_{i}\beta_{j}\mathcal{K}_{\gamma}(\bar{\mathbf{x}},\mathbf{x}_{i})\mathcal{K}_{\gamma}(\bar{\mathbf{x}},\mathbf{x}_{j})dt\\
+ & \qquad\qquad\qquad+\int\frac{4\omega(\bar{t}-t:\alpha)^{2}}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})^{2}}dt\\
+\\\int\|X,t,\alpha\|_{P}\|X,t,\alpha,\beta\|_{SV}dt & =\int\sum_{\mathbf{\bar{x}}\in X}\omega(\bar{t}-t:\alpha)\int\left(\frac{\phi^{\tau}(\mathbf{\bar{x}})}{\phi(\mathbf{\bar{x}})}-1\right)^{2}d\tau\sum_{\mathbf{\bar{x}}\in X}\omega(\bar{t}-t:\alpha)\int\left(\frac{\phi^{\tau}(\mathbf{\bar{x}}:\beta)}{\phi(\mathbf{\bar{x}}:\beta)}-1\right)^{2}d\tau dt\\
 \int\|X,t,\alpha,\beta\|_{SV}^{2}dt & =\int\sum_{\mathbf{\bar{x}}\in X}\omega(\bar{t}-t:\alpha)\int\left(\frac{\phi^{\tau}(\mathbf{\bar{x}}:\beta)}{\phi(\mathbf{\bar{x}}:\beta)}-1\right)^{2}d\tau\sum_{\mathbf{\bar{x}}\in X}\omega(\bar{t}-t:\alpha)\int\left(\frac{\phi^{\tau}(\mathbf{\bar{x}}:\beta)}{\phi(\mathbf{\bar{x}}:\beta)}-1\right)^{2}d\tau dt\end{align*}
 
 \end_inset
