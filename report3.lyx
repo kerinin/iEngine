@@ -24,7 +24,16 @@
 \graphics default
 \paperfontsize 10
 \spacing single
-\use_hyperref false
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks false
+\pdf_backref false
+\pdf_pdfusetitle true
 \papersize default
 \use_geometry false
 \use_amsmath 1
@@ -1095,32 +1104,17 @@ We can re-frame the situation by substituting a windowing function
 \end_layout
 
 \begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-You're not shifting any of this.
- This can probably be fixed through sliding windows, but it would be nice
- to add that detail eventually
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
 \begin_inset Formula \begin{align*}
 \boldsymbol{\alpha} & =\left[\alpha_{1},\alpha_{2},...,\alpha_{\ell}\right]\\
 t_{i} & \in\alpha_{i}\\
 \bar{k}_{\gamma}(\mathbf{x}_{i},\mathbf{x}_{j}:\ \alpha_{k}) & =k_{\gamma}\left(\mathbf{x}_{i},(x_{j},t_{j}-t_{k})\right)\\
 \bar{\phi}(\mathbf{x},X:\ \alpha) & =\sum_{\mathbf{x}_{i}\in X}\omega(\mathbf{x}_{i}:\ \alpha)\frac{1}{\sum_{\mathbf{x}\in X}\omega(\mathbf{x}:\ \alpha)}\bar{k}_{\gamma}(\mathbf{x},\mathbf{x}_{i}:\ \alpha)\\
-\bar{D}_{KL}(\alpha_{i},\alpha_{j}:\ X,\hat{X}) & =\sum_{\mathbf{x}\in X}\bar{\phi}(\mathbf{x},X:\ \alpha_{i})\log\frac{\bar{\phi}(\mathbf{x},X:\ \alpha_{i})}{\bar{\phi}(\mathbf{x},\hat{X}:\ \alpha_{j})}\\
-\|\alpha_{i},\alpha_{j}:\ X,\hat{X}\|_{KL} & =\bar{D}_{KL}(\alpha_{i},\alpha_{j}:\ X,\hat{X})+\bar{D}_{KL}(\alpha_{j},\alpha_{i}:\ X,\hat{X})\\
-\bar{K}_{\gamma}(\alpha_{i},\alpha_{j}:\ X,\hat{X}) & =\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|\alpha_{i},\alpha_{j}:\ X,\hat{X}\|_{KL}^{2}}\\
-\bar{\varphi}_{P}(\mathbf{x}:\ \boldsymbol{\alpha},X,\hat{X}) & =\sum_{\begin{array}{c}
+\bar{D}_{KL}(\mathbf{x},\alpha_{i},\alpha_{j}:\ X,Y) & =\sum_{\mathbf{x}_{k}\in X\cup\mathbf{x}}\bar{\phi}(\mathbf{x}_{k},X:\ \alpha_{i})\log\frac{\bar{\phi}(\mathbf{x}_{k},X:\ \alpha_{i})}{\bar{\phi}(\mathbf{x}_{k},Y:\ \alpha_{j})}\\
+\|\mathbf{x},\alpha_{i},\alpha_{j}:\ X,Y\|_{KL} & =\bar{D}_{KL}(\mathbf{x},\alpha_{i},\alpha_{j}:\ X,Y)+\bar{D}_{KL}(\mathbf{x},\alpha_{j},\alpha_{i}:\ X,Y)\\
+\bar{K}_{\gamma}(\mathbf{x},\alpha_{i},\alpha_{j}:\ X,Y) & =\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|\mathbf{x},\alpha_{i},\alpha_{j}:\ X,Y\|_{KL}^{2}}\\
+\bar{\varphi}_{P}(\mathbf{x}:\ \boldsymbol{\alpha},X,Y) & =\sum_{\begin{array}{c}
 i\in\boldsymbol{\alpha}\\
-j\in\boldsymbol{\alpha}\end{array}}\frac{1}{|\boldsymbol{\alpha}|^{2}}\bar{K}_{\gamma}(\alpha_{i},\alpha_{j}:\ X,\hat{X})\end{align*}
+j\in\boldsymbol{\alpha}\end{array}}\frac{1}{|\boldsymbol{\alpha}|^{2}}\bar{K}_{\gamma}(\mathbf{x},\alpha_{i},\alpha_{j}:\ X,Y)\end{align*}
 
 \end_inset
 
@@ -1424,11 +1418,7 @@ Support Vector Estimation
 The Parzen Window method is neither sparse nor computationally efficient,
  and as the number of observations grows, these deficiencies quickly become
  prohibitive.
- We now investigate the use of Support Vector Machines to generate 
-\begin_inset Formula $\varphi(\mathbf{x},S)$
-\end_inset
-
-.
+ We now investigate the use of Support Vector Machines to generate estimates.
 \end_layout
 
 \begin_layout Subsection
@@ -1496,7 +1486,7 @@ where
 
 \begin_layout Standard
 Rather than calculating the cumulative probability distribution of 
-\begin_inset Formula $\Omega^{\mathcal{S}}$
+\begin_inset Formula $X$
 \end_inset
 
 , we begin with the assumption that the Parzen Window estimate of the probabilit
@@ -1507,18 +1497,15 @@ y distribution is acceptably accurate and attempt to minimize the square
 \begin_inset Formula $\Omega$
 \end_inset
 
- which penalizes similar 
-\begin_inset Formula $S$
-\end_inset
-
-.
+ which penalizes similar windows.
  The Support Vector approach seeks a solution in the following form:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align}
-\varphi_{SV}(\mathbf{x},S:\beta) & =\sum_{i\in\mathcal{S}}\beta_{i}K_{\gamma}(S_{\mathbf{x}},S_{i})\label{eq:SVResultSingle}\\
-S_{\mathbf{x}} & =\{S\cup\mathbf{x}\}\end{align}
+\varphi_{SV}(\mathbf{x}:\ \boldsymbol{\alpha},\beta,X,Y) & =\sum_{\begin{array}{c}
+i\in\boldsymbol{\alpha}\\
+j\in\boldsymbol{\alpha}\end{array}}\sum_{k\in Y}\beta_{k}\bar{K}_{\gamma}(\mathbf{x},\alpha_{i},\alpha_{j}:\ X,Y)\label{eq:SVResultSingle}\end{align}
 
 \end_inset
 
@@ -1531,11 +1518,7 @@ So we can express the Support Vector optimization problem as:
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-W(\beta) & =\sum_{S\in\mathcal{S}}\left(\varphi_{P}(S)-\varphi_{SV}(S:\beta)\right)^{2}+\lambda\Omega(\beta,S)\\
- & =\sum_{S\in S}\left(\varphi_{SV}(S:\beta)^{2}-2\varphi_{SV}(S:\beta)\varphi_{P}(S)\right)+\lambda\Omega(\beta,S)\\
- & =\sum_{S\in\mathcal{S}}\left(\left(\sum_{i\in\mathcal{S}}\beta_{i}K_{\gamma}(S,S_{i})\right)\cdot\left(\sum_{j\in\mathcal{S}}\beta_{j}K_{\gamma}(S,S_{j})\right)\right)+\lambda\Omega(\beta,S)\\
- & =\sum_{i,j\in\mathcal{S}}\beta_{i}\beta_{j}\sum_{S\in\mathcal{S}}K_{\gamma}(S,S_{i})K_{\gamma}(S,S_{j})\\
- & \qquad\qquad\qquad\qquad+\sum_{i\in\mathcal{S}}\beta_{i}\sum_{S\in\mathcal{S}}\left(\lambda K_{\gamma}(S,S_{i})^{-1}-\frac{2}{|\mathcal{S}|}\sum_{j\in\mathcal{S}}K_{\gamma}(S,S_{i})K_{\gamma}(S,S_{j})\right)\end{align*}
+W(\beta) & =\sum_{\alpha\in\boldsymbol{\alpha}}\sum_{\mathbf{x}\in X}\left(\bar{\varphi}_{P}(\mathbf{x}:\ \alpha,X,X)-\bar{\varphi}_{SV}(\mathbf{x}:\ \alpha,\beta,X,X)\right)^{2}+\lambda\Omega(\boldsymbol{\alpha},\beta)\end{align*}
 
 \end_inset
 
@@ -1557,7 +1540,9 @@ Notice the regularizer selected is defined as:
 
 \begin_layout Standard
 \begin_inset Formula \begin{equation}
-\Omega(\beta,S)=\sum_{i\in\mathcal{S}}\beta_{i}\sum_{S\in\mathcal{S}}K_{\gamma}(S,S_{i})^{-1}\end{equation}
+\Omega(\boldsymbol{\alpha},\beta)=\sum_{\begin{array}{c}
+i\in\boldsymbol{\alpha}\\
+j\in\boldsymbol{\alpha}\end{array}}\sum_{\mathbf{x}\in X}\bar{K}_{\gamma}(\mathbf{x},\alpha_{i},\alpha_{j}:\ X,X)^{-1}\end{equation}
 
 \end_inset
 
@@ -1578,15 +1563,15 @@ reference "eq:SVProcessSingle"
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
 W(\beta) & =\frac{1}{2}\beta^{T}P\beta+q^{T}\beta\\
-P_{i,j} & =\sum_{S\in\mathcal{S}}K_{\gamma}(S,S_{i})K_{\gamma}(S,S_{j})\\
-q_{i} & =\sum_{S\in\mathcal{S}}\left(\lambda K_{\gamma}(S,S_{i})^{-1}-\frac{1}{|\mathcal{S}|}\sum_{j\in\mathcal{S}}K_{\gamma}(S,S_{i})K_{\gamma}(S,S_{j})\right)\end{align*}
+P_{i,j} & =\sum_{\alpha\in\boldsymbol{\alpha}}\sum_{\mathbf{x}\in X}K_{\gamma}(\mathbf{x},\alpha,\alpha_{i}:\ X,X)K_{\gamma}(\mathbf{x},\alpha,\alpha_{j}:\ X,X)\\
+q_{i} & =\sum_{\alpha_{i}\in\boldsymbol{\alpha}}\sum_{\mathbf{x}\in X}\left(\lambda K_{\gamma}(\mathbf{x},\alpha,\alpha_{i})^{-1}-\frac{1}{|\boldsymbol{\alpha}|^{2}}\sum_{\alpha_{j}\in\boldsymbol{\alpha}}K_{\gamma}(\mathbf{x},\alpha,\alpha_{i}:\ X,X)K_{\gamma}(\mathbf{x},\alpha,\alpha_{j}:\ X,X)\right)\end{align*}
 
 \end_inset
 
  
 \begin_inset Formula \begin{align}
 P & =\langle\mathbf{K}^{T}\cdot\mathbf{K}\rangle\label{eq:SVPSingle}\\
-q & =\lambda\langle\mathbf{K}^{T}\cdot\mathbf{1}_{(|\mathcal{S}|,1)}\rangle^{-1}-\frac{1}{|\mathcal{S}|}\langle\mathbf{K}^{T}\cdot\mathbf{K}\cdot\mathbf{1}_{(|\mathcal{S}|,1)}\rangle\end{align}
+q & =\lambda\langle\mathbf{K}^{T}\cdot\mathbf{1}_{(|\boldsymbol{\alpha}|,1)}\rangle^{-1}-\frac{1}{|\boldsymbol{\alpha}|}\langle\mathbf{K}^{T}\cdot\mathbf{K}\cdot\mathbf{1}_{(|\boldsymbol{\alpha}|,1)}\rangle\end{align}
 
 \end_inset
 
@@ -1595,6 +1580,35 @@ q & =\lambda\langle\mathbf{K}^{T}\cdot\mathbf{1}_{(|\mathcal{S}|,1)}\rangle^{-1}
 
 \begin_layout Subsection
 Sliding Windows 
+\end_layout
+
+\begin_layout Standard
+A final refinement to the SVM solution comes from observing that the set
+ of windows need not be defined by the input data; we can factor out the
+ offset and restrict 
+\begin_inset Formula $\alpha$
+\end_inset
+
+ to defining parameters relevant to the input data such as window duration.
+ This can be accomplished by substituting an integral for the summation
+ over the window set:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\varphi_{SV}(\mathbf{x}:\ \alpha,\beta,X,Y) & =\sum_{k\in Y}\beta_{k}\bar{K}_{\gamma}(\mathbf{x}:\ \alpha,X,Y)\\
+\bar{\phi}(\mathbf{x},X:\ \tau,\alpha) & =\int_{i}\int_{j}\sum_{\mathbf{x}_{i}\in X}\omega(\mathbf{x}_{i}:\ \tau,\alpha)\frac{1}{\sum_{\mathbf{x}\in X}\omega(\mathbf{x}:\ \tau,\alpha)}\bar{k}_{\gamma}(\mathbf{x},\mathbf{x}_{i}:\ \tau)d\tau d\tau\\
+\bar{k}_{\gamma}(\mathbf{x}_{i},\mathbf{x}_{j}:\ \tau) & =k_{\gamma}\left(\mathbf{x}_{i},(x_{j},t_{j}-\tau)\right)\\
+W(\beta) & =\int\sum_{\mathbf{x}\in X}\left(\bar{\varphi}_{P}(\mathbf{x}:\ \alpha,X,X)-\bar{\varphi}_{SV}(\mathbf{x}:\ \alpha,\beta,X,X)\right)^{2}d\tau+\lambda\Omega(\boldsymbol{\alpha},\beta)\\
+\Omega(\boldsymbol{\alpha},\beta) & =\int_{i}\int_{j}\sum_{\mathbf{x}\in X}\bar{K}_{\gamma}(\mathbf{x}:\ \alpha,X,X)^{-1}d\tau d\tau\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+(old) Sliding Windows
 \end_layout
 
 \begin_layout Standard
