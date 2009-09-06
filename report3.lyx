@@ -611,16 +611,13 @@ We begin by considering the case where only one channel exists, so for now
 \end_inset
 
 .
- Given a set of test data 
-\begin_inset Formula $\hat{X}$
+ Given a set of training data 
+\begin_inset Formula $Y$
 \end_inset
 
-, our goal is to estimate the probability distribution of 
-\begin_inset Formula $X$
-\end_inset
-
- over some time window 
-\begin_inset Formula $(t_{\hat{x}},\theta_{\hat{x}})$
+, our task is to estimate a probability distribution based on a set of test
+ data 
+\begin_inset Formula $Z$
 \end_inset
 
 :
@@ -628,18 +625,18 @@ We begin by considering the case where only one channel exists, so for now
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\mathbf{\hat{x}}_{i} & =(\hat{x}_{i},t_{i})\\
-\hat{X} & =[\mathbf{\hat{x}}_{0},\ldots,\mathbf{\hat{x}}_{\ell}]\\
- & (t_{\hat{x}},\theta_{\hat{x}}),\quad t_{\hat{x}}<\min_{t}\hat{X}<\max_{t}\hat{X}<t_{\hat{x}}+\theta_{\hat{x}}\end{align*}
+Y & =\left[(y_{1},t_{1}),...,(y_{\ell},t_{\ell})\right]\longmapsto\left[\mathbf{y}_{1},...,\mathbf{y}_{\ell}\right]\\
+Z & =\left[(z_{1},t_{1}),...,(z_{\eta},t_{\eta})\right]\longmapsto\left[\mathbf{z}_{1},...,\mathbf{z}_{\eta}\right]\end{align*}
 
 \end_inset
 
+For each observation in the training data we define a subset of 
+\begin_inset Formula $Y$
+\end_inset
 
-\end_layout
-
-\begin_layout Standard
-We begin by defining the subset of the training observations which fall
- into each time window, shifted to the interval 
+ which contains all the observations which fall in a time window starting
+ at the training observation and of duration greater than or equal to the
+ duration of the test data and, shifted to the interval 
 \begin_inset Formula $t\in[0,\theta)$
 \end_inset
 
@@ -654,19 +651,10 @@ elaborate on what the time windows are and how they're denoted
 \end_inset
 
 
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{equation}
-S_{t,\theta}=\left[\left(x_{i},t_{i}-t\right)|\quad x_{i}\in X,\ 0\le t_{i}-t<\theta\right]\label{eq:Ssingle}\end{equation}
-
-\end_inset
-
- 
-\begin_inset Formula \[
-\mathcal{S}=\begin{bmatrix}S_{t_{0},\theta_{0}} & \cdots & S_{t_{0},\theta_{z}}\\
-\vdots & \ddots & \vdots\\
-S_{t_{\ell},\theta_{0}} & \cdots & S_{t_{\ell},\theta_{z}}\end{bmatrix}\]
+\begin_inset Formula \begin{align}
+\theta & \ge\max_{t}Z-\min_{t}Z\nonumber \\
+S_{i} & =\left[(y_{j},t_{j}-t_{i})|\quad\mathbf{y}\in Y,t_{i}\le t_{j}<t_{j}+\theta\right]\label{eq:sSingle}\\
+\mathcal{S} & =\left[S_{1},...,S_{\ell}\right]\nonumber \end{align}
 
 \end_inset
 
@@ -692,7 +680,7 @@ We treat
 
 \begin_layout Standard
 and observe that 
-\begin_inset Formula $\hat{X}$
+\begin_inset Formula $Z$
 \end_inset
 
  can be treated as an observation of 
@@ -704,7 +692,7 @@ and observe that
 
 \begin_layout Standard
 \begin_inset Formula \begin{equation}
-S_{\hat{x}}=\left[\left(x_{i},t_{i}-\min_{t}\hat{X}\right)|\quad(x_{i},t_{i})\in\hat{X}\right]\label{eq:SySingle}\end{equation}
+S_{Z}=\left[\left(z_{i},z_{i}-\min_{t}Z\right)|\quad(x_{i},t_{i})\in Z\right]\label{eq:SySingle}\end{equation}
 
 \end_inset
 
@@ -714,7 +702,7 @@ S_{\hat{x}}=\left[\left(x_{i},t_{i}-\min_{t}\hat{X}\right)|\quad(x_{i},t_{i})\in
 \begin_layout Standard
 We can now frame the task of estimating the probability distribution of
  
-\begin_inset Formula $\hat{X}$
+\begin_inset Formula $Z$
 \end_inset
 
  as a task of estimating a probability density function 
@@ -726,34 +714,11 @@ We can now frame the task of estimating the probability distribution of
 \end_inset
 
 :
-\begin_inset Note Note
-status collapsed
-
-\begin_layout Plain Layout
-This framing is not an exact equality; 
-\begin_inset Formula $\varphi$
-\end_inset
-
- is the PDF of *subsets* of 
-\begin_inset Formula $\hat{X}$
-\end_inset
-
- - this information is only really useful if we assume 
-\begin_inset Formula $\hat{X}$
-\end_inset
-
- contains repeating patterns.
- The equation is also the conditional PDF, not the straight PDF.
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{equation}
-\Pr(X=\mathbf{x}\ |\ \hat{X})\mapsto\ \Pr(\mathcal{S}=\{S_{\hat{x}}\cup\mathbf{x}\})\ \simeq\ \varphi(\mathbf{x},S_{\hat{x}})\label{eq:PrS}\end{equation}
+\Pr(X=\mathbf{x}\ |\ Y\cup Z)\mapsto\ \Pr(\mathcal{S}=\{S_{Z}\cup\mathbf{x}\}|\quad Z)\ \simeq\ \varphi(\mathbf{x},S_{Z}:\ \mathcal{S})\label{eq:PrS}\end{equation}
 
 \end_inset
 
@@ -769,7 +734,7 @@ In order to extend this result to settings in which multiple channels exist,
  we return to 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "eq:Ssingle"
+reference "eq:sSingle"
 
 \end_inset
 
@@ -778,7 +743,7 @@ reference "eq:Ssingle"
 
 \begin_layout Standard
 \begin_inset Formula \begin{equation}
-S_{t,\theta}=\left[\left(x_{i}^{n},t_{i}-t\right)|\quad x_{i}^{n}\in\mathbf{X},\ 0\le t_{i}-t<\theta\right]\label{eq:Smultiple}\end{equation}
+S_{i}=\left[(y_{j}^{n},t_{j}-t_{i})|\quad\mathbf{y}^{n}\in\mathbf{Y},t_{i}\le t_{j}<t_{j}+\theta\right]\label{eq:Smultiple}\end{equation}
 
 \end_inset
 
@@ -804,7 +769,7 @@ reference "eq:SySingle"
 
 \begin_layout Standard
 \begin_inset Formula \begin{equation}
-S_{\hat{x}}=\left[\left(x_{i}^{n},t_{i}-\min_{t}\hat{X}\right)|\quad(x_{i}^{n},t_{i})\in\mathbf{\hat{X}}\right]\label{eq:SyMultiple}\end{equation}
+S_{Z}=\left[\left(z_{i}^{n},z_{i}-\min_{t}Z\right)|\quad\mathbf{z}^{n}\in\mathbf{Z}\right]\label{eq:SyMultiple}\end{equation}
 
 \end_inset
 
@@ -862,22 +827,6 @@ D_{KL}(S_{n}\|S_{m}) & =\sum_{\mathbf{x}\in\{S_{n}\cup S_{m}\}}\phi_{n}(\mathbf{
 \end_inset
 
  
-\begin_inset ERT
-status collapsed
-
-\begin_layout Plain Layout
-
-% Need to discuss why the union of n&m is sufficient to evaluate the KL
- divergence
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
@@ -909,7 +858,7 @@ and
 
 \begin_layout Standard
 \begin_inset Formula \begin{equation}
-\Pr(S\ |\ \mathcal{S})\simeq\sum_{i\in\mathcal{S}}\frac{1}{|\mathcal{S}|}K_{\gamma}(S,S_{i})\label{eq:PrSParzenSingle}\end{equation}
+\Pr(S\ |\ \mathcal{S})\simeq\sum_{i=1}^{\ell}\frac{1}{\ell}K_{\gamma}(S,S_{i})\label{eq:PrSParzenSingle}\end{equation}
 
 \end_inset
 
@@ -917,11 +866,7 @@ and
 \end_layout
 
 \begin_layout Standard
-where 
-\begin_inset Formula $|\cdot|$
-\end_inset
-
- denotes cardinality and 
+where
 \begin_inset Formula $K$
 \end_inset
 
@@ -951,7 +896,7 @@ The same method can be used to estimate
 
 \begin_layout Standard
 \begin_inset Formula \begin{equation}
-\phi_{n}(\mathbf{x})=\sum_{\mathbf{x}_{i}\in S_{n}}\frac{1}{|S_{n}|}k_{\gamma}(\mathbf{x},\mathbf{x}_{i})\label{eq:PhiSingle}\end{equation}
+\phi_{n}(\mathbf{x}:\ S_{n})=\sum_{\mathbf{x}_{i}\in S_{n}}\frac{1}{|S_{n}|}k_{\gamma}(\mathbf{x},\mathbf{x}_{i})\label{eq:PhiSingle}\end{equation}
 
 \end_inset
 
@@ -959,7 +904,12 @@ The same method can be used to estimate
 \end_layout
 
 \begin_layout Standard
-Substituting 
+Where 
+\begin_inset Formula $|\cdot|$
+\end_inset
+
+ denotes cardinality.
+ Substituting 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "eq:PrSParzenSingle"
@@ -978,17 +928,11 @@ reference "eq:PrS"
 
 \begin_layout Standard
 \begin_inset Formula \begin{equation}
-\varphi_{P}(\mathbf{x},S)=\sum_{i\in\mathcal{S}}\frac{1}{|\mathcal{S}|}K_{\gamma}(S_{\mathbf{x}},S_{i})\label{eq:VarphiParzenSingle}\end{equation}
+\varphi_{P}(\mathbf{x},S_{Z}:\ \mathcal{S})=\sum_{i=1}^{\ell}\frac{1}{\ell}K_{\gamma}\left(\{S_{Z}\cup\mathbf{x}\},S_{i}\right)\label{eq:VarphiParzenSingle}\end{equation}
 
 \end_inset
 
  
-\begin_inset Formula \[
-S_{\mathbf{x}}=\{S\cup\mathbf{x}\}\]
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Subsection
@@ -1090,6 +1034,20 @@ reference "eq:KRBFparzen"
 
 \begin_layout Subsection
 Parzen Window with Windowing Function
+\end_layout
+
+\begin_layout Standard
+Another way to approach the estimation problem is to consider the implications
+ of using duration value larger than the duration of the training data.
+ In this case defining multiple subsets has little value as the subsets
+ no longer capture a localized behavior.
+ This does not, however, prevent us from using the Parzen Window method.
+ Rather than segmenting the training data and comparing it to the test data,
+ we can simply 'slide' the training data to a point on the time dimension
+ where the two sets overlap and compare the shifted test data to the training
+ data.
+ If we assign a variable to the magnitude of the shift, we can integrate
+ over that variable to produce the effect of having defined infinite subsets.
 \end_layout
 
 \begin_layout Standard
@@ -1492,20 +1450,11 @@ Rather than calculating the cumulative probability distribution of
 , we begin with the assumption that the Parzen Window estimate of the probabilit
 y distribution is acceptably accurate and attempt to minimize the square
  loss between the Support Vector estimate and the Parzen Window estimate.
- Because we are hoping to generate a sparse representation of the probability
- distribution, we add a regularizing term 
-\begin_inset Formula $\Omega$
-\end_inset
-
- which penalizes similar windows.
- The Support Vector approach seeks a solution in the following form:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align}
-\varphi_{SV}(\mathbf{x}:\ \boldsymbol{\alpha},\beta,X,Y) & =\sum_{\begin{array}{c}
-i\in\boldsymbol{\alpha}\\
-j\in\boldsymbol{\alpha}\end{array}}\sum_{k\in Y}\beta_{k}\bar{K}_{\gamma}(\mathbf{x},\alpha_{i},\alpha_{j}:\ X,Y)\label{eq:SVResultSingle}\end{align}
+\varphi_{SV}(\mathbf{x},Z:\ \alpha,\tau,\beta,Y) & =\int\sum_{i=1}^{\ell}\beta_{i}\bar{K}_{\gamma}\left(\{Y\cup\mathbf{x}\},Z:\ \alpha,\tau\right)d\tau\label{eq:SVResultSingle}\end{align}
 
 \end_inset
 
@@ -1513,12 +1462,74 @@ j\in\boldsymbol{\alpha}\end{array}}\sum_{k\in Y}\beta_{k}\bar{K}_{\gamma}(\mathb
 \end_layout
 
 \begin_layout Standard
-So we can express the Support Vector optimization problem as:
+The support vector approach requires that we define an optimization problem
+ which will determine which observations will be used in estimations and
+ which can be discarded as redundant or irrelevant information.
+ We must therefore develop a method of evaluating the 'usefulness' of each
+ point in a set of training data.
+ To do this we begin by observing that the duration of the training set
+ is likely larger than the duration of test sets, which means we will have
+ to make estimates using less information that is available in the training
+ data; whatever optimization problem we define will need to take this into
+ account.
+ The optimization equation compares the results of Parzen estimation to
+ the results of SVM estimation using a portion of the training data as synthetic
+ testing data.
+ This can be accomplished using subsets of the training data, but a more
+ flexible approach is to introduce a windowing kernel function.
+ This windowing function operates by adjusting the influence of the distance
+ between two points on the value of 
+\begin_inset Formula $\phi(\mathbf{x})$
+\end_inset
+
+:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-W(\beta) & =\sum_{\alpha\in\boldsymbol{\alpha}}\sum_{\mathbf{x}\in X}\left(\bar{\varphi}_{P}(\mathbf{x}:\ \alpha,X,X)-\bar{\varphi}_{SV}(\mathbf{x}:\ \alpha,\beta,X,X)\right)^{2}+\lambda\Omega(\boldsymbol{\alpha},\beta)\end{align*}
+\bar{\phi}(\mathbf{x}:\ X,\tau,\alpha) & =\sum_{\mathbf{x}_{i}\in X}\omega(\mathbf{x}_{i}:\ \tau,\alpha)\frac{1}{\sum_{\mathbf{x}\in X}\omega(\mathbf{x}:\ \tau,\alpha)}\bar{k}_{\gamma}(\mathbf{x},\mathbf{x}_{i}:\ \tau)\\
+\bar{k}_{\gamma}(\mathbf{x}_{i},\mathbf{x}_{j}:\ \tau) & =k_{\gamma}\left(\mathbf{x}_{i},(x_{j},t_{j}-\tau)\right)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This requires us to reformulate our Parzen Window equations thus:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\|X,Y:\ \tau,\alpha\|_{KL} & =\sum_{\mathbf{x}_{k}\in X\cup\mathbf{x}}\bar{\phi}(\mathbf{x}_{k}:\ X,\tau,\alpha)\log\frac{\bar{\phi}(\mathbf{x}_{k}:\ X,\tau,\alpha)}{\phi(\mathbf{x}_{k}:\ Y)}+\sum_{\mathbf{x}_{k}\in X\cup\mathbf{x}}\phi(\mathbf{x}_{k}:\ Y)\log\frac{\phi(\mathbf{x}_{k}:\ Y)}{\bar{\phi}(\mathbf{x}_{k}:\ X,\tau,\alpha)}\\
+\bar{K}_{\gamma}\left(X,Y:\ \tau,\alpha\right) & =\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|X,Y:\ \tau,\alpha\|_{KL}^{2}}\\
+\bar{\varphi}_{P}(\mathbf{x}:\ \alpha,\tau,Y) & =\sum_{i=1}^{\ell}\frac{1}{\ell}\bar{K}_{\gamma}\left(\{Y\cup\mathbf{x}\},Y:\ \tau,\alpha\right)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We must likewise reformulate the Support Vector target functional:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\bar{\varphi}_{SV}(\mathbf{x}:\ \alpha,\tau,\beta,Y) & =\int\sum_{i=1}^{\ell}\beta_{i}\bar{K}_{\gamma}\left(\{Y\cup\mathbf{x}\},Y:\ \tau,\alpha\right)d\tau\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+So we can now express the Support Vector optimization problem as:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+W(\beta:\ \alpha) & =\int\sum_{\mathbf{x}\in X}\left(\bar{\varphi}_{P}(\mathbf{x}:\ \alpha,\tau,Y)-\bar{\varphi}_{SV}(\mathbf{x}:\ \alpha,\tau,\beta,Y)\right)^{2}d\tau+\lambda\Omega(\boldsymbol{\alpha},\beta)\end{align*}
 
 \end_inset
 
@@ -1535,14 +1546,22 @@ W(\beta) & =\sum_{\alpha\in\boldsymbol{\alpha}}\sum_{\mathbf{x}\in X}\left(\bar{
 \end_layout
 
 \begin_layout Standard
+Because we are hoping to generate a sparse representation of the probability
+ distribution, we add a regularizing term 
+\begin_inset Formula $\Omega$
+\end_inset
+
+ which penalizes similar windows.
+ The Support Vector approach seeks a solution in the following form:
+\end_layout
+
+\begin_layout Standard
 Notice the regularizer selected is defined as:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{equation}
-\Omega(\boldsymbol{\alpha},\beta)=\sum_{\begin{array}{c}
-i\in\boldsymbol{\alpha}\\
-j\in\boldsymbol{\alpha}\end{array}}\sum_{\mathbf{x}\in X}\bar{K}_{\gamma}(\mathbf{x},\alpha_{i},\alpha_{j}:\ X,X)^{-1}\end{equation}
+\Omega(\boldsymbol{\alpha},\beta)=?\end{equation}
 
 \end_inset
 
