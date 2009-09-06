@@ -104,6 +104,25 @@ Support Vector Random Process Estimate
 \end_layout
 
 \begin_layout Standard
+\begin_inset Note Comment
+status open
+
+\begin_layout Plain Layout
+Why are we calculating for all S and all X? Wouldn't it be sufficient to
+ simply use all S? After all, we're treating S as a random variable.
+ The x subscript was added primarily to allow testing, not for selecting
+ SV S's.
+ Think it over - if it makes sense it would substantially reduce the computation
+al demands.
+ The entropy function calculates for all X, this is redundant...
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula \begin{align}
 \varphi_{SV}(\mathbf{x},S:\beta) & =\sum_{i\in\mathcal{S}}\beta_{i}K_{\gamma}(S_{\mathbf{x}},S_{i})\label{eq:varphiSV}\\
 S_{\mathbf{x}} & =\{S\cup\mathbf{x}\}\\
@@ -243,15 +262,12 @@ q & =\lambda\left\langle \mathbf{K}^{T}\cdot\mathbf{1}_{(|\mathcal{S}|,1)}\right
 \end_layout
 
 \begin_layout Standard
-To implement this, consider two matrices, the first a 2d matrix 
+To implement this, consider two matrices, the first a 2d matrix containing
+ observations 
 \begin_inset Formula $X$
 \end_inset
 
- containing observations and the second a 2d matrix 
-\begin_inset Formula $M$
-\end_inset
-
- used to mask subsets; each 
+ and the second a 2d matrix used to mask subsets; each 
 \begin_inset Formula $S$
 \end_inset
 
@@ -260,41 +276,6 @@ To implement this, consider two matrices, the first a 2d matrix
 \end_inset
 
 .
- 
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-M_{i,j} & =\begin{cases}
-0 & \quad X_{j}<t_{i}\\
-0 & \quad t_{i}+\theta_{i}\le X_{j}\\
-\frac{1}{|S_{i}|} & \quad\text{otherwise}\end{cases}\\
-X_{i,0} & =t_{i}\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-This allows us to change how we think of 
-\begin_inset Formula $\mathbf{D}$
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-\mathbf{D}_{i,j} & =k_{\gamma}(\mathbf{x}_{i},\mathbf{x}_{j})\\
-\mathbf{\bar{D}}_{n,m} & =\sum_{\begin{array}{c}
-i=S_{n}\\
-j=S_{m}\end{array}}\mathbf{D}_{i,j}\\
- & =\mathbf{D}\times\left\langle M_{n}\cdot M_{m}^{T}\right\rangle \end{align*}
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Section
@@ -337,9 +318,7 @@ reference "eq:varphiSV"
 \mathbf{D}_{i,j} & =k_{\gamma}(\mathbf{x},\mathbf{\hat{x}})\\
 \mathbf{\bar{D}}_{A,B} & =\sum_{\begin{array}{c}
 i\in A\\
-j\in B\end{array}}\mathbf{D}_{i,j}\\
- & =\mathbf{D}\times\left\langle M_{n}\cdot M_{m}^{T}\right\rangle \\
-\mathbf{\bar{D}}_{x,B} & =\mathbf{D}_{x}\times M_{B}\end{align*}
+j\in B\end{array}}\mathbf{D}_{i,j}\end{align*}
 
 \end_inset
 
@@ -429,30 +408,6 @@ Again, observe that
 
 .
  
-\end_layout
-
-\begin_layout Section
-Random Thoughts
-\end_layout
-
-\begin_layout Standard
-What if instead of using 
-\begin_inset Formula $\theta$
-\end_inset
-
-, we simply specified a number of observations to include.
- This would allow us to represent each subset with a 3rd dimension in the
- array, since the 3rd dimension would have a set number of values.
- I'm not sure if that helps though - we get back to the data duplication
- issue.
- I think we need to either duplicate the data or mask it - the combination
- of the two seems like the worst of both worlds.
-\end_layout
-
-\begin_layout Standard
-I'm still leaning towards masking, especially as we start to get into longer
- window lengths.
- How can this be done efficiently?
 \end_layout
 
 \end_body

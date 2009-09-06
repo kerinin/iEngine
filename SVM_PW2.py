@@ -24,62 +24,25 @@ cvxopt.solvers.options['feastol'] = 1e-15
 
 _Functions = ['run']
 	
-class kMachine(object):
-	def __init__(self,gamma):
-		self.gamma = gamma
-		
-	def _K(self,X,Y=None):
-	# Kernel function
-		
-		# Subset difference
-		if not Y==None:
-			diff = ( X - Y )
-		else:
-			diff =X
-
-		
-		# Subset Gaussian
-		return (1.0/(self.gamma*math.sqrt(math.pi))) * np.ma.exp( (-1.*(np.ma.power(diff,2)))/self.gamma)
-	
 class subset:
-	def __init__(self,data,D,svm=None,tStart=None,theta=None):
-		
-		self.tStart = tStart
-		self.theta = theta
-		self.X = data
-		self.N,self.d = data.shape
-		self.t = np.hsplit(self.X,[1,])[0]
+	def __init__(self,X,D,tStart,theta):
+		self.N,self.d = X.shape
+		self.X = X
 		self.D = D
-		self.svm = svm
+		self.argStart = np.argmax( X * ( X == tStart ) )
+		self.argEnd = np.argmax( X * (X < (tStart + theta) ) ) + 1
+		print self.argEnd - self.argStart
 		
-		if tStart != None and theta != None:
-			self.argStart = np.ma.masked_less(self.t,tStart,copy=False).argmin()
-			self.argEnd = 1+ np.ma.masked_greater(self.t,tStart+theta,copy=False).argmax()
-			
-			self.N = self.argStart - self.argEnd
-		else:
-			self.argStart = 0
-			self.argEnd = -1
-			
-			self.N = self.X.shape[0]
-			
-	def __sub__(self,other):
-	# difference - for comparing two subsets using Entropy
+	def __sub__(self,S):
 		
-		#NOTE: change this to conform to the entropy kernel
+		phi = self.D[self.argStart:self.argEnd,S.argStart:S.argEnd].sum(1) / S.N
 		
-		if other.__class__ == subset:
-		# other is an array of subsets
-			Dx = self.D[self.argStart:self.argEnd,other.argStart:other.argEnd,1:].prod(2)
-			Dt = self.svm._K( (self.t[self.argStart:self.argEnd] - self.t[self.argStart] ) - (other.t[other.argStart:other.argEnd] - other.t[other.argStart] ).T )
-			D = ( Dx * Dt )/( self.N * other.N )
-			return -( D * np.log2(D) ).sum()
-			#NOTE: when comparing a point to itself, the kernel value is 0, which produces NaN in Log
-		
-		raise StandardError, 'This type of subtraction not implemented'
+		diff = ( phi * np.log2(phi) ).sum()
+		#print self.D[self.argStart:self.argEnd,S.argStart:S.argEnd].shape
+		return diff
 
-class svm(kMachine):
-	def __init__(self,t=list(),data=list(),Lambda=.1, gamma =.5, theta=None ):
+class svm:
+	def __init__(self,data=list(),Lambda=.1, gamma =.5, theta=None ):
 	# SVM Class
 	#
 	# @param data		[Nxd] array of observations where N is the number of observations and d is the dimensionality of the abstract space
@@ -93,15 +56,17 @@ class svm(kMachine):
 			self.X = data.reshape([ self.N, self.d ])
 		else:
 			self.X = data
-		self.t = np.hsplit(self.X,[1])[0]
-		
-		self.theta = theta
+
 		self.Lambda = Lambda
-		super(svm, self).__init__(gamma)
+		self.gamma = gamma
+		
+		self.t = np.hsplit(self.X,[1])[0]
+		self.offset = np.tile( np.hsplit(self.X,[1])[0], len(theta) )
+		self.theta = np.repeat( np.array(theta), self.N )
 		
 		self.D = self._K( self.X.reshape([self.N,1,self.d]) - self.X.T.reshape([1,self.N,self.d]) )
-		self.S = self._S()
-		self.Y = None				# empirical CDF of X
+		self.S = np.array( [ [ subset(self.X,self.D, t, theta ) for t in self.t ] for theta in self.theta ] ).flatten()
+		
 		self.SV = None			# X value array of SV
 		self.NSV = None			# cardinality of SV
 		self.alpha = None			# the full weight array for all observations
@@ -118,55 +83,29 @@ class svm(kMachine):
 		ret += "SV: %s (%s percent)\n" % ( self.NSV,100. * float(self.NSV) / float(self.N ) )
 		return ret
 		
-	def _S(self):
+	def _K(self,X,Y=None):
+	# Kernel function
 		
-		S = np.ma.vstack( 
-			[ 
-				np.ma.vstack( 
-					[ subset(data=self.X,D=self.D,svm=self,tStart=tStart,theta=theta) for tStart in self.t ] 
-				) for theta in self.theta 
-			]
-		)
+		# Subset difference
+		if not Y==None:
+			diff = ( X - Y )
+		else:
+			diff =X
+
 		
-		return S
+		# Subset Gaussian
+		return (1.0/(self.gamma*math.sqrt(math.pi))) * np.ma.exp( (-1.*(np.ma.power(diff,2)))/self.gamma)
 		
-	def pdf(self,S,X):
+	def pdf(self,Sx,X):
 	# Probability distribution function
 	#
-		Ns,ds = S.shape
-		Nx,dx = X.shape
+		pass
 		
-		shift = np.array([S[0,0],]+([0,]*(ds-1))).reshape([1,ds])
-		floor = np.array([0,]+([1,]*(ds-1))).reshape([1,ds])
-		
-		Sx = S - np.repeat( shift, Ns, axis=0 )
-		Xshifted = X
-		
-		K = np.array([
-			self._K( Sx.reshape([Ns,1,ds]) - S[0].X[S[0].argStart:S[0].argEnd].T.reshape([1,(S[0].argEnd - S[0].argStart),S[0].d]) ).prod(2).sum() / (Ns * (S[0].argEnd - S[0].argStart ) )
-			for S in self.S
-		])
-		Ds = -( K * np.log2(K) ).reshape([self.S.shape[0],1])
-		
-		tmp = list()
-		for S in self.S:
-			shape1 = [ X.shape[0],1,X.shape[1] ]
-			shape2 = [1,( S[0].argEnd-S[0].argStart),S[0].d]
-			phi = self._K( Xshifted.reshape(shape1) - S[0].X[S[0].argStart:S[0].argEnd].reshape(shape2 ) ).prod(2).sum(1) / ( Nx * (S[0].argEnd-S[0].argStart) ) 
-			tmp.append( -( phi * np.log2(phi) ) )
-		Dx = np.array(tmp)
-				
-		R = Ds + Dx
-		
-		pdf = np.ma.dot( R.T, self.beta )
-		
-		return pdf
-	
 	def _compute(self):
 		start = datetime.datetime.now()
-		
-		diff = np.array( self.S - self.S.T, dtype=float, copy=False )
-		
+
+		diff = np.array( [ [ Si - Sj for Sj in self.S ] for Si in self.S ] )
+
 		self.K = self._K( diff )
 		
 		P = cvxopt.matrix( np.dot(self.K.T,self.K), (self.N,self.N) )
@@ -184,39 +123,40 @@ class svm(kMachine):
 		self.NSV = beta.count()
 		self.alpha = beta
 		self.beta = beta
-		
 		#self.beta = beta.compressed().reshape([self.NSV,1])
+		#self.SV = np.array( [ subsetSV( S=S,svm=self ) for S in np.ma.array( self.S, mask=mask).compressed() ],ndmin=2)
 
 		duration = datetime.datetime.now() - start
 		print "optimized in %ss" % ( duration.seconds + float(duration.microseconds)/1000000)
 		
 	def contourPlot(self, S, fig, xrange, yrange, xstep, ystep, axes=(0,1) ):
+		N,d=S.shape
 		xN = int((xrange[1]-xrange[0])/xstep)
 		yN =  int((yrange[1]-yrange[0])/ystep)
 		X = np.dstack(np.mgrid[xrange[0]:xrange[1]:xstep,yrange[0]:yrange[1]:ystep]).reshape([ xN * yN,2])
 		x = np.arange(xrange[0],xrange[1],xstep)
 		y = np.arange(yrange[0],yrange[1],ystep)
-
+		
 		CS1 = fig.contourf(x,y,self.pdf(S,X).reshape([xN,yN]).T,200, antialiased=True, cmap=cm.gray )
 		#CS2 = plt.contour(x,y,self.pdf(S,X).reshape([xN,yN]).T, [.1,], colors='r' )
-		fig.plot( np.hsplit( S,S.shape[1] )[0],np.hsplit( S,S.shape[1] )[ axes[1] ], 'r+' )
-		#fig.axis( [ xrange[0],xrange[1],yrange[0],yrange[1] ] )
+		fig.plot( np.hsplit( S,d )[0],np.hsplit( S,d )[ axes[1] ], 'r+' )
+		fig.axis( [ xrange[0],xrange[1],yrange[0],yrange[1] ] )
 		#return (CS1,CS2)
 		
 def run():
 	fig = plt.figure()
 	
-	Xtrain = np.arange(0,20,.25)
+	Xtrain = np.arange(0,10,.5)
 	Ytrain = np.sin(Xtrain) + (np.random.randn( Xtrain.shape[0] )/10.)
-	mod = svm( data=np.hstack([Xtrain.reshape([Xtrain.shape[0],1]),Ytrain.reshape([Ytrain.shape[0],1])]), gamma=.5, Lambda=.005, theta=[5.] )
+	mod = svm( data=np.hstack([Xtrain.reshape([Xtrain.shape[0],1]),Ytrain.reshape([Ytrain.shape[0],1])]), gamma=.005, Lambda=.05, theta=[.1] )
 	print mod
 
-	Xtest = np.arange(5,15,.25)
+	Xtest = np.arange(5,11,.2)
 	Ytest = np.sin(Xtest)+ (np.random.randn( Xtest.shape[0] )/10.)
 	S=np.hstack([Xtest.reshape([Xtest.shape[0],1]),Ytest.reshape([Ytest.shape[0],1])])
 	
-	mod.contourPlot( S, plt, (0,22), (-2,2),1.,.1 )
-	#(c1,c2) = mod.contourPlot( S, plt, (0,20), (-2,2),.1,.01 )
+	mod.contourPlot( S, plt, (0,10), (-2,2),1.,.25 )
+	#(c1,c2) = mod.contourPlot( S, plt, (0,10), (-2,2),1.,.25 )
 
 	plt.show()
 	
