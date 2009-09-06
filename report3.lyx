@@ -1448,13 +1448,27 @@ Rather than calculating the cumulative probability distribution of
 \end_inset
 
 , we begin with the assumption that the Parzen Window estimate of the probabilit
-y distribution is acceptably accurate and attempt to minimize the square
- loss between the Support Vector estimate and the Parzen Window estimate.
+y distribution is acceptably accurate and attempt to minimize the difference
+ between the Support Vector estimate and the Parzen Window estimate.
+ The support vector approach requires that we define an optimization problem
+ 
+\begin_inset Formula $W(\beta)$
+\end_inset
+
+ which will determine which observations will be used in estimations and
+ which can be discarded as redundant or irrelevant information by defining
+ a set of weights 
+\begin_inset Formula $\beta$
+\end_inset
+
+, some of which will be non-zero.
+ We define the optimization problem as minimizing the square loss between
+ the Support Vector and Parzen Window estimates:
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align}
-\varphi_{SV}(\mathbf{x},Z:\ \alpha,\tau,\beta,Y) & =\int\sum_{i=1}^{\ell}\beta_{i}\bar{K}_{\gamma}\left(\{Y\cup\mathbf{x}\},Z:\ \alpha,\tau\right)d\tau\label{eq:SVResultSingle}\end{align}
+\begin_inset Formula \begin{align*}
+W(\beta) & =\sum_{i=1}^{\ell}\left(\varphi_{P}(\mathbf{x})-\varphi_{SV}(\mathbf{x}:\ \beta)\right)^{2}\end{align*}
 
 \end_inset
 
@@ -1462,10 +1476,7 @@ y distribution is acceptably accurate and attempt to minimize the square
 \end_layout
 
 \begin_layout Standard
-The support vector approach requires that we define an optimization problem
- which will determine which observations will be used in estimations and
- which can be discarded as redundant or irrelevant information.
- We must therefore develop a method of evaluating the 'usefulness' of each
+We must therefore develop a method of evaluating the 'usefulness' of each
  point in a set of training data.
  To do this we begin by observing that the duration of the training set
  is likely larger than the duration of test sets, which means we will have
@@ -1496,14 +1507,28 @@ The support vector approach requires that we define an optimization problem
 \end_layout
 
 \begin_layout Standard
-This requires us to reformulate our Parzen Window equations thus:
+This approach is much more powerful than using subsets, as it allows a gradient
+ of magnitudes in the influence of each point, rather than forcing a binary
+ decision of included/not included.
+ In order to use this approach, we must modify both the distance metric
+ and the kernel function to handle the additional parameters 
+\begin_inset Formula $\tau$
+\end_inset
+
+ (which specifies the location of the windowing function in the time dimension)
+ and 
+\begin_inset Formula $\alpha$
+\end_inset
+
+ (which specifies parameters of the windowing function such as duration).
+ We reformulate the Parzen Window equations thus:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
 \|X,Y:\ \tau,\alpha\|_{KL} & =\sum_{\mathbf{x}_{k}\in X\cup\mathbf{x}}\bar{\phi}(\mathbf{x}_{k}:\ X,\tau,\alpha)\log\frac{\bar{\phi}(\mathbf{x}_{k}:\ X,\tau,\alpha)}{\phi(\mathbf{x}_{k}:\ Y)}+\sum_{\mathbf{x}_{k}\in X\cup\mathbf{x}}\phi(\mathbf{x}_{k}:\ Y)\log\frac{\phi(\mathbf{x}_{k}:\ Y)}{\bar{\phi}(\mathbf{x}_{k}:\ X,\tau,\alpha)}\\
 \bar{K}_{\gamma}\left(X,Y:\ \tau,\alpha\right) & =\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|X,Y:\ \tau,\alpha\|_{KL}^{2}}\\
-\bar{\varphi}_{P}(\mathbf{x}:\ \alpha,\tau,Y) & =\sum_{i=1}^{\ell}\frac{1}{\ell}\bar{K}_{\gamma}\left(\{Y\cup\mathbf{x}\},Y:\ \tau,\alpha\right)\end{align*}
+\bar{\varphi}_{P}(\mathbf{x},Z:\ \alpha,\tau,Y) & =\int\sum_{i=1}^{\ell}\frac{1}{\ell}\bar{K}_{\gamma}\left(\{Y\cup\mathbf{x}\},Z:\ \tau,\alpha\right)d\tau\end{align*}
 
 \end_inset
 
@@ -1511,12 +1536,30 @@ This requires us to reformulate our Parzen Window equations thus:
 \end_layout
 
 \begin_layout Standard
-We must likewise reformulate the Support Vector target functional:
+This formulation essentially replaces explicit subsets with equivalent functions
+ based on the windowing function and adds our windowing parameters to the
+ function.
+ We can now elaborate on the 'target functional' of the Support Vector approach;
+ the function which will be used to generate estimates once the optimization
+ problem 
+\begin_inset Formula $W(\beta)$
+\end_inset
+
+ has been solved.
+ The target functional replaces the normalizing term 
+\begin_inset Formula $\frac{1}{\ell}$
+\end_inset
+
+ in the Parzen Window function with 
+\begin_inset Formula $\beta$
+\end_inset
+
+:
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-\bar{\varphi}_{SV}(\mathbf{x}:\ \alpha,\tau,\beta,Y) & =\int\sum_{i=1}^{\ell}\beta_{i}\bar{K}_{\gamma}\left(\{Y\cup\mathbf{x}\},Y:\ \tau,\alpha\right)d\tau\end{align*}
+\begin_inset Formula \begin{align}
+\bar{\varphi}_{SV}(\mathbf{x},Z:\ \alpha,\tau,\beta,Y) & =\int\sum_{i=1}^{\ell}\beta_{i}\bar{K}_{\gamma}\left(\{Y\cup\mathbf{x}\},Z:\ \alpha,\tau\right)d\tau\label{eq:SVResultSingle}\end{align}
 
 \end_inset
 
@@ -1524,12 +1567,29 @@ We must likewise reformulate the Support Vector target functional:
 \end_layout
 
 \begin_layout Standard
-So we can now express the Support Vector optimization problem as:
+We can now refine the optimiation problem 
+\begin_inset Formula $W(\beta)$
+\end_inset
+
+ to take into account the new definitions of 
+\begin_inset Formula $\bar{\varphi}_{P}$
+\end_inset
+
+ and 
+\begin_inset Formula $\bar{\varphi}_{SV}$
+\end_inset
+
+.
+ We add a regularizer term 
+\begin_inset Formula $\Omega$
+\end_inset
+
+ to controll the sparseness of the result by penalizing similar windows:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-W(\beta:\ \alpha) & =\int\sum_{\mathbf{x}\in X}\left(\bar{\varphi}_{P}(\mathbf{x}:\ \alpha,\tau,Y)-\bar{\varphi}_{SV}(\mathbf{x}:\ \alpha,\tau,\beta,Y)\right)^{2}d\tau+\lambda\Omega(\boldsymbol{\alpha},\beta)\end{align*}
+W(\beta:\ \alpha) & =\int\sum_{\mathbf{x}\in X}\left(\bar{\varphi}_{P}(\mathbf{x},Y:\ \alpha,\tau,Y)-\bar{\varphi}_{SV}(\mathbf{x},Y:\ \alpha,\tau,\beta,Y)\right)^{2}d\tau+\lambda\Omega(\boldsymbol{\alpha},\beta,Y)\end{align*}
 
 \end_inset
 
@@ -1546,22 +1606,16 @@ W(\beta:\ \alpha) & =\int\sum_{\mathbf{x}\in X}\left(\bar{\varphi}_{P}(\mathbf{x
 \end_layout
 
 \begin_layout Standard
-Because we are hoping to generate a sparse representation of the probability
- distribution, we add a regularizing term 
-\begin_inset Formula $\Omega$
+We choose the following for our regularizer (a modification of 
+\begin_inset Formula $\bar{K}_{\gamma}$
 \end_inset
 
- which penalizes similar windows.
- The Support Vector approach seeks a solution in the following form:
-\end_layout
-
-\begin_layout Standard
-Notice the regularizer selected is defined as:
+ to allow windowing of both sets):
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{equation}
-\Omega(\boldsymbol{\alpha},\beta)=?\end{equation}
+\Omega(\boldsymbol{\alpha},\beta,Y)=\sum_{i=1}^{\ell}\beta_{i}\int\left(\sum_{\mathbf{x}_{k}\in Y}\bar{\phi}(\mathbf{x}_{k}:\ Y,\tau,\alpha)\log\frac{\bar{\phi}(\mathbf{x}_{k}:\ Y,\tau,\alpha)}{\bar{\phi}(\mathbf{x}_{k}:\ Y,t_{i},\alpha)}+\sum_{\mathbf{x}_{k}\in X\cup\mathbf{x}}\bar{\phi}(\mathbf{x}_{k}:\ Y,t_{i},\alpha)\log\frac{\bar{\phi}(\mathbf{x}_{k}:\ Y,t_{i},\alpha)}{\bar{\phi}(\mathbf{x}_{k}:\ Y,\tau,\alpha)}\right)^{-1}d\tau\end{equation}
 
 \end_inset
 
