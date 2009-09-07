@@ -1380,7 +1380,7 @@ The Parzen Window method is neither sparse nor computationally efficient,
 \end_layout
 
 \begin_layout Subsection
-Random Process Estimation 
+Generalized Parzen-SVM 
 \end_layout
 
 \begin_layout Standard
@@ -1616,6 +1616,53 @@ We choose the following for our regularizer (a modification of
 \begin_layout Standard
 \begin_inset Formula \begin{equation}
 \Omega(\boldsymbol{\alpha},\beta,Y)=\sum_{i=1}^{\ell}\beta_{i}\int\left(\sum_{\mathbf{x}_{k}\in Y}\bar{\phi}(\mathbf{x}_{k}:\ Y,\tau,\alpha)\log\frac{\bar{\phi}(\mathbf{x}_{k}:\ Y,\tau,\alpha)}{\bar{\phi}(\mathbf{x}_{k}:\ Y,t_{i},\alpha)}+\sum_{\mathbf{x}_{k}\in X\cup\mathbf{x}}\bar{\phi}(\mathbf{x}_{k}:\ Y,t_{i},\alpha)\log\frac{\bar{\phi}(\mathbf{x}_{k}:\ Y,t_{i},\alpha)}{\bar{\phi}(\mathbf{x}_{k}:\ Y,\tau,\alpha)}\right)^{-1}d\tau\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Pearson Divergence Solution to P-SVM
+\end_layout
+
+\begin_layout Standard
+Unfortunately, there is no known solution to the integral equations of the
+ P-SVM using the Kullbeck-Liebler divergence measure 
+\begin_inset Formula $\|\cdot\|_{KL}$
+\end_inset
+
+.
+ We address this problem by using the Pearson Divergence rather than the
+ KL Divergence:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\|X-Y\|_{P} & =\sum_{\mathbf{x}\in X\cup Y}\left(\frac{\phi_{X}(\mathbf{x})}{\phi_{Y}(\mathbf{x})}-1\right)^{2}\\
+\|X,Y:\ \tau,\alpha\|_{P} & =\sum_{\mathbf{x}\in X\cup Y}\left(\frac{\bar{\phi}(\mathbf{x}:\ X,\tau,\alpha)}{\phi(\mathbf{x}:\ Y)}-1\right)^{2}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We can now solve for the equations 
+\begin_inset Formula $W(\beta)$
+\end_inset
+
+ and 
+\begin_inset Formula $\bar{\varphi}_{SV}$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+W(\beta:\ \alpha) & =\int\sum_{\mathbf{x}\in X}\left(\bar{\varphi}_{P}(\mathbf{x},Y:\ \alpha,\tau,Y)-\bar{\varphi}_{SV}(\mathbf{x},Y:\ \alpha,\tau,\beta,Y)\right)^{2}d\tau+\lambda\Omega(\boldsymbol{\alpha},\beta,Y)\\
+ & =\sum_{\mathbf{x}\in X}\int\bar{\varphi}_{P}(\mathbf{x},Y:\ \alpha,\tau,Y)^{2}d\tau-2\int\bar{\varphi}_{P}(\mathbf{x},Y:\ \alpha,\tau,Y)\bar{\varphi}_{SV}(\mathbf{x},Y:\ \alpha,\tau,\beta,Y)d\tau+\int\bar{\varphi}_{SV}(\mathbf{x},Y:\ \alpha,\tau,\beta,Y)^{2}d\tau+\lambda\Omega(\boldsymbol{\alpha},\beta,Y)\end{align*}
 
 \end_inset
 
