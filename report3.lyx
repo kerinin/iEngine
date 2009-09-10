@@ -378,6 +378,21 @@ General Overview
 \end_layout
 
 \begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Try to work out the scale invariance, the re-frame this entire paper in
+ the context of multiple scale and shift invariant parameters (if that's
+ possible of course)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 The goal is to create a method of statistical inference capable of processing
  timeseries data which is both multi-variate and exhibits different behaviors
  at different times.
@@ -802,7 +817,7 @@ es of unordered sets, provided they have an addition operation and a kernel
 We will again begin by considering the single-channel case, then extend
  the resulting equations as necessary.
  The Parzen Window method requires the definition of a metric 
-\begin_inset Formula $\|\cdot\|$
+\begin_inset Formula $\|\cdot,\cdot\|$
 \end_inset
 
  over the abstract space 
@@ -820,9 +835,9 @@ We will again begin by considering the single-channel case, then extend
 
 \begin_layout Standard
 \begin_inset Formula \begin{align}
-D_{KL}(S_{n}\|S_{m}) & =\sum_{\mathbf{x}\in\{S_{n}\cup S_{m}\}}\phi_{n}(\mathbf{x})\log\frac{\phi_{n}(\mathbf{x})}{\phi_{m}(\mathbf{x})}\label{eq:KLsingle}\\
+D_{KL}(\phi_{n},\phi_{m}) & =\sum_{\mathbf{x}\in\{S_{n}\cup S_{m}\}}\phi_{n}(\mathbf{x})\log\frac{\phi_{n}(\mathbf{x})}{\phi_{m}(\mathbf{x})}\label{eq:KLsingle}\\
  & =-\sum_{\mathbf{x}\in\{S_{n}\cup S_{m}\}}\phi_{n}(\mathbf{x})\log\phi_{m}(\mathbf{x})+\sum_{\mathbf{x}\in\{S_{n}\cup S_{m}\}}\phi_{n}(\mathbf{x})\log\phi_{n}(\mathbf{x})\\
-\|S_{n}-S_{m}\|_{KL} & =D_{KL}(S_{n}\|S_{m})+D_{KL}(S_{m}\|S_{n})\end{align}
+\|\phi_{n},\phi_{m}\|_{KL} & =D_{KL}(\phi_{n},\phi_{m})+D_{KL}(\phi_{m},\phi_{n})\end{align}
 
 \end_inset
 
@@ -835,25 +850,6 @@ The Parzen Window estimation of
 \end_inset
 
  is defined as:
-\begin_inset Note Note
-status collapsed
-
-\begin_layout Plain Layout
-I don't think the Pr equation is correct - the arguments should probably
- be 
-\begin_inset Formula $S_{\hat{x}}$
-\end_inset
-
-and 
-\begin_inset Formula $S_{i}$
-\end_inset
-
- or something similar
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
@@ -875,7 +871,7 @@ where
 
 \begin_layout Standard
 \begin_inset Formula \begin{equation}
-\mathcal{K}_{\gamma}(S_{i},S_{j})=\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|S_{i}-S_{j}\|_{KL}^{2}}\label{eq:KRBFparzen}\end{equation}
+K_{\gamma}(S_{i},S_{j})=\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|\phi_{i},\phi_{j}\|}\label{eq:KRBFparzen}\end{equation}
 
 \end_inset
 
@@ -1025,7 +1021,20 @@ reference "eq:KRBFparzen"
 
 \begin_layout Standard
 \begin_inset Formula \begin{equation}
-\mathcal{K}_{\gamma}(S_{i},S_{j})=\prod_{c}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|S_{i}^{c}-S_{j}^{c}\|_{KL}^{2}}\label{eq:KRBFParzenMultiple}\end{equation}
+\mathcal{K}_{\gamma}(S_{i},S_{j})=\prod_{c}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|S_{i}^{c},S_{j}^{c}\|_{KL}^{2}}\label{eq:KRBFParzenMultiple}\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Notice that this means the e multiplier needs to be raised to c
+\end_layout
 
 \end_inset
 
@@ -1037,42 +1046,38 @@ Parzen Window with Windowing Function
 \end_layout
 
 \begin_layout Standard
-Another way to approach the estimation problem is to consider the implications
- of using duration value larger than the duration of the training data.
- In this case defining multiple subsets has little value as the subsets
- no longer capture a localized behavior.
- This does not, however, prevent us from using the Parzen Window method.
- Rather than segmenting the training data and comparing it to the test data,
- we can simply 'slide' the training data to a point on the time dimension
- where the two sets overlap and compare the shifted test data to the training
- data.
- If we assign a variable to the magnitude of the shift, we can integrate
- over that variable to produce the effect of having defined infinite subsets.
-\end_layout
-
-\begin_layout Standard
-We can re-frame the situation by substituting a windowing function 
+Another approach to handling localized patterns in the training set is to
+ use a windowing function 
 \begin_inset Formula $\omega(\cdot)$
 \end_inset
 
- for explicit subsets.
- Rather than using subsets whose membership is defined by a time and duration
- parameter, we can define a window on the input data defined by the windowing
- function:
+.
+ Where the subset approach compares localized patterns by reducing the number
+ of input points being compared, using a windowing functions allows us to
+ localize our comparison by reducing the influence of points based on their
+ distance from two reference points.
+ This is a generalized case of subsets; the same result can be produce by
+ using a step function for the windowing function.
+ The strength of the windowing approach is that it allows us to eliminate
+ the task of defining specific subsets and allows us to use a gradient of
+ influence rather than an all-or-nothing approach.
+ We define a windowing function as a kernel function which returns a weight
+ value based on the distance from a point to a window defined by a location
+ in the time axis 
+\begin_inset Formula $t$
+\end_inset
+
+ and some set of parameters 
+\begin_inset Formula $\alpha$
+\end_inset
+
+:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\boldsymbol{\alpha} & =\left[\alpha_{1},\alpha_{2},...,\alpha_{\ell}\right]\\
-t_{i} & \in\alpha_{i}\\
-\bar{k}_{\gamma}(\mathbf{x}_{i},\mathbf{x}_{j}:\ \alpha_{k}) & =k_{\gamma}\left(\mathbf{x}_{i},(x_{j},t_{j}-t_{k})\right)\\
-\bar{\phi}(\mathbf{x},X:\ \alpha) & =\sum_{\mathbf{x}_{i}\in X}\omega(\mathbf{x}_{i}:\ \alpha)\frac{1}{\sum_{\mathbf{x}\in X}\omega(\mathbf{x}:\ \alpha)}\bar{k}_{\gamma}(\mathbf{x},\mathbf{x}_{i}:\ \alpha)\\
-\bar{D}_{KL}(\mathbf{x},\alpha_{i},\alpha_{j}:\ X,Y) & =\sum_{\mathbf{x}_{k}\in X\cup\mathbf{x}}\bar{\phi}(\mathbf{x}_{k},X:\ \alpha_{i})\log\frac{\bar{\phi}(\mathbf{x}_{k},X:\ \alpha_{i})}{\bar{\phi}(\mathbf{x}_{k},Y:\ \alpha_{j})}\\
-\|\mathbf{x},\alpha_{i},\alpha_{j}:\ X,Y\|_{KL} & =\bar{D}_{KL}(\mathbf{x},\alpha_{i},\alpha_{j}:\ X,Y)+\bar{D}_{KL}(\mathbf{x},\alpha_{j},\alpha_{i}:\ X,Y)\\
-\bar{K}_{\gamma}(\mathbf{x},\alpha_{i},\alpha_{j}:\ X,Y) & =\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|\mathbf{x},\alpha_{i},\alpha_{j}:\ X,Y\|_{KL}^{2}}\\
-\bar{\varphi}_{P}(\mathbf{x}:\ \boldsymbol{\alpha},X,Y) & =\sum_{\begin{array}{c}
-i\in\boldsymbol{\alpha}\\
-j\in\boldsymbol{\alpha}\end{array}}\frac{1}{|\boldsymbol{\alpha}|^{2}}\bar{K}_{\gamma}(\mathbf{x},\alpha_{i},\alpha_{j}:\ X,Y)\end{align*}
+\omega(\mathbf{x}:\ t,\alpha) & \ge0\\
+\int_{-\infty}^{\infty}\omega(\mathbf{x}:\ t,\alpha)dt & =1\end{align*}
 
 \end_inset
 
@@ -1080,17 +1085,69 @@ j\in\boldsymbol{\alpha}\end{array}}\frac{1}{|\boldsymbol{\alpha}|^{2}}\bar{K}_{\
 \end_layout
 
 \begin_layout Standard
-Notice that these equations reduce to the previous set of equations if we
- set the windowing function to a step function defined by a time and duration
- parameter:
+Implementing a windowing function requires to to reconsider the distance
+ metric 
+\begin_inset Formula $\|\cdot,\cdot\|$
+\end_inset
+
+ discussed previously.
+ The established distance metric compares the divergence between two sets
+ of data; we must now define a distance metric capable of comparing the
+ divergence between two windows defined on a single set of data (as well
+ as two windows defined on two discrete sets of data).
+ If we use the Kullback-Liebler divergence as our divergence measure, we
+ can use the following as our distance metric:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\alpha_{i} & =(t_{i},\theta)\\
-\omega(\mathbf{x},X:\ \alpha_{i}) & =\begin{cases}
-1: & t_{i}\le t<t_{i}+\theta\\
-0: & \text{otherwise}\end{cases}\end{align*}
+\|\phi_{X},\phi_{Y}:\ t,\alpha\| & =D_{KL}(\phi_{n},\phi_{m}:\ t,0,\alpha)+D_{KL}(\phi_{m},\phi_{n}:\ 0,t,\alpha)\\
+D_{KL}(\phi_{i},\phi_{j}:\ t_{i},t_{j},\alpha) & =\sum_{\mathbf{x}_{k}\in X\cup Y}\omega(\mathbf{x}_{k}:\ t_{i},\alpha)\omega(\mathbf{x}_{k}:\ t_{j},\alpha)\ \phi\left((x_{k},t_{k}-t_{i}):\ X\right)\log\frac{\phi\left((x_{k},t_{k}-t_{i}):\ X\right)}{\phi\left((x_{k},t_{k}-t_{j}):\ Y\right)}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+The shifting hasn't been explained
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This definition of the distance metric essentially weights the contribution
+ of each point's entropy to the divergence based on its distance from either
+ of the windows defined by 
+\begin_inset Formula $(t_{i},\alpha)$
+\end_inset
+
+ and 
+\begin_inset Formula $(t_{j},\alpha)$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+We can now reformulate the Parzen Window equations to use the windowing
+ function in place of explicit subsets.
+ For cumputational reasons we check windows centered on each of the points
+ in the sets being compared:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\bar{\varphi}_{P}(\mathbf{x},Z:\ Y) & =\sum_{i=1}^{\ell}\sum_{j=1}^{|Z|}\frac{1}{\ell|Z|}\bar{K}_{\gamma}\left(\{Z\cup\mathbf{x}\},Y\right)\\
+\bar{K}_{\gamma}\left(Z,Y:\ t_{i},t_{j}\alpha\right) & =\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|\phi_{Z},\phi_{Y}\|}\end{align*}
 
 \end_inset
 
@@ -1102,35 +1159,39 @@ Sliding Windowing Function
 \end_layout
 
 \begin_layout Standard
-Thus far we have been dealing with a discrete set of windowing parameters
- and making comparisons between sets of parameters.
- Another approach is to treat the time offsets between windows as a parameter
- 
-\begin_inset Formula $\tau$
-\end_inset
-
- and to investigate the divergence between the two windows at different
- values of 
-\begin_inset Formula $\tau$
+Thus far we have been dealing with a discrete set of windowing parameters,
+ defined by the points being compared and some parameter 
+\begin_inset Formula $\alpha$
 \end_inset
 
 .
- In this approach, rather than evaluating the divergence at the single value
- of 
-\begin_inset Formula $\tau=0$
+ The approach as been to select windows over two sets of points, shift the
+ two sets so the window is at 
+\begin_inset Formula $t=0$
 \end_inset
 
-, we evaluate the cumulative value of the divergence over the range 
-\begin_inset Formula $\tau\in(-\infty,\infty)$
+ and compare them to each other.
+ We have established a method which windows both the testing data 
+\begin_inset Formula $Y$
 \end_inset
 
-, which is to say we evaluate the following integral:
+ and the training data 
+\begin_inset Formula $Z$
+\end_inset
+
+ in order to handle localized patterns.
+ We can simplify this process in two ways; by eliminating the windowing
+ function over the testing data and by using a sliding window over the training
+ data.
+ In this approach we eliminate explicit windows and instead take the integral
+ over all windows of the training data:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\|\alpha_{i},\alpha_{j}:\ X,\hat{X}\|_{S} & =\int_{-\infty}^{\infty}\|\alpha_{i},\alpha_{j}:\ X,\hat{X}\|d\tau\\
-\bar{k}_{\gamma}(\mathbf{x}_{i},\mathbf{x}_{j}:\ \tau) & =k_{\gamma}\left(\mathbf{x}_{i},(x_{j},t_{j}-\tau)\right)\end{align*}
+\bar{\varphi}_{sP}(\mathbf{x},Z:\ Y,\alpha) & =\sum_{i=1}^{\ell}\bar{K}_{\gamma}\left(\{Z\cup\mathbf{x}\},Y:\ t_{i},\alpha\right)\\
+\bar{K}_{\gamma}\left(Z,Y:\ t,\alpha\right) & =\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|\phi_{Z},\phi_{Y}:\ t,\alpha\|}\\
+\|\phi_{x},\phi_{Y}:\ t,\alpha\| & =\int_{-\infty}^{\infty}D_{KL}(\phi_{n},\phi_{m}:\ \tau,t,\alpha)+D_{KL}(\phi_{m},\phi_{n}:\ t,\tau,\alpha)d\tau\end{align*}
 
 \end_inset
 
@@ -1138,55 +1199,28 @@ Thus far we have been dealing with a discrete set of windowing parameters
 \end_layout
 
 \begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Right, so now just finish that integration and you're good to go...
- :)
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Subsection
-(old) Sliding Parzen Windows
-\end_layout
-
-\begin_layout Standard
-Thus far we have been dealing with discrete subsets with specific starting
- points and durations.
- We have compared these against test sets by shifting them along the time
- axis so their starting points align.
- Another approach is to treat the time difference between a training set
- and our test set as a variable 
-\begin_inset Formula $\tau$
-\end_inset
-
- and to investigate the divergence between the two sets at different values
- of 
-\begin_inset Formula $\tau$
+We now turn out attention to the distance metric 
+\begin_inset Formula $\|\cdot,\cdot\|$
 \end_inset
 
 .
- In this approach, rather than evaluating the divergence at the single value
- of 
-\begin_inset Formula $\tau=0$
+ We mentioned earlier that the Kullback-Liebler distance cannot be integrated
+ in the context of sliding Parzen Windows.
+ We address this shortcoming by substituting the Pearson Divergence for
+ the Kullbak-Liebler divergence.
+ We will further simplify our calculations by omitting the symmetrizing
+ redundancy.
+ While this choice means that 
+\begin_inset Formula $\varphi(\mathbf{x},Y:\ Z)\neq\varphi(\mathbf{x},Z:\ Y)$
 \end_inset
 
-, we evaluate the cumulative value of the divergence over the range 
-\begin_inset Formula $\tau\in(-\infty,\infty)$
-\end_inset
-
-, which is to say we evaluate the following integral:
+, in normal practice this is not a substantial sacrifice.
+ We can now restate the distance metric as:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\|S_{\mathbf{x}}-S_{n}\|_{S} & =\int_{-\infty}^{\infty}\|S_{\mathbf{x}}-S_{n}\|d\tau\\
-\phi_{n}^{\tau}(\mathbf{x}) & =\sum_{\mathbf{x}_{i}\in S_{n}}\frac{1}{|S_{n}|}K_{\gamma}(\mathbf{x},(x_{i},t_{i}+\tau))\end{align*}
+\|\phi_{x},\phi_{Y}:\ t,\alpha\| & =\sum_{\mathbf{x}_{i}\in X\cup Y}\omega(t_{i}:\ t,\alpha)\int_{-\infty}^{\infty}\left(\frac{\phi\left((x_{i},t_{i}-\tau):\ X\right)}{\phi_{Y}\left((x_{i},t_{i}):\ Y\right)}-1\right)^{2}d\tau\end{align*}
 
 \end_inset
 
@@ -1194,157 +1228,40 @@ Thus far we have been dealing with discrete subsets with specific starting
 \end_layout
 
 \begin_layout Standard
-This integration requires a combination of divergence measure and kernel
- function which can be integrated.
- We use the Pearson divergence :
+It can be shown that this reduces to the following:
+\end_layout
+
+\begin_layout Standard
 \begin_inset Note Note
 status collapsed
 
 \begin_layout Plain Layout
-Check this integration
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
 \begin_inset Formula \begin{align*}
-\int\|S_{\mathbf{x}}-S_{n}\|_{P}\ d\tau & =\int\sum_{\mathbf{\bar{x}}\in S_{\mathbf{x}}}\left(\frac{\phi_{n}^{\tau}(\mathbf{\bar{x}})}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})}-1\right)^{2}d\tau\\
- & =\sum_{\mathbf{\bar{x}}\in S_{\mathbf{x}}}\int\frac{\phi_{n}^{\tau}(\mathbf{\bar{x}})}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})}^{2}d\tau-2\int\frac{\phi_{n}^{\tau}(\mathbf{\bar{x}})}{\phi_{\mathbf{x}}(\mathbf{\bar{x}})}d\tau+\int1d\tau\\
- & =\sum_{\mathbf{\bar{x}}\in S_{\mathbf{x}}}\int\sum_{\begin{array}{c}
-\mathbf{x}_{i}\in S_{n}\\
-\mathbf{x}_{j}\in S_{n}\end{array}}\frac{1}{|S_{n}|^{2}\phi_{\mathbf{x}}(\mathbf{\bar{x}})^{2}}K_{\gamma}(\mathbf{\bar{x}},(x_{i},t_{i}+\tau))K_{\gamma}(\mathbf{\bar{x}},(x_{j},t_{j}+\tau))d\tau-2\int\sum_{\mathbf{x}_{i}\in S_{n}^{\tau}}\frac{1}{|S_{n}|\phi_{\mathbf{x}}(\mathbf{\bar{x}})}K_{\gamma}(\mathbf{\bar{x}},(x_{i},t_{i}+\tau))d\tau+\int1d\tau\\
- & =\sum_{\mathbf{\bar{x}}\in S_{\mathbf{x}}}\sum_{\begin{array}{c}
-\mathbf{x}_{i}\in S_{n}\\
-\mathbf{x}_{j}\in S_{n}\end{array}}\frac{1}{|S_{n}|^{2}\phi_{\mathbf{x}}(\mathbf{\bar{x}})^{2}}\ \int K_{\gamma}(\mathbf{\bar{x}},(x_{i},t_{i}+\tau))K_{\gamma}(\mathbf{\bar{x}},(x_{j},t_{j}+\tau))d\tau-2\int\sum_{\mathbf{x}_{i}\in S_{n}^{\tau}}\frac{1}{|S_{n}|\phi_{\mathbf{x}}(\mathbf{\bar{x}})}\ \int K_{\gamma}(\mathbf{\bar{x}},(x_{i},t_{i}+\tau))d\tau+\int1d\tau\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Because we know the integral of the kernel function over the real line is
- 1, we can eliminate that term over the range 
-\begin_inset Formula $(-\infty,\infty)$
-\end_inset
-
-, and because our kernel function uses the tensor product of each dimension
- of 
-\begin_inset Formula $\mathbf{x}$
-\end_inset
-
-, we can separate the kernel function into a portion dependant on 
-\begin_inset Formula $\tau$
-\end_inset
-
- and an independant portion.
- Finally, because this divergence is intended as a comparison, we eliminate
- the constant terms: 
-\begin_inset Note Note
-status collapsed
-
-\begin_layout Plain Layout
-WTF? Read up, try to work this through on paper
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-\int\sum_{\mathbf{x}\in S_{\mathbf{x}}}\|S_{\mathbf{x}}-S_{n}\|_{P}\ d\tau & =\sum_{\bar{\mathbf{x}}\in S_{\mathbf{x}}}\sum_{\begin{array}{c}
-\mathbf{x}_{i}\in S_{n}\\
-\mathbf{x}_{j}\in S_{n}\end{array}}\frac{1}{|S_{n}|^{2}\phi_{\mathbf{x}}(\mathbf{\bar{x}})^{2}}K_{\gamma}(x,x_{i})K_{\gamma}(x,x_{j})\ \int K_{\gamma}(t,t_{i}+\tau)K_{\gamma}(t,t_{j}+\tau)d\tau-\frac{2}{\phi_{\mathbf{x}}(\bar{\mathbf{x}})}\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-The final term can be eliminated as the probability 
-\begin_inset Formula $\phi_{\mathbf{x}}$
-\end_inset
-
- over the range 
-\begin_inset Formula $S_{\mathbf{x}}$
-\end_inset
-
- must be 1, reducing the final term to a constant.
- Substituting the Gaussian kernel, our divergence measure become:
-\begin_inset Note Note
-status collapsed
-
-\begin_layout Plain Layout
-I assume that there was some Wolfram magic here...
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-\int\sum_{\mathbf{x}\in S_{\mathbf{x}}}\|S_{\mathbf{x}}-S_{n}\|_{P}\ d\tau & =\sum_{\mathbf{\bar{x}}\in S_{\mathbf{x}}}\sum_{\begin{array}{c}
-\mathbf{x}_{i}\in S_{n}\\
-\mathbf{x}_{j}\in S_{n}\end{array}}\frac{1}{|S_{n}|^{2}\gamma^{2}2\pi\phi_{\mathbf{x}}(\mathbf{\bar{x}})^{2}}e^{-\frac{1}{\gamma}\left(\bar{x}-x_{i}\right)^{2}}e^{-\frac{1}{\gamma}\left(\bar{x}-x_{j}\right)^{2}}\ \int_{-\infty}^{\infty}e^{-\frac{1}{\gamma}\left(\bar{t}-t_{i}-\tau\right)^{2}}e^{-\frac{1}{\gamma}\left(\bar{t}-t_{j}-\tau\right)^{2}}d\tau\\
- & =\sum_{\mathbf{\bar{x}}\in S_{\mathbf{x}}}\sum_{\begin{array}{c}
-\mathbf{x}_{i}\in S_{n}\\
-\mathbf{x}_{j}\in S_{n}\end{array}}\frac{1}{|S_{n}|^{2}\gamma^{2}2\pi\phi_{\mathbf{x}}(\mathbf{\bar{x}})^{2}}e^{-\frac{1}{\gamma}\left(\bar{x}-x_{i}\right)^{2}-\frac{1}{\gamma}\left(\bar{x}-x_{j}\right)^{2}}\ \int_{-\infty}^{\infty}e^{-\frac{1}{\gamma}\left(\bar{t}-t_{i}-\tau\right)^{2}-\frac{1}{\gamma}\left(\bar{t}-t_{j}-\tau\right)^{2}}d\tau\\
- & =\sum_{\mathbf{\bar{x}}\in S_{\mathbf{x}}}\sum_{\begin{array}{c}
-\mathbf{x}_{i}\in S_{n}\\
-\mathbf{x}_{j}\in S_{n}\end{array}}\frac{1}{|S_{n}|^{2}\gamma^{2}2\pi\phi_{\mathbf{x}}(\mathbf{\bar{x}})^{2}}e^{-\frac{1}{\gamma}\left(\bar{x}-x_{i}\right)^{2}-\frac{1}{\gamma}\left(\bar{x}-x_{j}\right)^{2}}-\lim_{\tau\rightarrow\infty}\frac{1}{2}e^{-\frac{1}{2\gamma}(t_{j}-t_{i})^{2}}\sqrt{\frac{\gamma\pi}{2}}\text{erf}\left(\frac{(2\bar{t}-t_{i}-t_{j}-2\tau)}{\sqrt{2\gamma}}\right)\\
- & \qquad\qquad\qquad+\lim_{\tau\rightarrow-\infty}\frac{1}{2}e^{-\frac{1}{2\gamma}(t_{j}-t_{i})^{2}}\sqrt{\frac{\gamma\pi}{2}}\text{erf}\left(\frac{(2\bar{t}-t_{i}-t_{j}-2\tau)}{\sqrt{2\gamma}}\right)\\
- & =\sum_{\mathbf{\bar{x}}\in S_{\mathbf{x}}}\sum_{\begin{array}{c}
-\mathbf{x}_{i}\in S_{n}\\
-\mathbf{x}_{j}\in S_{n}\end{array}}\frac{1}{|S_{n}|^{2}\gamma^{2}2\pi\phi_{\mathbf{x}}(\mathbf{\bar{x}})^{2}}e^{-\frac{1}{\gamma}\left(\bar{x}-x_{i}\right)^{2}-\frac{1}{\gamma}\left(\bar{x}-x_{j}\right)^{2}}+\frac{1}{2}\sqrt{\frac{\pi}{2\gamma}}e^{-\frac{1}{2\gamma}(t_{j}-t_{i})^{2}}\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Our new divergence measure 
-\begin_inset Formula $\|S_{\mathbf{x}}-S_{n}\|_{S}$
-\end_inset
-
- can now be substituted into 
-\begin_inset Formula $\varphi(\mathbf{x})$
-\end_inset
-
-.
- We can make a fundamental change to the Parzen density estimation approach
- by observing that we can set 
-\begin_inset Formula $S_{n}=X$
-\end_inset
-
- without any loss of predictive ability.
- The continuous sliding window approach eliminates the need for specific
- windows, allowing us to evaluate the probability of a test set 
-\begin_inset Formula $\hat{X}$
-\end_inset
-
- based on a training set 
-\begin_inset Formula $X$
-\end_inset
-
-:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-\varphi_{P}(\hat{X}) & =\mathcal{K}_{\gamma}(\hat{X},X)\\
-K_{\gamma}(\hat{X},X) & =\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|\hat{X}-X\|_{KL}^{2}}\\
-\|\hat{X}-X\|_{S} & =\sum_{\mathbf{\bar{x}}\in\hat{X}}\sum_{\begin{array}{c}
+\int\left(\frac{\bar{\phi}(\mathbf{x}_{i}:\ X,\tau)}{\phi(\mathbf{x}_{i}:\ Y)}-1\right)^{2}d\tau & =\int\left(\frac{\sum_{\mathbf{x}_{i}\in X}\ k_{\gamma}\left((x,t+\tau),(x_{i},t_{i})\right)}{\phi(\mathbf{x}_{i}:\ Y)}-1\right)^{2}d\tau\\
+ & =\int\frac{\left(\sum_{\mathbf{x}_{i}\in X}\ k_{\gamma}\left((x,t+\tau),(x_{i},t_{i})\right)\right)^{2}}{\phi(\mathbf{x}_{i}:\ Y)^{2}}d\tau-\int\frac{\sum_{\mathbf{x}_{i}\in X}\ 2k_{\gamma}\left((x,t+\tau),(x_{i},t_{i})\right)}{\phi(\mathbf{x}_{i}:\ Y)}d\tau\\
+ & =\int\frac{\sum_{\mathbf{x}_{i}\in X}\sum_{\mathbf{x}_{j}\in X}\ k_{\gamma}\left((x,t+\tau),(x_{i},t_{i})\right)k_{\gamma}\left((x,t+\tau),(x_{j},t_{j})\right)}{\phi(\mathbf{x}_{i}:\ Y)^{2}}d\tau-\int\frac{\sum_{\mathbf{x}_{i}\in X}\ 2k_{\gamma}\left((x,t+\tau),(x_{i},t_{i})\right)}{\phi(\mathbf{x}_{i}:\ Y)}d\tau\\
+ & =\sum_{\begin{array}{c}
 \mathbf{x}_{i}\in X\\
-\mathbf{x}_{j}\in X\end{array}}\frac{1}{|X|^{2}\gamma^{2}2\pi\phi_{\hat{X}}(\mathbf{\bar{x}})^{2}}e^{-\frac{1}{\gamma}\left(\bar{x}-x_{i}\right)^{2}-\frac{1}{\gamma}\left(\bar{x}-x_{j}\right)^{2}}+\frac{1}{2}\sqrt{\frac{\pi}{2\gamma}}e^{-\frac{1}{2\gamma}(t_{j}-t_{i})^{2}}\end{align*}
+\mathbf{x}_{j}\in X\end{array}}\int\frac{k_{\gamma}\left((x,t+\tau),(x_{i},t_{i})\right)k_{\gamma}\left((x,t+\tau),(x_{j},t_{j})\right)}{\phi(\mathbf{x}_{i}:\ Y)^{2}}d\tau-\sum_{\mathbf{x}_{i}\in X}\int\frac{2k_{\gamma}\left((x,t+\tau),(x_{i},t_{i})\right)}{\phi(\mathbf{x}_{i}:\ Y)}d\tau\\
+ & =\sum_{\begin{array}{c}
+\mathbf{x}_{i}\in X\\
+\mathbf{x}_{j}\in X\end{array}}\int\frac{e^{-\frac{1}{\gamma}\left((t+\tau-t_{i})^{2}+(t+\tau-t_{j})^{2}+(x-x_{i})^{2}+(x-x_{j})^{2}\right)}}{\gamma^{2}2\pi\phi(\mathbf{x}_{i}:\ Y)^{2}}d\tau-\sum_{\mathbf{x}_{i}\in X}\int\frac{2e^{-\frac{1}{\gamma}\left((t+\tau-t_{i})^{2}+(x-x_{i})^{2}\right)}}{\gamma\sqrt{2\pi}\phi(\mathbf{x}_{i}:\ Y)}d\tau\\
+ & =\sum_{\begin{array}{c}
+\mathbf{x}_{i}\in X\\
+\mathbf{x}_{j}\in X\end{array}}\lim_{n\rightarrow\infty}\frac{e^{-\frac{1}{2\gamma}\left((t-t_{i})^{2}-2(t-t_{i})(t-t_{j})+(t-t_{j})^{2}+2(x-x_{i})^{2}+2(x-x_{j})^{2}\right)}\sqrt{\frac{\pi}{2}}\text{erf}\left(\frac{\sqrt{\frac{1}{\gamma}}\left(2t-t_{i}-t_{j}+2n\right)}{\sqrt{2}}\right)}{2\sqrt{\frac{1}{\gamma}}\gamma^{2}2\pi\phi(\mathbf{x}_{i}:\ Y)^{2}}\\
+ & \qquad\qquad\qquad-\sum_{\begin{array}{c}
+\mathbf{x}_{i}\in X\\
+\mathbf{x}_{j}\in X\end{array}}\lim_{n\rightarrow-\infty}\frac{e^{-\frac{1}{2\gamma}\left((t-t_{i})^{2}-2(t-t_{i})(t-t_{j})+(t-t_{j})^{2}+2(x-x_{i})^{2}+2(x-x_{j})^{2}\right)}\sqrt{\frac{\pi}{2}}\text{erf}\left(\frac{\sqrt{\frac{1}{\gamma}}\left(2t-t_{i}-t_{j}+2n\right)}{\sqrt{2}}\right)}{2\sqrt{\frac{1}{\gamma}}\gamma^{2}2\pi\phi(\mathbf{x}_{i}:\ Y)^{2}}\\
+ & \qquad\qquad\qquad-\sum_{\mathbf{x}_{i}\in X}\lim_{n\rightarrow\infty}\frac{e^{-\frac{1}{\gamma}\left((x-x_{i})^{2}+(x-x_{j})^{2}\right)}\sqrt{\pi}\text{erf}\left(\sqrt{\frac{1}{\gamma}}\left((t-t_{i})+n\right)\right)}{\sqrt{\frac{1}{\gamma}}\gamma\sqrt{2\pi}\phi(\mathbf{x}_{i}:\ Y)}\\
+ & \qquad\qquad\qquad+\sum_{\mathbf{x}_{i}\in X}\lim_{n\rightarrow-\infty}\frac{e^{-\frac{1}{\gamma}\left((x-x_{i})^{2}+(x-x_{j})^{2}\right)}\sqrt{\pi}\text{erf}\left(\sqrt{\frac{1}{\gamma}}\left((t-t_{i})+n\right)\right)}{\sqrt{\frac{1}{\gamma}}\gamma\sqrt{2\pi}\phi(\mathbf{x}_{i}:\ Y)}\\
+ & =\sum_{\begin{array}{c}
+\mathbf{x}_{i}\in X\\
+\mathbf{x}_{j}\in X\end{array}}\frac{\sqrt{\frac{\pi}{2}}e^{-\frac{1}{2\gamma}\left((t-t_{i})^{2}-2(t-t_{i})(t-t_{j})+(t-t_{j})^{2}+2\sum_{c}(x^{c}-x_{i}^{c})^{2}+(x^{c}-x_{j}^{c})^{2}\right)}}{\sqrt{\frac{1}{\gamma}}\gamma^{2}2\pi\phi(\mathbf{x}_{i}:\ Y)^{2}}-\sum_{\mathbf{x}_{i}\in X}\frac{2\sqrt{\pi}e^{-\frac{1}{\gamma}\left((x-x_{i})^{2}+(x-x_{j})^{2}\right)}}{\sqrt{\frac{1}{\gamma}}\gamma\sqrt{2\pi}\phi(\mathbf{x}_{i}:\ Y)}\end{align*}
+
+\end_inset
+
+
+\end_layout
 
 \end_inset
 
@@ -1356,12 +1273,22 @@ K_{\gamma}(\hat{X},X) & =\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|\hat{X
 status open
 
 \begin_layout Plain Layout
-Aug 31: This section seems to be worked out.
- The last bit of math is over my head right now, but I seem to remember
- working it out correctly and spending a lot of time verifying the equations.
- This is certainly worth re-hashing (especially since familiarity will probably
- be required for the remaining parts) but I suspect it's correct and complete.
+Check that equation to make sure the subscripts haven't gotten mixed up.
 \end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\|\phi_{x},\phi_{Y}:\ t,\alpha\| & =\sum_{\begin{array}{c}
+\mathbf{x}_{i}\in X\\
+\mathbf{x}_{j}\in X\\
+\mathbf{x}_{k}\in X\end{array}}\frac{\omega(t_{i}:\ t,\alpha)\sqrt{\frac{\pi}{2}}e^{-\frac{1}{2\gamma}\left((t_{i}-t_{j})^{2}-2(t_{i}-t_{j})(t_{i}-t_{k})+(t_{i}-t_{k})^{2}+2\sum_{c}(x_{i}^{c}-x_{j}^{c})^{2}+(x_{i}^{c}-x_{k}^{c})^{2}\right)}}{\sqrt{\frac{1}{\gamma}}\gamma^{2}2\pi\phi\left((x_{i},t_{i}):\ Y\right)^{2}}-\sum_{\begin{array}{c}
+\mathbf{x}_{i}\in X\\
+\mathbf{x}_{j}\in X\end{array}}\frac{\omega(t_{i}:\ t,\alpha)2\sqrt{\pi}e^{-\frac{1}{\gamma}\left((x_{i}-x_{j})^{2}+(x_{i}-x_{k})^{2}\right)}}{\sqrt{\frac{1}{\gamma}}\gamma\sqrt{2\pi}\phi\left((x_{i},t_{i}-t):\ Y\right)}\end{align*}
 
 \end_inset
 
@@ -1455,20 +1382,26 @@ y distribution is acceptably accurate and attempt to minimize the difference
 \begin_inset Formula $W(\beta)$
 \end_inset
 
- which will determine which observations will be used in estimations and
- which can be discarded as redundant or irrelevant information by defining
- a set of weights 
+ which will determine which observations (or as we shall see, windows) will
+ be used in estimations and which can be discarded as redundant or irrelevant
+ information.
+ We therefore define a set of weights 
 \begin_inset Formula $\beta$
 \end_inset
 
-, some of which will be non-zero.
+, some of which will be non-zero at the conclusion of our optimization task.
  We define the optimization problem as minimizing the square loss between
- the Support Vector and Parzen Window estimates:
+ the Support Vector and Parzen Window estimates over some set of observations
+ 
+\begin_inset Formula $X$
+\end_inset
+
+:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-W(\beta) & =\sum_{i=1}^{\ell}\left(\varphi_{P}(\mathbf{x})-\varphi_{SV}(\mathbf{x}:\ \beta)\right)^{2}\end{align*}
+W(\beta) & =\min_{\beta}\sum_{\mathbf{x}\in X}\ \sum_{i=1}^{\ell}\left(\varphi_{P}(\mathbf{x})-\varphi_{SV}(\mathbf{x}:\ \beta_{i})\right)^{2}+\lambda\Omega\end{align*}
 
 \end_inset
 
@@ -1476,8 +1409,43 @@ W(\beta) & =\sum_{i=1}^{\ell}\left(\varphi_{P}(\mathbf{x})-\varphi_{SV}(\mathbf{
 \end_layout
 
 \begin_layout Standard
-We must therefore develop a method of evaluating the 'usefulness' of each
- point in a set of training data.
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+explain regularizer
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Before discussing the nature of this optimization task, we must establish
+ the Support Vector estimation function 
+\begin_inset Formula $\varphi_{SV}$
+\end_inset
+
+.
+ The support vector target functional is identical to the Parzen Window
+ estimator, with the exception that rather than averaging over all the observati
+ons in the training set (or integrating over all offsets), we use the weighted
+ sum of each training observation:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\varphi_{SV}(\mathbf{x},Z:\ \alpha,\beta,Y) & =\sum_{i=1}^{\ell}\beta_{i}\bar{K}_{\gamma}\left(\{Z\cup\mathbf{x}\},Y:\ t_{i},\alpha\right)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We can now develop a method of evaluating the 'usefulness' of time window
+ in a set of training data.
  To do this we begin by observing that the duration of the training set
  is likely larger than the duration of test sets, which means we will have
  to make estimates using less information that is available in the training
@@ -1486,183 +1454,27 @@ We must therefore develop a method of evaluating the 'usefulness' of each
  The optimization equation compares the results of Parzen estimation to
  the results of SVM estimation using a portion of the training data as synthetic
  testing data.
- This can be accomplished using subsets of the training data, but a more
- flexible approach is to introduce a windowing kernel function.
- This windowing function operates by adjusting the influence of the distance
- between two points on the value of 
-\begin_inset Formula $\phi(\mathbf{x})$
-\end_inset
-
-:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-\bar{\phi}(\mathbf{x}:\ X,\tau,\alpha) & =\sum_{\mathbf{x}_{i}\in X}\omega(\mathbf{x}_{i}:\ \tau,\alpha)\frac{1}{\sum_{\mathbf{x}\in X}\omega(\mathbf{x}:\ \tau,\alpha)}\bar{k}_{\gamma}(\mathbf{x},\mathbf{x}_{i}:\ \tau)\\
-\bar{k}_{\gamma}(\mathbf{x}_{i},\mathbf{x}_{j}:\ \tau) & =k_{\gamma}\left(\mathbf{x}_{i},(x_{j},t_{j}-\tau)\right)\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-This approach is much more powerful than using subsets, as it allows a gradient
- of magnitudes in the influence of each point, rather than forcing a binary
- decision of included/not included.
- In order to use this approach, we must modify both the distance metric
- and the kernel function to handle the additional parameters 
-\begin_inset Formula $\tau$
-\end_inset
-
- (which specifies the location of the windowing function in the time dimension)
- and 
+ Fortunately, we have already developed an understanding of a windowing
+ function which can be applied to this situation.
+ For the optimization problem, we check the difference between the two estimates
+ only at windows defined by the observations in the training set.
+ The set of weights used in the Support Vector estimation must have a discrete
+ number of elements; for simplicity we choose to assign a weight to each
+ window defined by the time value of an observation in the training set
+ and the constant parameter 
 \begin_inset Formula $\alpha$
 \end_inset
 
- (which specifies parameters of the windowing function such as duration).
- We reformulate the Parzen Window equations thus:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-\|X,Y:\ \tau,\alpha\|_{KL} & =\sum_{\mathbf{x}_{k}\in X\cup\mathbf{x}}\bar{\phi}(\mathbf{x}_{k}:\ X,\tau,\alpha)\log\frac{\bar{\phi}(\mathbf{x}_{k}:\ X,\tau,\alpha)}{\phi(\mathbf{x}_{k}:\ Y)}+\sum_{\mathbf{x}_{k}\in X\cup\mathbf{x}}\phi(\mathbf{x}_{k}:\ Y)\log\frac{\phi(\mathbf{x}_{k}:\ Y)}{\bar{\phi}(\mathbf{x}_{k}:\ X,\tau,\alpha)}\\
-\bar{K}_{\gamma}\left(X,Y:\ \tau,\alpha\right) & =\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|X,Y:\ \tau,\alpha\|_{KL}^{2}}\\
-\bar{\varphi}_{P}(\mathbf{x},Z:\ \alpha,\tau,Y) & =\int\sum_{i=1}^{\ell}\frac{1}{\ell}\bar{K}_{\gamma}\left(\{Y\cup\mathbf{x}\},Z:\ \tau,\alpha\right)d\tau\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-This formulation essentially replaces explicit subsets with equivalent functions
- based on the windowing function and adds our windowing parameters to the
- function.
- We can now elaborate on the 'target functional' of the Support Vector approach;
- the function which will be used to generate estimates once the optimization
- problem 
-\begin_inset Formula $W(\beta)$
-\end_inset
-
- has been solved.
- The target functional replaces the normalizing term 
-\begin_inset Formula $\frac{1}{\ell}$
-\end_inset
-
- in the Parzen Window function with 
-\begin_inset Formula $\beta$
-\end_inset
-
-:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align}
-\bar{\varphi}_{SV}(\mathbf{x},Z:\ \alpha,\tau,\beta,Y) & =\int\sum_{i=1}^{\ell}\beta_{i}\bar{K}_{\gamma}\left(\{Y\cup\mathbf{x}\},Z:\ \alpha,\tau\right)d\tau\label{eq:SVResultSingle}\end{align}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-We can now refine the optimiation problem 
-\begin_inset Formula $W(\beta)$
-\end_inset
-
- to take into account the new definitions of 
-\begin_inset Formula $\bar{\varphi}_{P}$
-\end_inset
-
- and 
-\begin_inset Formula $\bar{\varphi}_{SV}$
-\end_inset
-
-.
- We add a regularizer term 
-\begin_inset Formula $\Omega$
-\end_inset
-
- to controll the sparseness of the result by penalizing similar windows:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-W(\beta:\ \alpha) & =\int\sum_{\mathbf{x}\in X}\left(\bar{\varphi}_{P}(\mathbf{x},Y:\ \alpha,\tau,Y)-\bar{\varphi}_{SV}(\mathbf{x},Y:\ \alpha,\tau,\beta,Y)\right)^{2}d\tau+\lambda\Omega(\boldsymbol{\alpha},\beta,Y)\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{equation}
-\text{subject to}\quad\sum_{i}\beta_{i}=1,\quad\beta_{i}\ge0,\ i=1,\ldots,|\mathcal{S}|\label{eq:SVProcessSingle}\end{equation}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-We choose the following for our regularizer (a modification of 
-\begin_inset Formula $\bar{K}_{\gamma}$
-\end_inset
-
- to allow windowing of both sets):
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{equation}
-\Omega(\boldsymbol{\alpha},\beta,Y)=\sum_{i=1}^{\ell}\beta_{i}\int\left(\sum_{\mathbf{x}_{k}\in Y}\bar{\phi}(\mathbf{x}_{k}:\ Y,\tau,\alpha)\log\frac{\bar{\phi}(\mathbf{x}_{k}:\ Y,\tau,\alpha)}{\bar{\phi}(\mathbf{x}_{k}:\ Y,t_{i},\alpha)}+\sum_{\mathbf{x}_{k}\in X\cup\mathbf{x}}\bar{\phi}(\mathbf{x}_{k}:\ Y,t_{i},\alpha)\log\frac{\bar{\phi}(\mathbf{x}_{k}:\ Y,t_{i},\alpha)}{\bar{\phi}(\mathbf{x}_{k}:\ Y,\tau,\alpha)}\right)^{-1}d\tau\end{equation}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Subsection
-Pearson Divergence Solution to P-SVM
-\end_layout
-
-\begin_layout Standard
-Unfortunately, there is no known solution to the integral equations of the
- P-SVM using the Kullbeck-Liebler divergence measure 
-\begin_inset Formula $\|\cdot\|_{KL}$
-\end_inset
-
-.
- We address this problem by using the Pearson Divergence rather than the
- KL Divergence:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-\|X-Y\|_{P} & =\sum_{\mathbf{x}\in X\cup Y}\left(\frac{\phi_{X}(\mathbf{x})}{\phi_{Y}(\mathbf{x})}-1\right)^{2}\\
-\|X,Y:\ \tau,\alpha\|_{P} & =\sum_{\mathbf{x}\in X\cup Y}\left(\frac{\bar{\phi}(\mathbf{x}:\ X,\tau,\alpha)}{\phi(\mathbf{x}:\ Y)}-1\right)^{2}\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-We can now solve for the equations 
-\begin_inset Formula $W(\beta)$
-\end_inset
-
- and 
-\begin_inset Formula $\bar{\varphi}_{SV}$
-\end_inset
-
 :
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-W(\beta:\ \alpha) & =\int\sum_{\mathbf{x}\in X}\left(\bar{\varphi}_{P}(\mathbf{x},Y:\ \alpha,\tau,Y)-\bar{\varphi}_{SV}(\mathbf{x},Y:\ \alpha,\tau,\beta,Y)\right)^{2}d\tau+\lambda\Omega(\boldsymbol{\alpha},\beta,Y)\\
- & =\sum_{\mathbf{x}\in X}\int\bar{\varphi}_{P}(\mathbf{x},Y:\ \alpha,\tau,Y)^{2}d\tau-2\int\bar{\varphi}_{P}(\mathbf{x},Y:\ \alpha,\tau,Y)\bar{\varphi}_{SV}(\mathbf{x},Y:\ \alpha,\tau,\beta,Y)d\tau+\int\bar{\varphi}_{SV}(\mathbf{x},Y:\ \alpha,\tau,\beta,Y)^{2}d\tau+\lambda\Omega(\boldsymbol{\alpha},\beta,Y)\end{align*}
+W(\beta:\ Y,\alpha) & \longmapsto\min_{\beta}\sum_{\mathbf{x}\in Y}\ \sum_{i=1}^{\ell}\left(\varphi_{P}(\mathbf{x},Y:\ Y)-\varphi_{SV}(\mathbf{x},Y:\ \alpha,\beta_{i},Y)\right)^{2}+\lambda\Omega\\
+ & =\sum_{\mathbf{x}\in Y}\ \sum_{i=1}^{\ell}\varphi_{P}(\mathbf{x},Y:\ Y)^{2}-2\varphi_{P}(\mathbf{x},Y:\ Y)\varphi_{SV}(\mathbf{x},Y:\ \alpha,\beta_{i},Y)+\varphi_{SV}(\mathbf{x},Y:\ \alpha,\beta_{i},Y)^{2}+\lambda\Omega\\
+ & =\sum_{\mathbf{x}\in Y}\ \sum_{\begin{array}{c}
+i=1\\
+j=1\end{array}}^{\ell}\beta_{i}\beta_{j}\bar{K}_{\gamma}\left(\{Z\cup\mathbf{x}\},Y:\ t_{i},\alpha\right)\bar{K}_{\gamma}\left(\{Z\cup\mathbf{x}\},Y:\ t_{j},\alpha\right)-\sum_{i=1}^{\ell}\beta_{i}2\varphi_{P}(\mathbf{x},Y:\ Y)+\varphi_{P}(\mathbf{x},Y:\ Y)^{2}+\lambda\Omega\end{align*}
 
 \end_inset
 
@@ -1670,189 +1482,20 @@ W(\beta:\ \alpha) & =\int\sum_{\mathbf{x}\in X}\left(\bar{\varphi}_{P}(\mathbf{x
 \end_layout
 
 \begin_layout Standard
-Equation 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:SVProcessSingle"
-
-\end_inset
-
- is a quadratic optimiztion problem defined as:
+This is a quadratic optimization problem and can be solved with known methods.
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-W(\beta) & =\frac{1}{2}\beta^{T}P\beta+q^{T}\beta\\
-P_{i,j} & =\sum_{\alpha\in\boldsymbol{\alpha}}\sum_{\mathbf{x}\in X}K_{\gamma}(\mathbf{x},\alpha,\alpha_{i}:\ X,X)K_{\gamma}(\mathbf{x},\alpha,\alpha_{j}:\ X,X)\\
-q_{i} & =\sum_{\alpha_{i}\in\boldsymbol{\alpha}}\sum_{\mathbf{x}\in X}\left(\lambda K_{\gamma}(\mathbf{x},\alpha,\alpha_{i})^{-1}-\frac{1}{|\boldsymbol{\alpha}|^{2}}\sum_{\alpha_{j}\in\boldsymbol{\alpha}}K_{\gamma}(\mathbf{x},\alpha,\alpha_{i}:\ X,X)K_{\gamma}(\mathbf{x},\alpha,\alpha_{j}:\ X,X)\right)\end{align*}
-
-\end_inset
-
- 
-\begin_inset Formula \begin{align}
-P & =\langle\mathbf{K}^{T}\cdot\mathbf{K}\rangle\label{eq:SVPSingle}\\
-q & =\lambda\langle\mathbf{K}^{T}\cdot\mathbf{1}_{(|\boldsymbol{\alpha}|,1)}\rangle^{-1}-\frac{1}{|\boldsymbol{\alpha}|}\langle\mathbf{K}^{T}\cdot\mathbf{K}\cdot\mathbf{1}_{(|\boldsymbol{\alpha}|,1)}\rangle\end{align}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Subsection
-Sliding Windows 
-\end_layout
-
-\begin_layout Standard
-A final refinement to the SVM solution comes from observing that the set
- of windows need not be defined by the input data; we can factor out the
- offset and restrict 
-\begin_inset Formula $\alpha$
-\end_inset
-
- to defining parameters relevant to the input data such as window duration.
- This can be accomplished by substituting an integral for the summation
- over the window set:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-\varphi_{SV}(\mathbf{x}:\ \alpha,\beta,X,Y) & =\sum_{k\in Y}\beta_{k}\bar{K}_{\gamma}(\mathbf{x}:\ \alpha,X,Y)\\
-\bar{\phi}(\mathbf{x},X:\ \tau,\alpha) & =\int_{i}\int_{j}\sum_{\mathbf{x}_{i}\in X}\omega(\mathbf{x}_{i}:\ \tau,\alpha)\frac{1}{\sum_{\mathbf{x}\in X}\omega(\mathbf{x}:\ \tau,\alpha)}\bar{k}_{\gamma}(\mathbf{x},\mathbf{x}_{i}:\ \tau)d\tau d\tau\\
-\bar{k}_{\gamma}(\mathbf{x}_{i},\mathbf{x}_{j}:\ \tau) & =k_{\gamma}\left(\mathbf{x}_{i},(x_{j},t_{j}-\tau)\right)\\
-W(\beta) & =\int\sum_{\mathbf{x}\in X}\left(\bar{\varphi}_{P}(\mathbf{x}:\ \alpha,X,X)-\bar{\varphi}_{SV}(\mathbf{x}:\ \alpha,\beta,X,X)\right)^{2}d\tau+\lambda\Omega(\boldsymbol{\alpha},\beta)\\
-\Omega(\boldsymbol{\alpha},\beta) & =\int_{i}\int_{j}\sum_{\mathbf{x}\in X}\bar{K}_{\gamma}(\mathbf{x}:\ \alpha,X,X)^{-1}d\tau d\tau\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Subsection
-(old) Sliding Windows
-\end_layout
-
-\begin_layout Standard
-We must begin by modifying the conceptual model of the SVM solution.
- Our task is to determine which of the training set 
-\begin_inset Formula $X$
-\end_inset
-
- should be used as SV's.
- We cannot treat each observation as independant, however, because we are
- searching for timeseries patterns; each observation of 
-\begin_inset Formula $X$
-\end_inset
-
- must be considered in the context of adjacent observations.
- 
-\end_layout
-
-\begin_layout Standard
-We begin by proposing two functions;
-\begin_inset Formula $\omega(\cdot)$
-\end_inset
-
- which assigns weights to inputs based on their time proximity to a given
- observation and 
-\begin_inset Formula $\Delta(\cdot)$
-\end_inset
-
- which shifts the inputs to 0.
- The function 
-\begin_inset Formula $\omega(\cdot)$
-\end_inset
-
- satisfies the properties of a kernel function: it is non-negative and its
- integral is 1.
- This is a different approach than subsets, as we are not excluding any
- observations, merely reducing their impact on the optimization algorithm.
- By using this function, we can treat each observation as both a point (which
- may or may not be a SV) and a set of points (which describe a timeseries
- pattern).
- Our task can now be seen as assigning weights to each point based on the
- relevancy of the set determined by that point in reproducing the estimates
- of a parzen estimator.
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-\Delta(X:t) & =\left[\left(x_{i},t_{i}-t\right)|\ \left(x_{i},t_{i}\right)\in X\right]\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-In order to make this comparison, we must first establish how each observation
- and its associated weight are used to make predictions.
- Recall that the SV solution to the estimation problem is
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \[
-\varphi_{SV}(\mathbf{x},S:\beta)=\sum_{i\in\mathcal{S}}\beta_{i}K_{\gamma}(S_{\mathbf{x}},S_{i})\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-We can now substitute our weighting function for explicit sets, producing
- the following prediction equation:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-\varphi_{sSV}(\mathbf{x}:\beta,X,\hat{X}) & =\int\sum_{i\in X}\beta_{i}K_{\gamma}\left(X,\Delta(\hat{X}:\tau)\right)d\tau\\
- & =\sum_{i\in X}\beta_{i}\ \int K_{\gamma}\left(X,\Delta(\hat{X}:\tau)\right)d\tau\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Extending the sliding Parzen approach, our objective is to determine which
- points 
-\begin_inset Formula $\mathbf{x}\in X$
-\end_inset
-
- should be selected as SV's.
- Let us now develop our SV optimization problem by seeking the least squared
- error between the Parzen and SV divergences:
 \begin_inset Note Note
 status open
 
 \begin_layout Plain Layout
-This can't be right - the weight function reduces to one and goes away.
+Regularizer term?
 \end_layout
 
 \end_inset
 
 
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-W(\beta) & =\int\sum_{\mathbf{x}\in\hat{X}}\omega(t-\tau)\left(\varphi_{sP}(\mathbf{x}:\hat{X})-\varphi_{sSV}(\mathbf{x}:\beta,\hat{X},\hat{X})\right)^{2}d\tau+\lambda\Omega(\beta,\hat{X})\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-
-\end_layout
-
-\begin_layout Standard
-Where 
-\begin_inset Formula $\omega(\cdot)$
-\end_inset
-
- is some kernel function controlling sequence length.
 \end_layout
 
 \begin_layout Subsection
@@ -1979,330 +1622,6 @@ a_{it} & \text{if}\ a_{it}>0\\
 \begin_layout Standard
 \begin_inset Formula \begin{equation}
 \max_{i\in I(\boldsymbol{\alpha}^{k})}-\nabla f(\boldsymbol{\alpha})_{i}+\min_{j\in I(\boldsymbol{\alpha}^{k})}\nabla f(\boldsymbol{\alpha})_{j}\le\epsilon\end{equation}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Subsection
- Random Process Kernel Definition 
-\end_layout
-
-\begin_layout Standard
-When developing the Parzen Window algorithm, we used kernel function 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:KLsingle"
-
-\end_inset
-
- which is based on the Kullbeck Liebler divergence of a probability estimate
- 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:PhiSingle"
-
-\end_inset
-
- defined at the sets being evaluated.
- Our motivation in developing a Support Vector approach is to generate sparse
- representations of 
-\begin_inset Formula $\mathcal{P}^{\mathcal{S}}$
-\end_inset
-
-, in part to reduce the computational demands of evaluating 
-\begin_inset Formula $\varphi(\mathbf{x},S)$
-\end_inset
-
- for test data sets.
- Unfortunately, kernel function 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:KLsingle"
-
-\end_inset
-
- requires probability estimates of both sets being compared - it would be
- helpful to develop a kernel function capable of evaluating a distance between
- a test set 
-\begin_inset Formula $S_{\hat{X}}$
-\end_inset
-
- and a training set 
-\begin_inset Formula $S_{i}$
-\end_inset
-
- without first calculating an estimate of the probability distribution of
- 
-\begin_inset Formula $S_{\hat{X}}$
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Standard
-Note that 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:SVProcessSingle"
-
-\end_inset
-
- is formulated in such a way that the first kernel argument is always 
-\begin_inset Formula $S_{\mathbf{x}}$
-\end_inset
-
-, which allows us to define a kernel which takes a set of points as its
- first argument and a probability distribution as its second.
- The definition of 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:SVPSingle"
-
-\end_inset
-
- also allows us to define non-symmetric kernels without sacrificing convexity
- or monotonicity in the optimization objective function.
- We can therefore use any measure of the divergence between a set of points
- and a probability distribution.
- We consider the Renyi entropy with 
-\begin_inset Formula $\alpha=1$
-\end_inset
-
- and select the Shannon Entropy as our kernel metric, as it is equivalent
- the the Kullback Lieblier divergence.
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{equation}
-\|X-\phi\|_{H}=\sum_{x\in X}\phi(x)\log\phi(x)\end{equation}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Recalling that 
-\begin_inset Formula $S_{\mathbf{x}}=\{S\cup\mathbf{x}\}$
-\end_inset
-
-, we observe that:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{equation}
-\|S_{\mathbf{x}}-S_{i}\|_{H}=\|S-S_{i}\|_{H}+\|\mathbf{x}-S_{i}\|_{H}\end{equation}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-We restate the kernel function as:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{equation}
-K_{\gamma}(X,S_{i})=\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|X-S_{i}\|_{H}^{2}}\end{equation}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-In situations where probabilities are being calculated for a uniform set
- of points in 
-\begin_inset Formula $\Omega^{\mathcal{S}}$
-\end_inset
-
-, this can considerably reduce the computational time needed to evaluate
- 
-\begin_inset Formula $\mathbf{K}$
-\end_inset
-
-, as 
-\begin_inset Formula $\|\mathbf{x}-S_{i}\|_{H}$
-\end_inset
-
- can be computed once and then added to each 
-\begin_inset Formula $\|S-S_{i}\|_{H},S\in\mathcal{S}$
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Subsection
- Random Vector Estimation 
-\end_layout
-
-\begin_layout Standard
-Evaluating 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:SVProcessSingle"
-
-\end_inset
-
- over a training set 
-\begin_inset Formula $X$
-\end_inset
-
- produces a set 
-\begin_inset Formula $\mathcal{S}_{SV}\in\mathcal{S}$
-\end_inset
-
- referred to as Support Vectors.
- While 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:SVProcessSingle"
-
-\end_inset
-
- produces a sparse representation of 
-\begin_inset Formula $\mathcal{P}^{\mathcal{S}}$
-\end_inset
-
- by eliminating some 
-\begin_inset Formula $S$
-\end_inset
-
-, further sparseness can be achieved by refining the definition of 
-\begin_inset Formula $\phi(\mathbf{x})$
-\end_inset
-
- to allow the elimination of some 
-\begin_inset Formula $\mathbf{x}$
-\end_inset
-
- in each 
-\begin_inset Formula $S\in\mathcal{S}_{SV}$
-\end_inset
-
-.
- In the context of computing the kernel matrices used in optimizing 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:SVProcessSingle"
-
-\end_inset
-
- the Parzen Window definition of 
-\begin_inset Formula $\phi(\mathbf{x})$
-\end_inset
-
- is computationally acceptable, as it results in a good approximation with
- a minimal amount of computation 
-\begin_inset Foot
-status collapsed
-
-\begin_layout Plain Layout
- The Parzen Window estimate at a point requires distance computations for
- each observation and a summation.
- By contrast, the SV estimate requires the same number of distance computations
- as well as the solving of a quadratic optimization problem whose complexity
- increases exponentially with the number of observations.
- 
-\end_layout
-
-\end_inset
-
-.
- In the context of evaluating 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:SVResultSingle"
-
-\end_inset
-
- over a testing set 
-\begin_inset Formula $\hat{X}$
-\end_inset
-
-, the Parzen Window algorithm for 
-\begin_inset Formula $\phi(\mathbf{x})$
-\end_inset
-
- is sub-optimal due to the fact that it requires the full set of observations
- for each 
-\begin_inset Formula $S\in\mathcal{S}_{SV}$
-\end_inset
-
-.
- In this context, a sparse algorithm for 
-\begin_inset Formula $\phi(\mathbf{x})$
-\end_inset
-
- would reduce both the data required to store 
-\begin_inset Formula $\mathcal{S}_{SV}$
-\end_inset
-
- and the computational resources required to evaluate 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:DKLemp"
-
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Standard
-We return now to the empirical cumulative distribution function method of
- Support Vector density estimation and search for a solution in the following
- form, which is able to use multiple non-symmetric kernel functions simultaneous
-ly:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{equation}
-\phi(x)=\sum_{i=1}^{\ell}\left(\beta_{i}^{1}\mathcal{K}_{1}(x_{i},x)+...+\beta_{i}^{\kappa}\mathcal{K}_{\kappa}(x_{i},x)\right)\label{eq:SVDensity}\end{equation}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-We select values of 
-\begin_inset Formula $\beta$
-\end_inset
-
- which minimize the square loss of the empirical cumulative probability
- distribution using some regularizer:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align}
- & \min\left(\sum_{i=1}^{\ell}\left(y_{i}-\sum_{j=1}^{\ell}\sum_{n=1}^{\kappa}\beta_{j}^{n}k_{n}(x_{i},x_{j})\right)^{2}+\lambda\sum_{i=1}^{\ell}\sum_{n=1}^{\kappa}\frac{1}{\gamma_{n}}\beta_{i}^{n}\right)\\
- & \text{subject to}\quad\sum_{i=1}^{\ell}\sum_{n=1}^{\kappa}\beta_{i}^{n}=1,\quad\beta_{i}\ge0\end{align}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-given a kernel function 
-\begin_inset Formula $k(x,x')$
-\end_inset
-
- from the sigmoid family to approximate the cumulative probability distribution
- and it's derivative which we refer to as the cross-kernel 
-\begin_inset Formula $\mathcal{K}(x,x')$
-\end_inset
-
- which we use to construct an estimate of the probability distribution:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align}
- & k(x,x')=\frac{1}{1+e^{-\gamma(x-x')}}\\
- & \mathcal{K}(x,x')=-\frac{\gamma}{2+e^{\gamma(x-x')}+e^{-\gamma(x-x')}}\end{align}
 
 \end_inset
 
