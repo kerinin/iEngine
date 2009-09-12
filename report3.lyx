@@ -1663,6 +1663,264 @@ There are limits to the predictive ability of the current architecture.
  A simple example of this is delayed causality; recognizing the relationship
  between an action and a delayed result requires that the system be capable
  of ignoring the intervening data.
+ One solution to this limitation is to include multiple windows in the context
+ of an estimate.
+ In this case we would compare data drawn from multiple windows to data
+ in a similar set of windows in 
+\begin_inset Formula $X$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+Another perspective in this limitation is that the estimates we generate
+ (as well as the contexts from which we make the estimates) is limited by
+ the nature of 
+\begin_inset Formula $\omega(\cdot,\cdot)$
+\end_inset
+
+; it would be helpful for our estimates to make predictions about the probabilit
+y of values in multiple windows of the abstract space 
+\begin_inset Formula $\Omega^{X}$
+\end_inset
+
+.
+ Taken together, we can see that a superior architecture would be capable
+ of making estimates in the form of multiple windows using on observations
+ 
+\emph on
+based
+\emph default
+ on multiple windows.
+ This can be accomplished by treating windows over 
+\begin_inset Formula $X$
+\end_inset
+
+ as independant observations of the random variable 
+\begin_inset Formula $Y$
+\end_inset
+
+.
+ For any such window defined by a point 
+\begin_inset Formula $D_{n}$
+\end_inset
+
+, we define the value of the point 
+\begin_inset Formula $y_{m}^{n}$
+\end_inset
+
+ in the abstract space 
+\begin_inset Formula $\Omega^{Y}$
+\end_inset
+
+as the divergence between 
+\begin_inset Formula $X$
+\end_inset
+
+ in the window defined by 
+\begin_inset Formula $D_{n}$
+\end_inset
+
+and the window defined by 
+\begin_inset Formula $D_{m}$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+y_{m}^{n} & =g(x_{m}:\ X)\\
+g(x_{m}:\ X) & =\|x_{n},x_{m},X,D\|\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The dimensionality of 
+\begin_inset Formula $\Omega^{Y}$
+\end_inset
+
+ is determined by the number of windows over 
+\begin_inset Formula $X$
+\end_inset
+
+ which are used as observations of 
+\begin_inset Formula $Y$
+\end_inset
+
+.
+ We can define the value of each dimension of 
+\begin_inset Formula $Y$
+\end_inset
+
+ at any point 
+\begin_inset Formula $D_{i}$
+\end_inset
+
+ by determining the divergence between that dimension's corresponding window
+ over 
+\begin_inset Formula $X$
+\end_inset
+
+ and the window over 
+\begin_inset Formula $X$
+\end_inset
+
+ defined by 
+\begin_inset Formula $D_{i}$
+\end_inset
+
+.
+ Because observations of 
+\begin_inset Formula $Y$
+\end_inset
+
+ are derived from 
+\begin_inset Formula $X$
+\end_inset
+
+, we must establish some method of choosing values of 
+\begin_inset Formula $D$
+\end_inset
+
+ for which to derive observations; the nature of this method will depend
+ on the nature of the data being analyzed and the computational resources
+ available.
+ We leave this for future investigation.
+\end_layout
+
+\begin_layout Standard
+The generation of estimates of 
+\begin_inset Formula $\mathcal{P}^{Y}$
+\end_inset
+
+ in a given window 
+\begin_inset Formula $D$
+\end_inset
+
+ can be accomplished using the techniques already set forth, and in this
+ sense the revised architecture is recursive.
+ The estimator for each abstract space is referred to as a 'layer'; depending
+ on the way estimates are used, the system can be seein as either a hierarchical
+ system or a feed-forward system.
+ We define a layer as such:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\varphi^{i+1}(g(x:\ X^{i}):\ X^{i+1}) & \longmapsto\Pr(g(x:\ X^{i})|X^{i+1})\pm\xi\\
+X^{i+1} & =[g(x_{1}:\ X^{i}),...,g(x_{\ell^{i+1}}:\ X^{i})]\\
+g(x:\ X^{i}) & =\left[\|x_{1},x,X^{i},D\|,...,\|x_{d^{i+1}},x,X^{i},D\|\right]\\
+g(x:\ X^{i+1})^{j+1} & =g(g(x:\ X^{i})^{j}:\ X^{i+1})\\
+g(x:\ X^{i})^{0} & =\|x_{n},x_{m},X,D\|\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We must therefore develop a method of translating estimates in the abstract
+ space 
+\begin_inset Formula $\Omega^{Y}$
+\end_inset
+
+ into estimates in the abstract space 
+\begin_inset Formula $\Omega^{X}$
+\end_inset
+
+.
+ One method is to use a feed-forward system, transforming a prediction 
+\begin_inset Formula $y_{i}$
+\end_inset
+
+ into a PDF in 
+\begin_inset Formula $\Omega^{X}$
+\end_inset
+
+.
+ Because each dimension of 
+\begin_inset Formula $y_{i}$
+\end_inset
+
+ is defined as a PDF in 
+\begin_inset Formula $\Omega^{X}$
+\end_inset
+
+ and combining these PDF's is a trivial task.
+ There are two weakness in this approach; it requries that the all the informati
+on in a window 
+\begin_inset Formula $D_{n}$
+\end_inset
+
+ over 
+\begin_inset Formula $X$
+\end_inset
+
+ be used in generating values of 
+\begin_inset Formula $y^{n}$
+\end_inset
+
+ and our predictions are limited by the sampling rate of 
+\begin_inset Formula $Y$
+\end_inset
+
+.
+ A more robust approach would allow the full use of the information contained
+ in 
+\begin_inset Formula $X$
+\end_inset
+
+ regardless of the amount of information transferred from 
+\begin_inset Formula $X$
+\end_inset
+
+ to 
+\begin_inset Formula $Y$
+\end_inset
+
+ (determined by the sampling rate and method of generating observations).
+ A better approach is to use a hierarchical system in which we use some
+ combination of predictions drawn from each layer of the architecture:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\varphi(x:\ X^{1},...,X^{\mu}) & =f\left(\varphi^{1}(x:\ X^{1}),...,\varphi^{\mu}(g(x:\ X^{\mu-1})^{\mu-1}:\ X^{\mu}):\ \lambda\right)\\
+\int_{-\infty}^{\infty}f(x)dx & =1\\
+0\le f(x)\le1 & \forall x\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+One way of doing this would be to simply take the product of each estimate
+ weighted by some parameter to control the influence of different layers:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\varphi(x:\ X^{1},...,X^{\mu}) & =\prod_{n=1}^{\mu}\lambda^{n}\varphi^{n}(x:\ X^{n})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This system is not strictly hierarchical; we can determine the influence
+ of each layer individually (potentially favoring lower layers over higher
+ ones), however we refer to it as such because successive layers have an
+ increased scope of data from which to make predictions, and each of these
+ is eventually combined in making estimates.
+ 
 \end_layout
 
 \begin_layout Section
