@@ -1028,6 +1028,23 @@ Finish this up
 
 \end_layout
 
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Extend this to integrate over a subset of 
+\begin_inset Formula $d$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsection
 Multiple Data Sources
 \end_layout
@@ -1494,78 +1511,49 @@ Some datasets do not lend themselves to TI analysis, these datasets exhibit
 \end_layout
 
 \begin_layout Standard
-TI assumes that it is possible to achieve some reduction in the quantity
- of information required to estimate a PDF.
- This is only possible if there are discrete portions of the dataset with
- low information entropy relative to each other.
- In these cases a estimate capable of estimating one portion of the PDF
- can be used to estimate another portion; our task is to identify these
- portions and develop a method both for estimating the PDF in the neighborhood
- of one such portion and for applying that estimate to similar portions
- through transformations.
+Transformation invariance assumes that the context of an observation carries
+ information relevant to the PDF of 
+\begin_inset Formula $X$
+\end_inset
+
+ within that context.
+ As such, we can say that the higher the expected information carried by
+ a context, the more useful a TI analysis will be.
+ This raises the question of how we determine the amount of information
+ a given context contains 
+\emph on
+about the PDF within that context
+\emph default
+.
+ In order for a context to contain information about itself, it must be
+ similar to other contexts - we must have examples of similar behaviors
+ from which we can generalize.
+ So on the one hand, the more information we can extract from different
+ contexts, the more likely we are to benefit from a TI analysis.
+ On the other hand, if there are a relatively small number of divergent
+ contexts, we can assume that the PDF of 
+\begin_inset Formula $X$
+\end_inset
+
+ is not strongly contextualized, and therefore a TI analysis (based on contextua
+l information) won't be particularly beneficial.
+ These are the two factors which influence the relevance of a TI analysis;
+ the variety of contexts and the overlap between contexts.
+ In order to evaluate the relevance of TI analysis, we must develop orthogonal
+ descriptions of these two factors.
  
 \end_layout
 
 \begin_layout Standard
-An ideal dataset for TI analysis therefore will have a substantial amount
- of entropy between portions of the dataset as well as a substantial quantity
- of portions with low entropy between them.
- We have already developed a system which can be used for evaluating how
- much 'compression' is possible in a dataset, however determining the level
- of compression is computationally intensive; it would be helpful to restrict
- such an analysis to datasets which are likely to benefit from such analysis.
- Returning to our earlier definition of an ideal dataset for TI analysis
- we can state that datasets with high entropy between different portions
- is necessary (but not sufficient) for achieving a high level of compression.
- We will therefore develop a rigorous quantification of this entropy measure.
-\end_layout
-
-\begin_layout Subsection
-Dimensional Information
-\end_layout
-
-\begin_layout Standard
-We begin by investigating a vector-valued dataset 
-\begin_inset Formula $X$
-\end_inset
-
- in which all observations are of the same dimensionality, and it is assumed
- that each dimension is drawn for a consistent source.
- We will describe the information content of a single dimension 
-\begin_inset Formula $d$
-\end_inset
-
- of this dataset.
- We begin by picking two windows defined by 
-\begin_inset Formula $(d_{1},\alpha),(d_{2},\alpha)$
-\end_inset
-
-.
- We can compare the divergence between 
-\begin_inset Formula $X$
-\end_inset
-
- at these two windows using our distance metric 
-\begin_inset Formula $\|\cdot,\cdot\|$
-\end_inset
-
- as before.
- To determine the total information content of 
-\begin_inset Formula $d$
-\end_inset
-
-, we simply average this distance using each point's value in 
-\begin_inset Formula $d$
-\end_inset
-
- for our first window and integrate over all possible transformed windows:
+The variety of contexts within a dataset can be described as the expected
+ divergence between adjacent contexts:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-H^{\nu}(X:\ \alpha) & =\sum_{i=1}^{\ell}\frac{1}{\ell}\|\vec{x}_{i},X:\ \alpha\|\\
-\|x,X:\ \alpha\| & =\sum_{i=1}^{\ell}\omega_{\alpha}(x^{\nu},x_{i}^{\nu})\int_{-\infty}^{\infty}\left(\frac{\varphi(x_{i}:\ x,AX+b)}{\varphi(x_{i}:\ x,X)}-1\right)^{2}dAdb\\
-\varphi(x_{i}:\ x,X) & =\sum_{j=1}^{\ell}\omega(x^{\nu},x_{j}^{\nu})\frac{1}{\ell}K_{\gamma}(x_{i},x_{j})\end{align*}
+H_{\varepsilon}^{V}(X) & =\sum_{\begin{array}{c}
+i=1\\
+j=1\end{array}}^{\ell}\frac{1}{\ell^{2}}\omega_{\varepsilon}(x_{i},x_{j})\omega_{\alpha}(x_{i},x_{j})\|x_{i},x_{j},X\|\end{align*}
 
 \end_inset
 
@@ -1573,41 +1561,108 @@ H^{\nu}(X:\ \alpha) & =\sum_{i=1}^{\ell}\frac{1}{\ell}\|\vec{x}_{i},X:\ \alpha\|
 \end_layout
 
 \begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Not sure if this is right - think about the windows mostly
+The overlap between contexts can be described as the expected divergence
+ between all possible contexts.
 \end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+H_{\varepsilon}^{O}(X) & =\sum_{\begin{array}{c}
+i=1\\
+j=1\end{array}}^{\ell}\frac{1}{\ell^{2}}\omega_{\alpha}(x_{i},x_{j})\|x_{i},x_{j},X\|\end{align*}
 
 \end_inset
 
 
 \end_layout
 
-\begin_layout Subsection
-Cross-Dimensional Information
+\begin_layout Standard
+We would like the TI value to increase as either of these factors increase.
 \end_layout
 
 \begin_layout Standard
-Thus far we have been using an intuitive definition of shared dimensions
- between channels.
- We can now develop a more rigorous understanding.
- In the earlier section we developed a method for evaluating the entropy
- of a dataset in the context of different windows over one of the dataset's
- dimensions.
- We now investigate the case of multiple datasets; our task is to identify
- the extent to which a dimension in one dataset corresponds to a dimension
- in another.
- This investigation is motivated by the desire to apply a single transformations
- to data in these two dimensions.
- In order to evaluate relationships between two channels, we must be able
- to define meaningful windows over both channels - identifying corresponding
- dimensions across channels allows us to do this.
+\begin_inset Formula \begin{align*}
+H_{\varepsilon}(X) & =H_{\varepsilon}^{V}(X)+H_{\varepsilon}^{O}(X)\\
+ & =\sum_{\begin{array}{c}
+i=1\\
+j=1\end{array}}^{\ell}\frac{1}{\ell^{2}}\omega_{\varepsilon}(x_{i},x_{j})\omega_{\alpha}(x_{i},x_{j})\|x_{i},x_{j},X\|+\frac{1}{\ell^{2}}\omega_{\alpha}(x_{i},x_{j})\|x_{i},x_{j},X\|\\
+ & =\sum_{\begin{array}{c}
+i=1\\
+j=1\end{array}}^{\ell}\frac{1}{\ell^{2}}\omega_{\alpha}(x_{i},x_{j})\|x_{i},x_{j},X\|\left(\omega_{\varepsilon}(x_{i},x_{j})+1\right)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This can be extended to multi-dimensional data by observing that the window
+ used previously is defined along a single dimension; we can just as easily
+ consider a multi-dimensional window.
+ In this case, we simply need to compare the expected divergence between
+ adjacent windows in multiple dimensions and the expected divergence between
+ all possible windows in multiple dimensions (here we use the 
+\begin_inset Formula $L^{2}$
+\end_inset
+
+ metric):
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+H_{\varepsilon}^{V}(X) & =\sum_{\begin{array}{c}
+i=1\\
+j=1\end{array}}^{\ell}\sqrt{\sum_{\nu=1}^{d}\left(\frac{1}{\ell^{2}}\omega_{\varepsilon}(x_{i}^{\nu},x_{j}^{\nu})\omega_{\alpha}(x_{i}^{\nu},x_{j}^{\nu})\|x_{i}^{\nu},x_{j}^{\nu},X\|\right)^{2}}\\
+H_{\varepsilon}^{O}(X) & =\sum_{\begin{array}{c}
+i=1\\
+j=1\end{array}}^{\ell}\sqrt{\sum_{\nu=1}^{d}\left(\frac{1}{\ell^{2}}\omega_{\alpha}(x_{i}^{\nu},x_{j}^{\nu})\|x_{i}^{\nu},x_{j}^{\nu},X\|\right)^{2}}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We can refine these to apply only to a subset of 
+\begin_inset Formula $d$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+H_{\varepsilon}^{V}(X,D) & =\sum_{\begin{array}{c}
+i=1\\
+j=1\end{array}}^{\ell}\sqrt{\sum_{\nu\in D}\left(\frac{1}{\ell^{2}}\omega_{\varepsilon}(x_{i}^{\nu},x_{j}^{\nu})\omega_{\alpha}(x_{i}^{\nu},x_{j}^{\nu})\|x_{i}^{\nu},x_{j}^{\nu},X,D\|\right)^{2}}\\
+H_{\varepsilon}^{O}(X,D) & =\sum_{\begin{array}{c}
+i=1\\
+j=1\end{array}}^{\ell}\sqrt{\sum_{\nu\in D}\left(\frac{1}{\ell^{2}}\omega_{\alpha}(x_{i}^{\nu},x_{j}^{\nu})\|x_{i}^{\nu},x_{j}^{\nu},X,D\|\right)^{2}}\\
+D & =[d_{n},...,d_{m}],\ 1\le d_{i}<d\end{align*}
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
 Ensemble System
+\end_layout
+
+\begin_layout Standard
+There are limits to the predictive ability of the current architecture.
+ Most significantly, the context which influences a prediction is limited
+ by the nature of 
+\begin_inset Formula $\omega(\cdot,\cdot)$
+\end_inset
+
+.
+ A more robust architecture would allow the context of a prediction to be
+ more flexible, for example responding to two discrete windows while ignoring
+ data outside those windows.
+ A simple example of this is delayed causality; recognizing the relationship
+ between an action and a delayed result requires that the system be capable
+ of ignoring the intervening data.
 \end_layout
 
 \begin_layout Section
