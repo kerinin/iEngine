@@ -58,8 +58,7 @@
 \begin_body
 
 \begin_layout Title
-Parzen-SVM: An Approach to Timeseries Analysis Using Support Vector Machines
- based on Parzen Windows
+Motivated Decision-Making using Transformation Invariant Probability Estimates
 \end_layout
 
 \begin_layout Author
@@ -378,21 +377,6 @@ General Overview
 \end_layout
 
 \begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Try to work out the scale invariance, the re-frame this entire paper in
- the context of multiple scale and shift invariant parameters (if that's
- possible of course)
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
 The goal is to create a method of statistical inference capable of processing
  multiplle sources of data which are both multi-variate and exhibits transformat
 ion-invariant behaviors.
@@ -434,30 +418,26 @@ Problem Setting
 \end_layout
 
 \begin_layout Standard
-We begin with a set of hidden random variables 
-\begin_inset Formula $\Phi$
+Our analysis take place in the context of a set of 
+\begin_inset Formula $\ell$
 \end_inset
 
-, each variable describing a source of data 
+ vector observations 
+\begin_inset Formula $\vec{x}_{i}$
+\end_inset
+
+ of a hidden random variables 
 \begin_inset Formula $X$
 \end_inset
 
- with a consistent dimensionality 
-\begin_inset Formula $\mathbb{R}^{d+n}$
-\end_inset
-
- and some type of partiy between discrete observations of a given dimension
- (for example, one dimension could be time; all observations' time dimension
- is describes the time at which teh observation occurred).
- We refer to each source of data as a channel; all channels share some dimension
-s, and each channel has a set of dimensions which are unique to the channel:
+ with a real-valued event space of arbitrary dimension:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\Phi & =(\Omega,\mathcal{F},\mathcal{P})\\
-\Phi & =[X,...,Z]\\
-X & =(\Omega,\mathcal{F},\mathcal{P})\end{align*}
+X & =(\Omega,\mathcal{F},\mathcal{P})\\
+\Omega & \in\mathbb{R}^{d}\\
+X & =[\vec{x}_{1},...,\vec{x}_{\ell}]\end{align*}
 
 \end_inset
 
@@ -465,30 +445,24 @@ X & =(\Omega,\mathcal{F},\mathcal{P})\end{align*}
 \end_layout
 
 \begin_layout Standard
-For each channel we are given a set of vector observations of which consist
- of 
-\begin_inset Formula $d$
+Our objective is to develop an estimate 
+\begin_inset Formula $\varphi(x:\ X)$
 \end_inset
 
- shared dimensions and 
-\begin_inset Formula $n$
+ of the probability of a given point 
+\begin_inset Formula $x$
 \end_inset
 
- channel-specific dimensions:
+ given a set of observations 
+\begin_inset Formula $X$
+\end_inset
+
+:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-X & =[\vec{x}_{1},...,\vec{x}_{|X|}]\\
-\vec{x}_{i} & =\begin{array}{c}
-\left[\begin{array}{c}
-x_{i}^{\bar{1}}\\
-\vdots\\
-x_{i}^{\bar{d}}\end{array}\right]\\
-\left[\begin{array}{c}
-x_{i}^{1}\\
-\vdots\\
-x_{i}^{d_{X}}\end{array}\right]\end{array}\end{align*}
+\varphi(x:\ X) & \longmapsto\Pr(x|X)\pm\xi\end{align*}
 
 \end_inset
 
@@ -496,26 +470,33 @@ x_{i}^{d_{X}}\end{array}\right]\end{array}\end{align*}
 \end_layout
 
 \begin_layout Standard
-Notice that we denote dimensions which are shared with a bar (
-\begin_inset Formula $x^{\bar{n}}$
+We assume that our estimate's error is upper-bounded by 
+\begin_inset Formula $\xi$
 \end_inset
 
-) and dimensions which are channel-specific without (
-\begin_inset Formula $x^{n}$
+.
+ Methods exist to determine 
+\begin_inset Formula $\xi$
 \end_inset
 
-).
- 
+; this is left as an exercise for the reader.
 \end_layout
 
 \begin_layout Section
-Single Channel Setting
+Transformation Invariant Parzen Windows
 \end_layout
 
 \begin_layout Standard
-We begin by considering a single channel in isolation.
- This allows us to defer the issue of relationships between channels until
- we have developed a sufficient platform on which to analyze the full situation.
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+General discussion of Parzen Windows
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
@@ -566,7 +547,7 @@ es of unordered sets, provided they have an addition operation and a kernel
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\phi(\vec{x}:\ X) & =\sum_{i}^{|X|}\frac{1}{|X|}K_{\gamma}(\vec{x},\vec{x}_{i})\end{align*}
+\varphi(\vec{x}:\ X) & =\sum_{i}^{\ell}\frac{1}{\ell}K_{\gamma}(\vec{x},\vec{x}_{i})\end{align*}
 
 \end_inset
 
@@ -580,7 +561,7 @@ Multiple kernel functions exist, in this paper we will use the Radial Basis
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-K_{\gamma}\left(\vec{x}_{i},\vec{y}_{j}\right) & =\prod_{\upsilon=1}^{\bar{d}+d_{X}}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|x^{\nu},y^{\nu}\|^{2}}\end{align*}
+K_{\gamma}\left(\vec{x},\vec{y}\right) & =\prod_{\upsilon=1}^{d}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|x^{\nu},y^{\nu}\|^{2}}\end{align*}
 
 \end_inset
 
@@ -659,8 +640,8 @@ The crucial distinction between i.i.d data from a static PDF and data which
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\omega(\Delta:\ \alpha) & \Rightarrow[0,\infty)\\
-\int_{-\infty}^{\infty}\omega(\Delta:\ \alpha)d\Delta & =1\end{align*}
+\omega_{\alpha}(x_{i},x_{j}) & \Rightarrow[0,\infty)\\
+\int_{-\infty}^{\infty}\omega_{\alpha}(x_{i},x_{j})dx_{i} & =1\end{align*}
 
 \end_inset
 
@@ -734,7 +715,7 @@ sets of points
 \noun off
 \color none
 \begin_inset Formula \begin{align*}
-K_{\gamma}\left(X_{i},X_{j}\right) & =\prod_{\upsilon=1}^{\bar{d}+d_{X}}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|X_{i}^{\nu},X_{j}^{\nu}\|}\end{align*}
+K_{\gamma}\left(X_{i},X_{j}\right) & =\prod_{\upsilon=1}^{d}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|X_{i}^{\nu},X_{j}^{\nu}\|}\end{align*}
 
 \end_inset
 
@@ -773,7 +754,7 @@ We can simplify this equation by observing that we are not actually dealing
 \noun off
 \color none
 \begin_inset Formula \begin{align*}
-K_{\gamma}\left(\vec{x},X:\ \alpha\right) & =\prod_{\upsilon=1}^{\bar{d}+d_{X}}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|x^{\nu},X^{\nu}:\ \alpha\|}\end{align*}
+K_{\gamma}\left(\vec{x}_{n},\vec{x}_{m},X\right) & =\prod_{\upsilon=1}^{d}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|x_{n}^{\nu},x_{m}^{\nu},X\|}\end{align*}
 
 \end_inset
 
@@ -814,7 +795,7 @@ Notice we've added
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\|X^{\nu},Y^{\nu}\| & =\sum_{x^{\nu}\in\{X\cup Y\}}\left(\frac{\phi(x^{\nu}:\ \mathbf{A}^{\nu}X^{\nu}+\mathbf{b}^{\nu})}{\phi(x^{\nu}:\ Y^{\nu})}-1\right)^{2}\end{align*}
+\|X^{\nu},Y^{\nu}\| & =\sum_{x^{\nu}\in\{X\cup Y\}}\left(\frac{\varphi(x^{\nu}:\ \mathbf{A}^{\nu}X^{\nu}+\mathbf{b}^{\nu})}{\varphi(x^{\nu}:\ Y^{\nu})}-1\right)^{2}\end{align*}
 
 \end_inset
 
@@ -877,7 +858,9 @@ Because the Pearson Divergence is a summation, we can control the influence
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\|x^{\nu},X^{\nu}:\ \alpha\| & =\sum_{x_{i}^{\nu}\in\{x\cup X\}}\omega(\|x^{\nu}-x_{i}^{\nu}\|:\ \mathbf{A}^{\nu},\alpha)\left(\frac{\phi(x_{i}^{\nu}:\ \mathbf{A}^{\nu}\{x\cup X\}^{\nu}+\mathbf{b}^{\nu})}{\phi(x_{i}^{\nu}:\ X^{\nu})}-1\right)^{2}\end{align*}
+\|x_{n}^{\nu},x_{m}^{\nu},X\| & =\sum_{i=1}^{\ell}\omega_{\alpha}(x_{n}^{\nu},x_{i}^{\nu})\left(\frac{\varphi(x_{i}^{\nu}:\ x_{m}^{\nu},\mathbf{A}X+\mathbf{b})}{\varphi(x_{i}^{\nu}:\ x_{m}^{\nu},X^{\nu})}-1\right)^{2}\\
+\varphi(x^{\nu}:\ x_{n}^{\nu},X) & =\sum_{i=1}^{\ell}\frac{\omega_{\alpha}(x_{i}^{\nu},x_{n}^{\nu})}{\sum_{j=1}^{\ell}\omega_{\alpha}(x_{j}^{\nu},x_{n}^{\nu})}K_{\gamma}(x^{\nu},x_{i}^{\nu})\\
+ & =\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)\ K_{\gamma}(x^{\nu},x_{i}^{\nu})\end{align*}
 
 \end_inset
 
@@ -954,7 +937,7 @@ In both of these equations we have used
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\|x^{\nu},X^{\nu}:\ \alpha\| & \sum_{x_{i}^{\nu}\in\{x\cup X\}}\omega(\|x^{\nu}-x_{i}^{\nu}\|:\ \alpha)\int\int_{-\infty}^{\infty}\left(\frac{\phi(x^{\nu}:\ \mathbf{A}^{\nu}\{x\cup X\}^{\nu}+\mathbf{b}^{\nu})}{\phi(x^{\nu}:\ X^{\nu})}-1\right)^{2}d\mathbf{A}d\mathbf{b}\end{align*}
+\|x_{n}^{\nu},x_{m}^{\nu},X:\ \alpha\| & \sum_{x_{i}^{\nu}\in\{x\cup X\}}\omega_{\alpha}(x_{n}^{\nu},x_{i}^{\nu})\int\int_{-\infty}^{\infty}\left(\frac{\varphi(x_{i}^{\nu}:\ x_{m}^{\nu},\mathbf{A}X+\mathbf{b})}{\varphi(x_{i}^{\nu}:\ x_{m}^{\nu},X^{\nu})}-1\right)^{2}d\mathbf{A}d\mathbf{b}\end{align*}
 
 \end_inset
 
@@ -986,7 +969,7 @@ This approach allows us to compare the distance between any linear transform
 
 \begin_layout Standard
 \begin_inset Formula \[
-\int\int_{-\infty}^{\infty}\left(\frac{\phi(x:\ \mathbf{A}\{x\cup X\}+\mathbf{b})}{\phi(x:\ X)}-1\right)^{2}d\mathbf{A}d\mathbf{b}\]
+\int\int_{-\infty}^{\infty}\left(\frac{\varphi(x_{i}^{\nu}:\ x_{m}^{\nu},\mathbf{A}X+\mathbf{b})}{\varphi(x_{i}^{\nu}:\ x_{m}^{\nu},X^{\nu})}-1\right)^{2}d\mathbf{A}d\mathbf{b}\]
 
 \end_inset
 
@@ -1004,7 +987,7 @@ Because
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\int\int_{-\infty}^{\infty}\left(\frac{\phi(x:\ \mathbf{A}\{x\cup X\}+\mathbf{b})}{\phi(x:\ X)}-1\right)^{2}d\mathbf{A}d\mathbf{b} & =\int...\int\left(\frac{\phi\left(x:\ \left[\mathbf{b}+\sum_{n=1}^{\bar{d}+d_{X}}\mathbf{A}_{n}x_{i}^{n}|\ x_{i}\in\{x\cup X\}\right]\right)}{\phi(x:\ X)}-1\right)^{2}d\mathbf{A}_{0}...d\mathbf{A}_{\bar{d}+d_{X}}d\mathbf{b}\end{align*}
+\int\int_{-\infty}^{\infty}\left(\frac{\varphi(x^{\nu}:\ x_{n}^{\nu},\mathbf{A}X+\mathbf{b})}{\varphi(x^{\nu}:\ x_{n}^{\nu},X)}-1\right)^{2}d\mathbf{A}d\mathbf{b} & =\int...\int\left(\frac{\varphi\left(x^{\nu}:\ x_{n}^{\nu},\left[\mathbf{b}_{\nu}+\sum_{n=1}^{d}\mathbf{A}_{\nu,n}x_{i}^{n}|\ x_{i}\in X\right]\right)}{\varphi(x^{\nu}:\ x_{n}^{\nu},X)}-1\right)^{2}d\mathbf{A}_{0}...d\mathbf{A}_{d}d\mathbf{b}\end{align*}
 
 \end_inset
 
@@ -1013,15 +996,19 @@ Because
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
- & =\int...\int\left(\frac{\sum_{i}^{|X|}\frac{1}{|X|}K_{\gamma}\left(x,\left(\mathbf{b}+\sum_{n=1}^{\bar{d}+d_{X}}\mathbf{A}_{n}x_{i}^{n}\right)\right)}{\sum_{i}^{|X|}\frac{1}{|X|}K_{\gamma}(x,X)}-1\right)^{2}d\mathbf{A}_{0}...d\mathbf{A}_{\bar{d}+d_{X}}d\mathbf{b}\\
- & =\int...\int\left(\frac{1}{\sum_{i}^{|X|}\exp\left(-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}\right)}\sum_{i}^{|X|}\exp\left(-\frac{1}{\gamma}\left(x-\left(\mathbf{b}+\sum_{n=1}^{\bar{d}+d_{X}}\mathbf{A}_{n}x_{i}^{n}\right)\right)^{2}\right)-1\right)^{2}d\mathbf{A}_{0}...d\mathbf{A}_{\bar{d}+d_{X}}d\mathbf{b}\\
- & =\int...\int\left(\frac{1}{\sum_{i}^{|X|}\exp\left(-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}\right)}\sum_{i}^{|X|}\exp\left(-\frac{1}{\gamma}\left(x^{2}-2x\left(\mathbf{b}+\sum_{n=1}^{\bar{d}+d_{X}}\mathbf{A}_{n}x_{i}^{n}\right)+\left(\mathbf{b}+\sum_{n=1}^{\bar{d}+d_{X}}\mathbf{A}_{n}x_{i}^{n}\right)^{2}\right)\right)-1\right)^{2}d\mathbf{A}_{0}...d\mathbf{A}_{\bar{d}+d_{X}}d\mathbf{b}\\
- & =\int...\int\left(\frac{1}{\sum_{i}^{|X|}\exp\left(-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}\right)}\sum_{i}^{|X|}\exp\left(-\frac{1}{\gamma}\left(x^{2}-2x\mathbf{b}+2x\sum_{n=1}^{\bar{d}+d_{X}}\mathbf{A}_{n}x_{i}^{n}+\mathbf{b}^{2}+\mathbf{b}\sum_{n=1}^{\bar{d}+d_{X}}\mathbf{A}_{n}x_{i}^{n}+\sum_{\begin{array}{c}
+ & =\int...\int\left(\frac{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)\ K_{\gamma}\left(x^{\nu},\left(\mathbf{b}_{\nu}+\sum_{n=1}^{d}\sum_{i=1}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}\right)\right)}{\sum_{i}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)\ K_{\gamma}(x^{\nu},X)}-1\right)^{2}d\mathbf{A}_{0}...d\mathbf{A}_{d}d\mathbf{b}\\
+ & =\int...\int\left(\frac{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)}{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)\ \exp\left(-\frac{1}{\gamma}\left(x^{\nu}-x_{i}^{\nu}\right)^{2}\right)}\ \exp\left(-\frac{1}{\gamma}\left(x^{\nu}-\left(\mathbf{b}_{\nu}+\sum_{n=1}^{d}\sum_{i=1}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}\right)\right)^{2}\right)-1\right)^{2}d\mathbf{A}_{0}...d\mathbf{A}_{d}d\mathbf{b}\\
+ & =\int...\int\left(\frac{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)}{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)\ \exp\left(-\frac{1}{\gamma}\left(x^{\nu}-x_{i}^{\nu}\right)^{2}\right)}\ \exp\left(-\frac{1}{\gamma}\left(\left(x^{\nu}\right)^{2}-2x^{\nu}\left(\mathbf{b}_{\nu}+\sum_{n=1}^{d}\sum_{i=1}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}\right)+\left(\mathbf{b}_{\nu}+\sum_{n=1}^{d}\sum_{i=1}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}\right)^{2}\right)\right)-1\right)^{2}d\mathbf{A}_{0}...d\mathbf{A}_{d}d\mathbf{b}\\
+ & =\int...\int\left(\frac{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)}{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)\ \exp\left(-\frac{1}{\gamma}\left(x^{\nu}-x_{i}^{\nu}\right)^{2}\right)}\ \exp\left(-\frac{1}{\gamma}\left(\left(x^{\nu}\right)^{2}-2x^{\nu}\mathbf{b}_{\nu}+2x^{\nu}\sum_{n=1}^{d}\sum_{i=1}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}+\mathbf{b}_{\nu}^{2}+\mathbf{b}_{\nu}\sum_{n=1}^{d}\sum_{i=1}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}+\sum_{\begin{array}{c}
 n=1\\
-m=1\end{array}}^{\bar{d}+d_{X}}\mathbf{A}_{n}x_{i}^{n}\mathbf{A}_{m}x_{i}^{m}\right)\right)-1\right)^{2}d\mathbf{A}_{0}...d\mathbf{A}_{\bar{d}+d_{X}}d\mathbf{b}\\
- & =\int...\int\left(\frac{1}{\sum_{i}^{|X|}\exp\left(-\frac{1}{\gamma}\left(x-x_{i}\right)^{2}\right)}\sum_{i}^{|X|}\exp\left(-\frac{1}{\gamma}\left(\sum_{\begin{array}{c}
+m=1\end{array}}^{d}\sum_{\begin{array}{c}
+i=1\\
+j=1\end{array}}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}\mathbf{A}_{\nu,m}x_{j}^{m}\right)\right)-1\right)^{2}d\mathbf{A}_{0}...d\mathbf{A}_{d}d\mathbf{b}\\
+ & =\int...\int\left(\frac{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)}{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)\ \exp\left(-\frac{1}{\gamma}\left(x^{\nu}-x_{i}^{\nu}\right)^{2}\right)}\ \exp\left(-\frac{1}{\gamma}\left(\sum_{\begin{array}{c}
 n=1\\
-m=1\end{array}}^{\bar{d}+d_{X}}\mathbf{A}_{n}x_{i}^{n}\mathbf{A}_{m}x_{i}^{m}+x^{2}+\sum_{n=1}^{\bar{d}+d_{X}}(2x+\mathbf{b})\mathbf{A}_{n}x_{i}^{n}-2x\mathbf{b}+\mathbf{b}^{2}\right)\right)-1\right)^{2}d\mathbf{A}_{0}...d\mathbf{A}_{\bar{d}+d_{X}}d\mathbf{b}\end{align*}
+m=1\end{array}}^{d}\sum_{\begin{array}{c}
+i=1\\
+j=1\end{array}}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}\mathbf{A}_{\nu,m}x_{j}^{m}+\left(x^{\nu}\right)^{2}+\sum_{n=1}^{d}\sum_{i=1}^{\ell}(2x^{\nu}+\mathbf{b}_{\nu})\mathbf{A}_{\nu,n}x_{i}^{n}-2x^{\nu}\mathbf{b}_{\nu}+\mathbf{b}_{\nu}^{2}\right)\right)-1\right)^{2}d\mathbf{A}_{0}...d\mathbf{A}_{d}d\mathbf{b}\end{align*}
 
 \end_inset
 
@@ -1039,6 +1026,75 @@ Finish this up
 \end_inset
 
 
+\end_layout
+
+\begin_layout Subsection
+Multiple Data Sources
+\end_layout
+
+\begin_layout Standard
+Consider the case where data from multiple data sources contributes to our
+ set of observations 
+\begin_inset Formula $X$
+\end_inset
+
+, for instance the data drawn from a microphone and a video camera.
+ Let us assume that both input sources are timestamped, but the sampling
+ frequency is different for each source and that the vector data points
+ have different dimensionality, we will refer to observations of the former
+ as 
+\begin_inset Formula $X=(\Omega^{X},\mathcal{F}^{X},\mathcal{P}^{X})$
+\end_inset
+
+ and the latter as 
+\begin_inset Formula $Y=(\Omega^{Y},\mathcal{P}^{Y},\mathcal{F}^{Y})$
+\end_inset
+
+.
+ In this situation we can treat the timestamp as a 'shared' dimension, but
+ all other dimensions of the two vectors are independant.
+ It is clear that if we intend to establish a PDF of the joint probability
+ space 
+\begin_inset Formula $(\Omega^{Y,X},\mathcal{P}^{Y,X},\mathcal{F}^{Y,X})$
+\end_inset
+
+, we must treat each dimension in 
+\begin_inset Formula $\Omega^{X}$
+\end_inset
+
+ and 
+\begin_inset Formula $\Omega^{Y}$
+\end_inset
+
+ as orthonormal to each other.
+ The fact that both event spaces share a time dimension means that a TI
+ analysis over the time dimension is likely to produce useful results.
+ 
+\end_layout
+
+\begin_layout Standard
+The most straightforward way to handle this situation is to assume that
+ vector observations constitute sparse matrices; for any given dimension
+ of an observation 
+\begin_inset Formula $\vec{x}$
+\end_inset
+
+, the value can either be a real number or null:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\vec{x}^{v} & \in[\mathbb{R},\textrm{Ø}]\end{align*}
+
+\end_inset
+
+ In this case we only include in our analysis operations between real-valued
+ dimensions.
+ We can easily accomodate the shared time dimension by including the two
+ time dimensions in our TI analysis.
+ This allows us to consider not only the situation where both inputs are
+ timestamped with accurate clocks, but the situation where the two clocks
+ are independantly inaccurate.
 \end_layout
 
 \begin_layout Subsection
@@ -1060,16 +1116,510 @@ We have developed a PDF estimation technique which allows us to take advantage
  with non-shared dimensions.
 \end_layout
 
-\begin_layout Section
-Multiple Channel Setting
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\varphi(\vec{x}:\ X) & =\prod_{\upsilon=1}^{d}\sum_{i=1}^{|X|}\frac{1}{|X|}\ K_{\gamma}(x^{\nu},x_{i}^{\nu},X^{\nu})\\
+K_{\gamma}\left(x_{n}^{\nu},x_{m}^{\nu},X^{\nu}\right) & =\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|x_{n}^{\nu},x_{m}^{\nu},X^{\nu}\|}\\
+\|x_{n}^{\nu},x_{m}^{\nu},X^{\nu}\| & =\sum_{i=1}^{\ell}\omega_{\alpha}(x^{\nu},x_{i}^{\nu})\qquad???\\
+\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X) & =\frac{\omega_{\alpha}(x_{i}^{\nu},x_{n}^{\nu})}{\sum_{j=1}^{\ell}\omega_{\alpha}(x_{j}^{\nu},x_{n}^{\nu})}\end{align*}
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
 Support Vector Optimizations
 \end_layout
 
+\begin_layout Standard
+The Parzen Window method is neither sparse nor computationally efficient,
+ and as the number of observations grows, these deficiencies quickly become
+ prohibitive.
+ We now investigate the use of Support Vector Machines to generate estimates.
+\end_layout
+
+\begin_layout Subsection
+Generalized Parzen-SVM 
+\end_layout
+
+\begin_layout Standard
+Support Vector Machines are often used
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+ref?
+\end_layout
+
+\end_inset
+
+ to estimate probability distributions by solving the related problem of
+ estimating the cumulative distribution function of the random variable
+ in question.
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+This isn't really the essence of SVM - put more verbage in the intro regarding
+ what SVM's are, why they work, and why they're superior to other approaches
+ (say, neural networks)
+\end_layout
+
+\end_inset
+
+ This reduces the problem to one of estimating a non-linear mapping from
+ observations to cumulative distribution values, which can be formulated
+ as an optimization problem over a linear operator equation.
+ Unfortunately, these methods depend on the ability to calculate an empirical
+ distribution for each observation:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{equation}
+F_{\ell}(x)=\frac{1}{\ell}\sum_{i}\theta(x-x_{i})\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+where 
+\begin_inset Formula $\theta(x)$
+\end_inset
+
+ is the indicator function.
+ To evaluate this function, the abstract space 
+\begin_inset Formula $\Omega^{\mathcal{S}}$
+\end_inset
+
+ must be ordered.
+ While we have described a distance metric over 
+\begin_inset Formula $\Omega^{\mathcal{S}}$
+\end_inset
+
+, it is not clear what a meaningful ordering relation would be.
+\end_layout
+
+\begin_layout Standard
+Rather than calculating the cumulative probability distribution of 
+\begin_inset Formula $X$
+\end_inset
+
+, we begin with the assumption that the Parzen Window estimate of the probabilit
+y distribution is acceptably accurate and attempt to minimize the difference
+ between the Support Vector estimate and the Parzen Window estimate.
+ In this spirit, we will use a modification of the Parzen Window estimator
+ which substitutes a set of weights 
+\begin_inset Formula $\beta$
+\end_inset
+
+ for the normalizing contant 
+\begin_inset Formula $\frac{1}{|X|}$
+\end_inset
+
+ in the Parzen Window equation:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\varphi(\vec{x}:\ \beta,X) & =\prod_{\upsilon=1}^{d}\sum_{i=1}^{\ell}\beta_{i}K_{\gamma}(x^{\nu},x_{i}^{\nu},X^{\nu})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The support vector approach requires that we define an optimization problem
+ 
+\begin_inset Formula $W(\beta)$
+\end_inset
+
+ to determine the value of 
+\begin_inset Formula $\beta$
+\end_inset
+
+.
+ This optimization problem will determine which observations (or as we shall
+ see, windows) will be used in estimations and which can be discarded as
+ redundant or irrelevant information; the result of the optimization problem
+ will be that a substantial number of multipliers 
+\begin_inset Formula $\beta_{i}$
+\end_inset
+
+ will be 
+\begin_inset Formula $0$
+\end_inset
+
+, allowing us to omit the windows defined by these points to be ignored
+ in the prediction phase.
+ We define the optimization problem as minimizing the square loss between
+ the Support Vector and Parzen Window estimates over some set of observations
+ 
+\begin_inset Formula $X$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+W(\beta:\ X) & \longmapsto\min_{\beta}\sum_{i=1}^{\ell}\left(\varphi(\vec{x}_{i}:\ X)-\varphi(\vec{x}_{i}:\ \beta,X)\right)^{2}+\beta\Omega(\lambda,X)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The optimization equation compares the results of Parzen estimation to the
+ results of SVM estimation using a portion of the training data as synthetic
+ testing data.
+ For the optimization problem, we check the difference between the two estimates
+ at windows defined by the observations 
+\begin_inset Formula $X$
+\end_inset
+
+.
+ The set of weights used in the Support Vector estimation must have a discrete
+ number of elements; for simplicity we choose to assign a weight to each
+ window defined by the time value of an observation in the training set
+ and the constant parameter 
+\begin_inset Formula $\alpha$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\sum_{i=1}^{\ell}\left(\varphi(x_{i}:\ X)-\varphi(x_{i}:\ \beta,X)\right)^{2} & =\sum_{i=1}^{\ell}\left(\varphi(x_{i}:\ X)\right)^{2}-2\left(\varphi(x_{i}:\ X)\varphi(x_{i}:\ \beta,X)\right)+\left(\varphi(x_{i}:\ \beta,X)\right)^{2}\\
+ & =\sum_{i=1}^{\ell}\left(\left(\sum_{j=1}^{\ell}\frac{1}{\ell}K_{\gamma}(x_{i},x_{j},X)\right)^{2}-2\left(\sum_{j=1}^{\ell}\frac{1}{\ell}K_{\gamma}(x_{i},x_{j},X)\right)\left(\sum_{j=1}^{\ell}\beta_{j}K_{\gamma}(x_{i},x_{j},X)\right)+\left(\sum_{j=1}^{\ell}\beta_{j}K_{\gamma}(x_{i},x_{j},X)\right)^{2}\right)\\
+ & =\sum_{i=1}^{\ell}\left(\sum_{\begin{array}{c}
+j=1\\
+k=1\end{array}}^{\ell}\frac{1}{\ell^{2}}K_{\gamma}(x_{i},x_{j},X)K_{\gamma}(x_{i},x_{k},X)-2\sum_{\begin{array}{c}
+j=1\\
+k=1\end{array}}^{\ell}\frac{1}{\ell}K_{\gamma}(x_{i},x_{j},X)\beta_{j}K_{\gamma}(x_{i},x_{k},X)+\sum_{\begin{array}{c}
+j=1\\
+k=1\end{array}}^{\ell}\beta_{j}\beta_{k}K_{\gamma}(x_{i},x_{j},X)K_{\gamma}(x_{i},x_{k},X)\right)\\
+ & =\sum_{\begin{array}{c}
+i=1\\
+j=1\\
+k=1\end{array}}^{\ell}\beta_{j}\beta_{k}K_{\gamma}(x_{i},x_{j},X)K_{\gamma}(x_{i},x_{k},X)-\sum_{\begin{array}{c}
+i=1\\
+j=1\\
+k=1\end{array}}^{\ell}\frac{2\beta_{j}}{\ell}K_{\gamma}(x_{i},x_{j},X)K_{\gamma}(x_{i},x_{k},X)+\sum_{\begin{array}{c}
+i=1\\
+j=1\\
+k=1\end{array}}^{\ell}\frac{1}{\ell^{2}}K_{\gamma}(x_{i},x_{j},X)K_{\gamma}(x_{i},x_{k},X)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Because this is an minimization problem we can eliminate the last term (changing
+ 
+\begin_inset Formula $\beta$
+\end_inset
+
+ won't affect its value).
+ Substituting our optimization problem becomes:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+W(\beta:\ X) & \longmapsto\min_{\beta}\sum_{\begin{array}{c}
+i=1\\
+j=1\\
+k=1\end{array}}^{\ell}\beta_{j}\beta_{k}K_{\gamma}(x_{i},x_{j},X)K_{\gamma}(x_{i},x_{k},X)-\sum_{\begin{array}{c}
+i=1\\
+j=1\\
+k=1\end{array}}^{\ell}\frac{2\beta_{j}}{\ell}K_{\gamma}(x_{i},x_{j},X)K_{\gamma}(x_{i},x_{k},X)+\lambda\Omega(\beta,X)\\
+\text{subject to} & \beta_{i}\ge0,\ \sum\beta=1\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Quadratic Optimization Problem
+\end_layout
+
+\begin_layout Subsection
+Support Vector Decomposition 
+\end_layout
+
+\begin_layout Standard
+Due to the simplicity of the constraints in the optimization problem, it
+ is possible to use the decomposition method of Osuna to reduce the memory
+ requirements of the Parzen-SVM algorithm.
+\end_layout
+
+\begin_layout Subsubsection
+ Sub-Problem Definition 
+\end_layout
+
+\begin_layout Standard
+The decomposition algorithm breaks 
+\begin_inset Formula $X$
+\end_inset
+
+ into two working sets 
+\begin_inset Formula $B,N$
+\end_inset
+
+, and attempts to optimize 
+\begin_inset Formula $B$
+\end_inset
+
+ while keeping 
+\begin_inset Formula $N$
+\end_inset
+
+ fixed.
+ This results in the following iterative optimization problem where 
+\begin_inset Formula $\boldsymbol{\beta}^{k}$
+\end_inset
+
+ denotes the result of the previous iteration:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+W(\boldsymbol{\beta}_{B}) & =\frac{1}{2}\begin{bmatrix}\boldsymbol{\beta}_{B}^{T} & (\boldsymbol{\beta}_{N}^{k})^{T}\end{bmatrix}\begin{bmatrix}P_{BB} & P_{BN}\\
+P_{NB} & P_{NN}\end{bmatrix}\begin{bmatrix}\boldsymbol{\beta}_{B}\\
+\boldsymbol{\beta}_{N}^{k}\end{bmatrix}-\begin{bmatrix}q_{B}^{T} & q_{N}^{T}\end{bmatrix}\begin{bmatrix}\boldsymbol{\beta}_{B}\\
+\boldsymbol{\beta}_{N}^{k}\end{bmatrix}\\
+ & =\frac{1}{2}\boldsymbol{\beta}_{B}^{T}P_{BB}\boldsymbol{\beta}_{B}-(-q_{B}+P_{BN}\boldsymbol{\beta}_{N}^{k})^{T}\boldsymbol{\beta}_{B}\\
+ & =\frac{1}{2}\begin{bmatrix}\beta_{i} & \beta_{j}\end{bmatrix}\begin{bmatrix}P_{ii} & P_{ij}\\
+P_{ij} & P_{jj}\end{bmatrix}\begin{bmatrix}\beta_{i}\\
+\beta_{j}\end{bmatrix}-(-q_{B}+P_{BN}\boldsymbol{\beta}_{N}^{k})^{T}\begin{bmatrix}\beta_{i}\\
+\beta_{j}\end{bmatrix}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{equation}
+\text{subject to}\quad0\le\beta_{i},\beta_{j},\quad\beta_{i}+\beta_{j}=1-\mathbf{1}^{T}\boldsymbol{\beta}_{N}^{k}\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+ Working Set Selection 
+\end_layout
+
+\begin_layout Standard
+Select
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align}
+ & i\in\text{arg}\max_{t}\left\{ -\nabla f(\boldsymbol{\beta}^{k})_{t}\ |\quad t\in I(\boldsymbol{\beta}^{k})\right\} \\
+ & j\in\text{arg}\min_{t}\left\{ -\frac{b_{it}^{2}}{a_{it}}\ |\quad t\in I(\boldsymbol{\beta}^{k}),\quad-\nabla f(\boldsymbol{\beta}^{k})_{t}<-\nabla f(\boldsymbol{\beta}^{k})_{i}\right\} \end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Where 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+% This needs to be checked for the new optimization scenario
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align}
+I(\boldsymbol{\beta}) & \equiv\{t\ |\quad\beta_{t}<1\quad\text{or}\quad\beta_{t}>0\}\\
+ & a_{it}=P_{ii}+P_{tt}-2P_{it}\\
+ & \bar{a}_{it}=\begin{cases}
+a_{it} & \text{if}\ a_{it}>0\\
+\delta & \text{otherwise}\end{cases}\\
+ & b_{it}=-\nabla f(\boldsymbol{\beta}^{k})_{i}+\nabla f(\boldsymbol{\beta}^{k})_{t}\\
+\nabla f(\boldsymbol{\beta})_{i} & \equiv P_{i}\boldsymbol{\beta}-q_{i}\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+ Stopping Condition 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{equation}
+\max_{i\in I(\boldsymbol{\alpha}^{k})}-\nabla f(\boldsymbol{\alpha})_{i}+\min_{j\in I(\boldsymbol{\alpha}^{k})}\nabla f(\boldsymbol{\alpha})_{j}\le\epsilon\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Transformation Invariance
+\end_layout
+
+\begin_layout Standard
+Some datasets do not lend themselves to TI analysis, these datasets exhibit
+ a single PDF with no similarity between the distribution at different locations
+ along any axis.
+ In order to understand when a TI analysis is useful we must develop a rigorous
+ understanding of the problems TI solves and a method to quantify that problem
+ for a given dataset.
+\end_layout
+
+\begin_layout Standard
+TI assumes that it is possible to achieve some reduction in the quantity
+ of information required to estimate a PDF.
+ This is only possible if there are discrete portions of the dataset with
+ low information entropy relative to each other.
+ In these cases a estimate capable of estimating one portion of the PDF
+ can be used to estimate another portion; our task is to identify these
+ portions and develop a method both for estimating the PDF in the neighborhood
+ of one such portion and for applying that estimate to similar portions
+ through transformations.
+ 
+\end_layout
+
+\begin_layout Standard
+An ideal dataset for TI analysis therefore will have a substantial amount
+ of entropy between portions of the dataset as well as a substantial quantity
+ of portions with low entropy between them.
+ We have already developed a system which can be used for evaluating how
+ much 'compression' is possible in a dataset, however determining the level
+ of compression is computationally intensive; it would be helpful to restrict
+ such an analysis to datasets which are likely to benefit from such analysis.
+ Returning to our earlier definition of an ideal dataset for TI analysis
+ we can state that datasets with high entropy between different portions
+ is necessary (but not sufficient) for achieving a high level of compression.
+ We will therefore develop a rigorous quantification of this entropy measure.
+\end_layout
+
+\begin_layout Subsection
+Dimensional Information
+\end_layout
+
+\begin_layout Standard
+We begin by investigating a vector-valued dataset 
+\begin_inset Formula $X$
+\end_inset
+
+ in which all observations are of the same dimensionality, and it is assumed
+ that each dimension is drawn for a consistent source.
+ We will describe the information content of a single dimension 
+\begin_inset Formula $d$
+\end_inset
+
+ of this dataset.
+ We begin by picking two windows defined by 
+\begin_inset Formula $(d_{1},\alpha),(d_{2},\alpha)$
+\end_inset
+
+.
+ We can compare the divergence between 
+\begin_inset Formula $X$
+\end_inset
+
+ at these two windows using our distance metric 
+\begin_inset Formula $\|\cdot,\cdot\|$
+\end_inset
+
+ as before.
+ To determine the total information content of 
+\begin_inset Formula $d$
+\end_inset
+
+, we simply average this distance using each point's value in 
+\begin_inset Formula $d$
+\end_inset
+
+ for our first window and integrate over all possible transformed windows:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+H^{\nu}(X:\ \alpha) & =\sum_{i=1}^{\ell}\frac{1}{\ell}\|\vec{x}_{i},X:\ \alpha\|\\
+\|x,X:\ \alpha\| & =\sum_{i=1}^{\ell}\omega_{\alpha}(x^{\nu},x_{i}^{\nu})\int_{-\infty}^{\infty}\left(\frac{\varphi(x_{i}:\ x,AX+b)}{\varphi(x_{i}:\ x,X)}-1\right)^{2}dAdb\\
+\varphi(x_{i}:\ x,X) & =\sum_{j=1}^{\ell}\omega(x^{\nu},x_{j}^{\nu})\frac{1}{\ell}K_{\gamma}(x_{i},x_{j})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Not sure if this is right - think about the windows mostly
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Cross-Dimensional Information
+\end_layout
+
+\begin_layout Standard
+Thus far we have been using an intuitive definition of shared dimensions
+ between channels.
+ We can now develop a more rigorous understanding.
+ In the earlier section we developed a method for evaluating the entropy
+ of a dataset in the context of different windows over one of the dataset's
+ dimensions.
+ We now investigate the case of multiple datasets; our task is to identify
+ the extent to which a dimension in one dataset corresponds to a dimension
+ in another.
+ This investigation is motivated by the desire to apply a single transformations
+ to data in these two dimensions.
+ In order to evaluate relationships between two channels, we must be able
+ to define meaningful windows over both channels - identifying corresponding
+ dimensions across channels allows us to do this.
+\end_layout
+
 \begin_layout Section
 Ensemble System
+\end_layout
+
+\begin_layout Section
+Motivated Decision-Making
+\end_layout
+
+\begin_layout Section
+Results
+\end_layout
+
+\begin_layout Section
+Conclusion
 \end_layout
 
 \begin_layout Section
