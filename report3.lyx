@@ -1008,7 +1008,9 @@ j=1\end{array}}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}\mathbf{A}_{\nu,m}x_{j}^{m}\rig
 n=1\\
 m=1\end{array}}^{d}\sum_{\begin{array}{c}
 i=1\\
-j=1\end{array}}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}\mathbf{A}_{\nu,m}x_{j}^{m}+\left(x^{\nu}\right)^{2}+\sum_{n=1}^{d}\sum_{i=1}^{\ell}(2x^{\nu}+\mathbf{b}_{\nu})\mathbf{A}_{\nu,n}x_{i}^{n}-2x^{\nu}\mathbf{b}_{\nu}+\mathbf{b}_{\nu}^{2}\right)\right)-1\right)^{2}d\mathbf{A}_{0}...d\mathbf{A}_{d}d\mathbf{b}\end{align*}
+j=1\end{array}}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}\mathbf{A}_{\nu,m}x_{j}^{m}+\left(x^{\nu}\right)^{2}+\sum_{n=1}^{d}\sum_{i=1}^{\ell}(2x^{\nu}+\mathbf{b}_{\nu})\mathbf{A}_{\nu,n}x_{i}^{n}-2x^{\nu}\mathbf{b}_{\nu}+\mathbf{b}_{\nu}^{2}\right)\right)-1\right)^{2}d\mathbf{A}_{0}...d\mathbf{A}_{d}d\mathbf{b}\\
+ & (\text{mathmatica})\\
+ & =\end{align*}
 
 \end_inset
 
@@ -1928,9 +1930,9 @@ Motivated Decision-Making
 \end_layout
 
 \begin_layout Standard
-Up to this point, our discussion has focused on data analysis - we now turn
- our attention to systems which have the ability influence the the probability
- distribution 
+Up to this point, our discussion has focused on data analysis.
+ We now turn our attention to volitive systems; systems which have the ability
+ influence the the probability distribution 
 \begin_inset Formula $\mathcal{P}$
 \end_inset
 
@@ -1938,7 +1940,7 @@ Up to this point, our discussion has focused on data analysis - we now turn
 \begin_inset Formula $\Omega$
 \end_inset
 
-, and in which certain types of probability distributions are preferred
+, and in which certain types of local probability distributions are preferred
  over others.
  
 \end_layout
@@ -2269,6 +2271,163 @@ A & =\sup_{A}e(A_{1})\end{align*}
 
 \end_layout
 
+\begin_layout Subsection
+Curiosity
+\end_layout
+
+\begin_layout Standard
+Without the ability to take action, a system's accuracy and efficiency for
+ a given dataset is limited by the algorithm it uses and the computational
+ resources available to it.
+ Systems with the ability to influence the observations from which they
+ make estimates, on the other hand, can take advantage of this ability to
+ increase both their accuracy and performance.
+ Before we can discuss the mechanisims by which this is possible, we must
+ first develop a more rigorous understanding of these two objectives; accuracy
+ and efficiency.
+\end_layout
+
+\begin_layout Standard
+Any probabilistic system's estimation accuracy is limited by the amount
+ of uncertainty inherent in the data it processes and the nature of the
+ algorithm used to generate estimates.
+ The rate of convergence in such a system's estimations and the 'true' probabili
+ty distribution has an upper bound determined by its VC dimension; within
+ these bounds a system's estimation accuracy improves as the number of observati
+ons increases.
+ In the context of TI data, it is possible to think of each neighborhood
+ in a TI dimension as an independant estimation problem, thus an observation
+ of 
+\begin_inset Formula $X$
+\end_inset
+
+ will not increase the system's accuracy in a given neighborhood if the
+ observation 
+\begin_inset Formula $x$
+\end_inset
+
+ is not in that neighborhood.
+ The task of improving a volitive system's accuracy in a given context therefore
+ can be framed as the task of obtaining observations of that context.
+ 
+\end_layout
+
+\begin_layout Standard
+The efficiency of the system we've developed is primarily controlled by
+ the number of Support Vectors.
+ For a given dataset and predictive accuracy, as the number of SV's decreases,
+ the efficiency of the system increases.
+ The efficiency of non-volitive systems is limited by the results of the
+ optimization problem for 
+\begin_inset Formula $\beta$
+\end_inset
+
+.
+ In the context of a volitive system, decreasing the number of SV's can
+ be accomplished by obtaining observations higher-order structure.
+ Higher-order structure refers to the ability of a multi-layered system
+ to break multiple high-entropy observations down into shared combinations
+ of lower-entropy observations in such a way that the entropy of combined
+ observations is lower than the entropy of the original observations.
+ The result of such a process is the ability to eliminate portions of the
+ original dataset as redundant, reducing the number of required SV's to
+ match the accuracy of the system prior to observing the higher-order structure.
+\end_layout
+
+\begin_layout Standard
+Working within the context of the existing architecture, our task is to
+ develop a metric which can be used as a motivational parameter to drive
+ these two behaviors.
+ If we assume that the sampling rate of the system is independant of the
+ action choices which are made, both behaviors can be reduced to minimizing
+ the ratio of observations to support vectors.
+ Increasing the system's accuracy can be viewed as determining a suitable
+ support vector (or vectors) to represent behavior of 
+\begin_inset Formula $X$
+\end_inset
+
+ in a given context (allowing the redundant observations to be discarded)
+ and promoting the discovery of higher-order structure inherently increases
+ this ratio by the same mechanism.
+ We can therefore create a curious system by establishing the performance
+ metric 
+\begin_inset Formula $p(\beta,X)$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+p_{|X|}(\beta,X) & =\frac{|X|}{|\beta|-|\beta_{0}|}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+where 
+\begin_inset Formula $\beta_{0}=[\beta_{i}|\ \beta_{i}=0]$
+\end_inset
+
+.
+ Motivating the system towards curiosity simply entails establishing a motivator
+ which prefers positive values of the second-derivative of 
+\begin_inset Formula $p(\beta,X)$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+m(x_{i}^{p}:\ X) & =e^{\lambda\frac{d^{2}}{di^{2}}p_{i}(\beta,X)}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Using the second derivative motivates the system to prefer increases in
+ the average change in 
+\begin_inset Formula $p(\beta,X)$
+\end_inset
+
+.
+ The value of 
+\begin_inset Formula $p(\beta,X)$
+\end_inset
+
+ is likely non-stationary, so establishing a motivational parameter for
+ set values isn't helpful.
+ The first-derivative of 
+\begin_inset Formula $p(\beta,X)$
+\end_inset
+
+ establishes the expected change in the system's comprehension, however
+ this rate will vary with different datasets and would need to be determined
+ for each dataset.
+ The second-derivative however describes the rate at which the system's
+ comprehension is increasing or decreasing, and is more likely to be tied
+ to the system's actions than to the underlying data.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+This needs some housekeeping - explain values of p at each observation and
+ work the work 'curiosity' and 'comprehension' into the earlier paragraphs
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Section
 Results
 \end_layout
@@ -2377,6 +2536,10 @@ status collapsed
 \end_inset
 
 
+\end_layout
+
+\begin_layout Subsection
+Performance
 \end_layout
 
 \begin_layout Section
