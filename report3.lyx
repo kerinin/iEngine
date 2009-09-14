@@ -76,9 +76,23 @@ kerinin@gmail.com
 \end_layout
 
 \begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 \begin_inset CommandInset toc
 LatexCommand tableofcontents
 
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
 \end_inset
 
 
@@ -989,7 +1003,7 @@ Because
 \begin_inset Formula \begin{align*}
 f([x^{0},...,x^{d}]:\ a,b,c,f,h) & =\left(a\ \exp\left(-b\left(\left(x^{d}\right)^{2}+x^{d}\sum_{i=1}^{d-1}x^{i}c^{i}+f\right)\right)-h\right)^{2}\\
 \int...\int f([x^{0},...,x^{d}]:\ a,b,c,f,h)\ dx^{0},...,dx^{d} & =\int...\int f\left([x^{0},...,x^{d-1}]:\ \frac{\sqrt{\frac{\pi}{2}}a^{2}}{\sqrt{b}},-\frac{b}{2},-2bf,0\right)\ dx^{0},...,dx^{d-1}\\
- & \qquad\qquad\qquad+\int f\left([x^{0},...,x^{d-1}]:\ \frac{-2a\sqrt{\pi}}{\sqrt{b}},-\frac{b}{4},-4f,0\right)\ dx^{0},...,dx^{d-1}\\
+ & \qquad\qquad+\int f\left([x^{0},...,x^{d-1}]:\ \frac{-2a\sqrt{\pi}}{\sqrt{b}},-\frac{b}{4},-4f,0\right)\ dx^{0},...,dx^{d-1}\\
 \int f([x^{0}]:\ a,b,f,h)\ dx^{0} & =\frac{\sqrt{\frac{\pi}{2}}a^{2}}{\sqrt{b}}\exp\left(-\frac{1}{2}b^{2}f\right)-\frac{2a\sqrt{\pi}}{\sqrt{b}}\exp\left(-bf\right)\end{align*}
 
 \end_inset
@@ -999,7 +1013,7 @@ f([x^{0},...,x^{d}]:\ a,b,c,f,h) & =\left(a\ \exp\left(-b\left(\left(x^{d}\right
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\int\int_{-\infty}^{\infty}\left(\frac{\varphi(x^{\nu}:\ x_{n}^{\nu},\mathbf{A}X+\mathbf{b})}{\varphi(x^{\nu}:\ x_{n}^{\nu},X)}-1\right)^{2}d\mathbf{A}d\mathbf{b} & =\int...\int\left(\frac{\varphi\left(x^{\nu}:\ x_{n}^{\nu},\left[\mathbf{b}_{\nu}+\sum_{n=1}^{d}\mathbf{A}_{\nu,n}x_{i}^{n}|\ x_{i}\in X\right]\right)}{\varphi(x^{\nu}:\ x_{n}^{\nu},X)}-1\right)^{2}d\mathbf{A}_{\nu,0}...d\mathbf{A}_{\nu,d}d\mathbf{b}_{\nu}\\
+\int\int_{-\infty}^{\infty}\left(\frac{\varphi(x^{\nu}:\ x_{n}^{\nu},\mathbf{A}X+\mathbf{b})}{\varphi(x^{\nu}:\ x_{n}^{\nu},X)}-1\right)^{2}d\mathbf{A}d\mathbf{b} & =\int...\int\left(\frac{\varphi\left(x^{\nu}:\ x_{n}^{\nu},\left[\mathbf{b}_{\nu}+\sum_{n=1}^{d}\mathbf{A}_{\nu,n}x_{i}^{n}|\ x_{i}\in X\right]\right)}{\varphi(x^{\nu}:\ x_{n}^{\nu},X)}-1\right)^{2}d\mathbf{A}d\mathbf{b}\\
  & =\int...\int f([x^{0},...,x^{d}]:\ a,b,c,f,h)\ dx^{0},...,dx^{d}d\mathbf{b}_{\nu}\\
 a & =\frac{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)}{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)\ \exp\left(-\frac{1}{\gamma}\left(x^{\nu}-x_{i}^{\nu}\right)^{2}\right)}\\
 b & =\frac{1}{\gamma}\\
@@ -1317,22 +1331,33 @@ The optimization equation compares the results of Parzen estimation to the
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\sum_{i=1}^{\ell}\left(\varphi(x_{i}:\ X)-\varphi(x_{i}:\ \beta,X)\right)^{2} & =\sum_{i=1}^{\ell}\left(\varphi(x_{i}:\ X)\right)^{2}-2\left(\varphi(x_{i}:\ X)\varphi(x_{i}:\ \beta,X)\right)+\left(\varphi(x_{i}:\ \beta,X)\right)^{2}\\
- & =\sum_{i=1}^{\ell}\left(\left(\sum_{j=1}^{\ell}\frac{1}{\ell}K_{\gamma}(x_{i},x_{j},X)\right)^{2}-2\left(\sum_{j=1}^{\ell}\frac{1}{\ell}K_{\gamma}(x_{i},x_{j},X)\right)\left(\sum_{j=1}^{\ell}\beta_{j}K_{\gamma}(x_{i},x_{j},X)\right)+\left(\sum_{j=1}^{\ell}\beta_{j}K_{\gamma}(x_{i},x_{j},X)\right)^{2}\right)\\
- & =\sum_{i=1}^{\ell}\left(\sum_{\begin{array}{c}
+\sum_{i=1}^{\ell}\left(\varphi(x_{i}:\ X)-\varphi(x_{i}:\ \beta,X)\right)^{2} & =\sum_{i=1}^{\ell}\left(\varphi(x_{i}:\ X)\right)^{2}-2\left(\varphi(x_{i}:\ X)\varphi(x_{i}:\ \beta,X)\right)+\left(\varphi(x_{i}:\ \beta,X)\right)^{2}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+ & =\sum_{i=1}^{\ell}\left(\sum_{j=1}^{\ell}\frac{1}{\ell}K_{\gamma}(x_{i},x_{j},X)\right)^{2}-2\left(\sum_{j=1}^{\ell}\frac{1}{\ell}K_{\gamma}(x_{i},x_{j},X)\right)\left(\sum_{j=1}^{\ell}\beta_{j}K_{\gamma}(x_{i},x_{j},X)\right)\\
+ & \qquad\qquad\qquad+\left(\sum_{j=1}^{\ell}\beta_{j}K_{\gamma}(x_{i},x_{j},X)\right)^{2}\\
+ & =\sum_{i=1}^{\ell}\sum_{\begin{array}{c}
 j=1\\
 k=1\end{array}}^{\ell}\frac{1}{\ell^{2}}K_{\gamma}(x_{i},x_{j},X)K_{\gamma}(x_{i},x_{k},X)-2\sum_{\begin{array}{c}
 j=1\\
-k=1\end{array}}^{\ell}\frac{1}{\ell}K_{\gamma}(x_{i},x_{j},X)\beta_{j}K_{\gamma}(x_{i},x_{k},X)+\sum_{\begin{array}{c}
+k=1\end{array}}^{\ell}\frac{1}{\ell}K_{\gamma}(x_{i},x_{j},X)\beta_{j}K_{\gamma}(x_{i},x_{k},X)\\
+ & \qquad\qquad\qquad+\sum_{\begin{array}{c}
 j=1\\
-k=1\end{array}}^{\ell}\beta_{j}\beta_{k}K_{\gamma}(x_{i},x_{j},X)K_{\gamma}(x_{i},x_{k},X)\right)\\
+k=1\end{array}}^{\ell}\beta_{j}\beta_{k}K_{\gamma}(x_{i},x_{j},X)K_{\gamma}(x_{i},x_{k},X)\\
  & =\sum_{\begin{array}{c}
 i=1\\
 j=1\\
 k=1\end{array}}^{\ell}\beta_{j}\beta_{k}K_{\gamma}(x_{i},x_{j},X)K_{\gamma}(x_{i},x_{k},X)-\sum_{\begin{array}{c}
 i=1\\
 j=1\\
-k=1\end{array}}^{\ell}\frac{2\beta_{j}}{\ell}K_{\gamma}(x_{i},x_{j},X)K_{\gamma}(x_{i},x_{k},X)+\sum_{\begin{array}{c}
+k=1\end{array}}^{\ell}\frac{2\beta_{j}}{\ell}K_{\gamma}(x_{i},x_{j},X)K_{\gamma}(x_{i},x_{k},X)\\
+ & =\qquad\qquad\qquad+\sum_{\begin{array}{c}
 i=1\\
 j=1\\
 k=1\end{array}}^{\ell}\frac{1}{\ell^{2}}K_{\gamma}(x_{i},x_{j},X)K_{\gamma}(x_{i},x_{k},X)\end{align*}
