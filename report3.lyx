@@ -635,30 +635,33 @@ The crucial distinction between i.i.d data from a static PDF and data which
 \begin_inset Formula $x$
 \end_inset
 
-.
- We will do so through the use of a windowing kernel function 
-\begin_inset Formula $\omega(\cdot)$
+ which we will refer to as a window 
+\begin_inset Formula $w$
 \end_inset
 
- which returns a multiplier to describe the distance between an arbitrary
- point and 
-\begin_inset Formula $x$
+ on 
+\begin_inset Formula $X$
+\end_inset
+
+.
+ Because a TI analysis may be applicable to some dimensions of 
+\begin_inset Formula $\Omega$
+\end_inset
+
+ and not other, we will define the set of dimensions for which TI analysis
+ is used as 
+\begin_inset Formula $D$
 \end_inset
 
 :
 \end_layout
 
 \begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Mention 
-\begin_inset Formula $\alpha$
-\end_inset
-
- paramaterization
-\end_layout
+\begin_inset Formula \begin{align*}
+D & \subseteq[0,...,d]\\
+\vec{x}_{i} & \longmapsto w_{i}^{D}\\
+w_{i}^{D} & =[x_{i}^{n}|\ n\in D]\\
+w_{i}^{n} & =x_{i}^{n}\end{align*}
 
 \end_inset
 
@@ -666,9 +669,39 @@ Mention
 \end_layout
 
 \begin_layout Standard
+While the window 
+\begin_inset Formula $w$
+\end_inset
+
+ describes the 
+\emph on
+location 
+\emph default
+of a window, we still must define its extents.
+ We will do so through the use of a windowing kernel function 
+\begin_inset Formula $\omega(\cdot)$
+\end_inset
+
+ parameterized by some variable 
+\begin_inset Formula $\alpha$
+\end_inset
+
+ which returns a value describing the degree of inclusion of an arbitrary
+ point and 
+\begin_inset Formula $x$
+\end_inset
+
+ in the window 
+\begin_inset Formula $w$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula \begin{align*}
-\omega_{\alpha}(x_{i},x_{j}) & \Rightarrow[0,\infty)\\
-\int_{-\infty}^{\infty}\omega_{\alpha}(x_{i},x_{j})dx_{i} & =1\end{align*}
+\omega_{\alpha}(w,x) & \Rightarrow[0,\infty)\\
+\int_{-\infty}^{\infty}\omega_{\alpha}(w,x)dx_{i} & =1\end{align*}
 
 \end_inset
 
@@ -681,11 +714,18 @@ We can use any kernel function for
 \end_inset
 
 , however we assume that the windowing function has a peak at 
-\begin_inset Formula $x_{i}=x_{j}$
+\begin_inset Formula $w_{i}=[x_{j}^{n}|\ n\in D]$
 \end_inset
 
  and that it drops off as 
-\begin_inset Formula $x_{i}-x_{j}\rightarrow\pm\infty$
+\begin_inset Formula $\left\Vert w_{i}-[x_{j}^{n}|\ n\in D]\right\Vert \rightarrow\pm\infty$
+\end_inset
+
+.
+ Notice that we use a real-valued rather than boolean inclusion metric -
+ this allows us to 'smear' the context of a given window into adjacent areas
+ of 
+\begin_inset Formula $X^{D}$
 \end_inset
 
 .
@@ -751,16 +791,16 @@ K_{\gamma}\left(X_{i},X_{j}\right) & =\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\g
 
 \begin_layout Standard
 We can simplify this equation by observing that we are not actually dealing
- with two sets; we're dealing with two neighborhoods within 
-\begin_inset Formula $X$
-\end_inset
-
- defined by two vectors 
-\begin_inset Formula $\vec{x}_{n}$
+ with two sets; we're dealing with two windows 
+\begin_inset Formula $w_{n}$
 \end_inset
 
  and 
-\begin_inset Formula $\vec{x}_{m}$
+\begin_inset Formula $w_{m}$
+\end_inset
+
+ within 
+\begin_inset Formula $X$
 \end_inset
 
 :
@@ -777,7 +817,30 @@ We can simplify this equation by observing that we are not actually dealing
 \noun off
 \color none
 \begin_inset Formula \begin{align*}
-K_{\gamma}\left(\vec{x}_{n},\vec{x}_{m},X\right) & =\prod_{\upsilon=1}^{d}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|x_{n}^{\nu},x_{m}^{\nu},X\|}\end{align*}
+K_{\gamma}\left(w_{n},w_{m},X\right) & =\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|w_{n},w_{n},X\|}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We can extend this basic result to multiple dimensions by using the tensor
+ product of the kernel values:
+\end_layout
+
+\begin_layout Standard
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+\begin_inset Formula \begin{align*}
+K_{\gamma}\left(w_{n}^{D},w_{m}^{D},X\right) & =\prod_{\nu=1}^{d}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|w_{n}^{D},w_{n}^{D},\nu,X\|}\end{align*}
 
 \end_inset
 
@@ -898,9 +961,9 @@ Because the Pearson Divergence is a summation, we can control the influence
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\|x_{n}^{\nu},x_{m}^{\nu},X\| & =\sum_{i=1}^{\ell}\omega_{\alpha}(x_{n}^{\nu},x_{i}^{\nu})\left(\frac{\varphi(x_{i}^{\nu}:\ x_{m}^{\nu},\mathbf{A}X+\mathbf{b})}{\varphi(x_{i}^{\nu}:\ x_{m}^{\nu},X^{\nu})}-1\right)^{2}\\
-\varphi(x^{\nu}:\ x_{n}^{\nu},X) & =\sum_{i=1}^{\ell}\frac{\omega_{\alpha}(x_{i}^{\nu},x_{n}^{\nu})}{\sum_{j=1}^{\ell}\omega_{\alpha}(x_{j}^{\nu},x_{n}^{\nu})}K_{\gamma}(x^{\nu},x_{i}^{\nu})\\
- & =\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)\ K_{\gamma}(x^{\nu},x_{i}^{\nu})\end{align*}
+\|w_{n}^{D},w_{m}^{D},\nu,X\| & =\sum_{i=1}^{\ell}\omega_{\alpha}(w_{n}^{\nu},x_{i}^{\nu})\left(\frac{\varphi(x_{i}^{\nu}:\ w_{m}^{D},\mathbf{A}X+\mathbf{b})}{\varphi(x_{i}^{\nu}:\ w_{m}^{D},X^{\nu})}-1\right)^{2}\\
+\varphi(x^{\nu}:\ w_{n}^{D},X) & =\sum_{i=1}^{\ell}\frac{\omega_{\alpha}(w_{n}^{\nu},x_{i}^{\nu})}{\sum_{j=1}^{\ell}\omega_{\alpha}(w_{n}^{\nu},x_{j}^{\nu})}K_{\gamma}(x^{\nu},x_{i}^{\nu})\\
+ & =\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(w_{n}^{\nu},x_{i}^{\nu},X)\ K_{\gamma}(x^{\nu},x_{i}^{\nu})\end{align*}
 
 \end_inset
 
@@ -999,7 +1062,7 @@ One approach to these transformations is to explicitly determine values
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\|x_{n}^{\nu},x_{m}^{\nu},X\| & \sum_{x_{i}^{\nu}\in X}\omega_{\alpha}(x_{n}^{\nu},x_{i}^{\nu})\int\int_{-\infty}^{\infty}\left(\frac{\varphi(x_{i}^{\nu}:\ x_{m}^{\nu},\mathbf{A}X+\mathbf{b})}{\varphi(x_{i}^{\nu}:\ x_{m}^{\nu},X^{\nu})}-1\right)^{2}d\mathbf{A}d\mathbf{b}\end{align*}
+\|w_{n}^{D},w_{m}^{D},\nu,X\| & =\sum_{i=1}^{\ell}\omega_{\alpha}(w_{n}^{\nu},x_{i}^{\nu})\int\int_{-\infty}^{\infty}\left(\frac{\varphi(x_{i}^{\nu}:\ w_{m}^{\nu},\mathbf{A}X+\mathbf{b})}{\varphi(x_{i}^{\nu}:\ w_{m}^{\nu},X^{\nu})}-1\right)^{2}d\mathbf{A}d\mathbf{b}\end{align*}
 
 \end_inset
 
@@ -1007,32 +1070,42 @@ One approach to these transformations is to explicitly determine values
 \end_layout
 
 \begin_layout Standard
-This approach allows us to compare the distance between any linear transform
- of 
-\begin_inset Formula $\{x\cup X\}$
-\end_inset
-
-
 \begin_inset Note Note
 status open
 
 \begin_layout Plain Layout
-?
+I think this equation is good as it is - but make sure you include the 
+\begin_inset Formula $\{x\cup X\}$
+\end_inset
+
+ in the function call for the probability function of a random point.
 \end_layout
 
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This approach allows us to compare the distance between 
+\emph on
+any
+\emph default
+ linear transformation 
+\begin_inset Formula $\mathbf{A}X+\mathbf{b}$
 \end_inset
 
  and 
 \begin_inset Formula $X$
 \end_inset
 
- - a far more powerful and less computationally demanding approach.
+, a far more powerful and less computationally demanding approach.
  Doing so requires that we calculate the following integral:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \[
-\int\int_{-\infty}^{\infty}\left(\frac{\varphi(x_{i}^{\nu}:\ x_{m}^{\nu},\mathbf{A}X+\mathbf{b})}{\varphi(x_{i}^{\nu}:\ x_{m}^{\nu},X^{\nu})}-1\right)^{2}d\mathbf{A}d\mathbf{b}\]
+\int\int_{-\infty}^{\infty}\left(\frac{\varphi(x_{i}^{\nu}:\ w_{m}^{\nu},\mathbf{A}X+\mathbf{b})}{\varphi(x_{i}^{\nu}:\ w_{m}^{\nu},X^{\nu})}-1\right)^{2}d\mathbf{A}d\mathbf{b}\]
 
 \end_inset
 
@@ -1056,7 +1129,7 @@ Because
 
 
 \begin_inset Formula \begin{align*}
-\int\int_{-\infty}^{\infty}\left(\frac{\varphi(x_{i}^{\nu}:\ x_{m}^{\nu},\mathbf{A}X+\mathbf{b})}{\varphi(x_{i}^{\nu}:\ x_{m}^{\nu},X^{\nu})}-1\right)^{2}d\mathbf{A}d\mathbf{b} & =\int...\int_{-\infty}^{\infty}\left(\frac{\varphi(x_{i}^{\nu}:\ x_{m}^{\nu},\mathbf{A}X+\mathbf{b})}{\varphi(x_{i}^{\nu}:\ x_{m}^{\nu},X^{\nu})}-1\right)^{2}d\mathbf{A}_{\nu,0},...,d\mathbf{A}_{\nu,d}d\mathbf{b}\end{align*}
+\int\int_{-\infty}^{\infty}\left(\frac{\varphi(x_{i}^{\nu}:\ w_{m}^{\nu},\mathbf{A}X+\mathbf{b})}{\varphi(x_{i}^{\nu}:\ w_{m}^{\nu},X^{\nu})}-1\right)^{2}d\mathbf{A}d\mathbf{b} & =\int...\int_{-\infty}^{\infty}\left(\frac{\varphi(x_{i}^{\nu}:\ w_{m}^{\nu},\mathbf{A}X+\mathbf{b})}{\varphi(x_{i}^{\nu}:\ w_{m}^{\nu},X^{\nu})}-1\right)^{2}d\mathbf{A}_{\nu,0},...,d\mathbf{A}_{\nu,d}d\mathbf{b}\end{align*}
 
 \end_inset
 
@@ -1090,9 +1163,9 @@ f([x^{0},...,x^{d}]:\ a,b,c,f,h) & =\left(a\ \exp\left(-b\left(\left(x^{d}\right
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\int\int_{-\infty}^{\infty}\left(\frac{\varphi(x^{\nu}:\ x_{n}^{\nu},\mathbf{A}X+\mathbf{b})}{\varphi(x^{\nu}:\ x_{n}^{\nu},X)}-1\right)^{2}d\mathbf{A}d\mathbf{b} & =\int...\int\left(\frac{\varphi\left(x^{\nu}:\ x_{n}^{\nu},\left[\mathbf{b}_{\nu}+\sum_{n=1}^{d}\mathbf{A}_{\nu,n}x_{i}^{n}|\ x_{i}\in X\right]\right)}{\varphi(x^{\nu}:\ x_{n}^{\nu},X)}-1\right)^{2}d\mathbf{A}d\mathbf{b}\\
+\int\int_{-\infty}^{\infty}\left(\frac{\varphi(x^{\nu}:\ w_{n}^{\nu},\mathbf{A}X+\mathbf{b})}{\varphi(x^{\nu}:\ w_{n}^{\nu},X)}-1\right)^{2}d\mathbf{A}d\mathbf{b} & =\int...\int\left(\frac{\varphi\left(x^{\nu}:\ w_{n}^{\nu},\left[\mathbf{b}_{\nu}+\sum_{n=1}^{d}\mathbf{A}_{\nu,n}x_{i}^{n}|\ x_{i}\in X\right]\right)}{\varphi(x^{\nu}:\ w_{n}^{\nu},X)}-1\right)^{2}d\mathbf{A}d\mathbf{b}\\
  & =\int...\int f([x^{0},...,x^{d}]:\ a,b,c,f,h)\ dx^{0},...,dx^{d}d\mathbf{b}_{\nu}\\
-a & =\frac{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)}{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)\ \exp\left(-\frac{1}{\gamma}\left(x^{\nu}-x_{i}^{\nu}\right)^{2}\right)}\\
+a & =\frac{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(w_{n}^{\nu},x_{i}^{\nu},X)}{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(w_{n}^{\nu},x_{i}^{\nu},X)\ \exp\left(-\frac{1}{\gamma}\left(x^{\nu}-x_{i}^{\nu}\right)^{2}\right)}\\
 b & =\frac{1}{\gamma}\\
 c & =???\\
 f & =\left(x^{\nu}\right)^{2}-2x^{\nu}\mathbf{b}_{\nu}+\mathbf{b}_{\nu}^{2}\\
@@ -1108,7 +1181,7 @@ h & =1\end{align*}
 status open
 
 \begin_layout Plain Layout
-Finish this up
+Make a note that for d not in D, A_dd=0, b=0
 \end_layout
 
 \end_inset
@@ -1887,11 +1960,7 @@ Let us begin by considering information entropy in the abstract.
 \begin_inset Formula $H(X)$
 \end_inset
 
- is always great than or equal to the sum of the entropy of either dimension
- 
-\begin_inset Formula $H(X^{i})$
-\end_inset
-
+ is always great than or equal to the sum of the entropy of the two individually
 :
 \end_layout
 
@@ -1923,27 +1992,11 @@ This means that in our search for dimension sets which warrant TI analysis,
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-H_{\varepsilon}(X,D)<h & \longmapsto H_{\varepsilon}(X,D')\ \forall D'\subset D\end{align*}
+H_{\varepsilon}(X,D)<h & \longmapsto H_{\varepsilon}(X,D')<h,\quad\forall D'\subset D\end{align*}
 
 \end_inset
 
 
-\end_layout
-
-\begin_layout Standard
-Our search algorithm should therefore start with high-dimensional partitions
- of 
-\begin_inset Formula $D$
-\end_inset
-
- and then investigate lower dimensional partitions - this allows us to ignore
- any subsets of a partition whose contextual information is less than the
- constant 
-\begin_inset Formula $h$
-\end_inset
-
-.
- 
 \end_layout
 
 \begin_layout Standard
@@ -1988,9 +2041,9 @@ Reviewing the equation for
 \begin_inset Formula $\frac{1}{\ell^{2}}$
 \end_inset
 
-, the contextual sum of the contextual information for out two subsets would
- necessarily be less than both the contextual entropy of the union of these
- sets and the contextual information of 
+, the sum of the contextual information for out two subsets would necessarily
+ be less than both the contextual entropy of the union of these sets and
+ the contextual information of 
 \begin_inset Formula $X$
 \end_inset
 
@@ -2036,15 +2089,17 @@ This equation allows us to restrict entropy calculations to subsets of the
 .
  Taken together these two observations allow us to reduce the computational
  demands of the search algorithm by reducing the number of observations
- used in a given contextual information calculation and to discard partitions
- of dimensional sets whose entropy is below our threshold 
-\begin_inset Formula $h$
+ used in a given calculation.
+ This leaves us with the task of developing search heuristics.
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Intro search heuristics
+\end_layout
+
 \end_inset
 
-.
- This leaves us with the task of developing search heuristics which optimize
- the computational demands of generating contextual information for dimensional
- sets and the system's accuracy.
  We use the contextual information measure 
 \begin_inset Formula $H(X)$
 \end_inset
@@ -2085,63 +2140,6 @@ Algorithm needs to choose between partitioning a dimensional set and evaluating
 \end_inset
 
 
-\end_layout
-
-\begin_layout Standard
-This means that our search will be iterative; we will select a partition
- 
-\begin_inset Formula $D'$
-\end_inset
-
- of 
-\begin_inset Formula $D$
-\end_inset
-
- and determine the contextual information for each partition 
-\begin_inset Formula $D''$
-\end_inset
-
- with cardinality 
-\begin_inset Formula $|D'|-1$
-\end_inset
-
-.
- We have three basic options for selecting which set 
-\begin_inset Formula $D'$
-\end_inset
-
- will be partitioned; we can execute a depth-first search, a breadth-first
- search, or a maximal 
-\begin_inset Formula $H_{\varepsilon}$
-\end_inset
-
- search.
- A breadth-first search will eliminate subsets faster, however if our objective
- is to find the best set of low-dimensional partitions for which to apply
- TI analysis this approach will likely take longer, as it must traverse
- each potential high-dimensional partition first.
- A depth-first search will produce low-dimensional partitions fastest, and
- if we choose the partition 
-\begin_inset Formula $D''$
-\end_inset
-
- with the highest contextual information at each step, we are likely to
- quickly find low-dimensional partitions with high contextual information
- relative to other partitions along their local search tree, but we will
- have no guarantees that these partitions have high contextual information
- relative to all partitions of the same cardinality.
- The performance of the third approach will be highly dependant on the nature
- of the data being analyzed; in cases where all partitions of 
-\begin_inset Formula $D$
-\end_inset
-
- have similar contextual information it will traverse the search tree in
- a basically breadth-first manner, in cases where a few dimensions of 
-\begin_inset Formula $D$
-\end_inset
-
- contain the majority of the contextual information it will traverse the
- search tree in a basically depth-first manner.
 \end_layout
 
 \begin_layout Standard
@@ -2187,7 +2185,7 @@ There are limits to the predictive ability of the current architecture.
 \end_layout
 
 \begin_layout Standard
-Another perspective in this limitation is that the estimates we generate
+Another perspective on this limitation is that the estimates we generate
  (as well as the contexts from which we make the estimates) is limited by
  the nature of 
 \begin_inset Formula $\omega(\cdot,\cdot)$
@@ -2199,14 +2197,19 @@ y of values in multiple windows of the abstract space
 \end_inset
 
 .
- Taken together, we can see that a superior architecture would be capable
+ 
+\end_layout
+
+\begin_layout Standard
+Taken together, we can see that a superior architecture would be capable
  of making estimates in the form of multiple windows using on observations
  
 \emph on
 based
 \emph default
  on multiple windows.
- This can be accomplished by treating windows over 
+ This can be accomplished by treating the distance between sets of windows
+ over 
 \begin_inset Formula $X$
 \end_inset
 
@@ -2215,8 +2218,25 @@ based
 \end_inset
 
 .
+ 
+\end_layout
+
+\begin_layout Standard
+We can refer to a window over 
+\begin_inset Formula $X$
+\end_inset
+
+ defined in partition of dimensions 
+\begin_inset Formula $D$
+\end_inset
+
+ as a vector 
+\begin_inset Formula $w^{D}$
+\end_inset
+
+.
  For any such window defined by a point 
-\begin_inset Formula $D_{n}$
+\begin_inset Formula $w_{n}^{D}$
 \end_inset
 
 , we define the value of the point 
@@ -2231,12 +2251,12 @@ as the divergence between
 \begin_inset Formula $X$
 \end_inset
 
- in the window defined by 
-\begin_inset Formula $D_{n}$
+ in the window 
+\begin_inset Formula $w_{n}^{D}$
 \end_inset
 
-and the window defined by 
-\begin_inset Formula $D_{m}$
+ the window 
+\begin_inset Formula $w_{m}^{D}$
 \end_inset
 
 :
@@ -2244,8 +2264,21 @@ and the window defined by
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-y_{m}^{n} & =g(x_{m}:\ X)\\
-g(x_{m}:\ X) & =\|x_{n},x_{m},X,D\|\end{align*}
+y_{m}^{n} & =g(w_{m}^{D}:\ X)\\
+g(w_{m}^{D}:\ X) & =\|x_{n},x_{m},X,D\|\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+FIX THE D NOTATION THROUGHOUT
+\end_layout
 
 \end_inset
 
