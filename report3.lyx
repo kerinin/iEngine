@@ -987,7 +987,7 @@ Because
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\int\int_{-\infty}^{\infty}\left(\frac{\varphi(x^{\nu}:\ x_{n}^{\nu},\mathbf{A}X+\mathbf{b})}{\varphi(x^{\nu}:\ x_{n}^{\nu},X)}-1\right)^{2}d\mathbf{A}d\mathbf{b} & =\int...\int\left(\frac{\varphi\left(x^{\nu}:\ x_{n}^{\nu},\left[\mathbf{b}_{\nu}+\sum_{n=1}^{d}\mathbf{A}_{\nu,n}x_{i}^{n}|\ x_{i}\in X\right]\right)}{\varphi(x^{\nu}:\ x_{n}^{\nu},X)}-1\right)^{2}d\mathbf{A}_{0}...d\mathbf{A}_{d}d\mathbf{b}\end{align*}
+\int\int_{-\infty}^{\infty}\left(\frac{\varphi(x^{\nu}:\ x_{n}^{\nu},\mathbf{A}X+\mathbf{b})}{\varphi(x^{\nu}:\ x_{n}^{\nu},X)}-1\right)^{2}d\mathbf{A}d\mathbf{b} & =\int...\int\left(\frac{\varphi\left(x^{\nu}:\ x_{n}^{\nu},\left[\mathbf{b}_{\nu}+\sum_{n=1}^{d}\mathbf{A}_{\nu,n}x_{i}^{n}|\ x_{i}\in X\right]\right)}{\varphi(x^{\nu}:\ x_{n}^{\nu},X)}-1\right)^{2}d\mathbf{A}_{\nu,0}...d\mathbf{A}_{\nu,d}d\mathbf{b}_{\nu}\end{align*}
 
 \end_inset
 
@@ -996,19 +996,20 @@ Because
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
- & =\int...\int\left(\frac{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)\ K_{\gamma}\left(x^{\nu},\left(\mathbf{b}_{\nu}+\sum_{n=1}^{d}\sum_{i=1}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}\right)\right)}{\sum_{i}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)\ K_{\gamma}(x^{\nu},X)}-1\right)^{2}d\mathbf{A}_{0}...d\mathbf{A}_{d}d\mathbf{b}\\
- & =\int...\int\left(\frac{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)}{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)\ \exp\left(-\frac{1}{\gamma}\left(x^{\nu}-x_{i}^{\nu}\right)^{2}\right)}\ \exp\left(-\frac{1}{\gamma}\left(x^{\nu}-\left(\mathbf{b}_{\nu}+\sum_{n=1}^{d}\sum_{i=1}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}\right)\right)^{2}\right)-1\right)^{2}d\mathbf{A}_{0}...d\mathbf{A}_{d}d\mathbf{b}\\
- & =\int...\int\left(\frac{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)}{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)\ \exp\left(-\frac{1}{\gamma}\left(x^{\nu}-x_{i}^{\nu}\right)^{2}\right)}\ \exp\left(-\frac{1}{\gamma}\left(\left(x^{\nu}\right)^{2}-2x^{\nu}\left(\mathbf{b}_{\nu}+\sum_{n=1}^{d}\sum_{i=1}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}\right)+\left(\mathbf{b}_{\nu}+\sum_{n=1}^{d}\sum_{i=1}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}\right)^{2}\right)\right)-1\right)^{2}d\mathbf{A}_{0}...d\mathbf{A}_{d}d\mathbf{b}\\
+ & =\int...\int\left(\frac{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)\ K_{\gamma}\left(x^{\nu},\left(\mathbf{b}_{\nu}+\sum_{n=1}^{d}\sum_{i=1}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}\right)\right)}{\sum_{i}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)\ K_{\gamma}(x^{\nu},X)}-1\right)^{2}d\mathbf{A}_{\nu,0}...d\mathbf{A}_{\nu,d}d\mathbf{b}_{\nu}\\
+ & =\int...\int\left(\frac{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)}{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)\ \exp\left(-\frac{1}{\gamma}\left(x^{\nu}-x_{i}^{\nu}\right)^{2}\right)}\ \exp\left(-\frac{1}{\gamma}\left(x^{\nu}-\left(\mathbf{b}_{\nu}+\sum_{n=1}^{d}\sum_{i=1}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}\right)\right)^{2}\right)-1\right)^{2}d\mathbf{A}_{\nu,0}...d\mathbf{A}_{\nu,d}d\mathbf{b}_{\nu}\\
+ & =\int...\int\left(\frac{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)}{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)\ \exp\left(-\frac{1}{\gamma}\left(x^{\nu}-x_{i}^{\nu}\right)^{2}\right)}\ \exp\left(-\frac{1}{\gamma}\left(\left(x^{\nu}\right)^{2}-2x^{\nu}\left(\mathbf{b}_{\nu}+\sum_{n=1}^{d}\sum_{i=1}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}\right)+\left(\mathbf{b}_{\nu}+\sum_{n=1}^{d}\sum_{i=1}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}\right)^{2}\right)\right)-1\right)^{2}d\mathbf{A}_{\nu,0}...d\mathbf{A}_{\nu,d}d\mathbf{b}_{\nu}\\
  & =\int...\int\left(\frac{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)}{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)\ \exp\left(-\frac{1}{\gamma}\left(x^{\nu}-x_{i}^{\nu}\right)^{2}\right)}\ \exp\left(-\frac{1}{\gamma}\left(\left(x^{\nu}\right)^{2}-2x^{\nu}\mathbf{b}_{\nu}+2x^{\nu}\sum_{n=1}^{d}\sum_{i=1}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}+\mathbf{b}_{\nu}^{2}+\mathbf{b}_{\nu}\sum_{n=1}^{d}\sum_{i=1}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}+\sum_{\begin{array}{c}
 n=1\\
 m=1\end{array}}^{d}\sum_{\begin{array}{c}
 i=1\\
-j=1\end{array}}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}\mathbf{A}_{\nu,m}x_{j}^{m}\right)\right)-1\right)^{2}d\mathbf{A}_{0}...d\mathbf{A}_{d}d\mathbf{b}\\
+j=1\end{array}}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}\mathbf{A}_{\nu,m}x_{j}^{m}\right)\right)-1\right)^{2}d\mathbf{A}_{\nu,0}...d\mathbf{A}_{\nu,d}d\mathbf{b}_{\nu}\\
  & =\int...\int\left(\frac{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)}{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)\ \exp\left(-\frac{1}{\gamma}\left(x^{\nu}-x_{i}^{\nu}\right)^{2}\right)}\ \exp\left(-\frac{1}{\gamma}\left(\sum_{\begin{array}{c}
 n=1\\
 m=1\end{array}}^{d}\sum_{\begin{array}{c}
 i=1\\
-j=1\end{array}}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}\mathbf{A}_{\nu,m}x_{j}^{m}+\left(x^{\nu}\right)^{2}+\sum_{n=1}^{d}\sum_{i=1}^{\ell}(2x^{\nu}+\mathbf{b}_{\nu})\mathbf{A}_{\nu,n}x_{i}^{n}-2x^{\nu}\mathbf{b}_{\nu}+\mathbf{b}_{\nu}^{2}\right)\right)-1\right)^{2}d\mathbf{A}_{0}...d\mathbf{A}_{d}d\mathbf{b}\\
+j=1\end{array}}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}\mathbf{A}_{\nu,m}x_{j}^{m}+\left(x^{\nu}\right)^{2}+\sum_{n=1}^{d}\sum_{i=1}^{\ell}(2x^{\nu}+\mathbf{b}_{\nu})\mathbf{A}_{\nu,n}x_{i}^{n}-2x^{\nu}\mathbf{b}_{\nu}+\mathbf{b}_{\nu}^{2}\right)\right)-1\right)^{2}d\mathbf{A}_{\nu,0}...d\mathbf{A}_{\nu,d}d\mathbf{b}_{\nu}\\
+ & \simeq\int...\int\left(a\ \exp\left(-b\left(\mathbf{A}^{2}+\mathbf{A}c+\mathbf{A}d+f\right)\right)-1\right)^{2}\\
  & (\text{mathmatica})\\
  & =\end{align*}
 
@@ -1045,6 +1046,14 @@ Extend this to integrate over a subset of
 \end_inset
 
 
+\end_layout
+
+\begin_layout Subsection
+Performance
+\end_layout
+
+\begin_layout Standard
+Big-O
 \end_layout
 
 \begin_layout Subsection
@@ -1512,6 +1521,34 @@ Some datasets do not lend themselves to TI analysis, these datasets exhibit
  for a given dataset.
 \end_layout
 
+\begin_layout Subsection
+Contextual Information
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+The contextual information function needs to have two properties; the sum
+ of the entropy of two sets must be smaller than the entropy of the two
+ sets together, and the sum of the entropy of two dimensions of a dataset
+ must be less than the entropy of the two dimensions together.
+ The latter is a basic property of entropy, and it makes sense for it to
+ hold true (it also informs the search algorithm).
+ The former allows us to calculate the entropy of subsets of 
+\begin_inset Formula $X$
+\end_inset
+
+, combine them with previous entropy calculations, and identify any dimension
+ sets which are above the threshold.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Standard
 Transformation invariance assumes that the context of an observation carries
  information relevant to the PDF of 
@@ -1597,6 +1634,10 @@ j=1\end{array}}^{\ell}\frac{1}{\ell^{2}}\omega_{\alpha}(x_{i},x_{j})\|x_{i},x_{j
 
 \end_layout
 
+\begin_layout Subsection
+Multi-dimensional Contextual Information
+\end_layout
+
 \begin_layout Standard
 This can be extended to multi-dimensional data by observing that the window
  used previously is defined along a single dimension; we can just as easily
@@ -1634,10 +1675,10 @@ We can refine these to apply only to a subset of
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-H_{\varepsilon}^{V}(X,D) & =\sum_{\begin{array}{c}
+H_{\varepsilon}^{V}(X:\ D) & =\sum_{\begin{array}{c}
 i=1\\
 j=1\end{array}}^{\ell}\sqrt{\sum_{\nu\in D}\left(\frac{1}{\ell^{2}}\omega_{\varepsilon}(x_{i}^{\nu},x_{j}^{\nu})\omega_{\alpha}(x_{i}^{\nu},x_{j}^{\nu})\|x_{i}^{\nu},x_{j}^{\nu},X,D\|\right)^{2}}\\
-H_{\varepsilon}^{O}(X,D) & =\sum_{\begin{array}{c}
+H_{\varepsilon}^{O}(X:\ D) & =\sum_{\begin{array}{c}
 i=1\\
 j=1\end{array}}^{\ell}\sqrt{\sum_{\nu\in D}\left(\frac{1}{\ell^{2}}\omega_{\alpha}(x_{i}^{\nu},x_{j}^{\nu})\|x_{i}^{\nu},x_{j}^{\nu},X,D\|\right)^{2}}\\
 D & =[d_{n},...,d_{m}],\ 1\le d_{i}<d\end{align*}
@@ -1645,6 +1686,302 @@ D & =[d_{n},...,d_{m}],\ 1\le d_{i}<d\end{align*}
 \end_inset
 
 
+\end_layout
+
+\begin_layout Subsection
+Selecting TI Dimensions
+\end_layout
+
+\begin_layout Standard
+We now turn our attention to the task of selecting which dimensions and
+ which combinations of dimensions warrant a TI analysis.
+ We will search for sets of dimensions whose contextual information is greater
+ than some constant 
+\begin_inset Formula $h$
+\end_inset
+
+.
+ We know that the cardinality of the set of all possible subsets of 
+\begin_inset Formula $D$
+\end_inset
+
+ is 
+\begin_inset Formula $2^{|D|}$
+\end_inset
+
+, which quickly becomes intractable as the dimensionality of 
+\begin_inset Formula $\Omega$
+\end_inset
+
+ increases.
+ We need to develop some heuristics for reducing the search space when investiga
+ting contextual information.
+\end_layout
+
+\begin_layout Standard
+Let us begin by considering information entropy in the abstract.
+ Given a set of 2D vector observations 
+\begin_inset Formula $X$
+\end_inset
+
+, we can state that the entropy of the vector set 
+\begin_inset Formula $H(X)$
+\end_inset
+
+ is always great than or equal to the sum of the entropy of either dimension
+ 
+\begin_inset Formula $H(X^{i})$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+H(X) & \ge H(X^{1})+H(X^{2})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This means that in our search for dimension sets which warrant TI analysis,
+ for any set of dimensions 
+\begin_inset Formula $D$
+\end_inset
+
+, if the set 
+\begin_inset Formula $X^{D}$
+\end_inset
+
+ does not warrant TI analysis, than no subset 
+\begin_inset Formula $D'\subset D$
+\end_inset
+
+ warrants analysis either:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+H_{\varepsilon}(X,D)<h & \longmapsto H_{\varepsilon}(X,D')\ \forall D'\subset D\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Our search algorithm should therefore start with high-dimensional partitions
+ of 
+\begin_inset Formula $D$
+\end_inset
+
+ and then investigate lower dimensional partitions - this allows us to ignore
+ any subsets of a partition whose contextual information is less than the
+ constant 
+\begin_inset Formula $h$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+A second consideration relates to the number of observations used in the
+ calculation of 
+\begin_inset Formula $H(X)$
+\end_inset
+
+.
+ Let us consider two disjoint subsets 
+\begin_inset Formula $Y$
+\end_inset
+
+ and 
+\begin_inset Formula $Z$
+\end_inset
+
+ of our full set of observations 
+\begin_inset Formula $X$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+Y & \subset X\\
+Z & \subset X\\
+Y\cap Z & =\emptyset\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Reviewing the equation for 
+\begin_inset Formula $H(X)$
+\end_inset
+
+, it is clear that in the absence of the normalizer 
+\begin_inset Formula $\frac{1}{\ell^{2}}$
+\end_inset
+
+, the contextual sum of the contextual information for out two subsets would
+ necessarily be less than both the contextual entropy of the union of these
+ sets and the contextual information of 
+\begin_inset Formula $X$
+\end_inset
+
+.
+ We therefore establish a function which determines the minimum entropy
+ of two such subsets:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+H_{\min}(Y,Z:\ D) & =\frac{|Y|^{2}H_{\varepsilon}(Y:\ D)+|Z|^{2}H_{\varepsilon}(Z:\ D)}{\left(|Y|+|Z|\right)^{2}}\\
+H_{\min}(Y,Z:\ D) & \le H_{\varepsilon}(Y\cup Z:\ D)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Note that using this equation means that we can't really eliminate search
+ branches unless we've analyzed all their data points.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This equation allows us to restrict entropy calculations to subsets of the
+ data; if 
+\begin_inset Formula $H_{\min}(Y,Z:\ D)>h$
+\end_inset
+
+, we know that 
+\begin_inset Formula $H_{\varepsilon}(X:\ D)>h$
+\end_inset
+
+.
+ Taken together these two observations allow us to reduce the computational
+ demands of the search algorithm by reducing the number of observations
+ used in a given contextual information calculation and to discard partitions
+ of dimensional sets whose entropy is below our threshold 
+\begin_inset Formula $h$
+\end_inset
+
+.
+ This leaves us with the task of developing search heuristics which optimize
+ the computational demands of generating contextual information for dimensional
+ sets and the system's accuracy.
+ We use the contextual information measure 
+\begin_inset Formula $H(X)$
+\end_inset
+
+ as the measure of the expected increase in prediction accuracy; the more
+ information contained in a dimensional set the more we stand to gain from
+ analyzing it.
+\end_layout
+
+\begin_layout Standard
+We now develop a cost function which quantifies the computational cost of
+ evaluating the contextual information of a given dimensional set.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Cost function?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Algorithm needs to choose between partitioning a dimensional set and evaluating
+ more data points for a data set.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This means that our search will be iterative; we will select a partition
+ 
+\begin_inset Formula $D'$
+\end_inset
+
+ of 
+\begin_inset Formula $D$
+\end_inset
+
+ and determine the contextual information for each partition 
+\begin_inset Formula $D''$
+\end_inset
+
+ with cardinality 
+\begin_inset Formula $|D'|-1$
+\end_inset
+
+.
+ We have three basic options for selecting which set 
+\begin_inset Formula $D'$
+\end_inset
+
+ will be partitioned; we can execute a depth-first search, a breadth-first
+ search, or a maximal 
+\begin_inset Formula $H_{\varepsilon}$
+\end_inset
+
+ search.
+ A breadth-first search will eliminate subsets faster, however if our objective
+ is to find the best set of low-dimensional partitions for which to apply
+ TI analysis this approach will likely take longer, as it must traverse
+ each potential high-dimensional partition first.
+ A depth-first search will produce low-dimensional partitions fastest, and
+ if we choose the partition 
+\begin_inset Formula $D''$
+\end_inset
+
+ with the highest contextual information at each step, we are likely to
+ quickly find low-dimensional partitions with high contextual information
+ relative to other partitions along their local search tree, but we will
+ have no guarantees that these partitions have high contextual information
+ relative to all partitions of the same cardinality.
+ The performance of the third approach will be highly dependant on the nature
+ of the data being analyzed; in cases where all partitions of 
+\begin_inset Formula $D$
+\end_inset
+
+ have similar contextual information it will traverse the search tree in
+ a basically breadth-first manner, in cases where a few dimensions of 
+\begin_inset Formula $D$
+\end_inset
+
+ contain the majority of the contextual information it will traverse the
+ search tree in a basically depth-first manner.
 \end_layout
 
 \begin_layout Section
@@ -1923,6 +2260,50 @@ This system is not strictly hierarchical; we can determine the influence
  increased scope of data from which to make predictions, and each of these
  is eventually combined in making estimates.
  
+\end_layout
+
+\begin_layout Subsection
+Example System Architecture
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Control the dimensionality of this by restricting scope to adjacent windows?
+\end_layout
+
+\begin_layout Plain Layout
+if we do SV points, those points will need to have D as dimensions - they'll
+ need to know the context on which a given SV pattern occurred.
+\end_layout
+
+\begin_layout Plain Layout
+Treat the SV points as sparse datasets using a divergence threshold.
+\end_layout
+
+\begin_layout Plain Layout
+Here's what I'm thinking.
+ We start from the perspective of a single TI dimension.
+ We generate estimates in the dimension alone and isolate some SV's.
+ We then begin to compare that dimension to others to see if shared TI is
+ worthwhile.
+ Using the other dimensions which match, we construct a new estimator using
+ data points based on the shared dimensions and sparse SV's from the two
+ dimensions.
+ We can then build up to a third layer by comparing the SV's from the second
+ layer to SV's in other dimensions, again generating a set of shared TI
+ dimensions.
+\end_layout
+
+\begin_layout Plain Layout
+This needs refinement - we may run into the ambiguity of the channels again.
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
