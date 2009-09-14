@@ -1,0 +1,124 @@
+#LyX 1.6.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\language english
+\inputencoding auto
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+ & =\int...\int\left(\frac{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)\ K_{\gamma}\left(x^{\nu},\left(\mathbf{b}_{\nu}+\sum_{n=1}^{d}\sum_{i=1}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}\right)\right)}{\sum_{i}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)\ K_{\gamma}(x^{\nu},X)}-1\right)^{2}d\mathbf{A}_{\nu,0}...d\mathbf{A}_{\nu,d}d\mathbf{b}_{\nu}\\
+ & =\int...\int\left(\frac{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)}{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)\ \exp\left(-\frac{1}{\gamma}\left(x^{\nu}-x_{i}^{\nu}\right)^{2}\right)}\ \exp\left(-\frac{1}{\gamma}\left(x^{\nu}-\left(\mathbf{b}_{\nu}+\sum_{n=1}^{d}\sum_{i=1}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}\right)\right)^{2}\right)-1\right)^{2}d\mathbf{A}_{\nu,0}...d\mathbf{A}_{\nu,d}d\mathbf{b}_{\nu}\\
+ & =\int...\int\left(\frac{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)}{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)\ \exp\left(-\frac{1}{\gamma}\left(x^{\nu}-x_{i}^{\nu}\right)^{2}\right)}\ \exp\left(-\frac{1}{\gamma}\left(\left(x^{\nu}\right)^{2}-2x^{\nu}\left(\mathbf{b}_{\nu}+\sum_{n=1}^{d}\sum_{i=1}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}\right)+\left(\mathbf{b}_{\nu}+\sum_{n=1}^{d}\sum_{i=1}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}\right)^{2}\right)\right)-1\right)^{2}d\mathbf{A}_{\nu,0}...d\mathbf{A}_{\nu,d}d\mathbf{b}_{\nu}\\
+ & =\int...\int\left(\frac{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)}{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)\ \exp\left(-\frac{1}{\gamma}\left(x^{\nu}-x_{i}^{\nu}\right)^{2}\right)}\ \exp\left(-\frac{1}{\gamma}\left(\left(x^{\nu}\right)^{2}-2x^{\nu}\mathbf{b}_{\nu}+2x^{\nu}\sum_{n=1}^{d}\sum_{i=1}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}+\mathbf{b}_{\nu}^{2}+\mathbf{b}_{\nu}\sum_{n=1}^{d}\sum_{i=1}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}+\sum_{\begin{array}{c}
+n=1\\
+m=1\end{array}}^{d}\sum_{\begin{array}{c}
+i=1\\
+j=1\end{array}}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}\mathbf{A}_{\nu,m}x_{j}^{m}\right)\right)-1\right)^{2}d\mathbf{A}_{\nu,0}...d\mathbf{A}_{\nu,d}d\mathbf{b}_{\nu}\\
+ & =\int...\int\left(\frac{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)}{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)\ \exp\left(-\frac{1}{\gamma}\left(x^{\nu}-x_{i}^{\nu}\right)^{2}\right)}\ \exp\left(-\frac{1}{\gamma}\left(\sum_{\begin{array}{c}
+n=1\\
+m=1\end{array}}^{d}\sum_{\begin{array}{c}
+i=1\\
+j=1\end{array}}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}\mathbf{A}_{\nu,m}x_{j}^{m}+\sum_{n=1}^{d}\sum_{i=1}^{\ell}(2x^{\nu}+\mathbf{b}_{\nu})\mathbf{A}_{\nu,n}x_{i}^{n}-2x^{\nu}\mathbf{b}_{\nu}+\mathbf{b}_{\nu}^{2}+\left(x^{\nu}\right)^{2}\right)\right)-1\right)^{2}d\mathbf{A}_{\nu,0}...d\mathbf{A}_{\nu,d}d\mathbf{b}_{\nu}\\
+ & \simeq\int...\int\left(a\ \exp\left(-b\left(\mathbf{A}^{2}+\mathbf{A}c+\mathbf{A}d+f\right)\right)-1\right)^{2}\\
+ & (\text{mathmatica})\\
+ & =\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+ & =\int...\int\left(\frac{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)}{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)\ \exp\left(-\frac{1}{\gamma}\left(x^{\nu}-x_{i}^{\nu}\right)^{2}\right)}\ \exp\left(-\frac{1}{\gamma}\left(\sum_{\begin{array}{c}
+n=1\\
+m=1\end{array}}^{d}\sum_{\begin{array}{c}
+i=1\\
+j=1\end{array}}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}\mathbf{A}_{\nu,m}x_{j}^{m}+\left(x^{\nu}\right)^{2}+\sum_{n=1}^{d}\sum_{i=1}^{\ell}(2x^{\nu}+\mathbf{b}_{\nu})\mathbf{A}_{\nu,n}x_{i}^{n}-2x^{\nu}\mathbf{b}_{\nu}+\mathbf{b}_{\nu}^{2}\right)\right)-1\right)^{2}d\mathbf{A}_{\nu,0}...d\mathbf{A}_{\nu,d}d\mathbf{b}_{\nu}\\
+ & =\int\left(\frac{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)}{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)\ \exp\left(-\frac{1}{\gamma}\left(x^{\nu}-x_{i}^{\nu}\right)^{2}\right)}\ \exp\left(-\frac{1}{\gamma}\left(\sum_{\begin{array}{c}
+n=1\\
+m=1\end{array}}^{d}\sum_{\begin{array}{c}
+i=1\\
+j=1\end{array}}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}\mathbf{A}_{\nu,m}x_{j}^{m}+\left(x^{\nu}\right)^{2}+\sum_{n=1}^{d}\sum_{i=1}^{\ell}(2x^{\nu}+\mathbf{b}_{\nu})\mathbf{A}_{\nu,n}x_{i}^{n}-2x^{\nu}\mathbf{b}_{\nu}+\mathbf{b}_{\nu}^{2}\right)\right)-1\right)^{2}d\mathbf{A}_{\nu,0}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\int\left(a\ \exp\left(-b\left(\mathbf{A}_{\nu,0}^{2}+\sum_{i=1}^{d-1}\mathbf{A}_{\nu,0}C_{i}+f\right)\right)-h\right)^{2}d\mathbf{A}_{\nu,0} & =\lim_{x\rightarrow\infty}\frac{\exp\left(\frac{1}{2}b\left(\sum_{i=1}^{d-1}C_{i}\right)^{2}-2bf\right)\sqrt{\frac{\pi}{2}}\text{erf}\left(\frac{\sqrt{b}}{\sqrt{2}}\left(\left(\sum_{i=1}^{d-1}C_{i}\right)+2x\right)\right)a^{2}}{2\sqrt{b}}\\
+ & \qquad\qquad\qquad-\lim_{x\rightarrow\infty}\frac{\exp\left(\frac{1}{4}b\left(\left(\sum_{i=1}^{d-1}C_{i}\right)-4f\right)\right)h\sqrt{\pi}\text{erf}\left(\frac{\sqrt{b}}{2}\left(\left(\sum_{i=1}^{d-1}C_{i}\right)+2x\right)\right)a}{\sqrt{b}}+\lim_{x\rightarrow\infty}h^{2}x\\
+ & \qquad\qquad\qquad-\lim_{x\rightarrow-\infty}\frac{\exp\left(\frac{1}{2}b\left(\sum_{i=1}^{d-1}C_{i}\right)^{2}-2bf\right)\sqrt{\frac{\pi}{2}}\text{erf}\left(\frac{\sqrt{b}}{\sqrt{2}}\left(\left(\sum_{i=1}^{d-1}C_{i}\right)+2x\right)\right)a^{2}}{2\sqrt{b}}\\
+ & \qquad\qquad\qquad+\lim_{x\rightarrow-\infty}\frac{\exp\left(\frac{1}{4}b\left(\left(\sum_{i=1}^{d-1}C_{i}\right)-4f\right)\right)h\sqrt{\pi}\text{erf}\left(\frac{\sqrt{b}}{2}\left(\left(\sum_{i=1}^{d-1}C_{i}\right)+2x\right)\right)a}{\sqrt{b}}-\lim_{x\rightarrow-\infty}h^{2}x\\
+ & =\frac{\sqrt{\frac{\pi}{2}}a^{2}}{\sqrt{b}}\exp\left(\frac{1}{2}b\left(\left(\sum_{i=1}^{d-1}C_{i}\right)^{2}-2bf\right)\right)-\frac{2a\sqrt{\pi}}{\sqrt{b}}\exp\left(\frac{1}{4}b\left(\left(\sum_{i=1}^{d-1}C_{i}\right)^{2}-4f\right)\right)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\int\left(\frac{\sqrt{\frac{\pi}{2}}a^{2}}{\sqrt{b}}\exp\left(\frac{1}{2}b\left(\left(\mathbf{A}_{\nu,i}+\sum_{j=1}^{d-i}C_{j}\right)^{2}-2bf\right)\right)\right)d\mathbf{A}_{\nu,i} & =\int\left(\frac{\sqrt{\frac{\pi}{2}}a^{2}}{\sqrt{b}}\exp\left(\frac{1}{2}b\left(\mathbf{A}+2\mathbf{A}_{\nu,i}\sum_{j=1}^{d-i}C_{ij}+\left(\sum_{ij=1}^{d-i}C_{j}\right)-2bf\right)\right)\right)d\mathbf{A}_{\nu,i}\\
+ & =\int\left(\bar{a}\ \exp\left(-\bar{b}\left(\mathbf{A}_{\nu,i}^{2}+\sum_{j=1}^{d-i}\mathbf{A}_{\nu,i}\bar{C}_{j}+\bar{f}\right)\right)+\bar{h}\right)d\mathbf{A}_{\nu,i}\\
+\bar{a} & =\frac{\sqrt{\frac{\pi}{2}}a^{2}}{\sqrt{b}}\\
+\bar{b} & =-\frac{b}{2}\\
+\bar{f} & =\left(\sum_{i=1}^{|C|}C_{i}\right)-2bf\\
+\bar{h} & =0\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+f([x^{0},...,x^{d}]:\ a,b,c,f,h) & =\left(a\ \exp\left(-b\left(\left(x^{d}\right)^{2}+x^{d}\sum_{i=1}^{d-1}x^{i}c^{i}+f\right)\right)-h\right)^{2}\\
+\int f([x^{0},...,x^{d}]:\ a,b,c,f,h)\ dx^{d} & =\int f\left([x^{0},...,x^{d-1}]:\ \frac{\sqrt{\frac{\pi}{2}}a^{2}}{\sqrt{b}},-\frac{b}{2},-2bf,0\right)dx^{d-1}+\int f\left([x^{0},...,x^{d-1}]:\ \frac{-2a\sqrt{\pi}}{\sqrt{b}},-\frac{b}{4},-4f,0\right)dx^{d-1}\\
+\int f([x^{0}]:\ a,b,f,h)\ dx^{0} & =\frac{\sqrt{\frac{\pi}{2}}a^{2}}{\sqrt{b}}\exp\left(-\frac{1}{2}b^{2}f\right)-\frac{2a\sqrt{\pi}}{\sqrt{b}}\exp\left(-bf\right)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

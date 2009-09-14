@@ -987,7 +987,10 @@ Because
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\int\int_{-\infty}^{\infty}\left(\frac{\varphi(x^{\nu}:\ x_{n}^{\nu},\mathbf{A}X+\mathbf{b})}{\varphi(x^{\nu}:\ x_{n}^{\nu},X)}-1\right)^{2}d\mathbf{A}d\mathbf{b} & =\int...\int\left(\frac{\varphi\left(x^{\nu}:\ x_{n}^{\nu},\left[\mathbf{b}_{\nu}+\sum_{n=1}^{d}\mathbf{A}_{\nu,n}x_{i}^{n}|\ x_{i}\in X\right]\right)}{\varphi(x^{\nu}:\ x_{n}^{\nu},X)}-1\right)^{2}d\mathbf{A}_{\nu,0}...d\mathbf{A}_{\nu,d}d\mathbf{b}_{\nu}\end{align*}
+f([x^{0},...,x^{d}]:\ a,b,c,f,h) & =\left(a\ \exp\left(-b\left(\left(x^{d}\right)^{2}+x^{d}\sum_{i=1}^{d-1}x^{i}c^{i}+f\right)\right)-h\right)^{2}\\
+\int...\int f([x^{0},...,x^{d}]:\ a,b,c,f,h)\ dx^{0},...,dx^{d} & =\int...\int f\left([x^{0},...,x^{d-1}]:\ \frac{\sqrt{\frac{\pi}{2}}a^{2}}{\sqrt{b}},-\frac{b}{2},-2bf,0\right)\ dx^{0},...,dx^{d-1}\\
+ & \qquad\qquad\qquad+\int f\left([x^{0},...,x^{d-1}]:\ \frac{-2a\sqrt{\pi}}{\sqrt{b}},-\frac{b}{4},-4f,0\right)\ dx^{0},...,dx^{d-1}\\
+\int f([x^{0}]:\ a,b,f,h)\ dx^{0} & =\frac{\sqrt{\frac{\pi}{2}}a^{2}}{\sqrt{b}}\exp\left(-\frac{1}{2}b^{2}f\right)-\frac{2a\sqrt{\pi}}{\sqrt{b}}\exp\left(-bf\right)\end{align*}
 
 \end_inset
 
@@ -996,22 +999,13 @@ Because
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
- & =\int...\int\left(\frac{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)\ K_{\gamma}\left(x^{\nu},\left(\mathbf{b}_{\nu}+\sum_{n=1}^{d}\sum_{i=1}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}\right)\right)}{\sum_{i}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)\ K_{\gamma}(x^{\nu},X)}-1\right)^{2}d\mathbf{A}_{\nu,0}...d\mathbf{A}_{\nu,d}d\mathbf{b}_{\nu}\\
- & =\int...\int\left(\frac{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)}{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)\ \exp\left(-\frac{1}{\gamma}\left(x^{\nu}-x_{i}^{\nu}\right)^{2}\right)}\ \exp\left(-\frac{1}{\gamma}\left(x^{\nu}-\left(\mathbf{b}_{\nu}+\sum_{n=1}^{d}\sum_{i=1}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}\right)\right)^{2}\right)-1\right)^{2}d\mathbf{A}_{\nu,0}...d\mathbf{A}_{\nu,d}d\mathbf{b}_{\nu}\\
- & =\int...\int\left(\frac{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)}{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)\ \exp\left(-\frac{1}{\gamma}\left(x^{\nu}-x_{i}^{\nu}\right)^{2}\right)}\ \exp\left(-\frac{1}{\gamma}\left(\left(x^{\nu}\right)^{2}-2x^{\nu}\left(\mathbf{b}_{\nu}+\sum_{n=1}^{d}\sum_{i=1}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}\right)+\left(\mathbf{b}_{\nu}+\sum_{n=1}^{d}\sum_{i=1}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}\right)^{2}\right)\right)-1\right)^{2}d\mathbf{A}_{\nu,0}...d\mathbf{A}_{\nu,d}d\mathbf{b}_{\nu}\\
- & =\int...\int\left(\frac{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)}{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)\ \exp\left(-\frac{1}{\gamma}\left(x^{\nu}-x_{i}^{\nu}\right)^{2}\right)}\ \exp\left(-\frac{1}{\gamma}\left(\left(x^{\nu}\right)^{2}-2x^{\nu}\mathbf{b}_{\nu}+2x^{\nu}\sum_{n=1}^{d}\sum_{i=1}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}+\mathbf{b}_{\nu}^{2}+\mathbf{b}_{\nu}\sum_{n=1}^{d}\sum_{i=1}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}+\sum_{\begin{array}{c}
-n=1\\
-m=1\end{array}}^{d}\sum_{\begin{array}{c}
-i=1\\
-j=1\end{array}}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}\mathbf{A}_{\nu,m}x_{j}^{m}\right)\right)-1\right)^{2}d\mathbf{A}_{\nu,0}...d\mathbf{A}_{\nu,d}d\mathbf{b}_{\nu}\\
- & =\int...\int\left(\frac{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)}{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)\ \exp\left(-\frac{1}{\gamma}\left(x^{\nu}-x_{i}^{\nu}\right)^{2}\right)}\ \exp\left(-\frac{1}{\gamma}\left(\sum_{\begin{array}{c}
-n=1\\
-m=1\end{array}}^{d}\sum_{\begin{array}{c}
-i=1\\
-j=1\end{array}}^{\ell}\mathbf{A}_{\nu,n}x_{i}^{n}\mathbf{A}_{\nu,m}x_{j}^{m}+\left(x^{\nu}\right)^{2}+\sum_{n=1}^{d}\sum_{i=1}^{\ell}(2x^{\nu}+\mathbf{b}_{\nu})\mathbf{A}_{\nu,n}x_{i}^{n}-2x^{\nu}\mathbf{b}_{\nu}+\mathbf{b}_{\nu}^{2}\right)\right)-1\right)^{2}d\mathbf{A}_{\nu,0}...d\mathbf{A}_{\nu,d}d\mathbf{b}_{\nu}\\
- & \simeq\int...\int\left(a\ \exp\left(-b\left(\mathbf{A}^{2}+\mathbf{A}c+\mathbf{A}d+f\right)\right)-1\right)^{2}\\
- & (\text{mathmatica})\\
- & =\end{align*}
+\int\int_{-\infty}^{\infty}\left(\frac{\varphi(x^{\nu}:\ x_{n}^{\nu},\mathbf{A}X+\mathbf{b})}{\varphi(x^{\nu}:\ x_{n}^{\nu},X)}-1\right)^{2}d\mathbf{A}d\mathbf{b} & =\int...\int\left(\frac{\varphi\left(x^{\nu}:\ x_{n}^{\nu},\left[\mathbf{b}_{\nu}+\sum_{n=1}^{d}\mathbf{A}_{\nu,n}x_{i}^{n}|\ x_{i}\in X\right]\right)}{\varphi(x^{\nu}:\ x_{n}^{\nu},X)}-1\right)^{2}d\mathbf{A}_{\nu,0}...d\mathbf{A}_{\nu,d}d\mathbf{b}_{\nu}\\
+ & =\int...\int f([x^{0},...,x^{d}]:\ a,b,c,f,h)\ dx^{0},...,dx^{d}d\mathbf{b}_{\nu}\\
+a & =\frac{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)}{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X)\ \exp\left(-\frac{1}{\gamma}\left(x^{\nu}-x_{i}^{\nu}\right)^{2}\right)}\\
+b & =\frac{1}{\gamma}\\
+c & =???\\
+f & =\left(x^{\nu}\right)^{2}-2x^{\nu}\mathbf{b}_{\nu}+\mathbf{b}_{\nu}^{2}\\
+h & =1\end{align*}
 
 \end_inset
 
@@ -1897,7 +1891,8 @@ This equation allows us to restrict entropy calculations to subsets of the
 
 \begin_layout Standard
 We now develop a cost function which quantifies the computational cost of
- evaluating the contextual information of a given dimensional set.
+ evaluating the contextual information of a given dimensional set and the
+ computational cost of using a given dataset for prediction.
 \end_layout
 
 \begin_layout Standard
@@ -1982,6 +1977,19 @@ This means that our search will be iterative; we will select a partition
 
  contain the majority of the contextual information it will traverse the
  search tree in a basically depth-first manner.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Is this the system's dream state?
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
