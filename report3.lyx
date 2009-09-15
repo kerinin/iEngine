@@ -41,9 +41,9 @@
 \cite_engine basic
 \use_bibtopic false
 \paperorientation portrait
-\leftmargin 1.25in
+\leftmargin 1.5in
 \topmargin 1in
-\rightmargin 1.25in
+\rightmargin 1.5in
 \bottommargin 1.25in
 \secnumdepth 3
 \tocdepth 3
@@ -459,7 +459,11 @@ Our objective is to develop an estimate
 \begin_inset Formula $X$
 \end_inset
 
-:
+ assuming some minimal uncertainty 
+\begin_inset Formula $\xi$
+\end_inset
+
+ in the data:
 \end_layout
 
 \begin_layout Standard
@@ -472,12 +476,23 @@ Our objective is to develop an estimate
 \end_layout
 
 \begin_layout Standard
-We assume that our estimate's error is upper-bounded by 
-\begin_inset Formula $\xi$
+We confine our attention to datasets in which there exists self-similarity
+ between some subsets of 
+\begin_inset Formula $X$
 \end_inset
 
-.
- 
+ under linear transformations:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+Y & \subseteq X\\
+Z & \subseteq X\\
+Y & \simeq\mathbf{A}Z+\mathbf{b}\end{align*}
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -485,7 +500,14 @@ We assume that our estimate's error is upper-bounded by
 status open
 
 \begin_layout Plain Layout
-Discuss TI generally
+If we can quantify the minimal convergence rate of an estimator based on
+ the dimensionality of the observations we can demonstrate the benefits
+ of partitioning data, as well as make a better cost function for selecting
+ 
+\begin_inset Formula $D$
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -495,19 +517,6 @@ Discuss TI generally
 
 \begin_layout Section
 Transformation Invariant Parzen Windows
-\end_layout
-
-\begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-General discussion of Parzen Windows
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Subsection
@@ -653,12 +662,30 @@ The crucial distinction between i.i.d data from a static PDF and data which
 \begin_inset Formula $D$
 \end_inset
 
+, the the set of dimensions 
+\emph on
+not 
+\emph default
+used for TI analysis as 
+\begin_inset Formula $\tilde{D}$
+\end_inset
+
+, and the set of all dimensions of 
+\begin_inset Formula $\Omega$
+\end_inset
+
+ as 
+\begin_inset Formula $D^{X}$
+\end_inset
+
 :
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-D & \subseteq[0,...,d]\\
+D^{X} & =[0,...,d]\\
+D & \subseteq D^{X}\\
+\tilde{D} & =[n\in D^{X}|\ n\notin D]\\
 \vec{x}_{i} & \longmapsto w_{i}^{D}\\
 w_{i}^{D} & =[x_{i}^{n}|\ n\in D]\\
 w_{i}^{n} & =x_{i}^{n}\end{align*}
@@ -826,7 +853,27 @@ K_{\gamma}\left(w_{n},w_{m},X\right) & =\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{
 
 \begin_layout Standard
 We can extend this basic result to multiple dimensions by using the tensor
- product of the kernel values:
+ product of the kernel values.
+ In this context we must distinguish between TI dimensions and non-TI dimensions
+, as the distance metric will be different for e
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+ach
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\noun default
+\color inherit
+:
 \end_layout
 
 \begin_layout Standard
@@ -840,7 +887,7 @@ We can extend this basic result to multiple dimensions by using the tensor
 \noun off
 \color none
 \begin_inset Formula \begin{align*}
-K_{\gamma}\left(w_{n}^{D},w_{m}^{D},X\right) & =\prod_{\nu=1}^{d}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|w_{n}^{D},w_{n}^{D},\nu,X\|}\end{align*}
+K_{\gamma}\left(w_{n}^{D},w_{m}^{D},X\right) & =\prod_{\nu\in\tilde{D}}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\left(x_{n}^{\nu}-x_{m}^{\nu}\right)^{2}}\prod_{\nu\in D}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|w_{n}^{D},w_{n}^{D},\nu,X\|}\end{align*}
 
 \end_inset
 
@@ -885,83 +932,13 @@ There are multiple divergence measures available which can be used to define
 \end_layout
 
 \begin_layout Standard
-Notice that we are transforming the windowed set of data points 
-\emph on
-but
-\emph default
- 
-\emph on
-not
-\emph default
- 
-\begin_inset Formula $x^{v}$
-\end_inset
-
-.
- What we're trying to do is match transformed points in the windowed set
- to existing points in the full set - this tells us the 'distance' between
- the two neighborhoods.
- We also want to establish how adding the point 
-\begin_inset Formula $x^{\nu}$
-\end_inset
-
- to the windowed set affects the correlation between the two sets (this
- is how we determine the probability of 
-\begin_inset Formula $x^{\nu}$
-\end_inset
-
-).
- We're only testing a discrete subset possible values of 
-\begin_inset Formula $x^{\nu}$
-\end_inset
-
- (we can't integrate over all possible points because resulting equation
- isn't integrable), and we want to make sure that when we calculate the
- difference measure we use a 'good' set of points .
- Since we're assuming the windowed data contains all the points in 
-\begin_inset Formula $X$
-\end_inset
-
- this shouldn't be a problem, and using the points in 
-\begin_inset Formula $X$
-\end_inset
-
- to test the distance between the windowed set and 
-\begin_inset Formula $X$
-\end_inset
-
- should give us an accurate measure of the correlation between the two.
-\end_layout
-
-\begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Consider 
-\begin_inset Formula $X$
-\end_inset
-
- vs 
-\begin_inset Formula $\{x\cup X\}$
-\end_inset
-
-, reword this paragraph to be less wishy-washy
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
 Because the Pearson Divergence is a summation, we can control the influence
  of each point by scaling it using the windowing function:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\|w_{n}^{D},w_{m}^{D},\nu,X\| & =\sum_{i=1}^{\ell}\omega_{\alpha}(w_{n}^{\nu},x_{i}^{\nu})\left(\frac{\varphi(x_{i}^{\nu}:\ w_{m}^{D},\mathbf{A}X+\mathbf{b})}{\varphi(x_{i}^{\nu}:\ w_{m}^{D},X^{\nu})}-1\right)^{2}\\
+\|w_{n}^{D},w_{m}^{D},\nu,X\| & =\sum_{i=1}^{\ell}\omega_{\alpha}(w_{n}^{\nu},x_{i}^{\nu})\left(\frac{\varphi(x_{i}^{\nu}:\ w_{m}^{D},\mathbf{A}X+\mathbf{b})}{\varphi(x_{i}^{\nu}:\ w_{m}^{D},X)}-1\right)^{2}\\
 \varphi(x^{\nu}:\ w_{n}^{D},X) & =\sum_{i=1}^{\ell}\frac{\omega_{\alpha}(w_{n}^{\nu},x_{i}^{\nu})}{\sum_{j=1}^{\ell}\omega_{\alpha}(w_{n}^{\nu},x_{j}^{\nu})}K_{\gamma}(x^{\nu},x_{i}^{\nu})\\
  & =\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(w_{n}^{\nu},x_{i}^{\nu},X)\ K_{\gamma}(x^{\nu},x_{i}^{\nu})\end{align*}
 
@@ -972,21 +949,11 @@ Because the Pearson Divergence is a summation, we can control the influence
 
 \begin_layout Standard
 These two matrix transformations are used to shift, scale, rotate, shear
- or mirror 
-\begin_inset Formula $\{x\cup X\}$
+ or mirror the window 
+\begin_inset Formula $w_{n}^{D}$
 \end_inset
 
-
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-?
-\end_layout
-
-\end_inset
-
- prior to comparing it to 
+ of 
 \begin_inset Formula $X$
 \end_inset
 
@@ -1034,19 +1001,6 @@ status open
 \end_layout
 
 \begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Make sure you have terms for TI vs non-TI dimensions
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
 One approach to these transformations is to explicitly determine values
  for the two matrices and to determine the distance 
 \begin_inset Formula $\|\cdot,\cdot\|$
@@ -1063,23 +1017,6 @@ One approach to these transformations is to explicitly determine values
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
 \|w_{n}^{D},w_{m}^{D},\nu,X\| & =\sum_{i=1}^{\ell}\omega_{\alpha}(w_{n}^{\nu},x_{i}^{\nu})\int\int_{-\infty}^{\infty}\left(\frac{\varphi(x_{i}^{\nu}:\ w_{m}^{\nu},\mathbf{A}X+\mathbf{b})}{\varphi(x_{i}^{\nu}:\ w_{m}^{\nu},X^{\nu})}-1\right)^{2}d\mathbf{A}d\mathbf{b}\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-I think this equation is good as it is - but make sure you include the 
-\begin_inset Formula $\{x\cup X\}$
-\end_inset
-
- in the function call for the probability function of a random point.
-\end_layout
 
 \end_inset
 
@@ -1163,7 +1100,7 @@ f([x^{0},...,x^{d}]:\ a,b,c,f,h) & =\left(a\ \exp\left(-b\left(\left(x^{d}\right
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\int\int_{-\infty}^{\infty}\left(\frac{\varphi(x^{\nu}:\ w_{n}^{\nu},\mathbf{A}X+\mathbf{b})}{\varphi(x^{\nu}:\ w_{n}^{\nu},X)}-1\right)^{2}d\mathbf{A}d\mathbf{b} & =\int...\int\left(\frac{\varphi\left(x^{\nu}:\ w_{n}^{\nu},\left[\mathbf{b}_{\nu}+\sum_{n=1}^{d}\mathbf{A}_{\nu,n}x_{i}^{n}|\ x_{i}\in X\right]\right)}{\varphi(x^{\nu}:\ w_{n}^{\nu},X)}-1\right)^{2}d\mathbf{A}d\mathbf{b}\\
+\int\int_{-\infty}^{\infty}\left(\frac{\varphi(x^{\nu}:\ w_{n}^{\nu},\mathbf{A}X+\mathbf{b})}{\varphi(x^{\nu}:\ w_{n}^{\nu},X)}-1\right)^{2}d\mathbf{A}d\mathbf{b} & =\int...\int\left(\frac{\varphi\left(x^{\nu}:\ w_{n}^{\nu},\left[\mathbf{b}_{\nu}+\sum_{n=1}^{|D|}\mathbf{A}_{\nu,n}x_{i}^{n}|\ x_{i}\in X\right]\right)}{\varphi(x^{\nu}:\ w_{n}^{\nu},X)}-1\right)^{2}d\mathbf{A}d\mathbf{b}\\
  & =\int...\int f([x^{0},...,x^{d}]:\ a,b,c,f,h)\ dx^{0},...,dx^{d}d\mathbf{b}_{\nu}\\
 a & =\frac{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(w_{n}^{\nu},x_{i}^{\nu},X)}{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(w_{n}^{\nu},x_{i}^{\nu},X)\ \exp\left(-\frac{1}{\gamma}\left(x^{\nu}-x_{i}^{\nu}\right)^{2}\right)}\\
 b & =\frac{1}{\gamma}\\
@@ -1189,29 +1126,21 @@ Make a note that for d not in D, A_dd=0, b=0
 
 \end_layout
 
-\begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Extend this to integrate over a subset of 
-\begin_inset Formula $d$
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
 \begin_layout Subsection
 Performance
 \end_layout
 
 \begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
 Big-O
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
@@ -1294,16 +1223,6 @@ We have developed a PDF estimation technique which allows us to take advantage
  The solution uses a novel distance metric to compare the similarity between
  two sets of points in the context of arbitrary linear transformations of
  one set.
- 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Restate in terms of D
-\end_layout
-
-\end_inset
-
  The solution proposed is restricted to observations with shared dimensionality,
  however it imposes no restrictions on which dimensions are TI.
  The types of transformations considered by the proposed solution are restricted
@@ -1315,10 +1234,10 @@ Restate in terms of D
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\varphi(\vec{x}:\ X) & =\sum_{i=1}^{\ell}\frac{1}{\ell}\ K_{\gamma}(\vec{x},\vec{x}_{i},X)\\
-K_{\gamma}\left(\vec{x}_{n},\vec{x}_{m},X\right) & =\prod_{\nu=1}^{d}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|x_{n}^{\nu},x_{m}^{\nu},X\|}\\
-\|x_{n}^{\nu},x_{m}^{\nu},X\| & =???\\
-\ddot{\omega}_{\alpha}(x_{i}^{\nu},x_{n}^{\nu},X) & =\frac{\omega_{\alpha}(x_{i}^{\nu},x_{n}^{\nu})}{\sum_{j=1}^{\ell}\omega_{\alpha}(x_{j}^{\nu},x_{n}^{\nu})}\end{align*}
+\varphi(\vec{x}:\ X) & =\sum_{i=1}^{\ell}\frac{1}{\ell}\ K_{\gamma}(w^{D},w_{i}^{D},\{\vec{x}\cup X\})\\
+K_{\gamma}\left(w_{n}^{D},w_{m}^{D},X\right) & =\prod_{\nu\in\tilde{D}}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\left(x_{n}^{\nu}-x_{m}^{\nu}\right)^{2}}\prod_{\nu\in D}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|w_{n}^{D},w_{n}^{D},\nu,X\|}\\
+\|w_{n}^{D},w_{m}^{D},\nu,X\| & =???\\
+\ddot{\omega}_{\alpha}(w_{n}^{\nu},x_{i}^{\nu},X) & =\frac{\omega_{\alpha}(w_{n}^{\nu},x_{i}^{\nu})}{\sum_{j=1}^{\ell}\omega_{\alpha}(w_{n}^{\nu},x_{j}^{\nu})}\end{align*}
 
 \end_inset
 
@@ -1434,7 +1353,7 @@ s a set of weights
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\varphi(\vec{x}:\ \beta,X) & =\sum_{i=1}^{\ell}\beta_{i}K_{\gamma}(\vec{x},\vec{x}_{i},X)\end{align*}
+\varphi(\vec{x}:\ \beta,X) & =\sum_{i=1}^{\ell}\beta_{i}K_{\gamma}(w^{D},w_{i}^{D},X)\end{align*}
 
 \end_inset
 
@@ -1537,27 +1456,27 @@ Discuss the equations below
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
- & =\sum_{i=1}^{\ell}\left(\sum_{j=1}^{\ell}\frac{1}{\ell}K_{\gamma}(\vec{x}_{i},\vec{x}_{j},X)\right)^{2}-2\left(\sum_{j=1}^{\ell}\frac{1}{\ell}K_{\gamma}(\vec{x}_{i},\vec{x}_{j},X)\right)\left(\sum_{j=1}^{\ell}\beta_{j}K_{\gamma}(\vec{x}_{i},\vec{x}_{j},X)\right)\\
- & \qquad\qquad\qquad+\left(\sum_{j=1}^{\ell}\beta_{j}K_{\gamma}(\vec{x_{i}},\vec{x}_{j},X)\right)^{2}\\
+ & =\sum_{i=1}^{\ell}\left(\sum_{j=1}^{\ell}\frac{1}{\ell}K_{\gamma}(w_{i}^{D},w_{j}^{D},X)\right)^{2}-2\left(\sum_{j=1}^{\ell}\frac{1}{\ell}K_{\gamma}(w_{i}^{D},w_{j}^{D},X)\right)\left(\sum_{j=1}^{\ell}\beta_{j}K_{\gamma}(w_{i}^{D},w_{j}^{D},X)\right)\\
+ & \qquad\qquad\qquad+\left(\sum_{j=1}^{\ell}\beta_{j}K_{\gamma}(w_{i}^{D},w_{j}^{D},X)\right)^{2}\\
  & =\sum_{i=1}^{\ell}\sum_{\begin{array}{c}
 j=1\\
-k=1\end{array}}^{\ell}\frac{1}{\ell^{2}}K_{\gamma}(\vec{x}_{i},\vec{x}_{j},X)K_{\gamma}(\vec{x_{i}},\vec{x_{k}},X)-2\sum_{\begin{array}{c}
+k=1\end{array}}^{\ell}\frac{1}{\ell^{2}}K_{\gamma}(w_{i}^{D},w_{j}^{D},X)K_{\gamma}(w_{i}^{D},w_{k}^{D},X)-2\sum_{\begin{array}{c}
 j=1\\
-k=1\end{array}}^{\ell}\frac{1}{\ell}K_{\gamma}(\vec{x}_{i},\vec{x}_{j},X)\beta_{j}K_{\gamma}(\vec{x}_{i},\vec{x}_{k},X)\\
+k=1\end{array}}^{\ell}\frac{1}{\ell}K_{\gamma}(w_{i}^{D},w_{j}^{D},X)\beta_{j}K_{\gamma}(w_{i}^{D},w_{k}^{D},X)\\
  & \qquad\qquad\qquad+\sum_{\begin{array}{c}
 j=1\\
-k=1\end{array}}^{\ell}\beta_{j}\beta_{k}K_{\gamma}(\vec{x}_{i},\vec{x}_{j},X)K_{\gamma}(\vec{x_{i}},\vec{x}_{k},X)\\
+k=1\end{array}}^{\ell}\beta_{j}K_{\gamma}(w_{i}^{D},w_{j}^{D},X)K_{\gamma}(w_{i}^{D},w_{k}^{D},X)\\
  & =\sum_{\begin{array}{c}
 i=1\\
 j=1\\
-k=1\end{array}}^{\ell}\beta_{j}\beta_{k}K_{\gamma}(\vec{x}_{i},\vec{x}_{j},X)K_{\gamma}(\vec{x}_{i},\vec{x}_{k},X)-\sum_{\begin{array}{c}
+k=1\end{array}}^{\ell}\beta_{j}\beta_{k}K_{\gamma}(w_{i}^{D},w_{j}^{D},X)K_{\gamma}(w_{i}^{D},w_{k}^{D},X)-\sum_{\begin{array}{c}
 i=1\\
 j=1\\
-k=1\end{array}}^{\ell}\frac{2\beta_{j}}{\ell}K_{\gamma}(\vec{x}_{i},\vec{x}_{j},X)K_{\gamma}(\vec{x}_{i},\vec{x}_{k},X)\\
+k=1\end{array}}^{\ell}\frac{2\beta_{j}}{\ell}K_{\gamma}(w_{i}^{D},w_{j}^{D},X)K_{\gamma}(w_{i}^{D},w_{jk}^{D},X)\\
  & \qquad\qquad\qquad+\sum_{\begin{array}{c}
 i=1\\
 j=1\\
-k=1\end{array}}^{\ell}\frac{1}{\ell^{2}}K_{\gamma}(\vec{x}_{i},\vec{x}_{j},X)K_{\gamma}(\vec{x}_{i},\vec{x}_{k},X)\end{align*}
+k=1\end{array}}^{\ell}\frac{1}{\ell^{2}}K_{\gamma}(w_{i}^{D},w_{j}^{D},X)K_{\gamma}(w_{i}^{D},w_{k}^{D},X)\end{align*}
 
 \end_inset
 
@@ -1579,10 +1498,11 @@ Because this is a minimization problem we can eliminate the last term (changing
 W(\beta:\ X) & \longmapsto\min_{\beta}\sum_{\begin{array}{c}
 i=1\\
 j=1\\
-k=1\end{array}}^{\ell}\beta_{j}\beta_{k}K_{\gamma}(\vec{x}_{i},\vec{x}_{j},X)K_{\gamma}(\vec{x}_{i},\vec{x}_{k},X)-\sum_{\begin{array}{c}
+k=1\end{array}}^{\ell}\beta_{j}\beta_{k}K_{\gamma}(w_{i}^{D},w_{j}^{D},X)K_{\gamma}(w_{i}^{D},w_{k}^{D},X)\\
+ & \qquad\qquad\qquad-\sum_{\begin{array}{c}
 i=1\\
 j=1\\
-k=1\end{array}}^{\ell}\frac{2\beta_{j}}{\ell}K_{\gamma}(\vec{x}_{i},\vec{x}_{j},X)K_{\gamma}(\vec{x}_{i},\vec{x}_{k},X)+\lambda\Omega(\beta,X)\end{align*}
+k=1\end{array}}^{\ell}\frac{2\beta_{j}}{\ell}K_{\gamma}(w_{i}^{D},w_{j}^{D},X)K_{\gamma}(w_{i}^{D},w_{k}^{D},X)+\lambda\Omega(\beta,X)\end{align*}
 
 \end_inset
 
@@ -1604,6 +1524,19 @@ Quadratic Optimization Problem
 
 \begin_layout Subsection
 Support Vector Decomposition 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Marginal
+status open
+
+\begin_layout Plain Layout
+This section is probably better as an appendix
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1737,6 +1670,19 @@ Transformation Invariance
 \end_layout
 
 \begin_layout Standard
+\begin_inset Marginal
+status open
+
+\begin_layout Plain Layout
+This section is likely to change drastically
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 Some datasets do not lend themselves to TI analysis, these datasets exhibit
  a single PDF with no similarity between the distribution at different locations
  along any axis.
@@ -1747,30 +1693,6 @@ Some datasets do not lend themselves to TI analysis, these datasets exhibit
 
 \begin_layout Subsection
 Contextual Information
-\end_layout
-
-\begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-The contextual information function needs to have two properties; the sum
- of the entropy of two sets must be smaller than the entropy of the two
- sets together, and the sum of the entropy of two dimensions of a dataset
- must be less than the entropy of the two dimensions together.
- The latter is a basic property of entropy, and it makes sense for it to
- hold true (it also informs the search algorithm).
- The former allows us to calculate the entropy of subsets of 
-\begin_inset Formula $X$
-\end_inset
-
-, combine them with previous entropy calculations, and identify any dimension
- sets which are above the threshold.
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
@@ -1877,7 +1799,7 @@ This can be extended to multi-dimensional data by observing that the window
  In this case, we simply need to compare the expected divergence between
  adjacent windows in multiple dimensions and the expected divergence between
  all possible windows in multiple dimensions (here we use the 
-\begin_inset Formula $L^{2}$
+\begin_inset Formula $L_{2}$
 \end_inset
 
  metric):
@@ -1912,8 +1834,7 @@ i=1\\
 j=1\end{array}}^{\ell}\sqrt{\sum_{\nu\in D}\left(\frac{1}{\ell^{2}}\omega_{\varepsilon}(x_{i}^{\nu},x_{j}^{\nu})\omega_{\alpha}(x_{i}^{\nu},x_{j}^{\nu})\|x_{i}^{\nu},x_{j}^{\nu},X,D\|\right)^{2}}\\
 H_{\varepsilon}^{O}(X:\ D) & =\sum_{\begin{array}{c}
 i=1\\
-j=1\end{array}}^{\ell}\sqrt{\sum_{\nu\in D}\left(\frac{1}{\ell^{2}}\omega_{\alpha}(x_{i}^{\nu},x_{j}^{\nu})\|x_{i}^{\nu},x_{j}^{\nu},X,D\|\right)^{2}}\\
-D & =[d_{n},...,d_{m}],\ 1\le d_{i}<d\end{align*}
+j=1\end{array}}^{\ell}\sqrt{\sum_{\nu\in D}\left(\frac{1}{\ell^{2}}\omega_{\alpha}(x_{i}^{\nu},x_{j}^{\nu})\|x_{i}^{\nu},x_{j}^{\nu},X,D\|\right)^{2}}\end{align*}
 
 \end_inset
 
@@ -1925,29 +1846,76 @@ Selecting TI Dimensions
 \end_layout
 
 \begin_layout Standard
-We now turn our attention to the task of selecting which dimensions and
- which combinations of dimensions warrant a TI analysis.
- We will search for sets of dimensions whose contextual information is greater
- than some constant 
-\begin_inset Formula $h$
-\end_inset
-
-.
- We know that the cardinality of the set of all possible subsets of 
+We now turn our attention to the task of selecting which dimensions to include
+ in 
 \begin_inset Formula $D$
 \end_inset
 
- is 
-\begin_inset Formula $2^{|D|}$
+.
+ The computational complexity of TI-analysis grows exponentially with 
+\begin_inset Formula $|D|$
 \end_inset
 
-, which quickly becomes intractable as the dimensionality of 
-\begin_inset Formula $\Omega$
+, therefore it is important that we only include dimensions which will increase
+ the rate of convergence of 
+\begin_inset Formula $\varphi(\vec{x}:\ X)$
+\end_inset
+
+ on 
+\begin_inset Formula $\Pr(x|\ X)$
+\end_inset
+
+.
+ To make things more challenging, the computational complexity of calculating
+ 
+\begin_inset Formula $H_{\varepsilon}(X:\ D)$
+\end_inset
+
+ increases linearly 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+?
+\end_layout
+
+\end_inset
+
+ with both 
+\begin_inset Formula $|X|$
+\end_inset
+
+ and 
+\begin_inset Formula $|D|$
+\end_inset
+
+, and the cardinality of the set of all possible subsets of 
+\begin_inset Formula $D^{X}$
+\end_inset
+
+ is 
+\begin_inset Formula $2^{|D^{X}|}$
+\end_inset
+
+ which quickly becomes intractable as 
+\begin_inset Formula $|D^{X}|$
 \end_inset
 
  increases.
- We need to develop some heuristics for reducing the search space when investiga
-ting contextual information.
+ Our search algorithm therefore must take into account the cost and benefits
+ of using a given set 
+\begin_inset Formula $D$
+\end_inset
+
+ as well as the cost and benefits of determining 
+\begin_inset Formula $H_{\varepsilon}(X:\ D)$
+\end_inset
+
+ for a given 
+\begin_inset Formula $D$
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
@@ -1974,17 +1942,12 @@ H(X) & \ge H(X^{1})+H(X^{2})\end{align*}
 \end_layout
 
 \begin_layout Standard
-This means that in our search for dimension sets which warrant TI analysis,
- for any set of dimensions 
-\begin_inset Formula $D$
+This means that any set 
+\begin_inset Formula $D'$
 \end_inset
 
-, if the set 
-\begin_inset Formula $X^{D}$
-\end_inset
-
- does not warrant TI analysis, than no subset 
-\begin_inset Formula $D'\subset D$
+ which does not warrant TI analysis, no subset 
+\begin_inset Formula $D"\subset D'$
 \end_inset
 
  warrants analysis either:
@@ -1992,7 +1955,7 @@ This means that in our search for dimension sets which warrant TI analysis,
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-H_{\varepsilon}(X,D)<h & \longmapsto H_{\varepsilon}(X,D')<h,\quad\forall D'\subset D\end{align*}
+H_{\varepsilon}(X,D')<h & \longmapsto H_{\varepsilon}(X,D")<h,\quad\forall D"\subset D'\end{align*}
 
 \end_inset
 
@@ -2038,10 +2001,10 @@ Reviewing the equation for
 \end_inset
 
 , it is clear that in the absence of the normalizer 
-\begin_inset Formula $\frac{1}{\ell^{2}}$
+\begin_inset Formula $\frac{1}{|D|^{2}}$
 \end_inset
 
-, the sum of the contextual information for out two subsets would necessarily
+, the sum of the contextual information for our two subsets would necessarily
  be less than both the contextual entropy of the union of these sets and
  the contextual information of 
 \begin_inset Formula $X$
@@ -2063,56 +2026,29 @@ H_{\min}(Y,Z:\ D) & \le H_{\varepsilon}(Y\cup Z:\ D)\end{align*}
 \end_layout
 
 \begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Note that using this equation means that we can't really eliminate search
- branches unless we've analyzed all their data points.
-\end_layout
-
+As discussed earlier, the utility of a given set 
+\begin_inset Formula $D$
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
-This equation allows us to restrict entropy calculations to subsets of the
- data; if 
-\begin_inset Formula $H_{\min}(Y,Z:\ D)>h$
+ can be expressed by the amount of contextual information encoded by 
+\begin_inset Formula $D$
 \end_inset
 
-, we know that 
-\begin_inset Formula $H_{\varepsilon}(X:\ D)>h$
+, for which we have established the metric 
+\begin_inset Formula $H_{\varepsilon}(X:\ D)$
 \end_inset
 
 .
- Taken together these two observations allow us to reduce the computational
- demands of the search algorithm by reducing the number of observations
- used in a given calculation.
- This leaves us with the task of developing search heuristics.
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Intro search heuristics
-\end_layout
-
+ We also know that the cost of using a given subset 
+\begin_inset Formula $D$
 \end_inset
 
- We use the contextual information measure 
-\begin_inset Formula $H(X)$
+ can be expressed as 
+\begin_inset Formula $\mathcal{O}(2^{|D|})$
 \end_inset
 
- as the measure of the expected increase in prediction accuracy; the more
- information contained in a dimensional set the more we stand to gain from
- analyzing it.
-\end_layout
-
-\begin_layout Standard
-We now develop a cost function which quantifies the computational cost of
- evaluating the contextual information of a given dimensional set and the
- computational cost of using a given dataset for prediction.
+.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -2157,6 +2093,19 @@ Is this the system's dream state?
 
 \begin_layout Section
 Ensemble System
+\end_layout
+
+\begin_layout Standard
+\begin_inset Marginal
+status open
+
+\begin_layout Plain Layout
+The ideas here are OK, but the notation needs a lot of work
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -2699,6 +2648,19 @@ s of the incentive space in a given context.
 
 \begin_layout Subsection
 Incentivized Path Search
+\end_layout
+
+\begin_layout Standard
+\begin_inset Marginal
+status open
+
+\begin_layout Plain Layout
+This is a work in progress - ignore
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
