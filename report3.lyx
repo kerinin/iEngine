@@ -404,35 +404,186 @@ n-invariant behaviors.
 \end_layout
 
 \begin_layout Standard
-The most basic operation used in this system is the estimation of probability
- densities.
- Based on a set of observations drawn from some random process, we generate
- an estimate of the underlying probability distribution.
- This estimate tells us the probability of each point in the input space
- being observed.
- Areas of the input space in which a dense set of observations are observed
- are given high probability, while areas of the input space with few observation
-s are given low probability.
-\end_layout
-
-\begin_layout Section
-Problem Setting
+For any estimator of a probability density function, the accuracy (measured
+ by the confidence interval) of the estimator can be shown to depend on
+ two factors; the number of observations from which the estimates are made
+ and the amount of information the estimator is capable of extracting from
+ from those observations.
+ Existing estimators, such as the Parzen Window estimator extract information
+ about the probability of a given point by comparing the distance between
+ that point and the set of points previously observed; the greater the number
+ of points in that are 'close', the higher the probability.
+ It is possible to determine the confidence interval of such an estimator
+ using the VC Entropy of the estimating function.
+ The VC Entropy of an estimator is based on the number of points which are
+ needed to 'cover' the observations with some level of closeness.
+ This is to say that if the set of observations contain multiple points
+ which are 'close' to each other, the estimator can ignore all but one in
+ generating estimates (provided the number of similar points is retained).
 \end_layout
 
 \begin_layout Standard
-Our analysis take place in the context of a set of 
-\begin_inset Formula $\ell$
+Our task is to develop a set of estimators whose confidence interval is
+ less than the confidence interval determined by the VC Entropy, and we
+ do so by extending the conceprt of VC Entropy to sets of observations under
+ linear transformations.
+ Where the VC Entropy is determined by the number of points necessary to
+ 'cover' the set of observations, we define the Transformation-Invariant
+ Entropy (TI Entropy) as the number of 
+\emph on
+sets of points
+\emph default
+ necessary to 'cover' the observations under linear transformations.
+ In the same way that the VC Entropy is determined by the similarity between
+ individual observations, the TI Entropy is determined between sets of observati
+ons.
+ 
+\end_layout
+
+\begin_layout Standard
+The distance between two points can easily be determined using well-known
+ distance metrics; the distance between two sets of points requires that
+ we develop a new distance metric.
+ This distance metric measures the potential similarity between two sets
+ when one has been subjected to some linear transformation.
+ For simplicity we will integrate this similarity measure over all possible
+ transformations; the resulting similarity measure will describe the net
+ similarity of the two sets under 
+\emph on
+any
+\emph default
+ linear transformation.
+ It is for this reason that we refer to our extension of the VC Entropy
+ as Transformation-Invariant.
+ It will be shown that the TI Entropy is necessarily less than or equal
+ to the VC Entropy, and that as a result the confidence interval of an estimator
+ based on the TI-distance between sets of observations is necessarily greater
+ than or equal to that of estimators based on the distance between individual
+ points.
+ 
+\end_layout
+
+\begin_layout Standard
+Because the computational complexity of TI-based estimators is higher than
+ that of traditional estimators we will develop search heuristics allowing
+ us to confine the TI analysis to subsets of the observations which are
+ likely to provide useful results.
+ We will develop an ensemble system capable of applying TI analysis to multiple
+ subsets and combining the results of these analyses.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Intro motivation and decision-making
+\end_layout
+
 \end_inset
 
- vector observations 
-\begin_inset Formula $\vec{x}_{i}$
+
+\end_layout
+
+\begin_layout Subsection
+Formal Setting
+\end_layout
+
+\begin_layout Standard
+We use the notation of Vapnik - given three components:
+\end_layout
+
+\begin_layout Enumerate
+A generator (G) of random vectors 
+\begin_inset Formula $x\in\mathbb{R}^{n}$
 \end_inset
 
- of a hidden random variable 
-\begin_inset Formula $X$
+, drawn independantly from a fixed but unknown probability distribution
+ function 
+\begin_inset Formula $F(x)$
 \end_inset
 
- with a real-valued event space of arbitrary dimension:
+
+\end_layout
+
+\begin_layout Enumerate
+A supervisor (S) who returns an output value 
+\begin_inset Formula $y$
+\end_inset
+
+ to every input vector 
+\begin_inset Formula $x$
+\end_inset
+
+, according to a conditional distribution function 
+\begin_inset Formula $F(y|x)$
+\end_inset
+
+, also fixed but unknown
+\end_layout
+
+\begin_layout Enumerate
+A learning machine (LM) capable of implementing a set of functions 
+\begin_inset Formula $\varphi(x,\alpha),\ \alpha\in\Lambda$
+\end_inset
+
+, where 
+\begin_inset Formula $\Lambda$
+\end_inset
+
+ is a set of parameters
+\end_layout
+
+\begin_layout Standard
+Our goal is to choose the function which best approximates the supervisor's
+ response, given a set of observations:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+X & =x_{1},...,x_{\ell}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We choose between potential functions based on the empirical risk function
+ using the loss (discrepancy) 
+\begin_inset Formula $L(y,f(x,\alpha))$
+\end_inset
+
+ between the response 
+\begin_inset Formula $y$
+\end_inset
+
+ for a given value of 
+\begin_inset Formula $x$
+\end_inset
+
+ and the predicted value 
+\begin_inset Formula $f(x,\alpha)$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+R_{\text{emp}}(\alpha) & =\frac{1}{\ell}\sum_{i=1}^{\ell}L(y_{i},f(x_{i},\alpha))\\
+ & =\frac{1}{\ell}\sum_{i=1}^{\ell}Q(z_{i},\alpha)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We define our problem as one of estimating a Probability Density Functions
+ (PDF), so we define the set of observations as a random variable of arbitrary
+ dimensions:
 \end_layout
 
 \begin_layout Standard
@@ -476,38 +627,13 @@ Our objective is to develop an estimate
 \end_layout
 
 \begin_layout Standard
-We confine our attention to datasets in which there exists self-similarity
- between some subsets of 
-\begin_inset Formula $X$
-\end_inset
-
- under linear transformations:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-Y & \subseteq X\\
-Z & \subseteq X\\
-Y & \simeq\mathbf{A}Z+\mathbf{b}\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
 \begin_inset Note Note
 status open
 
 \begin_layout Plain Layout
-If we can quantify the minimal convergence rate of an estimator based on
- the dimensionality of the observations we can demonstrate the benefits
- of partitioning data, as well as make a better cost function for selecting
- 
-\begin_inset Formula $D$
-\end_inset
-
-
+Organize as follows: 1)Introduction and formal setting 2) Distance measure
+ 3) Parzen Estimator and SV Estimator 4) TI Entropy measure 5) Ensemble
+ System 6) Motivated Decision Making
 \end_layout
 
 \end_inset
@@ -1682,17 +1808,483 @@ This section is likely to change drastically
 
 \end_layout
 
+\begin_layout Subsection
+General Setting
+\end_layout
+
 \begin_layout Standard
-Some datasets do not lend themselves to TI analysis, these datasets exhibit
- a single PDF with no similarity between the distribution at different locations
- along any axis.
- In order to understand when a TI analysis is useful we must develop a rigorous
- understanding of the problems TI solves and a method to quantify that problem
- for a given dataset.
+We begin by describing the VC entropy of a set of estimators using their
+ risk values 
+\begin_inset Formula $Q(x:\ \alpha)$
+\end_inset
+
+ defined by the set of parameters 
+\begin_inset Formula $\alpha$
+\end_inset
+
+.
+ Given a set of observations 
+\begin_inset Formula $X=[x_{1},...,x_{\ell}]$
+\end_inset
+
+, we can construction a set of 
+\begin_inset Formula $\ell$
+\end_inset
+
+-dimensional vectors
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+q(\alpha) & =[Q(x_{1},\alpha),...,Q(x_{\ell},\alpha)]\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Each vector describes the loss of a given element of 
+\begin_inset Formula $\alpha$
+\end_inset
+
+ for the observations 
+\begin_inset Formula $X$
+\end_inset
+
+.
+ We define the number of vectors arbitrarily close to the observations 
+\begin_inset Formula $q(\alpha)$
+\end_inset
+
+ as 
+\begin_inset Formula $N^{\Lambda}(x_{1},...,x_{\ell})$
+\end_inset
+
+
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+For example, if 
+\begin_inset Formula $q(\alpha)=[1,2,4,1]$
+\end_inset
+
+, 
+\begin_inset Formula $N^{\Lambda}(X)=3$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+.
+ Using this value, we caluclate the entropy 
+\begin_inset Formula $H^{\Lambda}(X)$
+\end_inset
+
+ of the set of functions 
+\begin_inset Formula $Q(x,\alpha)$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+H^{\Lambda}(\ell) & =\ln N^{\Lambda}(x_{1},...,x_{\ell})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The function 
+\begin_inset Formula $H^{\Lambda}(X)$
+\end_inset
+
+ describes the VC entropy of the estimators 
+\begin_inset Formula $Q(x:\ \alpha)$
+\end_inset
+
+ over the set of observations 
+\begin_inset Formula $X$
+\end_inset
+
+.
+ The VC Entropy essentially describes the number of observations in 
+\begin_inset Formula $X$
+\end_inset
+
+ required to describe the PDF 
+\begin_inset Formula $\mathcal{P}$
+\end_inset
+
+, based on the assumption that if multiple points in 
+\begin_inset Formula $X$
+\end_inset
+
+ are 'close' to each other, we can eliminate all but one in our estimator.
+ It can be shown that the following equations hold true:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+R(\alpha_{\ell})-\inf_{\alpha\in\Lambda}R(\alpha) & \le\sqrt{\frac{-ln\eta}{2\ell}}+\frac{\Psi}{2}\left(1+\sqrt{1+\frac{4}{\Psi}}\right)\\
+\Psi & =4\frac{H_{\text{ann}}^{\Lambda}\left(2\ell\right)-\ln\left(\eta/4\right)}{\ell}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+It can be shown that for 
+\begin_inset Formula $\ell$
+\end_inset
+
+ observations, the difference between the least risk 
+\begin_inset Formula $\inf_{\alpha\in\Lambda}R(\alpha)$
+\end_inset
+
+ attainable by 
+\begin_inset Formula $Q(z,\alpha)$
+\end_inset
+
+ and the risk 
+\begin_inset Formula $R(\alpha_{\ell})$
+\end_inset
+
+ attainable by the value of 
+\begin_inset Formula $\alpha$
+\end_inset
+
+ which minimizes the emprical risk is less than a constant:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\Psi & =4\frac{H^{\Lambda}\left(2\ell\right)-\ln\left(\eta/4\right)}{\ell}\\
+R(\alpha_{\ell})-\inf_{\alpha\in\Lambda}R(\alpha) & \le\sqrt{\frac{-ln\eta}{2\ell}}+\frac{\Psi}{2}\left(1+\sqrt{1+\frac{4}{\Psi}}\right)\\
+R(\alpha) & \le R_{\text{emp}}(\alpha)+\frac{\Psi}{2}\left(1+\sqrt{1+\frac{4R_{\text{emp}}(\alpha)}{\Psi}}\right)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Where 
+\begin_inset Formula $\eta$
+\end_inset
+
+ is some confidence interval for which probability 
+\begin_inset Formula $1-\eta$
+\end_inset
+
+ the above statement holds true and the set of functions 
+\begin_inset Formula $Q(x:\ \alpha)$
+\end_inset
+
+ are upper-bounded by 1.
+ The former describes the difference between the minimal loss when 
+\begin_inset Formula $\ell\rightarrow\infty$
+\end_inset
+
+ and the minimal loss for 
+\begin_inset Formula $\ell$
+\end_inset
+
+ observations of 
+\begin_inset Formula $X$
+\end_inset
+
+, the latter describes the minimal loss for 
+\begin_inset Formula $\ell$
+\end_inset
+
+ observations of 
+\begin_inset Formula $X$
+\end_inset
+
+ given the observed loss of an estimator.
+ 
 \end_layout
 
 \begin_layout Subsection
-Contextual Information
+Distribution-Independant Bounds: The Growth Function
+\end_layout
+
+\begin_layout Standard
+The value of 
+\begin_inset Formula $H^{\Lambda}(X)$
+\end_inset
+
+ is specific to a given set of observations, thus these equations cannot
+ be evaluated in the absence of a set of observations.
+ In order to generate corresponding equations which are independant of a
+ dataset, the growth function 
+\begin_inset Formula $G^{\Lambda}(\alpha)$
+\end_inset
+
+ is generally substituted for the VC Entropy:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+G^{\Lambda}(\ell) & =\ln\sup_{z_{1},...,z_{\ell}}N^{\Lambda}(z_{1},...,z_{\ell})\\
+H^{\Lambda}(\ell) & \le G^{\Lambda}(\ell)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+It can be shown that the growth function is limited by
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+G^{\Lambda} & \le h\left(\ln\frac{\ell}{h}+1\right)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Where 
+\begin_inset Formula $h$
+\end_inset
+
+ describes the VC Dimension of the estimator, defined as the maximum number
+ of vectors that can be linearly separated by the estimator (in the case
+ of binary estimators) or as the VC Dimension of the set of indicators 
+\begin_inset Formula $I(x,\alpha,\beta)$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+I(x,\alpha,\beta) & =\theta(Q(x:\ \alpha)-\beta),\ \alpha\in\Lambda,\ \beta\in(0,1)\\
+\theta(x) & =\begin{cases}
+0 & \quad\text{if}\ x<0,\\
+1 & \quad\text{if}\ x\ge0\end{cases}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In other words the VC Dimension of a real-valued estimator is determined
+ by the miximum number of vectors which can be enclosed by a region with
+ radius 
+\begin_inset Formula $1-\beta$
+\end_inset
+
+.
+ In practical terms, this means that the VC Dimension is defined by the
+ granularity of the estimator 
+\begin_inset Formula $Q(x:\ \alpha)$
+\end_inset
+
+.
+ Recall that PDF's are bounded by 
+\begin_inset Formula $(0,1)$
+\end_inset
+
+; this means that each dimension of any loss vector 
+\begin_inset Formula $q(\alpha_{n})$
+\end_inset
+
+ must be between 
+\begin_inset Formula $(0,1)$
+\end_inset
+
+.
+ Therefore the VC Dimension of an estimator is determined by the maximum
+ number of regions with radius 
+\begin_inset Formula $1-\beta$
+\end_inset
+
+ which can be defined on the interval 
+\begin_inset Formula $(0,1)$
+\end_inset
+
+ in 
+\begin_inset Formula $\ell$
+\end_inset
+
+ dimensions.
+\end_layout
+
+\begin_layout Subsection
+TI Entropy
+\end_layout
+
+\begin_layout Standard
+We mention the growth function because it is often used to characterize
+ the worst-case performance for a specific type of estimator; we now show
+ that the worst-case performance of an estimator capable of TI analysis
+ is upper bounded by the growth function.
+ Consider the PDF generated by a given estimator 
+\begin_inset Formula $\varphi(x:\ \alpha_{n})$
+\end_inset
+
+ and two loss functions; the loss function 
+\begin_inset Formula $Q(x:\ \alpha)$
+\end_inset
+
+ defined by the distance between 
+\begin_inset Formula $\varphi(x:\ \alpha_{n})$
+\end_inset
+
+ and 
+\begin_inset Formula $X$
+\end_inset
+
+, and the loss function 
+\begin_inset Formula $Q_{TI}(x:\ \alpha)$
+\end_inset
+
+ defined by the TI distance between the same.
+ It can easily be shown that 
+\begin_inset Formula $Q(x:\ \alpha)$
+\end_inset
+
+ is a special case of 
+\begin_inset Formula $Q_{TI}(x:\ \alpha)$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+Q(x:\ \alpha) & =Q_{TI}(x:\ \alpha),\quad\mathbf{A}=I,\ \mathbf{b}=0\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Recall that TI estimators are generated from the integral of the distance
+ between two sets under transformations.
+ We can therefore construct the following inequality:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\|X,Y\| & \ge\int\|X,\mathbf{A}Y+\mathbf{b}\|d\mathbf{A}d\mathbf{b}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+It is clear therefore that the TI loss will be less than or equal to the
+ distance loss, and that the growth function for a given closeness parameter
+ will be less for the TI estimator than the distance estimator.
+ This same line of reasoning can be used to justify the fact that the TI
+ entropy will be less than or equal to the VC entropy.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+G_{TI}^{\Lambda}(\ell) & \le G^{\Lambda}(\ell)\\
+H_{TI}^{\Lambda}(\ell) & \le H^{\Lambda}(\ell)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Maximal TI Entropy
+\end_layout
+
+\begin_layout Standard
+Due to the computational demands of TI analysis a set of heuristics for
+ choosing when to use TI analysis and when to use more traditional means
+ is needed.
+ In its most general form, our task is to select subsets of 
+\begin_inset Formula $X$
+\end_inset
+
+ for which to integrate over transformations.
+ Unfortunately this decision cannot be made 
+\emph on
+a priori,
+\emph default
+ it must be data-dependant.
+ The objective therefore is to develop a means of estimating the efficacy
+ of a TI analysis without going through the process of completing said analysis.
+ 
+\end_layout
+
+\begin_layout Standard
+The TI entropy of a set of observations is determined by the minimum number
+ of vector sets required to cover the observations to some measure of closeness.
+ Determining this value requires that we first cosntruct a distance matrix
+ between the observations and then use some algorithm to determine the number
+ of points needed to cover the observations.
+ We can construct an upper bound on the TI Entropy through simpler analyses
+ of the distance matrix.
+ The simplist is to determine the maximal number of points needed to cover
+ a given set of observations by determining how many elements of the distance
+ matrix are less than our closeness parameter
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Consider the case where all but to observations are not 'close'; there will
+ be two elements in the distance matrix less than our closeness parameter.
+ 
+\end_layout
+
+\end_inset
+
+.
+ We can describe the maximal number of point needed to cover a given set
+ of observations as the square root of the number of elements in the distance
+ matrix less than our closeness parameter:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+D_{i} & =[\|x_{i},x_{n}\|\ |\ \|x_{i},x_{n}\|<\varepsilon]\\
+H_{\max}^{\Lambda}(\ell) & =\ell-\sum_{i=1}^{\ell}|D_{i}|-i\\
+H^{\Lambda}(\ell) & \le H_{\max}^{\Lambda}(\ell)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We can further refine this by using the kernel distance between observations:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+H_{K}^{\Lambda}(\ell) & =\ell-\sum_{i=1}^{\ell}\sum_{j=i}^{\ell}K_{\gamma}(x_{i},x_{j})\\
+H^{\Lambda}(\ell) & \le H_{K}^{\Lambda}(\ell)\le H_{\max}^{\Lambda}(\ell)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+(Old) Contextual Information
 \end_layout
 
 \begin_layout Standard
@@ -1789,7 +2381,7 @@ j=1\end{array}}^{\ell}\frac{1}{\ell^{2}}\omega_{\alpha}(x_{i},x_{j})\|x_{i},x_{j
 \end_layout
 
 \begin_layout Subsection
-Multi-dimensional Contextual Information
+(Old) Multi-dimensional Contextual Information
 \end_layout
 
 \begin_layout Standard
@@ -1842,7 +2434,7 @@ j=1\end{array}}^{\ell}\sqrt{\sum_{\nu\in D}\left(\frac{1}{\ell^{2}}\omega_{\alph
 \end_layout
 
 \begin_layout Subsection
-Selecting TI Dimensions
+(Old) Selecting TI Dimensions
 \end_layout
 
 \begin_layout Standard
