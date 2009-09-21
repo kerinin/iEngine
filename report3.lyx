@@ -1644,6 +1644,20 @@ k=1\end{array}}^{\ell}\frac{2\beta_{j}}{\ell}K_{\gamma}(w_{i}^{D},w_{j}^{D},X)K_
 
 \end_layout
 
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Shouldn't the second term only have one kernel function? If not combine
+ the first two terms
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsection
 Quadratic Optimization Problem
 \end_layout
@@ -1792,7 +1806,7 @@ a_{it} & \text{if}\ a_{it}>0\\
 \end_layout
 
 \begin_layout Section
-Transformation Invariance
+Ensemble System
 \end_layout
 
 \begin_layout Standard
@@ -1808,8 +1822,25 @@ This section is likely to change drastically
 
 \end_layout
 
+\begin_layout Standard
+We now discuss creating a system composed of multiple estimators.
+ It is well known that using a combination of estimates drawn from different
+ models of an underlying phenomenon tends to increase the prediction accuracy
+ of the hybrid system.
+ We will begin by establishing an explanation for this phenomenon based
+ on the concepts of VC Entropy and the uniform bounds on convergence of
+ learning processes.
+ We will then develop a method of qantifying the rate of convergence of
+ an individual estimator, and show how this quantification can be used to
+ build an optimal ensemble system of estimators.
+ The basic question we will address is 
+\emph on
+how does one choose sets of dimension which will benefit from TI analysis,
+ and how do we control the computational demands of an ensemble system?
+\end_layout
+
 \begin_layout Subsection
-General Setting
+VC Entropy and Bounds on the Rate of Convergence
 \end_layout
 
 \begin_layout Standard
@@ -1853,12 +1884,16 @@ Each vector describes the loss of a given element of
 \end_inset
 
 .
- We define the number of vectors arbitrarily close to the observations 
+ We define the minimum number of vectors required to 'cover' 
 \begin_inset Formula $q(\alpha)$
 \end_inset
 
+ with some arbitrarily small measure of closeness 
+\begin_inset Formula $\varepsilon$
+\end_inset
+
  as 
-\begin_inset Formula $N^{\Lambda}(x_{1},...,x_{\ell})$
+\begin_inset Formula $N^{\Lambda}(\varepsilon:x_{1},...,x_{\ell})$
 \end_inset
 
 
@@ -1880,7 +1915,7 @@ For example, if
 \end_inset
 
 .
- Using this value, we caluclate the entropy 
+ Using this value, we caluclate the VC Entropy 
 \begin_inset Formula $H^{\Lambda}(X)$
 \end_inset
 
@@ -1893,7 +1928,7 @@ For example, if
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-H^{\Lambda}(\ell) & =\ln N^{\Lambda}(x_{1},...,x_{\ell})\end{align*}
+H^{\Lambda}(\varepsilon:\ell) & =\ln N^{\Lambda}(\varepsilon:x_{1},...,x_{\ell})\end{align*}
 
 \end_inset
 
@@ -1901,20 +1936,7 @@ H^{\Lambda}(\ell) & =\ln N^{\Lambda}(x_{1},...,x_{\ell})\end{align*}
 \end_layout
 
 \begin_layout Standard
-The function 
-\begin_inset Formula $H^{\Lambda}(X)$
-\end_inset
-
- describes the VC entropy of the estimators 
-\begin_inset Formula $Q(x:\ \alpha)$
-\end_inset
-
- over the set of observations 
-\begin_inset Formula $X$
-\end_inset
-
-.
- The VC Entropy essentially describes the number of observations in 
+The VC Entropy essentially describes the number of observations in 
 \begin_inset Formula $X$
 \end_inset
 
@@ -1926,115 +1948,36 @@ The function
 \begin_inset Formula $X$
 \end_inset
 
- are 'close' to each other, we can eliminate all but one in our estimator.
- It can be shown that the following equations hold true:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-R(\alpha_{\ell})-\inf_{\alpha\in\Lambda}R(\alpha) & \le\sqrt{\frac{-ln\eta}{2\ell}}+\frac{\Psi}{2}\left(1+\sqrt{1+\frac{4}{\Psi}}\right)\\
-\Psi & =4\frac{H_{\text{ann}}^{\Lambda}\left(2\ell\right)-\ln\left(\eta/4\right)}{\ell}\end{align*}
-
+ are 
+\begin_inset Formula $\varepsilon$
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
-It can be shown that for 
-\begin_inset Formula $\ell$
+-close to each other, we can eliminate all but one in our estimator.
+ The VC Entropy is distribution-specific; it depends on the specific set
+ of vectors 
+\begin_inset Formula $q(\alpha)$
 \end_inset
 
- observations, the difference between the least risk 
-\begin_inset Formula $\inf_{\alpha\in\Lambda}R(\alpha)$
+.
+ In order to generate distribution-independant bounds, we establish the
+ growth function 
+\begin_inset Formula $G^{\Lambda}(\ell)$
 \end_inset
 
- attainable by 
-\begin_inset Formula $Q(z,\alpha)$
+ which describes the maximal value of 
+\begin_inset Formula $H^{\Lambda}(\ell)$
 \end_inset
 
- and the risk 
-\begin_inset Formula $R(\alpha_{\ell})$
-\end_inset
-
- attainable by the value of 
-\begin_inset Formula $\alpha$
-\end_inset
-
- which minimizes the emprical risk is less than a constant:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-\Psi & =4\frac{H^{\Lambda}\left(2\ell\right)-\ln\left(\eta/4\right)}{\ell}\\
-R(\alpha_{\ell})-\inf_{\alpha\in\Lambda}R(\alpha) & \le\sqrt{\frac{-ln\eta}{2\ell}}+\frac{\Psi}{2}\left(1+\sqrt{1+\frac{4}{\Psi}}\right)\\
-R(\alpha) & \le R_{\text{emp}}(\alpha)+\frac{\Psi}{2}\left(1+\sqrt{1+\frac{4R_{\text{emp}}(\alpha)}{\Psi}}\right)\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Where 
-\begin_inset Formula $\eta$
-\end_inset
-
- is some confidence interval for which probability 
-\begin_inset Formula $1-\eta$
-\end_inset
-
- the above statement holds true and the set of functions 
+ for any distribution given the set of estimators defined by 
 \begin_inset Formula $Q(x:\ \alpha)$
 \end_inset
 
- are upper-bounded by 1.
- The former describes the difference between the minimal loss when 
-\begin_inset Formula $\ell\rightarrow\infty$
-\end_inset
-
- and the minimal loss for 
-\begin_inset Formula $\ell$
-\end_inset
-
- observations of 
-\begin_inset Formula $X$
-\end_inset
-
-, the latter describes the minimal loss for 
-\begin_inset Formula $\ell$
-\end_inset
-
- observations of 
-\begin_inset Formula $X$
-\end_inset
-
- given the observed loss of an estimator.
- 
-\end_layout
-
-\begin_layout Subsection
-Distribution-Independant Bounds: The Growth Function
-\end_layout
-
-\begin_layout Standard
-The value of 
-\begin_inset Formula $H^{\Lambda}(X)$
-\end_inset
-
- is specific to a given set of observations, thus these equations cannot
- be evaluated in the absence of a set of observations.
- In order to generate corresponding equations which are independant of a
- dataset, the growth function 
-\begin_inset Formula $G^{\Lambda}(\alpha)$
-\end_inset
-
- is generally substituted for the VC Entropy:
+:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-G^{\Lambda}(\ell) & =\ln\sup_{z_{1},...,z_{\ell}}N^{\Lambda}(z_{1},...,z_{\ell})\\
+G^{\Lambda}(\ell) & =\ln\sup_{x_{1},...,x_{\ell}}N^{\Lambda}(x_{1},...,x_{\ell})\\
 H^{\Lambda}(\ell) & \le G^{\Lambda}(\ell)\end{align*}
 
 \end_inset
@@ -2043,7 +1986,40 @@ H^{\Lambda}(\ell) & \le G^{\Lambda}(\ell)\end{align*}
 \end_layout
 
 \begin_layout Standard
-It can be shown that the growth function is limited by
+It can be shown that the following equations hold true with probability
+ 
+\begin_inset Formula $(1-\eta)$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\Psi & =4\frac{G^{\Lambda}\left(2\ell\right)-\ln\left(\eta/4\right)}{\ell}\\
+R(\alpha) & \le R_{\text{emp}}(\alpha)+\frac{\Psi}{2}\left(1+\sqrt{1+\frac{4R_{\text{emp}}(\alpha)}{\Psi}}\right)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This equation describes the upper bound on the risk of estimators from the
+ set 
+\begin_inset Formula $Q(x:\ \alpha)$
+\end_inset
+
+ for 
+\begin_inset Formula $\ell$
+\end_inset
+
+ observations, when the empirical risk is equal to 
+\begin_inset Formula $R_{\text{emp }}(\alpha)$
+\end_inset
+
+.
+ It can be further shown that the growth function is bounded by
 \end_layout
 
 \begin_layout Standard
@@ -2122,17 +2098,29 @@ In other words the VC Dimension of a real-valued estimator is determined
 \end_inset
 
  dimensions.
+ In the case of SVM estimators, the value 
+\begin_inset Formula $h$
+\end_inset
+
+ can be determined after optimizing for 
+\begin_inset Formula $\beta$
+\end_inset
+
+ as the ratio of Support Vectors to 
+\begin_inset Formula $\ell$
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Subsection
-TI Entropy
+Bounds of Convergence for TI Analysis
 \end_layout
 
 \begin_layout Standard
-We mention the growth function because it is often used to characterize
- the worst-case performance for a specific type of estimator; we now show
- that the worst-case performance of an estimator capable of TI analysis
- is upper bounded by the growth function.
+The growth function is used to characterize the worst-case performance for
+ a specific type of estimator; we now show that the worst-case performance
+ of an estimator capable of TI analysis is upper bounded by the growth function.
  Consider the PDF generated by a given estimator 
 \begin_inset Formula $\varphi(x:\ \alpha_{n})$
 \end_inset
@@ -2193,14 +2181,134 @@ Recall that TI estimators are generated from the integral of the distance
 It is clear therefore that the TI loss will be less than or equal to the
  distance loss, and that the growth function for a given closeness parameter
  will be less for the TI estimator than the distance estimator.
- This same line of reasoning can be used to justify the fact that the TI
- entropy will be less than or equal to the VC entropy.
+ 
+\end_layout
+
+\begin_layout Subsection
+Bayesian Model Averaging Ensemble Machine
+\end_layout
+
+\begin_layout Standard
+We now develop a method of combining multiple estimators into a single learning
+ machine.
+ Our discussion of TI analysis has assumed that the distance metric is integrate
+d over some set of dimensions 
+\begin_inset Formula $D$
+\end_inset
+
+.
+ In the case of high-dimensional datasets the computational demands of integrati
+ng over set set of all dimensions in 
+\begin_inset Formula $X$
+\end_inset
+
+ may outweigh the utility of doing so.
+ We instead consider using multiple partitions of 
+\begin_inset Formula $\bar{D}$
+\end_inset
+
+ to generate partial estimators.
+ We can further extend the flexibility of the ensemble system by restricting
+ each partial estimator to a subset of observations 
+\begin_inset Formula $X^{D}\subseteq X$
+\end_inset
+
+.
+ We therefore define a set of partial estimators:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-G_{TI}^{\Lambda}(\ell) & \le G^{\Lambda}(\ell)\\
-H_{TI}^{\Lambda}(\ell) & \le H^{\Lambda}(\ell)\end{align*}
+\varphi^{n}(x:\ X^{n},D^{n}) & \longmapsto\Pr(x|X^{n})\approx\Pr(x|X)\\
+X^{n} & \subseteq X\\
+D^{n} & \subseteq\bar{D}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+With associated risk bounds
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+In the case of Parzen Estimators we can set the empirical risk to 0, in
+ the case of SVM estimators we can set the empirical risk to the minimal
+ value of the optimization problem.
+\end_layout
+
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\Psi^{n} & =4\frac{G^{\Lambda}\left(2|X^{n}|\right)-\ln\left(\eta/4\right)}{|X^{n}|}\\
+R^{n}(\alpha) & \le R_{\text{emp}}^{n}(\alpha)+\frac{\Psi}{2}\left(1+\sqrt{1+\frac{4R_{\text{emp}}^{n}(\alpha)}{\Psi}}\right)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Consider the case of multiple partial estimators which makes estimates of
+ 
+\begin_inset Formula $\Pr(x|X)$
+\end_inset
+
+ which we would like to combine.
+ Consider the two resulting extimates of the probability of a given point
+ 
+\begin_inset Formula $x$
+\end_inset
+
+.
+ Using Bayesian Model Averaging (BMA) we can average the estimators weighted
+ by their respective confidence interval
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Technically, they are being weighted by the probability that each estimator
+ is accurate given 
+\begin_inset Formula $X$
+\end_inset
+
+.
+ Given a confidence interval, the relative probability that each estimate
+ is accurate is determined by the confidence interval of the estimators.
+ In this context, the concepts of risk and confidence interval are interchangabl
+e.
+\end_layout
+
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+If that footnote is correct, it's odd that we need to normalize this.
+ And if we don't need to normalize it, how do we account for a thousand
+ estimators with decent confidence interval being combined?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\Pr(x|X) & \approx\sum_{n}\Pr(x|\varphi^{n},X)\Pr(\varphi^{n}|X)\\
+ & \approx\frac{1}{\sum_{n}1-R^{n}(\alpha)}\sum_{n}\varphi^{n}(x:\ X^{n},D^{n})(1-R^{n}(\alpha))\end{align*}
 
 \end_inset
 
@@ -2208,7 +2316,293 @@ H_{TI}^{\Lambda}(\ell) & \le H^{\Lambda}(\ell)\end{align*}
 \end_layout
 
 \begin_layout Subsection
-Maximal TI Entropy
+Merging Estimators with Shared Dimensional Sets
+\end_layout
+
+\begin_layout Standard
+This result allows us to create hybrid estimates based on a set of estimators
+ regardless of the dimensional sets used by the estimators or the subsets
+ of 
+\begin_inset Formula $X$
+\end_inset
+
+ used by the estimators.
+ We now consider a similar situation; combining the estimates of estimators
+ based on the same dimensional set.
+ In this context it is possible to to generate an estimator using the union
+ of the observations from the two original estimators.
+ This approach has a significant benefit over the BMA approach described
+ above; it allows the hybrid estimator to generate estimates using the joint
+ entropy of the observations, rather than the posterior probability of the
+ marginal entropy of the two estimators.
+ If we describe the entropy of two estimators as 
+\begin_inset Formula $H(X^{1})$
+\end_inset
+
+ and 
+\begin_inset Formula $H(X^{2})$
+\end_inset
+
+, the entropy of the union of these two subsets is lower bounded by the
+ sum of the marginal entropies:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+H(X^{1}\cap X^{2}) & \ge H(X^{1})+H(X^{2})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Unfortunately we cannot simply combine the two subsets 
+\begin_inset Formula $X^{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $X^{2}$
+\end_inset
+
+; doing so would violate the i.i.d.
+ requirement of the PW estimator.
+ To demonstrate this, consider a situation in which both subsets are drawn
+ randomly from 
+\begin_inset Formula $X$
+\end_inset
+
+ within some bounds 
+\begin_inset Formula $(a^{1},b^{1})$
+\end_inset
+
+ and 
+\begin_inset Formula $(a^{2},b^{2})$
+\end_inset
+
+ defined along some dimension of 
+\begin_inset Formula $X$
+\end_inset
+
+ (ie we draw 
+\begin_inset Formula $n$
+\end_inset
+
+ observations from 
+\begin_inset Formula $X$
+\end_inset
+
+ from a specific time window).
+ Within the context of each estimator the i.i.d.
+ constraints are met within the defined bounds, however combining these
+ two sets will only produce i.i.d.
+ data if 
+\begin_inset Formula $a^{1}=a^{2},\ b^{1}=b^{2}$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+Consider the requirement of i.i.d.
+ data in PW estimators; the probability of a given point is determined by
+ the sum of the kernel distance to each observation used by the estimator.
+ More observations in a given region increases the probability estimate
+ for any point near that region.
+ Let us assume that the bounds of one estimator are contained in and smaller
+ than the bounds of a second:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+a^{1} & <a^{2}\\
+b^{1} & >b^{2}\\
+|X^{1}| & =|X^{2}|\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In this case, a PW estimator would incorrectly generate elevated probability
+ estimates in the region 
+\begin_inset Formula $(a^{2},b^{2})$
+\end_inset
+
+ and lowered estimates in the compliment.
+ We have already seen how SVM estimators achieve performance optimization
+ by adjusting the weight 
+\begin_inset Formula $\beta$
+\end_inset
+
+ given to each observation; we now propose a similar weighting mechanism
+ 
+\begin_inset Formula $\rho(n)$
+\end_inset
+
+ which adjusts the influence of each point in the union of the two sets
+ 
+\begin_inset Formula $X^{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $X^{2}$
+\end_inset
+
+ so that the estimates of a PW estimator based on the union of two i.i.d.
+ data sets remain accurate estimates of the underlying PDF.
+ We now show that the weighting mechanism must be based on the risk of the
+ two estimators; given two estimators 
+\begin_inset Formula $\varphi^{n}(x:\ X^{n},D^{i})$
+\end_inset
+
+ and 
+\begin_inset Formula $\varphi^{m}(x:\ X^{m},D^{i})$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\varphi(x:\ X,D) & =\sum_{i=1}^{\ell}\frac{1}{\ell}K_{\gamma}(x,x_{i})\\
+\varphi^{n,m}(x:\ X^{n}\cap X^{m}:D^{i}) & =\frac{\varphi^{n}(x:\ X^{n},D^{i})(1-R^{n}(\alpha))+\varphi^{n}(x:\ X^{n},D^{i})(1-R^{m}(\alpha))}{2-R^{n}(\alpha)-R^{m}(\alpha)}\\
+ & =\frac{(1-R^{n}(\alpha))}{2-R^{n}(\alpha)-R^{m}(\alpha)}\sum_{x_{i}\in X^{n}}\frac{1}{|X^{n}|}K_{\gamma}(x,x_{i})+\frac{(1-R^{m}(\alpha))}{2-R^{n}(\alpha)-R^{m}(\alpha)}\sum_{x_{i}\in X^{m}}\frac{1}{|X^{m}|}K_{\gamma}(x,x_{i})\\
+ & =\sum_{x_{i}\in X^{n}\cup X^{m}}\rho(x_{i}:\ \varphi^{n},\varphi^{m})\frac{1}{|X^{n}|+|X^{m}|}K_{\gamma}(x,x_{i})\\
+\rho(x:\ \varphi^{n},\varphi^{m}) & =\begin{cases}
+\frac{(1-R^{n}(\alpha))}{|X^{n}|\left(2-R^{n}(\alpha)-R^{m}(\alpha)\right)} & \quad x\in X^{n},x\notin X^{m}\\
+\frac{(1-R^{m}(\alpha))}{|X^{m}|\left(2-R^{n}(\alpha)-R^{m}(\alpha)\right)} & \quad x\notin X^{n},x\in X^{m}\\
+\frac{(1-R^{n}(\alpha))}{|X^{n}|\left(2-R^{n}(\alpha)-R^{m}(\alpha)\right)}+\frac{(1-R^{m}(\alpha))}{|X^{m}|\left(2-R^{n}(\alpha)-R^{m}(\alpha)\right)} & \quad x\in X^{n},x\in X^{m}\end{cases}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This can be extended to SVM estimators:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\varphi^{n,m}(x:\ \beta,X) & =\sum_{x_{i}\in X^{n}\cup X^{m}}\beta_{i}\rho(x:\ \varphi^{n},\varphi^{m})K_{\gamma}(x,x_{i})\\
+W(\beta:\ X) & \longmapsto\min_{\beta}\sum_{\begin{array}{c}
+x_{i}\in X^{n}\cup X^{m}\\
+x_{j}\in X^{n}\cup X^{m}\\
+x_{k}\in X^{n}\cup X^{m}\end{array}}\beta_{j}\beta_{k}\rho(x_{j}:\ \varphi^{n},\varphi^{m})\rho(x_{k}:\ \varphi^{n},\varphi^{m})K_{\gamma}(x_{i},x_{j})K_{\gamma}(x_{i},x_{k})\\
+ & \qquad\qquad\qquad-\sum_{\begin{array}{c}
+x_{i}\in X^{n}\cup X^{m}\\
+x_{j}\in X^{n}\cup X^{m}\end{array}}\frac{2\beta_{j}}{\ell}\rho(x_{j}:\ \varphi^{n},\varphi^{m})K_{\gamma}(x_{i},x_{j})+\lambda\Omega(\beta,X^{n}\cup X^{m})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+I don't think the second term is correct - work this through the equations.
+ Also make sure the second term only needs one kernel term (note in SV section)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note that both sets being combined must be i.i.d.; this means that single observati
+ons in isolation cannot be added.
+ The minimum number of points in a set required for the set to constitue
+ i.i.d.
+ data is determined by the number of dimensions in the dimensional set.
+ The risk value 
+\begin_inset Formula $R(\alpha)$
+\end_inset
+
+ is also a worst-case scenario, rather than an exact measure; the more points
+ in a given subset.
+ This can be accomodated by combining sets with sufficient observations
+ that the contribution of the empirical risk is greater than the contribution
+ of the growth function.
+ In general terms, the more observations in the combined sets, the more
+ accurate the weighting term 
+\begin_inset Formula $\rho(\cdot)$
+\end_inset
+
+ will be.
+\end_layout
+
+\begin_layout Subsection
+Computational Considerations in Subset Selection
+\end_layout
+
+\begin_layout Subsection
+Hierarchical Ensemble Estimators
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Conclusions:
+\end_layout
+
+\begin_layout Itemize
+We can combine multiple LM's by averaging them weighted by their level of
+ risk
+\end_layout
+
+\begin_layout Itemize
+We can combine multiple observations from different LM's into a single LM
+ (provided they have the same dimensional set) by adding a multiplier to
+ each observation based on the level of risk of the LM from which they were
+ derived.
+ If observations exist in both LM's being combined, they are weighted by
+ the sum of the risk levels in the two LM's
+\end_layout
+
+\begin_layout Itemize
+We can add single points to an LM, but we must include the new point's nearest
+ neighbors in the risk multiplier (and update the multipliers of the neighbors).
+\end_layout
+
+\begin_layout Itemize
+Since adding a point to an LM requires computation, we can choose between
+ dimensional sets based on the expected risk decreas and the computational
+ cost of adding a point to that dimensional set.
+ Larger decreases in risk are better, and lower computational cost is better.
+ The influence of each can be adjusted using a single variable.
+\end_layout
+
+\begin_layout Itemize
+We can calculate the change in risk of a dimensional set using the empirical
+ risk of any existing observations as a base and the bounds on the growth
+ function to extrapolate some number of additional observations.
+ 
+\end_layout
+
+\begin_layout Itemize
+In the same way that neighborhood probabilities can be projected onto point
+ probabilities, probabilities on higher levels can be projected onto lower
+ levels, using the same risk evaluation function
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\lyxline
+
 \end_layout
 
 \begin_layout Standard
@@ -2277,6 +2671,537 @@ We can further refine this by using the kernel distance between observations:
 \begin_inset Formula \begin{align*}
 H_{K}^{\Lambda}(\ell) & =\ell-\sum_{i=1}^{\ell}\sum_{j=i}^{\ell}K_{\gamma}(x_{i},x_{j})\\
 H^{\Lambda}(\ell) & \le H_{K}^{\Lambda}(\ell)\le H_{\max}^{\Lambda}(\ell)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+The loss function used above is specific to a set of dimensions which are
+ being compared - the next step is to compare different sets of dimensions
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+Regarding optimization...
+\end_layout
+
+\begin_layout Plain Layout
+once the distance matrix for a set of observations has been calculated,
+ there isn't necessarily a large increse in the cost of minimizing for weights
+ (and no cost in the case of Parzen) aside from the potential increase in
+ the size of the kernel matrix.
+ This is due to the fact that the kernel matrix is determined as the product
+ of each dimension, possibly with additional terms if a given dimension
+ is included in multiple TI sets.
+ In essence; determining the distance matrix is *the* optimization problem.
+\end_layout
+
+\begin_layout Plain Layout
+Minimizing the computational cost of a given dimensional set distance matrix
+ can only be reduced by reducing the number of observations used for the
+ distance matrix.
+ This means that we have two choices; which observations to include in a
+ comparison set and which dimensional sets to check.
+ The former needs to retain the i.i.d.
+ nature of the observations, so should probably be a random sampling (although
+ this is an interesting area of manipulation if, for instance, you want
+ to weight the system towards recent observations).
+ In the case of the latter we have two options; randomly choose dimensional
+ sets, or develop some heuristic enabling us to pick sets based on some
+ already-known information about the data - the only such heuristic I can
+ think of would be based on the observations about the relative entropy
+ of a set and partitions of that set.
+\end_layout
+
+\begin_layout Plain Layout
+Picking sets of dimensions will need (as discussed) a cost function for
+ computing the distance matrix of *any* set (of the given dimension), an
+ understanding of the relationship between the entropy of different sets,
+ and knowledge of existing dimensional sets (to be used with the previous
+ understanding).
+ One thing we can know for sure is that if the choice parameter is absolute
+ (rather than relative, ie.
+ take the top 5 sets) if it's worthwhile to calculate a given dimensional
+ set, it's not worthwhile to calculate any paritions of that set (since
+ the information of the set includes any information contained in the partitions
+).
+ We also know that since entropy is additive, the minimum entropy of the
+ union of two disjoint sets will be the sum of the entropy of the two sets;
+ if this minimum satisfies the choice parameter, we can substitute the union
+ for the two subsets.
+ We should develop an understanding of the union of non-disjoint sets as
+ well.
+\end_layout
+
+\begin_layout Plain Layout
+Let's establish the basic search algorithm:
+\end_layout
+
+\begin_layout Enumerate
+evaluate the 0-d entropy of the set (this is essentially the VC Entropy
+ calculated for pairs of observations with no context) and use to initialize
+ the predicted entropy of all partitions of d
+\end_layout
+
+\begin_layout Enumerate
+pick the dimensional set with the highest predicted entropy (if multiple
+ sets share the maximal value pick among them at random)
+\end_layout
+
+\begin_layout Enumerate
+evaluate the entropy of the picked set over a subset of observations
+\end_layout
+
+\begin_layout Enumerate
+update predicted entropy based on the observed set
+\end_layout
+
+\begin_layout Enumerate
+if evaluated entropy meets demands expand calculation, else return to 2
+\end_layout
+
+\begin_layout Enumerate
+if computational resources allow, return to 2
+\end_layout
+
+\begin_layout Plain Layout
+One thing that's not clear is the relationship between our search and the
+ actual estimation process.
+ It would be nice if the two were integrated; *any* distance matrices generated
+ in the search were used in estimation.
+ In this case, we could also treat our heuristic as part of an integrated
+ system; the number of observations in a dimensional set could be gradually
+ increased or decreased based on the observed entropy.
+ Can this be accomplished easily in the structure as it exists?
+\end_layout
+
+\begin_layout Plain Layout
+Let's try to develop this.
+ In this case, each dimensional set constitutes its own LM, and our task
+ is simply to integrate the estimates of different LM's (this is needed
+ in any case for the ensemble system).
+ The nice thing is that we can caluclate the minimal accuracy of each LM
+ (either related to the risk or the confidence interval).
+ It should be possible to use this information in some way to combine them.
+ This is a nice observation, because it allows us to handle different dimensiona
+l sets as well as heirarchical information in a uniform manner (assuming
+ we can translate accuracy of upper layers into accuracy of lower layers).
+ Let's recall that the kernel distance for multi-dimenaional predictions
+ is the product of the kernel distance over each dimension - it stands to
+ reason that adding a multiplier based on accuracy would make sense; the
+ traditional multiplier is in the context of dimensions which are assumed
+ to carry equivalent information.
+ Let's propose this:
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\varphi(x:\ X) & =\sum_{i=1}^{\ell}\prod_{D\in\mathbf{D}}\mathcal{K}_{\gamma}(x,x_{i}:\ D)\\
+\mathcal{K}_{\gamma}(x,x_{i}:\ D) & =\begin{cases}
+\rho(D,X^{D})\beta_{i}^{D}K_{\gamma}(x,x_{i}:\ D) & \quad x_{i}\in X^{D}\\
+1 & \quad\text{otherwise}\end{cases}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+This leaves us (again) with the task of selecting which dimensional set
+ to add observations to, complicated now by the fact that each dimensional
+ set will have a different number of observations.
+ We need a method of comparing the entropy of sets with different numbers
+ of observations.
+ I think the best solution to this is to observe that the growth function
+ (and thus the observed entropy, I think) is upper bounded by a known function.
+ This allows us to normalize each estimate to ell - essentially taking the
+ observed entropy and projecting it to the worst case scenario and then
+ comparing these worst-case scenarios.
+ If this can be justified, it provides a seamless way to compare the expected
+ entropy of two sets with different numbers of observations.
+ As the number of observations in one grows, the expected entropy in the
+ worst case converges on the actual, so if the entropy of the more-defined
+ set is greater than the worst-case scenario of the less-defined set, we
+ know that we should work on the less defined set.
+ In essence, we simply pick the estimate that has the lowest worst-case
+ estimate given the observations.
+ This approach can be easily adjusted to take computational demands into
+ account, in fact if we assume we're going to add one observation at a time,
+ we can determine the exact computational demands based *both* on the dimensiona
+lity *and* the number of observations.
+ This would tend to promote dimensional sets with few observations over
+ those with many, even if the expected entropy of the former is greater
+ than the latter (in some cases), which is probably good; we strike the
+ optimal balance between performance and accuracy using a simple parameter
+ which scales the influence of the computational demands.
+ This is in additition to the benefit of the fact that we can choose to
+ add observations only when resources are available.
+\end_layout
+
+\begin_layout Plain Layout
+Let's return briefly the the issue of choosing an observation to add.
+ The previous stuff simply determines when to add an observation and to
+ which LM; it doesn't make any demands on which point is chosen.
+ The question is if i.i.d.
+ data requires random selection, or if we can tweak the selection process
+ (ie select more recent points).
+ In a Parzen estimator, I don't think we could tweak the selection process
+ - the probability is determined by the number of points in a given vicinity,
+ so selecting for specific values would skew this estimate.
+ It may be possible to adjust for this using the SVM approach, since the
+ weight of each point's influence is controlled for each observation, and
+ it should be possible to correct for any selection bias; in this case we
+ would simply be increasing the prediction accuracy for points near where
+ our sampling bias occurred.
+ I'm not sure how doing this would influence the optimization problem; increasin
+g the accuracy implies increasing the nubmer of SV's, so we would inevitably
+ get more SV's in the region being selected for.
+ It would seem that the weight adjustment would need to be applied after
+ the optimization problem was completed.
+ I'm also not sure how to modify that weight - we would probably need to
+ choose at random based on a distribution, then weight points based on the
+ distribution.
+ If we're talking about an online system, the selection distribution would
+ be tricky.
+ We could determine the distribution is observations were equally spaced
+ in time, the sampline rate was constant, and the selection was random,
+ but in the context of optimized sampline I'm not sure what the distribution
+ would be.
+ Maybe we use a sampling distribution which was uniform across scales (exponent,
+ inverse?) - this would mean that whenever we made a sampling the probability
+ distribution would remain the same.
+ Unfortunately, I don't see how we could simply add the most recent observation
+ to some subset of LM's and be able to generate useful data (the sampling
+ distribution would be based on the computational resources and the entropy
+ of each partition at each point in time).
+ One nice thing about being able to do this is that it would allow us to
+ discard data at some point.
+ If we were sampling randomly, we would have to retain all the data in the
+ system in order to sample from it - even if the data wasn't being used
+ in predictions, it would *all* have to be retained in order for the system
+ to increase its prediction accuracy.
+ Reducing the probability of including a point would allow us to discard
+ non-SV data once its selection probability dropped below some threshold.
+ OK - so we need to develop a system for doing this.
+ It should be as simple as establishing a selection distribution and a weight
+ function to correct it.
+\end_layout
+
+\begin_layout Plain Layout
+Handling non-iid data needs attention.
+ Even though the time dimension is part of the estimates, the time dimension
+ is assumed to correlate with different behaviors in other dimensions, thus
+ we cannot properly estimate the probability of the other dimensions unless
+ the time dimension is iid.
+ Let's assume we have a set of observations X taken before some time value,
+ and for which we have already determined SV's using a random sampling from
+ X.
+ We now need to add a set of observations Y, taken after the time; we need
+ to add observations from Y to the LM in such a way that iid data is retained.
+ If the observations of X are iid, mean of the distance between observations
+ will approach the duration of X divided by the number of points sampled.
+ To add Y to X, we must retain this mean.
+ This means that we can add at most one observation from Y for each segment
+ of the mean contained in the duration of Y, or alternately if we are going
+ to simply add a single point it must be chosen at random from the first
+ mean-window of Y.
+ This isn't really a great solution, as if we repeated this process indefinately
+, the result would be less random than if we selected the maximum number
+ of points from Y possible.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+Perhaps we can simply assume that each time a sample is drawn, it is drawn
+ from the set of observations which have occurred since the last sample
+ was drawn (in this case we assume multiple samples are drawn at each sampling).
+ This allows us to establish the sampling rate for each period between samplings
+; so long as each sampling is randome we should be able to weight the results
+ based on the sampling rate (the multiplier would be the inverse of the
+ sampling rate, or duration/samples).
+ This could even be extended to single samples; each sample would be weighted
+ by the duration since the last sample.
+ This system would both allow us to front-load samples and to go back and
+ fill in previous periods afterwards (which would be nice because it allows
+ shallow on-line awareness as well as a more exhaustive off-line investigation).
+\end_layout
+
+\begin_layout Plain Layout
+I think this (stratified) method might work - what we need to establish
+ now is how it integrates into the optimization procedure.
+ In this case, we don't want weights to be affected by the sample rate,
+ so the sample rate will need to show up in the optimization process somewhere.
+ I think we can just add the weight term before the multipliers in both
+ parzen and SVM estimates and end up with the proper result.
+\end_layout
+
+\begin_layout Plain Layout
+Consider a dataset with a single observation is surrounded by no observations
+ and a cluster of observations with highly divergent associated values.
+ In this case, the single observation will be weighted much higher than
+ the cluster, however the cluster implies that the dataset has a lot of
+ variation within small time windows.
+ In this case, the result of the cluster should probably be more influential
+ than the result of the point.
+ Contrast this to a similar case where the cluster shows highly consistent
+ associated values; in this case we should probably weight the two associated
+ patterns equally.
+ In other words, we need to take variation into account when doing this.
+ What this means is that we need to use the confidence interval to scale
+ observations, and the confidence interval needs to take the sampling rate
+ into account in some way; in the case where the cluster is highly convergent.
+ In the first case, the confidence interval for the cluster will be lower
+ than in the latter case.
+ We want to influcence of the cluster to be greater when the confidence
+ interval for the cluster is high than when its low (high confidence interval
+ means random process, in which case the point isn't much more releavnt
+ than the cluster, lower confidence interval means well-behaved process
+ in which both the point and the cluster can be treated as single observations).
+ This means that the influence of a point needs to be scaled linearly with
+ the confidence interval and inversely with the sampling rate.
+ In other words, the less information a point contains, the lower its influence
+ should be, or the less risk associated with an estimate derived from a
+ given sampling, the more the sample rate should predominate.
+\end_layout
+
+\begin_layout Plain Layout
+let's thinka about it this way; we're given a set of samples of X, each
+ of the same duration.
+ We want to combine them.
+ It seems like it would makes sense to weight them based on the information
+ contained in each sample.
+ This would reduce to the earlier situation (the information in the convergent
+ set is the same as the information contained in the point, and the information
+ in the divergent sample is much more than the information contained in
+ the point).
+ The question is if it's possible to prove this makes sense.
+ Intuitively, the iid case assumes that each observation carries an equal
+ amount of information about the distribution, so they're all weighted equally
+ - if a given set of observations holds more information about the distribution
+ it should carry more weight than a set of observations which carry less
+ information.
+ This would require that we prove that our information measure is derived
+ directly from the probability distribution.
+\end_layout
+
+\begin_layout Plain Layout
+This approach requires that we extend it to arbitrarily sized samples, which
+ probably means we need to define the information in a single point.
+ In the uniform case, we're determining the information contained in the
+ entire set, then applying that uniformly to each observation in that set;
+ moving to a point-based information measure will require that we also take
+ into account other points.
+ At the same time, applying the information in a whole set to each point
+ in the set seems less than idea; some points in that set may carry more
+ information than others.
+ Can we determine the information of a single point? Would we want to? If
+ we simply calulated the information of each point relative the the distribution
+ of all other points and then used this to weight points, what would the
+ result be? outlyers would be weighted higher than 'normal' points - would
+ this affect the final probability measure? Surely it would (in the Parzen
+ sense), because any weighting of iid points would distort the probability
+ measure.
+ So we can't simply calculate the entropy of points.
+ This implies that something must counteract the entropy of a given point
+ - what would that be?
+\end_layout
+
+\begin_layout Plain Layout
+Lets think in terms of subsets of X, and try to work out some method by
+ which the PDF of the subsets approaches the PDF of X.
+ The main difference here is that the entropy of a subset cannot be assumed
+ to be the entropy of the full set.
+ We can, however, state that the entropy of a subset is upper-bounded by
+ the growth function plus the entropy of the observations.
+ So maybe instead of considering the entropy of a set we consider the growth
+ entropy of a set normalized to some number of observations (say the number
+ of total observations)?
+\end_layout
+
+\begin_layout Plain Layout
+This leads to the idea that we're dealing with multiple LM's, each defined
+ by the set of observations in its sample subset.
+ In this case, there's not really any reason to distinguish between LM's
+ defined over different dimensional sets and LM's defined over different
+ subsets of X; both express partial information about the distribution of
+ X, and both need to be adjusted based on the expected risk of the estimator.
+ This probably works great so long as each estimator has multiple observations,
+ what do we do if each contains a single observation; it make it impossible
+ to calculate SV's.
+ maybe we can get out of this by first considering LM's as parzen estimators,
+ then combining weighted estimators, then generalizing to SVM's.
+\end_layout
+
+\begin_layout Plain Layout
+If we can justify combining multiple LM's using different dimensional subsets,
+ we should be able to justify combining LM's using different observation
+ sets.
+ Once that has been formalized, it should be possible to construct a weighted
+ Parzen estimator, then generalize it to a weighted SVM.
+ We just need to formalize the justification for combining LM's.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+This allows us to combine observations with a weighting multiplier which
+ factors out the lack of iid.
+ This can be done recursively so that we repeatedly add observations without
+ screwing up the estimator (in this case, the multipliers would be multiplied
+ - this can all be shown as expansions of the Parzen estimator equation).
+\end_layout
+
+\begin_layout Plain Layout
+The final question is how this operates in the context of TI.
+ We can treat neighborhoods as points, but is there a problem comparing
+ the neighborhoods to points? If we're adding all the points in a neighborhood,
+ how do we distribute the weight of the neighborhood? The ideal solution
+ would be to prove that we can extract the neighborhood weighting function
+ from the kernel and apply it to the iid weighting function as a multiplier.
+ One good thing is that there's no point in combining observations for different
+ dimensional subsets; we'll always be comparing points within a subset.
+ This means that we need to keep in mind that we're not combinging points,
+ we're combining neighborhoods.
+ This should allow us to ignore the issue completely; neighborhoods act
+ as points, and they can be combined with a single multiplier.
+ What you're starting to get at is an analysis of when a point can be discarded;
+ we want to only discard points which aren't used in any SV's, which brings
+ us back to the inclusion threshold.
+ This isn't complicated.
+\end_layout
+
+\begin_layout Plain Layout
+Given these observations, we can now even add single points; we use the
+ risk associated with a single observation as the points risk.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+Here's an odd observation; if we're using the risk as the multiplier, as
+ the risk increases the influence increases - this would seem to be the
+ opposite of what we want? I think the probability should probably be 1-risk.
+ This means that adding a single point will give it a multiplier very close
+ to 0 - how does this work out as we add more and more points? The most
+ recent points will have the highest multipliers, since the risk will necessaril
+y be less than one, and over successive additions the older points will
+ be diminished.
+ This points to a problem with the recursive issue - perhaps it needs to
+ be additive? In fact I think it must be - we can frame the issue as associative
+ addition; X+Y+Z = (X+Y)+Z.
+ In this case, the first two subsets are combined, then added to the third.
+ This of course leads us to the opposite situation, where older observations
+ have higher priority than newer.
+ No, because the weights will only increase if we have the same point in
+ multiple subsets.
+ What this doesn't take into account is the fact that the combined observations
+ have lower risk than the new ones - can we integrate this risk with the
+ original risk? IE X+Y->X', X'+Z.
+ I think we would have to treat X' as new subset of observations and scale
+ each point based on that.
+ To do this, we have to optimize with the weights from X,Y then replace
+ these weights with a single weight from new calculation.
+ But this won't work because we loose the iid fix - we'll certainly need
+ to adjust the weights.
+ It may be that allowing the weights to drift down is OK? No, I think the
+ problem is that we must keep the individual iid weights.
+ We can determine the risk of X', but it doesn't affect the constituent
+ points; they are being weighted relative to each other given their weight
+ when they were observed.
+ Even then, the problem is that if we add each point with the minimal weight,
+ they all end up with the same weight, which means we're back with the problem
+ of no iid scaling.
+ The problem (again) is that the risk value doesn't seem to care about the
+ sampling rate.
+\end_layout
+
+\begin_layout Plain Layout
+How about this, instead of adding one point at a time, we always add two
+ points; the most recent point and the one before it.
+ This means the entropy of both points is determined by the separation between
+ them.
+ It also means that points take into account their neighbors on both sides.
+ I think this solves our main problem; it allows us to add one point at
+ a time (by calculating the entropy of the point and the most recent one)
+ and it allows us to respond to the sampling rate.
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+In comparing the relative value of adding some observations, we must estimate
+ the reduction in risk adding these values will produce.
+ A simple method of doing this is to assume that the new observations will
+ have a negligable influence on the risk (as would be the case if you're
+ adding a fraction of the total number of observations).
+ This allows us to assume that the emprican risk and the VC Entropy will
+ both remain constant, and we can simply check (for each LM's entropy and
+ empirical risk) how adding observations will affect the maximal risk.
+\end_layout
+
+\begin_layout Plain Layout
+This might be an area in which we can integrate surprisal - we somehow integrate
+ the difference between the expected change in empirical risk to the actual
+ (alternately we weight the calculation towards 'recent' observations).
+ Maybe we establish a surprisal value which expresses the difference between
+ the actual change in empirical risk (or VC Dimension) and expected.
+ We could use a simple regression fit of these values to estimate future
+ values (this would probably only work if we were comparing actual to steady-sta
+te).
+ Another approach would be to use the worst-case scenario, in which the
+ loss was maximal for all new observations and each new observation became
+ a SV (this is essentially tracking the growth function).
+ It might be better to use this as the baseline.
+\end_layout
+
+\begin_layout Plain Layout
+One last (I hope) question; how do we evaluate the expected change when
+ l=0? In this case we need to evaluate what the risk of making an estimate
+ from no observations is.
+ In this the growth function isn't a problem (it's 0), and the confidence
+ level isn't a problem.
+ The equation, however, uses l in denominators, making it indeterminate.
+ Let's thinking more generally about the risk.
+ We're dealing with a worst-case scenario, and since we have nothing to
+ generate our estimates, we have to assume that the worst case scenario
+ is that our estimator has the maximal loss for each prediction.
+ Unfortunately, we're bounded by (0,1), so the risk in this case is purely
+ determined by the distribution.
+ Let's take the worst case scenario then and assume that it's always the
+ same value, and that our estimator always produces another value - our
+ risk will be 1.
+ In other words, we assume in the worst case scenario that our risk is the
+ upper bound.
+ In this case, the difference is 1-whatever.
+\end_layout
 
 \end_inset
 
