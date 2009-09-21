@@ -2538,12 +2538,181 @@ ons in isolation cannot be added.
  will be.
 \end_layout
 
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Show a second iteration of this process
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsection
 Computational Considerations in Subset Selection
 \end_layout
 
+\begin_layout Standard
+In general, computational demands will vary with different classes of estimators.
+ TI estimators have far higher computational cost than point-based estimators.
+ We assume that there exist more classes of estimators than are necessary
+ to produce a given risk for a given set of observation, which leaves us
+ with the task of selecting which estimators to apply to an estimation problem
+ and how to assign observations to the selected estimators.
+ To make these decisions, we develop a selection heuristic based on the
+ costs and benefits of using a given estimator.
+\end_layout
+
+\begin_layout Standard
+The basic approach we will describe is an iterative one; we first select
+ an i.i.d.
+ subset 
+\begin_inset Formula $X'$
+\end_inset
+
+ of 
+\begin_inset Formula $X$
+\end_inset
+
+, then add the subset to one or more estimators from the set of possible
+ estimators based on some heuristic.
+ At each iteration we update our selection heuristic based on the results
+ of the previous addition of 
+\begin_inset Formula $X'$
+\end_inset
+
+.
+ This approach allows us to control both the set of estimators used and
+ the observations assigned to each estimator; more importantly it allows
+ us to do so based on the nature of the observations 
+\begin_inset Formula $X$
+\end_inset
+
+.
+ We will show that it is possible to build a heuristic which requires no
+ additional computation, allowing us to simultaneously build estimators
+ and optimize subsequent iterations.
+\end_layout
+
+\begin_layout Standard
+The simplist portion of the heuristic to define is the cost of using an
+ estimator.
+ The computational complexity of estimators can generally be determined
+ 
+\emph on
+a priori
+\emph default
+ as a function of the number and dimensionality of the estimator.
+ In some cases optimizations exist which are data-dependant; in these cases
+ we will assume a worst-case scenario for additional observations.
+ We define the cost function for a given estimator as 
+\begin_inset Formula $c(n,X)$
+\end_inset
+
+ where 
+\begin_inset Formula $n$
+\end_inset
+
+ denotes the number of observations which will be added and 
+\begin_inset Formula $X$
+\end_inset
+
+ denotes the observations used by the estimator.
+\end_layout
+
+\begin_layout Standard
+The benefit portion of the heuristic can be easily constructed from previous
+ work.
+ For any estimator, the utility of the estimator is described by the risk
+ associated with the estimator.
+ In generating estiamtes our primary goal is to produce accurate estimates,
+ and the risk function 
+\begin_inset Formula $R(\alpha)$
+\end_inset
+
+ describes the lowest possible accuracy of a given estimator.
+ It is clear therefore that the utility of adding observations to an estimator
+ is determined by the change in the expected risk as a result of adding
+ observations; estimators which we expect to gain a high reduction in risk
+ should be preferred over estimators which we expect to gain a small reduction
+ in risk.
+ Recall that the maximal risk is determined by the number of observations
+ used by the estimator, the empirical risk of the estimator, and the estimator's
+ growth function; all three of these values are known for a given estimator
+ withou additional computation
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+The empirical risk for an SVM estimator is the minimal value of the optimization
+ problem.
+ The empirical risk of a Parzen Estimator can be assumed to be 0.
+\end_layout
+
+\end_inset
+
+.
+ We can therefore define the benefit function for a given estimator as 
+\begin_inset Formula $b(n,X)$
+\end_inset
+
+ where 
+\begin_inset Formula $n$
+\end_inset
+
+ denotes the number of observations which will be added and 
+\begin_inset Formula $X$
+\end_inset
+
+ denotes the observations used by the estimator:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+b(n,X) & =R(\alpha)-R(\alpha_{n})\\
+R(\alpha_{n}) & =R_{\text{emp}}(\alpha)+n+\frac{\Psi_{n}}{2}\left(1+\sqrt{1+\frac{4R_{\text{emp}}(\alpha)+4n}{\Psi_{n}}}\right)\\
+\Psi_{n} & =4\frac{G^{\Lambda}\left(2\left(|X|+n\right)\right)-\ln\left(\eta/4\right)}{|X|+n}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We can now define our heuristic 
+\begin_inset Formula $h(n,X)$
+\end_inset
+
+ as the difference of the benefit and the cost, scaled by some parameter
+ 
+\begin_inset Formula $\lambda$
+\end_inset
+
+ which controls the trade-off between accuracy and performance:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+h(n,X) & =b(n,X)-\lambda c(n,X)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsection
 Hierarchical Ensemble Estimators
+\end_layout
+
+\begin_layout Standard
+The ensemble system presented above is formulated in the context of traditional
+ point-based probability estimators (as opposed to set-based TI estimators).
+ The equations also hold in the context of combining estimates from point-based
+ and set-based estimators.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -2555,26 +2724,27 @@ Conclusions:
 \end_layout
 
 \begin_layout Itemize
-We can combine multiple LM's by averaging them weighted by their level of
- risk
+x We can combine multiple LM's by averaging them weighted by their level
+ of risk
 \end_layout
 
 \begin_layout Itemize
-We can combine multiple observations from different LM's into a single LM
- (provided they have the same dimensional set) by adding a multiplier to
- each observation based on the level of risk of the LM from which they were
- derived.
+x We can combine multiple observations from different LM's into a single
+ LM (provided they have the same dimensional set) by adding a multiplier
+ to each observation based on the level of risk of the LM from which they
+ were derived.
  If observations exist in both LM's being combined, they are weighted by
  the sum of the risk levels in the two LM's
 \end_layout
 
 \begin_layout Itemize
-We can add single points to an LM, but we must include the new point's nearest
- neighbors in the risk multiplier (and update the multipliers of the neighbors).
+x We can add single points to an LM, but we must include the new point's
+ nearest neighbors in the risk multiplier (and update the multipliers of
+ the neighbors).
 \end_layout
 
 \begin_layout Itemize
-Since adding a point to an LM requires computation, we can choose between
+x Since adding a point to an LM requires computation, we can choose between
  dimensional sets based on the expected risk decreas and the computational
  cost of adding a point to that dimensional set.
  Larger decreases in risk are better, and lower computational cost is better.
@@ -2582,7 +2752,7 @@ Since adding a point to an LM requires computation, we can choose between
 \end_layout
 
 \begin_layout Itemize
-We can calculate the change in risk of a dimensional set using the empirical
+x We can calculate the change in risk of a dimensional set using the empirical
  risk of any existing observations as a base and the bounds on the growth
  function to extrapolate some number of additional observations.
  
