@@ -641,6 +641,21 @@ Organize as follows: 1)Introduction and formal setting 2) Distance measure
 
 \end_layout
 
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Reorganize paper: 1) definition of similarity between subsets 2) probability
+ estimation over subsets 3) algorithm for choosing subsets, A1) SVM, A2)
+ ensemble system
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Section
 Transformation Invariant Parzen Windows
 \end_layout
@@ -2928,6 +2943,178 @@ In this way, estimates generated in higher layers can be integrated into
 
 .
  
+\end_layout
+
+\begin_layout Section
+Prediction
+\end_layout
+
+\begin_layout Standard
+We need to develop a method of taking a probability density estimate and
+ using it to predict values of 
+\begin_inset Formula $X$
+\end_inset
+
+.
+ In the most general sense, we can view this as finiding the point in 
+\begin_inset Formula $X$
+\end_inset
+
+ with the highest probability.
+ This isn't particularly useful, doing so will simply tell us which point
+ in 
+\begin_inset Formula $X$
+\end_inset
+
+ has the highest number of observations.
+ The utility of prediction is derived from the ability to estimate the most
+ probable value of 
+\begin_inset Formula $x$
+\end_inset
+
+ given a partial set of values along the dimensions of 
+\begin_inset Formula $x$
+\end_inset
+
+.
+ This allows us to estimate the most likely value in some region of the
+ abstract space.
+ For instance, if our abstract space 
+\begin_inset Formula $\Omega$
+\end_inset
+
+ contains a time dimension, we can make estimates of the most probable value
+ of 
+\begin_inset Formula $x$
+\end_inset
+
+ at a given time.
+\end_layout
+
+\begin_layout Standard
+We can express this situation formally by establishing a set of conditional
+ dimensions 
+\begin_inset Formula $\bar{D}$
+\end_inset
+
+ and a set of prediction dimensions 
+\begin_inset Formula $\hat{D}$
+\end_inset
+
+.
+ Our task is to estimate the value of 
+\begin_inset Formula $\hat{x}^{d},d\in\hat{D}$
+\end_inset
+
+ given the set of values 
+\begin_inset Formula $\bar{x}^{d},d\in\bar{D}$
+\end_inset
+
+ using a prediction function 
+\begin_inset Formula $\phi(\hat{x}:\ \bar{x},X)$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\phi(\hat{x}:\ \bar{x},X) & \longmapsto\max_{\hat{x}}\Pr(\hat{x}|X)\approx\max_{\hat{x}}\varphi(\hat{x}:\ \hat{x},X)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We assume that predictions are made in the context of an ensemble system
+ composed of multiple partial SVM estimators
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\max_{\hat{x}}\varphi(\hat{x}:\ \hat{x},X) & =\max_{x^{d},d\in\hat{D}}\left|\frac{1}{\sum_{n}1-R^{n}(\alpha)}\sum_{n}\varphi^{n}(x:\ X^{n},D^{n})(1-R^{n}(\alpha))\right|\\
+ & =\max_{x^{d},d\in\hat{D}}\left|\frac{1}{\sum_{n}1-R^{n}(\alpha)}\sum_{n}(1-R^{n}(\alpha))\sum_{x_{i}\in X^{n}}\beta_{i}^{n}K(x,x_{i})\right|\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We can formulate this as a minimization problem by observing that probability
+ estimates are upper-bounded by 1:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\max_{\hat{x}}\varphi(\hat{x}:\ \bar{x},X) & =\min_{x^{d},d\in\hat{D}}\left|1-\frac{1}{\sum_{n}1-R^{n}(\alpha)}\sum_{n}(1-R^{n}(\alpha))\sum_{x_{i}\in X^{n}}\beta_{i}^{n}K(x,x_{i})\right|\\
+ & =\min_{x^{d},d\in\hat{D}}\left|-\frac{1}{\sum_{n}1-R^{n}(\alpha)}\sum_{n}(1-R^{n}(\alpha))\sum_{x_{i}\in X^{n}}\beta_{i}^{n}K(x,x_{i})\right|\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We begin by considering a single estimator
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\max_{\hat{x}}\varphi(\hat{x}:\ \bar{x},X) & =\min_{x^{d},d\in\hat{D}}\left|-\sum_{x_{i}\in X}\beta_{i}K(x,x_{i})\right|\\
+ & =\min_{x^{d},d\in\hat{D}}\left|-\sum_{x_{i}\in X}\beta_{i}\prod_{d\in\bar{D}}K(x^{d},x_{i}^{d})\prod_{d\in\hat{D}}K(x^{d},x_{i}^{d})\right|\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Let us treat this as an optimization problem 
+\begin_inset Formula $W(\sigma);\ \sigma=x^{i},i\in\hat{D}$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\max_{\hat{x}}\varphi(\hat{x}:\ \bar{x},X) & =W(\sigma)\\
+W(\sigma) & =\min_{\sigma}\left|-\sum_{x_{i}\in X}\beta_{i}\prod_{d\in\bar{D}}K(x^{d},x_{i}^{d})\prod_{\sigma}K(\sigma_{d},x_{i}^{d})\right|\\
+ & =\min_{\sigma}\left|-\sum_{x_{i}\in X}\beta_{i}\prod_{d\in\bar{D}}K(x^{d},x_{i}^{d})\prod_{\sigma}e^{-\frac{1}{\gamma}\left\Vert \sigma_{d}-x_{i}^{d}\right\Vert }\right|\\
+ & =\min_{\sigma}\left|-\sum_{x_{i}\in X}\beta_{i}\prod_{d\in\bar{D}}K(x^{d},x_{i}^{d})\ e^{-\frac{1}{\gamma}\sum_{\sigma}\left\Vert \sigma_{d}-x_{i}^{d}\right\Vert }\right|\\
+ & =\min_{\sigma}\left|-\sum_{x_{i}\in X}\beta_{i}K_{i}\ e^{-\frac{1}{\gamma}\sum_{\sigma}\left\Vert \sigma_{d}-x_{i}^{d}\right\Vert }\right|\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We can solve this by checking only at the Lagrange Multipliers 
+\begin_inset Formula $\psi$
+\end_inset
+
+ of 
+\begin_inset Formula $W(\sigma)$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+See if you can confine the lagrange multipliers to local minima without
+ actually checking them independantly
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
