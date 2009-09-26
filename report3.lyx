@@ -3419,7 +3419,7 @@ The general definition of the conditional prediction task assumes that
 
 \begin_layout Standard
 \begin_inset Note Note
-status collapsed
+status open
 
 \begin_layout Plain Layout
 This is where the mistake is.
@@ -3869,7 +3869,8 @@ i\in\hat{X}\\
 j\in\bar{X}\end{array}}\beta_{i}\beta_{j}\sqrt{\frac{\gamma\pi}{2}}e^{-\frac{1}{2\gamma}(x_{i}-x_{j})^{2}}+\sum_{i,j\in\bar{X}}\beta_{i}\beta_{j}\sqrt{\frac{\gamma\pi}{2}}e^{-\frac{1}{2\gamma}(x_{i}-x_{j})^{2}}\right|\\
  & =\min_{\hat{X}}\left|\sum_{i,j\in\hat{X}}\beta_{i}\beta_{j}\sqrt{\frac{\gamma\pi}{2}}e^{-\frac{1}{2\gamma}(x_{i}-x_{j})^{2}}-2\sum_{\begin{array}{c}
 i\in\hat{X}\\
-j\in\bar{X}\end{array}}\beta_{i}\beta_{j}\sqrt{\frac{\gamma\pi}{2}}e^{-\frac{1}{2\gamma}(x_{i}-x_{j})^{2}}\right|\end{align*}
+j\in\bar{X}\end{array}}\beta_{i}\beta_{j}\sqrt{\frac{\gamma\pi}{2}}e^{-\frac{1}{2\gamma}(x_{i}-x_{j})^{2}}\right|\\
+ & =\min_{\hat{X}}f(\hat{X},\bar{X})\end{align*}
 
 \end_inset
 
@@ -3880,6 +3881,24 @@ j\in\bar{X}\end{array}}\beta_{i}\beta_{j}\sqrt{\frac{\gamma\pi}{2}}e^{-\frac{1}{
 And this clarifies why the earlier approach doesn't work - you need to compare
  the optimization variables to each other in the exponent.
  We're back to not having a way to determine the points.
+ My only hope is the convolved inner product bit, and I'm not really sure
+ what the fuck that means.
+ maybe it's something like this:
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+f(\hat{X}:\ \bar{X}) & \longmapsto g(\hat{X}:\ \bar{X)=}f(\hat{X}:\ \bar{X})*f(\hat{X}:\ \bar{X})\\
+g(x_{i},x_{j}:\ \bar{X}) & =f(x_{i}:\ \bar{X})f(x_{j}:\ \bar{X})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+I don't know where I'm going with this.
+ 
 \end_layout
 
 \end_inset
