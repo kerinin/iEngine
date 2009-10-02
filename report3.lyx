@@ -108,7 +108,7 @@ Existing Work
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
@@ -123,7 +123,7 @@ status collapsed
 
 
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
@@ -138,7 +138,7 @@ status collapsed
 
 
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
@@ -153,7 +153,7 @@ status collapsed
 
 
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
@@ -168,7 +168,7 @@ status collapsed
 
 
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
@@ -183,7 +183,7 @@ status collapsed
 
 
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
@@ -198,7 +198,7 @@ status collapsed
 
 
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
@@ -213,7 +213,7 @@ status collapsed
 
 
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
@@ -229,7 +229,7 @@ e
 
 
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
@@ -244,7 +244,7 @@ status collapsed
 
 
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
@@ -268,7 +268,7 @@ Hidden Markov Model
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
@@ -283,7 +283,7 @@ status collapsed
 
 
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
@@ -305,7 +305,7 @@ Box-Jenkins
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
@@ -321,7 +321,7 @@ status collapsed
 
 
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
@@ -343,7 +343,7 @@ Spectral Analysis
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
@@ -372,7 +372,7 @@ Shrinking-
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
@@ -1427,7 +1427,7 @@ Generalized Parzen-SVM
 \begin_layout Standard
 Support Vector Machines (SVM) are often used
 \begin_inset Note Note
-status collapsed
+status open
 
 \begin_layout Plain Layout
 ref?
@@ -1439,7 +1439,7 @@ ref?
  estimating the cumulative distribution function of the random variable
  in question.
 \begin_inset Note Note
-status collapsed
+status open
 
 \begin_layout Plain Layout
 This isn't really the essence of SVM - put more verbiage in the intro regarding
@@ -1787,7 +1787,7 @@ Select
 \begin_layout Standard
 Where 
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
@@ -2244,7 +2244,7 @@ D^{n} & \subseteq\bar{D}\end{align*}
 \begin_layout Standard
 With associated risk bounds
 \begin_inset Foot
-status collapsed
+status open
 
 \begin_layout Plain Layout
 In the case of Parzen Estimators we can set the empirical risk to 0, in
@@ -2283,7 +2283,7 @@ Consider the case of multiple partial estimators which makes estimates of
  Using Bayesian Model Averaging (BMA) we can average the estimators weighted
  by their respective confidence interval
 \begin_inset Foot
-status collapsed
+status open
 
 \begin_layout Plain Layout
 Technically, they are being weighted by the probability that each estimator
@@ -2657,7 +2657,7 @@ The benefit portion of the heuristic can be easily constructed from previous
  growth function; all three of these values are known for a given estimator
  without additional computation
 \begin_inset Foot
-status collapsed
+status open
 
 \begin_layout Plain Layout
 The empirical risk for an SVM estimator is the minimal value of the optimization
@@ -2856,7 +2856,7 @@ We treat SV's in different estimators as orthonormal; each SV in each estimator
  is mapped to a unique dimension of an AV.
  Because we can treat AV's as sparse data-sets
 \begin_inset Foot
-status collapsed
+status open
 
 \begin_layout Plain Layout
 A given AV can be represented by a pair of tuples defined by a SV index
@@ -2912,7 +2912,7 @@ We can now elaborate the nature of the third and fourth layers of our hierarchy;
  Between each pair of layers, the SV's act as a "bridge" allowing us to
  translate patterns between layer pairs
 \begin_inset Foot
-status collapsed
+status open
 
 \begin_layout Plain Layout
 The regularizing term in this equation eliminates the requirement that the
@@ -2976,6 +2976,24 @@ We will frame the prediction task as one of first constructing a suitable
  predictions.
  We will then investigate various types of conditional PDF's and extend
  our prediction technique to these conditional PDF's.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Reorganize this entire section to be based on various method of generating
+ 
+\begin_inset Formula $\rho$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
@@ -3668,7 +3686,9 @@ Z & \in\left(0,\sum_{i=1}^{\ell}\rho_{i}\right)\end{align*}
 Extending this to TI estimators is trivial; rather than selecting an observation
  for which to generate a random variate we select a window and proceed as
  before.
- 
+\end_layout
+
+\begin_layout Standard
 \begin_inset Note Note
 status open
 
@@ -3915,6 +3935,20 @@ In this case, the PDF of
 \end_layout
 
 \begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Get rid of this squelching shit - it duplicates the conditional prediction
+ functionality (I think)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 It is possible that successive prediction iterations generate predictions
  whose PDF does not converge.
  In other cases the number of iterations required for convergence will be
@@ -4104,8 +4138,433 @@ Continuous Iterative Prediction
 \end_layout
 
 \begin_layout Standard
+We have described the generation of random variates as a process in which
+ a set of random variates is generated at each iterative step.
+ We can take a different approach to the prediction task and formulate equivalen
+t results by assuming that the generation of random variates is a continuous
+ process.
+ The iterative approach implies a temporal processing structure; in order
+ for formulate a continuous approach we must explicitly define the temporal
+ aspect of the process.
+ In the continuous approach, the time 
+\begin_inset Formula $t_{i}$
+\end_inset
+
+ at which a random variate is generated is recorded, and each variate has
+ a 
+\begin_inset Quotes eld
+\end_inset
+
+lifetime
+\begin_inset Quotes erd
+\end_inset
+
+ denoted as the duration 
+\begin_inset Formula $\tau$
+\end_inset
+
+.
+ The set of predictions at a given point in time 
+\begin_inset Formula $t$
+\end_inset
+
+ is described by the set of variates generated before 
+\begin_inset Formula $t$
+\end_inset
+
+ and which 
+\begin_inset Quotes eld
+\end_inset
+
+expire
+\begin_inset Quotes erd
+\end_inset
+
+ after 
+\begin_inset Formula $t$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\phi(z:\ t) & \longmapsto\bar{x}^{t}\\
+\bar{X}^{t} & =\left[\bar{x}^{t_{i}}:\ t\le t_{i}<t+\tau\right]\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We ensure the distribution of 
+\begin_inset Formula $\bar{X}$
+\end_inset
+
+ conforms to the distribution of 
+\begin_inset Formula $\varphi$
+\end_inset
+
+ by controlling the rate at which random variates are generated.
+ We refer to the generation of random variates as the 
+\begin_inset Quotes eld
+\end_inset
+
+emission
+\begin_inset Quotes erd
+\end_inset
+
+ of random variates.
+ For a given emitter, the intervals between emissions are selected randomly
+ from the interval 
+\begin_inset Formula $(0,\frac{\kappa}{\rho})$
+\end_inset
+
+, where 
+\begin_inset Formula $\kappa$
+\end_inset
+
+ is some scaling constant which controls the system's emission rate.
+\end_layout
+
+\begin_layout Standard
+If we do not update 
+\begin_inset Formula $\rho$
+\end_inset
+
+ values, the result of the continuous prediction approach at any point in
+ time will coincide with the iterative approach.
+ The utility of the continous approach is that it can be implemented in
+ a distributed manner without the requirement of synchronization between
+ iterations.
+ 
+\end_layout
+
+\begin_layout Standard
+There are multiple methods for handling changes in an emitter's 
+\begin_inset Formula $\rho$
+\end_inset
+
+.
+ One is to eliminate any current variates from the estimator and generate
+ new ones with the new emission rate.
+ Another approach is to simply adjust the emission rate going forward.
+ The former option requires the ability to remove variates from the prediction
+ set, while the influence of the transition in the latter is not immediately
+ available to the system.
+ 
+\end_layout
+
+\begin_layout Subsection
+Performance Considerations
+\end_layout
+
+\begin_layout Standard
+Evaluating values of 
+\begin_inset Formula $\rho$
+\end_inset
+
+ can be computationally expensive.
+ In an ideal continuous predictive system, each time a new variate was generated
+ the 
+\begin_inset Formula $\rho$
+\end_inset
+
+ values of each emitter would be immediately updated.
+ In practice this requires evaluating kernel distances between each new
+ variate and each SV, then computing the conditional probabilities.
+ Marginal changes in an emitter's 
+\begin_inset Formula $\rho$
+\end_inset
+
+ value will produce marginal shifts in the distribution of 
+\begin_inset Formula $\bar{X}$
+\end_inset
+
+, but since 
+\begin_inset Formula $\bar{X}$
+\end_inset
+
+ is a probabalistic prediction it is possible 
+\begin_inset Quotes eld
+\end_inset
+
+noise
+\begin_inset Quotes erd
+\end_inset
+
+ resulting from the risk of 
+\begin_inset Formula $\varphi$
+\end_inset
+
+ will be more significant than marginal changes in the emission rate.
+ A simple method of reducing the computation demands of iterative prediction
+ is prioritize emitters in the neighborhood of emitters whose emission rate
+ has been changed significantly.
+ Fortunately, the kernel matrix for each SV must be computed during the
+ optimization process, so using these kernel distances to evaluate the priority
+ of evaluating a given SV's 
+\begin_inset Formula $\rho$
+\end_inset
+
+ value does not require additional computation if the kernel matrix is cached.
+ We can formalize this concept by assuming that an iterative process selects
+ SV's for 
+\begin_inset Formula $\rho$
+\end_inset
+
+ evaluation by choosing the SV whose priority value 
+\begin_inset Formula $\psi(\cdot)$
+\end_inset
+
+ is the greatest:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\psi(x:\ X,\triangle\rho) & =\sum_{x_{i}\in X}\triangle\rho_{i}K_{\gamma}(x,x_{i})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Where 
+\begin_inset Formula $\triangle\rho$
+\end_inset
+
+ is the most recent change in 
+\begin_inset Formula $\rho_{i}$
+\end_inset
+
+ for each observation 
+\begin_inset Formula $x_{i}$
+\end_inset
+
+.
+ In general terms, this approach allows us to evaluate the neighborhood
+ of SV's where a significant change in 
+\begin_inset Formula $\rho$
+\end_inset
+
+ has been observed before moving on to randomly selecting SV's.
+\end_layout
+
+\begin_layout Standard
 \begin_inset Note Note
-status open
+status collapsed
+
+\begin_layout Plain Layout
+Nope.
+ RVS would require multiple times as many random variates as observations
+ for the randomness to work out.
+ Otherwise you'd have a majority of SV's with null-sized RVS's, and they'd
+ never actually generate anything, despite having non-null probability.
+ use the emmission idea instead.
+ Select a time interval from t/rho randomly, execute after than interval
+ (then pick another one).
+ Probability changes should be assessed between emissions and new durations
+ chosen.
+ If the probability is going up and the new emission time is in the past,
+ probably just emit immediately and reschedule.
+ Again, the emission approach has a significant drawback; lots of data creation
+ and an ambiguous removal policy.
+\end_layout
+
+\begin_layout Plain Layout
+We might be able to use the TTL in conjunction with attention processing
+ of some kind to eliminate some resource demands.
+\end_layout
+
+\begin_layout Plain Layout
+OK, so the set idea isn't bad itself.
+ We can think of a hybrid system in which the system is constantly emitting
+ random timestamped points at a rate determined by rho, with a sliding time
+ window determining the 'active' set at any given time.
+ In this context we can either set the duration of each point to a constant
+ and randomly select the intervals between points based on rho, or we can
+ set the emission rate to a constant and scale the duration of a point based
+ on rho.
+ Either approach will produce the same effect after windowing.
+ The former approach may lead to less communication, as SV's with low probabilit
+y will produce less points.
+ The latter method will lead to a more controllable set of points being
+ produced at each iteration (the sum of the probabilities), but SV's with
+ very low probability will be producing lots of extrememly transient observation
+s.
+ I think scaling the interval is preferable, but it might be worth trying
+ both empirically.
+\end_layout
+
+\begin_layout Plain Layout
+So, at time t each SV has a time window from t-n to t, and any points in
+ that window constitute the active prediction set for time t.
+ Assume we're at time t=0; each SV calculates an interval and schedules
+ an emission at t=emissiontime.
+ As the window slides over this point, it gets added to the active set,
+ along with it's elimination time.
+ SV updates occur at some t (where the window is defined by t-n,t), at which
+ time the emission rate is modified.
+ How do we determine the next emissiontime? Simple solution; clear the current
+ window and schedule times from the beginning of the window.
+ Better yet, either augment or cull the window to match the intended emission
+ rate.
+ Either way this requires removing points from the active set both through
+ timeout and through culling.
+\end_layout
+
+\begin_layout Plain Layout
+Why do we need windows and death times? I don't think we really do - the
+ window can be a point slider - any points which intersect the slider make
+ up the current set (think of video time slider).
+ This means that each variate simply needs a death time - it's birth time
+ is equal to the generation time.
+ OK, so that works OK.
+ does the slider bit cause problems for transitions? Not really, we can
+ still delete active points or add new ones.
+\end_layout
+
+\begin_layout Plain Layout
+Now, the big question is how does this affect updates? In an ideal world,
+ each emission would immediately trigger an update in the rest of the system
+ at the point it was generated and the point when it died.
+ In the real world, we're dealing with hardware that will have both transmission
+ delays and finite processing speed (thus the need to prioritize).
+ We can still prioritize nearby SV's, but once we get into this situation,
+ we have to wonder what happens when a point dies before being updating
+ a SV? I think the simple answer to this is that death while waiting constitutes
+ sub-optimal system performance at a given time; it's the same as if the
+ system were operating iteratively and simply discarding some transfers.
+ This is the intended state in a way.
+ In any case, this raises a prioritization question; do we want to always
+ select the most recent observation? For a given SV, we probably want to
+ always work the the most recent points.
+ Ideally we would work through all points in a SV that are active.
+ Maybe this is the best way to go - order SV updates by their kernel distance
+ and for each SV work through the entire active set.
+ Of course, if we're constantly recieving updates this could be a problem
+ (we could cycle through a couple observations from close SV's and never
+ get to large sets of observations from further away ones which had been
+ accumulating over time).
+ 
+\end_layout
+
+\begin_layout Plain Layout
+Another approach is that each time we process a SV we process everything
+ in it's inbox, and the optimization task is selecting a single SV.
+ I don't really like this though - can't be distributed easily.
+ Think GIL.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+OK, this has all been approached from the wrong end.
+ We need to decide what the objective is and work backwards to a processing
+ method.
+ In the context of motivated prediction, the objective is to prioiritize
+ prediction which are useful to the system.
+ We've already established a metric for this utility, and we might modify
+ that later, but for now it will do.
+\end_layout
+
+\begin_layout Plain Layout
+Consider the iterative approach.
+ We sample from a given prediction set randomly weighted by utility, then
+ pass that along to the next iteration.
+\end_layout
+
+\begin_layout Plain Layout
+Transferring this to a continuous sitaution is sort of tricky.
+ In this case we have a set of predictions at any point in time, and this
+ set of predictions is constantly changing as SV's emit new points.
+ Rather than only passing certain points to future iterations, we select
+ single points and update the predictors for each point.
+ The time required to process a point means that the prediction set has
+ changed, so at the next iteration we're dealing with a slightly different
+ set of points, from which we again choose the one with the highest utility.
+ The end result is that for any window of time, only the points with the
+ highest utility are processed.
+ This also means that the utility of each point gets adjusted at each processing
+ step, which sort of blows.
+\end_layout
+
+\begin_layout Plain Layout
+OK, so lets think about this in the context of focus and task switching.
+ Task switching is clearly possible; whatever data is the most important
+ gets the processed first.
+ The system is intrinsically tied to the significance of input data.
+ Focus isn't quite as clear.
+ Let's try to define focus a little better.
+ I think we can define focus as a process which explores the impacts of
+ a given change before exploring parallel changes.
+ In this case, we're prioritizing the level of resolution in the predictions
+ over the utility of the predictions.
+ This is the problem, focus is SV-centric.
+ We update a single SV, then propagate the results of that update to affected
+ SV's, and they do the same.
+ The utility prioritization is observation-specific; we choose a specific
+ observation and calculate its impact on all the SV's, then pick another
+ observation.
+\end_layout
+
+\begin_layout Plain Layout
+I wonder if we can do both of these at the same time? One process selects
+ which points to send to the SV's, and another process selects which SV's
+ to update? The former allows us to control the utility of predictions,
+ while the latter allows us to optimize the update process; we can process
+ SV's with a higher probability of changing their emission rate first.
+ Does this work? What would be the 'other side' of this approach?
+\end_layout
+
+\begin_layout Plain Layout
+The goal of SV selection is to limit evaluation of emission rate changes
+ to SV's with a high probability of experiencing such a change.
+ Is there a quick way to determine this? One thing we know is that if a
+ given SV undergoes a major change, any SV's which are 'close' to that one
+ will likely also change.
+ The kernel distance between SV's is a known quantity, so this can probably
+ be a good decision metric.
+ Not only that, but if a given SV had a large change, we can immediately
+ evaluate nearby SV's, they will likely be responding to the exact same
+ predictions.
+ So we can probably develop an SV priority metric; for each SV the metric
+ is it's distance from each other SV times the most recent transition magnitude
+ divided by the time since last update (or some similar combination).
+ The longer it's been since last update, the less likely it is that the
+ prediction set is the same, so smaller time intervals should equal higher
+ priority (this might not be needed, especially if SV's are evaluated much
+ more rapidly than new observations are added).
+ This encourages the system to work on regions around known changes before
+ testing for new changes.
+\end_layout
+
+\begin_layout Plain Layout
+I wonder if it's possible to move the utility function directly into the
+ emission rate? In this sense we would need to evaluate the utility of an
+ SV based on the most recent prediction set.
+ I'm not sure if this is helpful or not - the number of SV's may be much
+ higher than the number of predictions.
+ Worth considering though - would simplify stuff.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status collapsed
 
 \begin_layout Plain Layout
 if squelching is equivalent to decreasing gamma, what's the point? Also,
@@ -4142,6 +4601,204 @@ Exponentiation is a shitty excuse for inhibition.
  want to mention it explicitly as another A/B/C case.
 \end_layout
 
+\begin_layout Plain Layout
+I've been thinking about motivation.
+ A few thoughts.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+First, a simple way to separate thinking from choosing is to treat the predictio
+n process as the thought process, and the selection of a specific action
+ as the choice process.
+ In other words, we keep a robust prediction set which explores the event
+ space in as complete a way as possible, but when we choose a specific action
+ to take, we choose the action with the highest expected benefit.
+ The choice algorithm is going to be slightly dicey anyway - we will have
+ a set of predictions at any given time, and we will need some way to decide
+ which to take.
+ It seems that since we'll need some mechanism for making this choice anyway,
+ using the choice to enforce motivation is the best option.
+\end_layout
+
+\begin_layout Plain Layout
+How to search the probability space is a tricky issue.
+ The first issue is how we handle iterations.
+ One way would be to use continuous emission with time-to-live.
+ In this scenario, the emission rate would be scaled to based on the probability
+ of each SV.
+ Perhaps a more elegant approach is for each SV to maintain a set of random
+ variates.
+ The number of observations in the set would be determined by the probability,
+ and the 'prediction set' would be the union of each SV's set.
+ What's nice about this is that we only have to generate random variates
+ when system conditions change.
+ When a SV's probability changes, it either adds some variates to its set
+ or it culls some from the set.
+ This would allow the system to restrict processing to cases where new informati
+on has become available.
+ It might even be possible to restrict the communication between SV's to
+ these changes - they could pass deltas back and fourth, and rather than
+ maintaining the kernel distance to each other SV, they simply maintain
+ a summation value.
+ The deltas would be added to the summation value.
+ This could significantly reduce the storage and communication costs.
+\end_layout
+
+\begin_layout Plain Layout
+I'm still not completely comfortable with the single-prediction idea.
+ The question I'm not sure about is how likely such a system is to explore
+ non-immediate locations in the probability space.
+ I really want a system capable of reflection, of re-evaluating past experiences
+ in light of new information, and to re-interpret both plans and past actions.
+ I'm also curious about our ability to shift focus without forgetting what
+ we were thinking about before.
+ I think the basic ability I'm trying to formalize *is* focus - the ability
+ to restrict prediction to specific areas, and then to shift that focus
+ without loosing the earlier predictions.
+\end_layout
+
+\begin_layout Plain Layout
+In a sense, this is an issue of prioritization.
+ The system needs to evaluate immediate possibilities when they have significant
+ consequences to the system.
+ Once the immediate possibilites are either well understood or recognized
+ to be unimportant, the system can shift its focus to less immediate issues.
+ If we were explicitly selecting subsets of predictions to pass to the next
+ iteration, this could be seen as selecting sets in some time range, and
+ evaluating both the risk of the prediction in that time range and the potential
+ changes in motivators in that time range.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+The problem with treating focus this way is that it screws up the probability
+ space - you end up with higher probabilities in some time ranges than others,
+ simply because you're increasing the resolution in those areas.
+ We could use a scaling function like when combining subsets, but another
+ option is to focus on SV's rather than contexts.
+ In this case, the prediction space remains coherent, but the risk of the
+ predictions is affected.
+ For this to work though, we'd need to be able to evaluate the relevance
+ of each SV to a context - with TI estimators this seems practically impossible.
+\end_layout
+
+\begin_layout Plain Layout
+What if we focused on the updating of SV variates.
+ If SV's only change when the information context changes, we have to deal
+ with the fact that there's a lot of information being passed around.
+ One solution to this is to prioritize updates coming from SV's in a given
+ context.
+ This allows us to concentrate system resources on relevant stuff, but keep
+ a queue of information which still needs to be processed.
+ Some clever queuing algorithm might enable us to control focus.
+ I really like this actually, it allows us to limit information processing
+ *by information content*, without requiring us to understand the nature
+ of that content.
+ It also allows us do task switching fairly easily - we simply re-prioritize
+ the queue, then come back to where we left off when we've finished the
+ new task.
+\end_layout
+
+\begin_layout Plain Layout
+One final issue; remembering thoughts.
+ I'd like to make sure that predictions can be tansferred into the system
+ permanently.
+ This might be a simple matter of investigating how hierarchical layers
+ function.
+ One thing to consider is that in order for hierarchical predictions to
+ take advantage of lower layers, they need some awareness of the predictions
+ being made there.
+ If we return to the SV random variate idea, we could treat changes in probabili
+ty as both the impetus to change the variate stack size and the impetus
+ to generate points for higher layers.
+ In this case, points would only be generated at state changes, so the hierarchi
+cal layers would only be responding to the relationships between state changes
+ (not the actual value of SV activation).
+ On the other hand, this allows us to know the probability value of each
+ SV at any point in time - we could likely tweak the SVM to use this knowledge
+ both in optimizing and estimating (this returns to Brad's idea for sensors).
+ 
+\end_layout
+
+\begin_layout Plain Layout
+We regardless of how information is passed, so long as the probability of
+ SV's is responding to the predictions (which it must be to generate iterative
+ predictions) the predictions will end up in memory.
+ Not as predictions per se, but as interpretations of predictions.
+ Which is probably better - data compression and all that.
+\end_layout
+
+\begin_layout Plain Layout
+OK, so now let's just think through the information passing bit.
+ Here's an idea; each time a SV changes state, we push the new variate set
+ to the rest of the network and recompute each SV's state.
+ Any changed states get pushed to the hierarcy and then added to the processing
+ stack.
+ This allows us to concentrate the effects of a state change in a single
+ point on upper layers, while retaining the processing stack (the other
+ option is just to push a single SV's state change to the upper layers -
+ I like the set approach because it coordinates a set of unified responses
+ to a given change).
+ I think this is a workable solution.
+ We're not actually pushing deltas - we're pushing the actual probability
+ values.
+ The only difference between this and random selection is that points are
+ only defined at state changes.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+Think about the implications of this on IID data.
+ In this case, the random variable for a higher layer is not the *values*
+ of the lower layer, but the *value changes* on lower layers.
+ Maybe this is good? In a way this is good - it tells us not only what the
+ value should be, but when it should take that value.
+ In essence it describes when we should observe a state change.
+ But how do create actual state changes this way? One possibility is to
+ create a time queue and adjust SV's when their state change is predicted.
+ This would seem to require a lot of synchronization, and doesn't really
+ fit into the queuing scheme discussed.
+ Here's the thing; if upper layer values are timestamped, their predictions
+ describe the expected state of the PDF at a given time for lower layers.
+ In that sense, they're only really useful at the time they predict.
+ So basically, what needs to happen is each time a SV's probability is adjusted,
+ it needs to also adjust it based on the most recent prediction from above.
+\end_layout
+
+\begin_layout Plain Layout
+The only thing that's not clear about this is how we handle noisy predictions
+ from above.
+ No, there is no noise from above.
+ In the same way that the choice function provides consistent output, the
+ choice function from above provides consistent state changes.
+ The predictions above may be noisy, but we only use motivated selections
+ from above to adjust SV's below.
+ So yes, we simply adjust based on the predictions and then bayesian update
+ the prediction based on the most recent state change from above.
+ This also means that we only need to make choices when there appear to
+ be state changes.
+ This might be a good approach to take in general.
+ Thanks Brad.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Hierarchical Considerations
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+transition probability vs value probability
+\end_layout
+
 \end_inset
 
 
@@ -4168,7 +4825,7 @@ Up to this point, our discussion has focused on data analysis.
 \end_layout
 
 \begin_layout Subsection
-Setting of the Motivation Problem
+Actions and Incentives
 \end_layout
 
 \begin_layout Standard
@@ -4229,14 +4886,18 @@ In this case, our observations are of dimension
 \end_inset
 
  describe the system's "actions".
- In order to choose between possible actions, the system must prefer certain
+ 
+\end_layout
+
+\begin_layout Standard
+In order to choose between possible actions, the system must prefer certain
  states of the input space 
 \begin_inset Formula $\Omega$
 \end_inset
 
  over others.
  We describe these preferred states as the system's using a function 
-\begin_inset Formula $m_{\theta}(x:\ X)$
+\begin_inset Formula $m_{\theta}(x)$
 \end_inset
 
  we'll refer to as the motivator with control parameter 
@@ -4244,7 +4905,7 @@ In this case, our observations are of dimension
 \end_inset
 
 .
- The for a given dimension of 
+ For a given dimension of 
 \begin_inset Formula $\Omega$
 \end_inset
 
@@ -4258,10 +4919,10 @@ In this case, our observations are of dimension
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-m_{\theta}(x^{i}:\ X) & \in\mathbb{R}^{+}\\
-m_{\theta}(x^{i}:\ X)>1 & \longmapsto\text{preferred state}\\
-m_{\theta}(x^{i}:\ X)<1 & \longmapsto\text{discouraged state}\\
-m_{\theta}(x^{i}:\ X)=1 & \longmapsto\text{no preference}\end{align*}
+m_{\theta}(x^{i}) & \in\mathbb{R}^{+}\\
+m_{\theta}(x^{i})>1 & \longmapsto\text{preferred state}\\
+m_{\theta}(x^{i})<1 & \longmapsto\text{discouraged state}\\
+m_{\theta}(x^{i})=1 & \longmapsto\text{no preference}\end{align*}
 
 \end_inset
 
@@ -4269,39 +4930,232 @@ m_{\theta}(x^{i}:\ X)=1 & \longmapsto\text{no preference}\end{align*}
 \end_layout
 
 \begin_layout Subsection
-Estimating Outcomes in the Incentive Space
+Motivated Prediction
 \end_layout
 
 \begin_layout Standard
-Motivated decision making therefore is a two-stage process; the system must
- first create an estimate of the relationship between actions and observations
- of 
+Before discussing motivated prediction, let us lay out a few assumptions
+ we will make regarding the architecture used for estimation and prediction.
+ The first assumption is that at least one dimension of the abstract space
+ describes time.
+ Second, we assume that the estimator 
+\begin_inset Formula $\varphi$
+\end_inset
+
+ includes at least one TI estimator.
+ Finally, we assume that the prediction function uses the Random Variate
+ Set method.
+ 
+\end_layout
+
+\begin_layout Standard
+It is difficult to talk about motivated decision making without assuming
+ that the motivated system has access to time data.
+ In general terms, motivation is the process of correlating actions with
+ consequences and choosing actions which will produce desirable consequences.
+ The concept of motivation itself assumes that there will be some change
+ in the system's 
+\begin_inset Quotes eld
+\end_inset
+
+environment
+\begin_inset Quotes erd
+\end_inset
+
+ as a result of taking specific actions, an assumption inherently based
+ on a temporal view of the probability space.
+ While explicit discussion of time will be minimized for the sake of general
+ solutions, it is worth noting that estimation and prediction contexts will
+ often refer to varying behaviors of 
 \begin_inset Formula $X$
 \end_inset
 
- in the context of those actions and then estimate action values which maximize
- the probability of preferred states given the action's context.
- The first stage can be accomplished using the TI analysis already developed.
- The second stage requires that we apply the motivator to the estimation
- task in a specific context.
- In this case our estimates are no longer probability estimates; instead
- they describe the probability that a given action will correspond to preferred
- states in the context of the action.
- We refer to these estimates as as pints in the incentive space 
-\begin_inset Formula $I$
+ at different points in time.
+\end_layout
+
+\begin_layout Standard
+We split the motivated decision making process into two general categories;
+ motivated prediction and choice.
+ This division is not necessary, however it provides a clean separation
+ between functions; the prediction task is to explore potential system states
+ and the choice task is to select actions from the available predictions.
+ The prediction task as described in the previous section involved exploring
+ possible sets of observations in order to learn something about the PDF
+ of 
+\begin_inset Formula $\varphi$
 \end_inset
 
-:
+ and its nature in different contexts.
+ Motivated prediction constitutes the same general process, however our
+ objective now is to learn the consequences of potential actions.
+ We can now quantify a given prediction's utility based on the amount of
+ information it contains regarding the correspondance between actions and
+ consequences, and our task is to modify the prediction process to be biased
+ towards exploring the nature of 
+\begin_inset Formula $\varphi$
+\end_inset
+
+ in these contexts.
+\end_layout
+
+\begin_layout Standard
+We begin by quantifying the utility of a given prediction 
+\begin_inset Formula $\bar{x}$
+\end_inset
+
+.
+ We wish to quantify the extent to which an estimate consitutes either a
+ preferred or discouraged point in 
+\begin_inset Formula $\Omega$
+\end_inset
+
+.
+ Because we wish our system to both strive for preferred states and avoid
+ discouraged states, points which correspond to either are have utility
+ in the prediction task.
+ We therefore describe the utility 
+\begin_inset Formula $u(x)$
+\end_inset
+
+ of a point as the average of the absolute value of the motivational state
+ of each dimension in the point
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\bar{\varphi}(x:\ X) & \longmapsto\Pr(x|I)\\
-\bar{\varphi}(x:\ X) & =\prod_{\upsilon=1}^{d}\sum_{i=1}^{|X|}m_{\theta}(x_{i}^{\nu}:\ X)\beta_{i}\ \bar{K}_{\gamma}(x^{\nu},x_{i}^{\nu},X^{\nu})\end{align*}
+u_{\theta}(x) & =\frac{1}{|\tilde{D}|}\sum_{d\in\tilde{D}}|m_{\theta}(x^{d})|\end{align*}
 
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+We can extend this to TI estimators by weighting each point by its membership
+ in the window
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+u_{\theta}(w) & =\frac{1}{\sum_{x_{i}\in X}\omega(w,x_{i})}\sum_{x_{i}\in X}\omega(w,x_{i})u_{\theta}(x_{i})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Evaluating the utility of a prediction is less straightforward.
+ Because predictions describe potential states (rather than observed states),
+ we can no know based solely on the prediction its utility.
+ We must evaluate the utility of a prediction in the context not only of
+ previous observations, but of the other sets in 
+\begin_inset Formula $\bar{X}$
+\end_inset
+
+
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Recall the conditional prediction scenario where the conditional probabilities
+ 
+\begin_inset Formula $A|B$
+\end_inset
+
+ and 
+\begin_inset Formula $B|C$
+\end_inset
+
+ are known to be high, but an iterative predictor will fail to predict 
+\begin_inset Formula $C$
+\end_inset
+
+.
+ This situation applies to utility as well; if the utility of 
+\begin_inset Formula $C$
+\end_inset
+
+ is high, we would like the utility of 
+\begin_inset Formula $A$
+\end_inset
+
+ to also be high, since we know that the conditional probability 
+\begin_inset Formula $A|C$
+\end_inset
+
+ is high.
+\end_layout
+
+\end_inset
+
+.
+ We therefore adopt an iterative approach to determining the utility of
+ a prediction.
+ We begin by evaluating the utility of a prediction using the utility of
+ each observation and the conditional probability of the prediction given
+ the observation
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+u_{\theta}^{1}(\bar{x}) & =\sum_{x_{i}\in X}u_{\theta}(x_{i})\varphi(x:\ x_{i})+\sum_{w_{i}\in X}u_{\theta}(w_{i})\varphi(w:\ w_{i})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Where 
+\begin_inset Formula $w$
+\end_inset
+
+ refers to the window defined by 
+\begin_inset Formula $x$
+\end_inset
+
+.
+ Our general approach is to ensure that for a point 
+\begin_inset Formula $\bar{x}_{i}$
+\end_inset
+
+ with high utility, any other points which 
+\begin_inset Formula $\bar{x}_{i}$
+\end_inset
+
+ is conditional upon also are assigned high utility; if it's useful to keep
+ 
+\begin_inset Formula $\bar{x}_{i}$
+\end_inset
+
+, it is also useful to keep any points which increase the probability of
+ predicting 
+\begin_inset Formula $\bar{x}_{i}$
+\end_inset
+
+.
+ We then use the conditional probabilities of the other estimates given
+ 
+\begin_inset Formula $\bar{x}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+u_{\theta}^{i}(\bar{x}) & =\sum_{\bar{x}_{i}\in\bar{X}}u_{\theta}^{i-1}(\bar{x}_{i})\frac{\varphi(\bar{x}_{i}:\ \bar{X})}{\varphi(\bar{x}_{i}:\ \bar{X}\vee\bar{x})}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+As this iterative step updates the utility of each observation, it can be
+ evaluated for as many iterations are necessary to provide a suitable level
+ of accuracy.
 \end_layout
 
 \begin_layout Standard
@@ -4309,7 +5163,7 @@ Motivated decision making therefore is a two-stage process; the system must
 status open
 
 \begin_layout Plain Layout
-Still not sure if the first one makes any sense
+Re-frame for emission
 \end_layout
 
 \end_inset
@@ -4318,113 +5172,71 @@ Still not sure if the first one makes any sense
 \end_layout
 
 \begin_layout Standard
-In this sense, the motivator function behaves like a weighting mechanism,
- increasing the incentive value of high-probability actions which correspond
- to preferred states and decreasing the incentive value of high-probability
- actions which correspond with discouraged states.
- Estimating values in the incentive space allows us to select actions whose
- influence is well understood to produce the desired states of 
-\begin_inset Formula $X$
-\end_inset
+Returning to the concept of motivated prediction, it is clear that in the
+ context of an iterative predictor we would like to emphasize prediction
+ in a given iteration based on predictions with high utility in previous
+ iterations.
+ While predictions are drawn from PDF's, they are not assumed to describe
+ a probability density themselves, therefore there is no requirement that
+ they be i.i.d.
+ points.
+ Selecting some predictions to pass through to subsequent iterations and
+ not others does not undermine the validity of subsequent predictions; the
+ validity of a given iteration is derived from the estimator generating
+ it (which is unaffected by the specific set of predictions passed to a
+ given iteration).
+ We can view the selection process as a type of conditional prediction;
+ we are creating predictions in the context of points the system considers
+ useful.
+ The reason we choose to implement the selection process after predictions
+ have been made is that prior to generating a prediction it is uncertain
+ exacly what the conditional utility between predictions will be.
+ 
+\end_layout
 
- in a given context.
- Choosing actions is reduced to determining the supremum of the action dimension
-s of the incentive space in a given context.
+\begin_layout Standard
+We have refined our understanding of the motivated prediction process; the
+ prediction task constitutes selecting points of interest from a set of
+ predictions and passing them to future iterations of the prediction process.
+ 
 \end_layout
 
 \begin_layout Subsection
-Incentivized Path Search
+Choice
 \end_layout
 
 \begin_layout Standard
-\begin_inset Marginal
-status open
+We have now developed a robust architecture for estimating correlation between
+ observations, generating predictions from that estimate, and evaluating
+ the consequences of actions contained in the predictions.
+ The final step is to chose specific actions to take.
+ This choice reduces to a simple matter of selecting the action with the
+ greatest expected correlation with preferred states of 
+\begin_inset Formula $\Omega$
+\end_inset
+
+, determined by the motivation function 
+\begin_inset Formula $m_{\theta}(\cdot)$
+\end_inset
+
+ at a given time 
+\begin_inset Formula $t$
+\end_inset
+
+
+\begin_inset Foot
+status collapsed
 
 \begin_layout Plain Layout
-This is a work in progress - ignore
+We assume that the time 
+\begin_inset Formula $t$
+\end_inset
+
+ describes the time at which the selection takes place.
+ The ability to increase the probability of selecting an action in the future
+ is provided by through iterative prediction.
 \end_layout
 
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Because estimates can now influence the underlying data, generating estimates
- is no longer a simple matter of perception; the choice of a specific action
- will influence the probability space, making the next estimation task different
- from the last.
- Furthermore, in the context of complex actions made up of multiple vectors,
- the choice of a single action may modify the incentive space independent
- of any influence from the motivator function.
- Maximizing the expected incentive value in a deterministic and computationally
- feasible manner, in the context of these facts, would be of great utility
- and is left as an exercise for the reader.
-\end_layout
-
-\begin_layout Standard
-We will instead focus on iterative approaches.
- We can create a set of actions 
-\begin_inset Formula $A$
-\end_inset
-
- through an iterative process.
- We first define a selector function 
-\begin_inset Formula $s(X:\ D)$
-\end_inset
-
- which selects a value of 
-\begin_inset Formula $a_{i}$
-\end_inset
-
- from the incentive space defined by 
-\begin_inset Formula $X$
-\end_inset
-
- and 
-\begin_inset Formula $D$
-\end_inset
-
-:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-s(X:\ D) & \longmapsto a_{i}\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-At each step 
-\begin_inset Formula $i+1$
-\end_inset
-
- in the iteration we select a context 
-\begin_inset Formula $D$
-\end_inset
-
- and select an action 
-\begin_inset Formula $a_{i}=s(X_{i}:\ D)$
-\end_inset
-
- from action dimensions for 
-\begin_inset Formula $X_{i}$
-\end_inset
-
- in the given context.
- We then append 
-\begin_inset Formula $a_{i}$
-\end_inset
-
- to 
-\begin_inset Formula $X_{i}$
-\end_inset
-
- and repeat the process, this time with the set 
-\begin_inset Formula $X_{i+1}=X_{i}\cup a_{i}$
 \end_inset
 
 .
@@ -4432,74 +5244,31 @@ At each step
 \end_layout
 
 \begin_layout Standard
-If 
-\begin_inset Formula $s(X:\ D)$
+It cannot be assumed that a prediction at time 
+\begin_inset Formula $t$
 \end_inset
 
- simply selects the supremum of the action dimensions of 
-\begin_inset Formula $X$
-\end_inset
-
-, the system is susceptible to local minimum.
- Various techniques exist to address this situation; we will simply assume
- that 
-\begin_inset Formula $s(X:\ D)$
-\end_inset
-
- is indeterminate and involves some element of randomness.
- This means that at each iteration, multiple values of 
-\begin_inset Formula $a_{i}$
-\end_inset
-
-are possible.
- We can therefore think of our iterative approach as a tree search, with
- multiple search paths originating from each iteration.
- This leaves us with not simply a set of action paths 
-\begin_inset Formula $A$
-\end_inset
-
-, but a set of paths, each one tracing a different route from trunk to tip,
- and each one producing different estimates of the expected incentives in
- different contexts.
- This presents yet another problem of choice; which branch of actions should
- actually be taken?
-\end_layout
-
-\begin_layout Standard
-To address this problem, we define an ethics function 
-\begin_inset Formula $e(A_{i})$
+ exists, so we use the windowing function to select between actions in the
+ vicinity of 
+\begin_inset Formula $t$
 \end_inset
 
 .
- The ethics function establishes different weights for different incentive
- values in different contexts:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-e(A_{i}) & \in\mathbb{R}^{+}\end{align*}
-
+ We select from the prediction actions 
+\begin_inset Formula $\bar{A}$
 \end_inset
 
+ the action 
+\begin_inset Formula $\ddot{a}$
+\end_inset
 
-\end_layout
-
-\begin_layout Standard
-We refer to this function as "ethical" because it makes trade-offs between
- the probability of satisfying the systems motivation and the context to
- which that probability refers; is it better to buy a new car today or save
- my money to buy a house in a year? 
-\end_layout
-
-\begin_layout Standard
-We can now generate a set of actions which is likely to produce known results
- which will satisfy the system's motivational parameters by selecting the
- supremum of the results of our path search:
+ with the greatest expected correlation with preferred states, scaled by
+ each action's inclusion in the window
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-A & =\sup_{A}e(A_{1})\end{align*}
+\ddot{a}^{t} & =\max_{\bar{a}_{i}\in\bar{A}}\omega_{\gamma}(t,a)\ u_{\theta}(a_{i})\end{align*}
 
 \end_inset
 
@@ -4523,78 +5292,55 @@ Without the ability to take action, a system's accuracy and efficiency for
 \end_layout
 
 \begin_layout Standard
-Any probabilistic system's estimation accuracy is limited by the amount
- of uncertainty inherent in the data it processes and the nature of the
- algorithm used to generate estimates.
- The rate of convergence in such a system's estimations and the "true" probabili
-ty distribution has an upper bound determined by its VC dimension; within
- these bounds a system's estimation accuracy improves as the number of observati
-ons increases.
- In the context of TI data, it is possible to think of each neighborhood
- in a TI dimension as an independent estimation problem, thus an observation
- of 
-\begin_inset Formula $X$
+Our system's accuracy can be described as the empirical loss resulting from
+ the SVM optimization process.
+ This is an attractive metric as it can be easily computed after optimization
+ by subtracting the regularizer term.
+ In this case we assume the PW estimate represents the minimal possible
+ risk of the system and measure the efficiency of the SVM estimator based
+ on its divergence from the PW estimator.
+ We can therefore quantify the system's accuracy after 
+\begin_inset Formula $\ell$
 \end_inset
 
- will not increase the system's accuracy in a given neighborhood if the
- observation 
-\begin_inset Formula $x$
+ observations as the empirical risk 
+\begin_inset Formula $R_{\text{emp}}(\ell)$
 \end_inset
 
- is not in that neighborhood.
- The task of improving a volitive system's accuracy in a given context therefore
- can be framed as the task of obtaining observations of that context.
+.
+\end_layout
+
+\begin_layout Standard
+The efficiency of the system is determined by the amount of computation
+ required to generate estimates, which depends on the number of support
+ vectors.
+ We can therefore describe the system's efficiency as the inverse of the
+ number of support vectors 
+\begin_inset Formula $|SV|^{-2}$
+\end_inset
+
+.
+ As the number of SV's grows the computational requirements of estimating
+ point's probabilities grows with the size of the kernel matrix ( which
+ contains 
+\begin_inset Formula $|SV|^{2}$
+\end_inset
+
+ elements).
+\end_layout
+
+\begin_layout Standard
+We can now establish the following metric for the system's performance after
  
-\end_layout
-
-\begin_layout Standard
-The efficiency of the system we've developed is primarily controlled by
- the number of Support Vectors.
- For a given data-set and predictive accuracy, as the number of SV's decreases,
- the efficiency of the system increases.
- The efficiency of non-volitive systems is limited by the results of the
- optimization problem for 
-\begin_inset Formula $\beta$
+\begin_inset Formula $\ell$
 \end_inset
 
-.
- In the context of a volitive system, decreasing the number of SV's can
- be accomplished by obtaining observations higher-order structure.
- Higher-order structure refers to the ability of a multi-layered system
- to break multiple high-entropy observations down into shared combinations
- of lower-entropy observations in such a way that the entropy of combined
- observations is lower than the entropy of the original observations.
- The result of such a process is the ability to eliminate portions of the
- original data-set as redundant, reducing the number of required SV's to
- match the accuracy of the system prior to observing the higher-order structure.
-\end_layout
-
-\begin_layout Standard
-Working within the context of the existing architecture, our task is to
- develop a metric which can be used as a motivational parameter to drive
- these two behaviors.
- If we assume that the sampling rate of the system is independent of the
- action choices which are made, both behaviors can be reduced to minimizing
- the ratio of observations to support vectors.
- Increasing the system's accuracy can be viewed as determining a suitable
- support vector (or vectors) to represent behavior of 
-\begin_inset Formula $X$
-\end_inset
-
- in a given context (allowing the redundant observations to be discarded)
- and promoting the discovery of higher-order structure inherently increases
- this ratio by the same mechanism.
- We can therefore create a curious system by establishing the performance
- metric 
-\begin_inset Formula $p(\beta,X)$
-\end_inset
-
-:
+ observations
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-p_{|X|}(\beta,X) & =\frac{|X|}{|\beta|-|\beta_{0}|}\end{align*}
+p(\ell:\ \varphi) & =\frac{R_{\text{emp}}(\ell)}{|SV_{\ell}|^{2}}\end{align*}
 
 \end_inset
 
@@ -4602,65 +5348,31 @@ p_{|X|}(\beta,X) & =\frac{|X|}{|\beta|-|\beta_{0}|}\end{align*}
 \end_layout
 
 \begin_layout Standard
-where 
-\begin_inset Formula $\beta_{0}=[\beta_{i}|\ \beta_{i}=0]$
+Where 
+\begin_inset Formula $SV_{\ell}$
 \end_inset
 
-.
- Motivating the system towards curiosity simply entails establishing a motivator
- which prefers positive values of the second-derivative of 
-\begin_inset Formula $p(\beta,X)$
+ is the set of support vectors after 
+\begin_inset Formula $\ell$
 \end_inset
 
-:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-m(x_{i}^{p}:\ X) & =e^{\lambda\frac{d^{2}}{di^{2}}p_{i}(\beta,X)}\end{align*}
-
+ observations.
+ The system can be motivated to increase its performance by including 
+\begin_inset Formula $p$
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
-Using the second derivative motivates the system to prefer increases in
- the average change in 
-\begin_inset Formula $p(\beta,X)$
-\end_inset
-
-.
- The value of 
-\begin_inset Formula $p(\beta,X)$
-\end_inset
-
- is likely non-stationary, so establishing a motivational parameter for
- set values isn't helpful.
- The first-derivative of 
-\begin_inset Formula $p(\beta,X)$
-\end_inset
-
- establishes the expected change in the system's comprehension, however
- this rate will vary with different data-sets and would need to be determined
- for each data-set.
- The second-derivative however describes the rate at which the system's
- comprehension is increasing or decreasing, and is more likely to be tied
- to the system's actions than to the underlying data.
-\end_layout
-
-\begin_layout Standard
+ as a system input and motivating positive values
 \begin_inset Note Note
-status open
+status collapsed
 
 \begin_layout Plain Layout
-This needs some housekeeping - explain values of p at each observation and
- work the work "curiosity" and "comprehension" into the earlier paragraphs
+Make sure p is stationary here - if it's not motivating any specific value
+ won't be useful
 \end_layout
 
 \end_inset
 
-
+.
 \end_layout
 
 \begin_layout Section
@@ -4693,7 +5405,7 @@ Data Pre-Processing
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
@@ -4712,7 +5424,7 @@ status collapsed
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
@@ -4738,7 +5450,7 @@ Delta
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
@@ -4757,7 +5469,7 @@ ary
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
@@ -4787,7 +5499,7 @@ Eat it, bitches
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
@@ -4803,7 +5515,7 @@ nocite{Moreno03}
 
 \begin_layout Standard
 \begin_inset ERT
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
