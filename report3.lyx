@@ -98,296 +98,24 @@ LatexCommand tableofcontents
 
 \end_layout
 
+\begin_layout Standard
+\begin_inset CommandInset nomencl_print
+LatexCommand printnomenclature
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
 \begin_layout Section
 Introduction
-\end_layout
-
-\begin_layout Subsection
-Existing Work
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-%http://en.wikipedia.org/wiki/Expectation-maximization_algorithm
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-%http://en.wikipedia.org/wiki/Stationary_process
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-%http://en.wikipedia.org/wiki/Ergodicity
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-%http://en.wikipedia.org/wiki/Mixing_(mathematics)
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-%http://en.wikipedia.org/wiki/Lyapunov_exponent
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-%http://en.wikipedia.org/wiki/Recurrence_quantification_analysis
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-%http://en.wikipedia.org/wiki/Recurrence_plot
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-%http://en.wikipedia.org/wiki/Autoregressive_fractionally_integrated_moving_averag
-e
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-%http://en.wikipedia.org/wiki/Autocorrelation
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-%
-\backslash
-url{http://en.wikipedia.org/wiki/Linear_discriminant_analysis}
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Subsubsection
-Hidden Markov Model
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-% cannot account for future states - only capable of prediction
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-% weak, short-term memory
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Subsubsection
-Box-Jenkins
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-% intended for simplistic processes with well-understood stationarity and
- periodicity
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-% http://en.wikipedia.org/wiki/Box-Jenkins
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Subsubsection
-Spectral Analysis
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-% assumes some type of frequency-domain decomposition.
-  Frequency-domain signal representations do not do a very good job predicting
- time-domain values.
- 
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Subsubsection
-Shrinking-
-\begin_inset Formula $\epsilon$
-\end_inset
-
- SVM Regression
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-% theoretical foundation weak; only compensates for the relevance of recent
- data.
-  See Markhov problem
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Subsection
@@ -550,6 +278,33 @@ X & =x_{1},...,x_{\ell}\end{align*}
 \end_layout
 
 \begin_layout Standard
+\begin_inset CommandInset nomenclature
+LatexCommand nomenclature
+symbol "$X$"
+description "Set of observations to be evaluated"
+
+\end_inset
+
+
+\begin_inset CommandInset nomenclature
+LatexCommand nomenclature
+symbol "$x_i$"
+description "Individual observations"
+
+\end_inset
+
+
+\begin_inset CommandInset nomenclature
+LatexCommand nomenclature
+symbol "$\\ell$"
+description "The number of observations "
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 We choose between potential functions based on the empirical risk function
  using the loss (discrepancy) 
 \begin_inset Formula $L(y,f(x,\alpha))$
@@ -581,6 +336,33 @@ R_{\text{emp}}(\alpha) & =\frac{1}{\ell}\sum_{i=1}^{\ell}L(y_{i},f(x_{i},\alpha)
 \end_layout
 
 \begin_layout Standard
+\begin_inset CommandInset nomenclature
+LatexCommand nomenclature
+symbol "$R_\\text{emp}(\\alpha)$"
+description "Empirical Risk "
+
+\end_inset
+
+
+\begin_inset CommandInset nomenclature
+LatexCommand nomenclature
+symbol "$L(\\cdot)$"
+description "Loss function"
+
+\end_inset
+
+
+\begin_inset CommandInset nomenclature
+LatexCommand nomenclature
+symbol "$Q(\\cdot)$"
+description "Loss Function"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 We define our problem as one of estimating a Probability Density Functions
  (PDF), so we define the set of observations as a random variable of arbitrary
  dimensions:
@@ -591,6 +373,49 @@ We define our problem as one of estimating a Probability Density Functions
 X & =(\Omega,\mathcal{F},\mathcal{P})\\
 \Omega & \in\mathbb{R}^{d}\\
 X & =[\vec{x}_{1},...,\vec{x}_{\ell}]\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset nomenclature
+LatexCommand nomenclature
+symbol "$\\Omega$"
+description "Abstract space of a random variable"
+
+\end_inset
+
+
+\begin_inset CommandInset nomenclature
+LatexCommand nomenclature
+symbol "$\\mathcal{F}$"
+description "Set of events for a random variable"
+
+\end_inset
+
+
+\begin_inset CommandInset nomenclature
+LatexCommand nomenclature
+symbol "$\\mathcal{P}$"
+description "Probability measure for a random variable"
+
+\end_inset
+
+
+\begin_inset CommandInset nomenclature
+LatexCommand nomenclature
+symbol "$\\mathbb{R}^d$"
+description "The set of real d-dimensional numbers"
+
+\end_inset
+
+
+\begin_inset CommandInset nomenclature
+LatexCommand nomenclature
+symbol "$\\vec{x}$"
+description "A vector observation of a random variable"
 
 \end_inset
 
@@ -620,6 +445,33 @@ Our objective is to develop an estimate
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
 \varphi(x:\ X) & \longmapsto\Pr(x|X)\pm\xi\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset nomenclature
+LatexCommand nomenclature
+symbol "$\\varphi(\\cdot)$"
+description "A probability density function estimator"
+
+\end_inset
+
+
+\begin_inset CommandInset nomenclature
+LatexCommand nomenclature
+symbol "$\\Pr(\\cdot)$"
+description "Probability"
+
+\end_inset
+
+
+\begin_inset CommandInset nomenclature
+LatexCommand nomenclature
+symbol "$\\xi$"
+description "Slack variable"
 
 \end_inset
 
@@ -727,6 +579,25 @@ es of unordered sets, provided they have an addition operation and a kernel
 \end_layout
 
 \begin_layout Standard
+\begin_inset CommandInset nomenclature
+LatexCommand nomenclature
+symbol "$K_\\gamma (x,y)$"
+description "Kernel function"
+
+\end_inset
+
+
+\begin_inset CommandInset nomenclature
+LatexCommand nomenclature
+symbol "$\\gamma$"
+description "Kernel width parameter"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 Multiple kernel functions exist, in this paper we will use the Radial Basis
  Function (RBF) kernel:
 \end_layout
@@ -734,6 +605,17 @@ Multiple kernel functions exist, in this paper we will use the Radial Basis
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
 K_{\gamma}\left(\vec{x},\vec{y}\right) & =\prod_{\upsilon=1}^{d}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|x^{\nu},y^{\nu}\|^{2}}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset nomenclature
+LatexCommand nomenclature
+symbol "$\\|\\cdot,\\cdot\\|$"
+description "Distance metric"
 
 \end_inset
 
@@ -1678,153 +1560,6 @@ status open
 Shouldn't the second term only have one kernel function? If not combine
  the first two terms
 \end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Subsection
-Quadratic Optimization Problem
-\end_layout
-
-\begin_layout Subsection
-Support Vector Decomposition 
-\end_layout
-
-\begin_layout Standard
-\begin_inset Marginal
-status open
-
-\begin_layout Plain Layout
-This section is probably better as an appendix
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Due to the simplicity of the constraints in the optimization problem, it
- is possible to use the decomposition method of Osuna to reduce the memory
- requirements of the Parzen-SVM algorithm.
-\end_layout
-
-\begin_layout Subsubsection
- Sub-Problem Definition 
-\end_layout
-
-\begin_layout Standard
-The decomposition algorithm breaks 
-\begin_inset Formula $X$
-\end_inset
-
- into two working sets 
-\begin_inset Formula $B,N$
-\end_inset
-
-, and attempts to optimize 
-\begin_inset Formula $B$
-\end_inset
-
- while keeping 
-\begin_inset Formula $N$
-\end_inset
-
- fixed.
- This results in the following iterative optimization problem where 
-\begin_inset Formula $\boldsymbol{\beta}^{k}$
-\end_inset
-
- denotes the result of the previous iteration:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-W(\boldsymbol{\beta}_{B}) & =\frac{1}{2}\begin{bmatrix}\boldsymbol{\beta}_{B}^{T} & (\boldsymbol{\beta}_{N}^{k})^{T}\end{bmatrix}\begin{bmatrix}P_{BB} & P_{BN}\\
-P_{NB} & P_{NN}\end{bmatrix}\begin{bmatrix}\boldsymbol{\beta}_{B}\\
-\boldsymbol{\beta}_{N}^{k}\end{bmatrix}-\begin{bmatrix}q_{B}^{T} & q_{N}^{T}\end{bmatrix}\begin{bmatrix}\boldsymbol{\beta}_{B}\\
-\boldsymbol{\beta}_{N}^{k}\end{bmatrix}\\
- & =\frac{1}{2}\boldsymbol{\beta}_{B}^{T}P_{BB}\boldsymbol{\beta}_{B}-(-q_{B}+P_{BN}\boldsymbol{\beta}_{N}^{k})^{T}\boldsymbol{\beta}_{B}\\
- & =\frac{1}{2}\begin{bmatrix}\beta_{i} & \beta_{j}\end{bmatrix}\begin{bmatrix}P_{ii} & P_{ij}\\
-P_{ij} & P_{jj}\end{bmatrix}\begin{bmatrix}\beta_{i}\\
-\beta_{j}\end{bmatrix}-(-q_{B}+P_{BN}\boldsymbol{\beta}_{N}^{k})^{T}\begin{bmatrix}\beta_{i}\\
-\beta_{j}\end{bmatrix}\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{equation}
-\text{subject to}\quad0\le\beta_{i},\beta_{j},\quad\beta_{i}+\beta_{j}=1-\mathbf{1}^{T}\boldsymbol{\beta}_{N}^{k}\end{equation}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Subsubsection
- Working Set Selection 
-\end_layout
-
-\begin_layout Standard
-Select
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align}
- & i\in\text{arg}\max_{t}\left\{ -\nabla f(\boldsymbol{\beta}^{k})_{t}\ |\quad t\in I(\boldsymbol{\beta}^{k})\right\} \\
- & j\in\text{arg}\min_{t}\left\{ -\frac{b_{it}^{2}}{a_{it}}\ |\quad t\in I(\boldsymbol{\beta}^{k}),\quad-\nabla f(\boldsymbol{\beta}^{k})_{t}<-\nabla f(\boldsymbol{\beta}^{k})_{i}\right\} \end{align}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Where 
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-% This needs to be checked for the new optimization scenario
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align}
-I(\boldsymbol{\beta}) & \equiv\{t\ |\quad\beta_{t}<1\quad\text{or}\quad\beta_{t}>0\}\\
- & a_{it}=P_{ii}+P_{tt}-2P_{it}\\
- & \bar{a}_{it}=\begin{cases}
-a_{it} & \text{if}\ a_{it}>0\\
-\delta & \text{otherwise}\end{cases}\\
- & b_{it}=-\nabla f(\boldsymbol{\beta}^{k})_{i}+\nabla f(\boldsymbol{\beta}^{k})_{t}\\
-\nabla f(\boldsymbol{\beta})_{i} & \equiv P_{i}\boldsymbol{\beta}-q_{i}\end{align}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Subsubsection
- Stopping Condition 
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{equation}
-\max_{i\in I(\boldsymbol{\alpha}^{k})}-\nabla f(\boldsymbol{\alpha})_{i}+\min_{j\in I(\boldsymbol{\alpha}^{k})}\nabla f(\boldsymbol{\alpha})_{j}\le\epsilon\end{equation}
 
 \end_inset
 
@@ -4352,441 +4087,6 @@ Where
  has been observed before moving on to randomly selecting SV's.
 \end_layout
 
-\begin_layout Standard
-\begin_inset Note Note
-status collapsed
-
-\begin_layout Plain Layout
-Nope.
- RVS would require multiple times as many random variates as observations
- for the randomness to work out.
- Otherwise you'd have a majority of SV's with null-sized RVS's, and they'd
- never actually generate anything, despite having non-null probability.
- use the emmission idea instead.
- Select a time interval from t/rho randomly, execute after than interval
- (then pick another one).
- Probability changes should be assessed between emissions and new durations
- chosen.
- If the probability is going up and the new emission time is in the past,
- probably just emit immediately and reschedule.
- Again, the emission approach has a significant drawback; lots of data creation
- and an ambiguous removal policy.
-\end_layout
-
-\begin_layout Plain Layout
-We might be able to use the TTL in conjunction with attention processing
- of some kind to eliminate some resource demands.
-\end_layout
-
-\begin_layout Plain Layout
-OK, so the set idea isn't bad itself.
- We can think of a hybrid system in which the system is constantly emitting
- random timestamped points at a rate determined by rho, with a sliding time
- window determining the 'active' set at any given time.
- In this context we can either set the duration of each point to a constant
- and randomly select the intervals between points based on rho, or we can
- set the emission rate to a constant and scale the duration of a point based
- on rho.
- Either approach will produce the same effect after windowing.
- The former approach may lead to less communication, as SV's with low probabilit
-y will produce less points.
- The latter method will lead to a more controllable set of points being
- produced at each iteration (the sum of the probabilities), but SV's with
- very low probability will be producing lots of extrememly transient observation
-s.
- I think scaling the interval is preferable, but it might be worth trying
- both empirically.
-\end_layout
-
-\begin_layout Plain Layout
-So, at time t each SV has a time window from t-n to t, and any points in
- that window constitute the active prediction set for time t.
- Assume we're at time t=0; each SV calculates an interval and schedules
- an emission at t=emissiontime.
- As the window slides over this point, it gets added to the active set,
- along with it's elimination time.
- SV updates occur at some t (where the window is defined by t-n,t), at which
- time the emission rate is modified.
- How do we determine the next emissiontime? Simple solution; clear the current
- window and schedule times from the beginning of the window.
- Better yet, either augment or cull the window to match the intended emission
- rate.
- Either way this requires removing points from the active set both through
- timeout and through culling.
-\end_layout
-
-\begin_layout Plain Layout
-Why do we need windows and death times? I don't think we really do - the
- window can be a point slider - any points which intersect the slider make
- up the current set (think of video time slider).
- This means that each variate simply needs a death time - it's birth time
- is equal to the generation time.
- OK, so that works OK.
- does the slider bit cause problems for transitions? Not really, we can
- still delete active points or add new ones.
-\end_layout
-
-\begin_layout Plain Layout
-Now, the big question is how does this affect updates? In an ideal world,
- each emission would immediately trigger an update in the rest of the system
- at the point it was generated and the point when it died.
- In the real world, we're dealing with hardware that will have both transmission
- delays and finite processing speed (thus the need to prioritize).
- We can still prioritize nearby SV's, but once we get into this situation,
- we have to wonder what happens when a point dies before being updating
- a SV? I think the simple answer to this is that death while waiting constitutes
- sub-optimal system performance at a given time; it's the same as if the
- system were operating iteratively and simply discarding some transfers.
- This is the intended state in a way.
- In any case, this raises a prioritization question; do we want to always
- select the most recent observation? For a given SV, we probably want to
- always work the the most recent points.
- Ideally we would work through all points in a SV that are active.
- Maybe this is the best way to go - order SV updates by their kernel distance
- and for each SV work through the entire active set.
- Of course, if we're constantly recieving updates this could be a problem
- (we could cycle through a couple observations from close SV's and never
- get to large sets of observations from further away ones which had been
- accumulating over time).
- 
-\end_layout
-
-\begin_layout Plain Layout
-Another approach is that each time we process a SV we process everything
- in it's inbox, and the optimization task is selecting a single SV.
- I don't really like this though - can't be distributed easily.
- Think GIL.
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Note Note
-status collapsed
-
-\begin_layout Plain Layout
-OK, this has all been approached from the wrong end.
- We need to decide what the objective is and work backwards to a processing
- method.
- In the context of motivated prediction, the objective is to prioiritize
- prediction which are useful to the system.
- We've already established a metric for this utility, and we might modify
- that later, but for now it will do.
-\end_layout
-
-\begin_layout Plain Layout
-Consider the iterative approach.
- We sample from a given prediction set randomly weighted by utility, then
- pass that along to the next iteration.
-\end_layout
-
-\begin_layout Plain Layout
-Transferring this to a continuous sitaution is sort of tricky.
- In this case we have a set of predictions at any point in time, and this
- set of predictions is constantly changing as SV's emit new points.
- Rather than only passing certain points to future iterations, we select
- single points and update the predictors for each point.
- The time required to process a point means that the prediction set has
- changed, so at the next iteration we're dealing with a slightly different
- set of points, from which we again choose the one with the highest utility.
- The end result is that for any window of time, only the points with the
- highest utility are processed.
- This also means that the utility of each point gets adjusted at each processing
- step, which sort of blows.
-\end_layout
-
-\begin_layout Plain Layout
-OK, so lets think about this in the context of focus and task switching.
- Task switching is clearly possible; whatever data is the most important
- gets the processed first.
- The system is intrinsically tied to the significance of input data.
- Focus isn't quite as clear.
- Let's try to define focus a little better.
- I think we can define focus as a process which explores the impacts of
- a given change before exploring parallel changes.
- In this case, we're prioritizing the level of resolution in the predictions
- over the utility of the predictions.
- This is the problem, focus is SV-centric.
- We update a single SV, then propagate the results of that update to affected
- SV's, and they do the same.
- The utility prioritization is observation-specific; we choose a specific
- observation and calculate its impact on all the SV's, then pick another
- observation.
-\end_layout
-
-\begin_layout Plain Layout
-I wonder if we can do both of these at the same time? One process selects
- which points to send to the SV's, and another process selects which SV's
- to update? The former allows us to control the utility of predictions,
- while the latter allows us to optimize the update process; we can process
- SV's with a higher probability of changing their emission rate first.
- Does this work? What would be the 'other side' of this approach?
-\end_layout
-
-\begin_layout Plain Layout
-The goal of SV selection is to limit evaluation of emission rate changes
- to SV's with a high probability of experiencing such a change.
- Is there a quick way to determine this? One thing we know is that if a
- given SV undergoes a major change, any SV's which are 'close' to that one
- will likely also change.
- The kernel distance between SV's is a known quantity, so this can probably
- be a good decision metric.
- Not only that, but if a given SV had a large change, we can immediately
- evaluate nearby SV's, they will likely be responding to the exact same
- predictions.
- So we can probably develop an SV priority metric; for each SV the metric
- is it's distance from each other SV times the most recent transition magnitude
- divided by the time since last update (or some similar combination).
- The longer it's been since last update, the less likely it is that the
- prediction set is the same, so smaller time intervals should equal higher
- priority (this might not be needed, especially if SV's are evaluated much
- more rapidly than new observations are added).
- This encourages the system to work on regions around known changes before
- testing for new changes.
-\end_layout
-
-\begin_layout Plain Layout
-I wonder if it's possible to move the utility function directly into the
- emission rate? In this sense we would need to evaluate the utility of an
- SV based on the most recent prediction set.
- I'm not sure if this is helpful or not - the number of SV's may be much
- higher than the number of predictions.
- Worth considering though - would simplify stuff.
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Note Note
-status collapsed
-
-\begin_layout Plain Layout
-if squelching is equivalent to decreasing gamma, what's the point? Also,
- consider if it's useful to bother with branching.
- My guess is that the computational cost will outweigh the utility - it
- would probably be better to just increase the number of predictions in
- an iteration.
-\end_layout
-
-\begin_layout Plain Layout
-Few thoughts from last night
-\end_layout
-
-\begin_layout Itemize
-For motivation, you probably don't want to fuck with the actual prediction
- task.
- Applying the motivation to the results of prediction is one thing, tweaking
- the underlying distribution is another.
- This does raise a question of how we allow both examination of bad stuff
- and action on good stuff in the same system.
- This could be though of as thinking vs deciding in a way.
- In any case, we probably want to nudge the prediction algorithm to explore
- situations whose consequences the system cares about.
- If we use CTP for the motivated system, it might make sense for the motivationa
-l value (either really good or really bad) to influence the TTL for a prediction.
- 
-\end_layout
-
-\begin_layout Itemize
-Exponentiation is a shitty excuse for inhibition.
- Inhibition only needs to happen between two points when the conditional
- probability of one given the other is low.
- I believe that this will happen via iteration anyway - in fact you might
- want to mention it explicitly as another A/B/C case.
-\end_layout
-
-\begin_layout Plain Layout
-I've been thinking about motivation.
- A few thoughts.
- 
-\end_layout
-
-\begin_layout Plain Layout
-First, a simple way to separate thinking from choosing is to treat the predictio
-n process as the thought process, and the selection of a specific action
- as the choice process.
- In other words, we keep a robust prediction set which explores the event
- space in as complete a way as possible, but when we choose a specific action
- to take, we choose the action with the highest expected benefit.
- The choice algorithm is going to be slightly dicey anyway - we will have
- a set of predictions at any given time, and we will need some way to decide
- which to take.
- It seems that since we'll need some mechanism for making this choice anyway,
- using the choice to enforce motivation is the best option.
-\end_layout
-
-\begin_layout Plain Layout
-How to search the probability space is a tricky issue.
- The first issue is how we handle iterations.
- One way would be to use continuous emission with time-to-live.
- In this scenario, the emission rate would be scaled to based on the probability
- of each SV.
- Perhaps a more elegant approach is for each SV to maintain a set of random
- variates.
- The number of observations in the set would be determined by the probability,
- and the 'prediction set' would be the union of each SV's set.
- What's nice about this is that we only have to generate random variates
- when system conditions change.
- When a SV's probability changes, it either adds some variates to its set
- or it culls some from the set.
- This would allow the system to restrict processing to cases where new informati
-on has become available.
- It might even be possible to restrict the communication between SV's to
- these changes - they could pass deltas back and fourth, and rather than
- maintaining the kernel distance to each other SV, they simply maintain
- a summation value.
- The deltas would be added to the summation value.
- This could significantly reduce the storage and communication costs.
-\end_layout
-
-\begin_layout Plain Layout
-I'm still not completely comfortable with the single-prediction idea.
- The question I'm not sure about is how likely such a system is to explore
- non-immediate locations in the probability space.
- I really want a system capable of reflection, of re-evaluating past experiences
- in light of new information, and to re-interpret both plans and past actions.
- I'm also curious about our ability to shift focus without forgetting what
- we were thinking about before.
- I think the basic ability I'm trying to formalize *is* focus - the ability
- to restrict prediction to specific areas, and then to shift that focus
- without loosing the earlier predictions.
-\end_layout
-
-\begin_layout Plain Layout
-In a sense, this is an issue of prioritization.
- The system needs to evaluate immediate possibilities when they have significant
- consequences to the system.
- Once the immediate possibilites are either well understood or recognized
- to be unimportant, the system can shift its focus to less immediate issues.
- If we were explicitly selecting subsets of predictions to pass to the next
- iteration, this could be seen as selecting sets in some time range, and
- evaluating both the risk of the prediction in that time range and the potential
- changes in motivators in that time range.
- 
-\end_layout
-
-\begin_layout Plain Layout
-The problem with treating focus this way is that it screws up the probability
- space - you end up with higher probabilities in some time ranges than others,
- simply because you're increasing the resolution in those areas.
- We could use a scaling function like when combining subsets, but another
- option is to focus on SV's rather than contexts.
- In this case, the prediction space remains coherent, but the risk of the
- predictions is affected.
- For this to work though, we'd need to be able to evaluate the relevance
- of each SV to a context - with TI estimators this seems practically impossible.
-\end_layout
-
-\begin_layout Plain Layout
-What if we focused on the updating of SV variates.
- If SV's only change when the information context changes, we have to deal
- with the fact that there's a lot of information being passed around.
- One solution to this is to prioritize updates coming from SV's in a given
- context.
- This allows us to concentrate system resources on relevant stuff, but keep
- a queue of information which still needs to be processed.
- Some clever queuing algorithm might enable us to control focus.
- I really like this actually, it allows us to limit information processing
- *by information content*, without requiring us to understand the nature
- of that content.
- It also allows us do task switching fairly easily - we simply re-prioritize
- the queue, then come back to where we left off when we've finished the
- new task.
-\end_layout
-
-\begin_layout Plain Layout
-One final issue; remembering thoughts.
- I'd like to make sure that predictions can be tansferred into the system
- permanently.
- This might be a simple matter of investigating how hierarchical layers
- function.
- One thing to consider is that in order for hierarchical predictions to
- take advantage of lower layers, they need some awareness of the predictions
- being made there.
- If we return to the SV random variate idea, we could treat changes in probabili
-ty as both the impetus to change the variate stack size and the impetus
- to generate points for higher layers.
- In this case, points would only be generated at state changes, so the hierarchi
-cal layers would only be responding to the relationships between state changes
- (not the actual value of SV activation).
- On the other hand, this allows us to know the probability value of each
- SV at any point in time - we could likely tweak the SVM to use this knowledge
- both in optimizing and estimating (this returns to Brad's idea for sensors).
- 
-\end_layout
-
-\begin_layout Plain Layout
-We regardless of how information is passed, so long as the probability of
- SV's is responding to the predictions (which it must be to generate iterative
- predictions) the predictions will end up in memory.
- Not as predictions per se, but as interpretations of predictions.
- Which is probably better - data compression and all that.
-\end_layout
-
-\begin_layout Plain Layout
-OK, so now let's just think through the information passing bit.
- Here's an idea; each time a SV changes state, we push the new variate set
- to the rest of the network and recompute each SV's state.
- Any changed states get pushed to the hierarcy and then added to the processing
- stack.
- This allows us to concentrate the effects of a state change in a single
- point on upper layers, while retaining the processing stack (the other
- option is just to push a single SV's state change to the upper layers -
- I like the set approach because it coordinates a set of unified responses
- to a given change).
- I think this is a workable solution.
- We're not actually pushing deltas - we're pushing the actual probability
- values.
- The only difference between this and random selection is that points are
- only defined at state changes.
- 
-\end_layout
-
-\begin_layout Plain Layout
-Think about the implications of this on IID data.
- In this case, the random variable for a higher layer is not the *values*
- of the lower layer, but the *value changes* on lower layers.
- Maybe this is good? In a way this is good - it tells us not only what the
- value should be, but when it should take that value.
- In essence it describes when we should observe a state change.
- But how do create actual state changes this way? One possibility is to
- create a time queue and adjust SV's when their state change is predicted.
- This would seem to require a lot of synchronization, and doesn't really
- fit into the queuing scheme discussed.
- Here's the thing; if upper layer values are timestamped, their predictions
- describe the expected state of the PDF at a given time for lower layers.
- In that sense, they're only really useful at the time they predict.
- So basically, what needs to happen is each time a SV's probability is adjusted,
- it needs to also adjust it based on the most recent prediction from above.
-\end_layout
-
-\begin_layout Plain Layout
-The only thing that's not clear about this is how we handle noisy predictions
- from above.
- No, there is no noise from above.
- In the same way that the choice function provides consistent output, the
- choice function from above provides consistent state changes.
- The predictions above may be noisy, but we only use motivated selections
- from above to adjust SV's below.
- So yes, we simply adjust based on the predictions and then bayesian update
- the prediction based on the most recent state change from above.
- This also means that we only need to make choices when there appear to
- be state changes.
- This might be a good approach to take in general.
- Thanks Brad.
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
 \begin_layout Subsection
 Hierarchical Considerations
 \end_layout
@@ -4796,7 +4096,22 @@ Hierarchical Considerations
 status open
 
 \begin_layout Plain Layout
-transition probability vs value probability
+I had originally planned to say that we only pass values up when they change,
+ but the more I think about that the less I like it.
+ Doing so requries that we have absolute certainty that the value has been
+ unchanged between outputs, which in our case isn't necessarily so - especially
+ if we're optimizing which SV's get updated.
+ At the same time, outputting after updates isn't a great idea either -
+ not i.i.d.
+ if the SV selection is optimized.
+ We get the same problem from outputting at emission - we want the upper
+ layers to have an accurate 'view' of the processes below, outputting at
+ emission would increase the number of points with large rho (which isn't
+ needed as rho describes the emission rate).
+ So I think the best way to handle this is to either take the state of the
+ entire system at some sampling rate, or possibly allow each SV to randomly
+ output at a uniform rate.
+ 
 \end_layout
 
 \end_inset
@@ -5275,6 +4590,20 @@ It cannot be assumed that a prediction at time
 
 \end_layout
 
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+If this was a regression function the output would be a lot smoother.
+ Just make sure you don't end up between peaks.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsection
 Curiosity
 \end_layout
@@ -5376,6 +4705,47 @@ Make sure p is stationary here - if it's not motivating any specific value
 \end_layout
 
 \begin_layout Section
+Conclusion
+\end_layout
+
+\begin_layout Standard
+Eat it, bitches
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+nocite{Moreno03}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+bibliographystyle{plain}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+\start_of_appendix
 Results
 \end_layout
 
@@ -5396,6 +4766,473 @@ Results Summary
 \end_layout
 
 \begin_layout Section
+Discussion of Existing Work
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%http://en.wikipedia.org/wiki/Expectation-maximization_algorithm
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%http://en.wikipedia.org/wiki/Stationary_process
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%http://en.wikipedia.org/wiki/Ergodicity
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%http://en.wikipedia.org/wiki/Mixing_(mathematics)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%http://en.wikipedia.org/wiki/Lyapunov_exponent
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%http://en.wikipedia.org/wiki/Recurrence_quantification_analysis
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%http://en.wikipedia.org/wiki/Recurrence_plot
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%http://en.wikipedia.org/wiki/Autoregressive_fractionally_integrated_moving_averag
+e
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%http://en.wikipedia.org/wiki/Autocorrelation
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%
+\backslash
+url{http://en.wikipedia.org/wiki/Linear_discriminant_analysis}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Hidden Markov Model
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+% cannot account for future states - only capable of prediction
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+% weak, short-term memory
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Box-Jenkins
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+% intended for simplistic processes with well-understood stationarity and
+ periodicity
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+% http://en.wikipedia.org/wiki/Box-Jenkins
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Spectral Analysis
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+% assumes some type of frequency-domain decomposition.
+  Frequency-domain signal representations do not do a very good job predicting
+ time-domain values.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Shrinking-
+\begin_inset Formula $\epsilon$
+\end_inset
+
+ SVM Regression
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+% theoretical foundation weak; only compensates for the relevance of recent
+ data.
+  See Markhov problem
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+SVM Details & Optimizations
+\end_layout
+
+\begin_layout Subsection
+Quadratic Optimization Problem
+\end_layout
+
+\begin_layout Subsection
+Support Vector Decomposition 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Marginal
+status collapsed
+
+\begin_layout Plain Layout
+This section is probably better as an appendix
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Due to the simplicity of the constraints in the optimization problem, it
+ is possible to use the decomposition method of Osuna to reduce the memory
+ requirements of the Parzen-SVM algorithm.
+\end_layout
+
+\begin_layout Subsubsection
+ Sub-Problem Definition 
+\end_layout
+
+\begin_layout Standard
+The decomposition algorithm breaks 
+\begin_inset Formula $X$
+\end_inset
+
+ into two working sets 
+\begin_inset Formula $B,N$
+\end_inset
+
+, and attempts to optimize 
+\begin_inset Formula $B$
+\end_inset
+
+ while keeping 
+\begin_inset Formula $N$
+\end_inset
+
+ fixed.
+ This results in the following iterative optimization problem where 
+\begin_inset Formula $\boldsymbol{\beta}^{k}$
+\end_inset
+
+ denotes the result of the previous iteration:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+W(\boldsymbol{\beta}_{B}) & =\frac{1}{2}\begin{bmatrix}\boldsymbol{\beta}_{B}^{T} & (\boldsymbol{\beta}_{N}^{k})^{T}\end{bmatrix}\begin{bmatrix}P_{BB} & P_{BN}\\
+P_{NB} & P_{NN}\end{bmatrix}\begin{bmatrix}\boldsymbol{\beta}_{B}\\
+\boldsymbol{\beta}_{N}^{k}\end{bmatrix}-\begin{bmatrix}q_{B}^{T} & q_{N}^{T}\end{bmatrix}\begin{bmatrix}\boldsymbol{\beta}_{B}\\
+\boldsymbol{\beta}_{N}^{k}\end{bmatrix}\\
+ & =\frac{1}{2}\boldsymbol{\beta}_{B}^{T}P_{BB}\boldsymbol{\beta}_{B}-(-q_{B}+P_{BN}\boldsymbol{\beta}_{N}^{k})^{T}\boldsymbol{\beta}_{B}\\
+ & =\frac{1}{2}\begin{bmatrix}\beta_{i} & \beta_{j}\end{bmatrix}\begin{bmatrix}P_{ii} & P_{ij}\\
+P_{ij} & P_{jj}\end{bmatrix}\begin{bmatrix}\beta_{i}\\
+\beta_{j}\end{bmatrix}-(-q_{B}+P_{BN}\boldsymbol{\beta}_{N}^{k})^{T}\begin{bmatrix}\beta_{i}\\
+\beta_{j}\end{bmatrix}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{equation}
+\text{subject to}\quad0\le\beta_{i},\beta_{j},\quad\beta_{i}+\beta_{j}=1-\mathbf{1}^{T}\boldsymbol{\beta}_{N}^{k}\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+ Working Set Selection 
+\end_layout
+
+\begin_layout Standard
+Select
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align}
+ & i\in\text{arg}\max_{t}\left\{ -\nabla f(\boldsymbol{\beta}^{k})_{t}\ |\quad t\in I(\boldsymbol{\beta}^{k})\right\} \\
+ & j\in\text{arg}\min_{t}\left\{ -\frac{b_{it}^{2}}{a_{it}}\ |\quad t\in I(\boldsymbol{\beta}^{k}),\quad-\nabla f(\boldsymbol{\beta}^{k})_{t}<-\nabla f(\boldsymbol{\beta}^{k})_{i}\right\} \end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Where 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+% This needs to be checked for the new optimization scenario
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align}
+I(\boldsymbol{\beta}) & \equiv\{t\ |\quad\beta_{t}<1\quad\text{or}\quad\beta_{t}>0\}\\
+ & a_{it}=P_{ii}+P_{tt}-2P_{it}\\
+ & \bar{a}_{it}=\begin{cases}
+a_{it} & \text{if}\ a_{it}>0\\
+\delta & \text{otherwise}\end{cases}\\
+ & b_{it}=-\nabla f(\boldsymbol{\beta}^{k})_{i}+\nabla f(\boldsymbol{\beta}^{k})_{t}\\
+\nabla f(\boldsymbol{\beta})_{i} & \equiv P_{i}\boldsymbol{\beta}-q_{i}\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Stopping Condition 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{equation}
+\max_{i\in I(\boldsymbol{\alpha}^{k})}-\nabla f(\boldsymbol{\alpha})_{i}+\min_{j\in I(\boldsymbol{\alpha}^{k})}\nabla f(\boldsymbol{\alpha})_{j}\le\epsilon\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Cascade SVM
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Hazan08"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Parallel SVM Decomposition
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Graf04"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
 Further Research
 \end_layout
 
@@ -5411,32 +5248,6 @@ status open
 
 % logistic function using mean and sd to put most training points between
  .1 and .9
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-% upper and lower bounds on 
-\backslash
-(
-\backslash
-int 
-\backslash
-Delta 
-\backslash
-) as non-stationary data detections mechanism
 \end_layout
 
 \begin_layout Plain Layout
@@ -5489,44 +5300,7 @@ status open
 Performance
 \end_layout
 
-\begin_layout Section
-Conclusion
-\end_layout
-
 \begin_layout Standard
-Eat it, bitches
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-nocite{Moreno03}
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-bibliographystyle{plain}
-\end_layout
-
-\end_inset
-
- 
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
 bibfiles "Research/research.bib"
