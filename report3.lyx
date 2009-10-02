@@ -2,7 +2,7 @@
 \lyxformat 345
 \begin_document
 \begin_header
-\textclass article
+\textclass amsbook
 \begin_preamble
 
 
@@ -10,6 +10,9 @@
 \usepackage{amsfonts}
 \end_preamble
 \use_default_options false
+\begin_modules
+theorems-ams
+\end_modules
 \language english
 \inputencoding auto
 \font_roman default
@@ -114,11 +117,11 @@ LatexCommand printnomenclature
 
 \end_layout
 
-\begin_layout Section
+\begin_layout Chapter
 Introduction
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 General Overview
 \end_layout
 
@@ -214,7 +217,7 @@ Intro motivation and decision-making
 
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Formal Setting
 \end_layout
 
@@ -519,11 +522,11 @@ Reorganize paper: 1) definition of similarity between subsets 2) probability
 Estimation
 \end_layout
 
-\begin_layout Section
+\begin_layout Chapter
 Transformation Invariant Parzen Windows
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Parzen Windows for i.i.d.
  Data
 \end_layout
@@ -657,7 +660,7 @@ This approach is useful in the context of a set of observations drawn i.i.d.
  
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Contextual Estimation
 \end_layout
 
@@ -792,7 +795,7 @@ We can use any kernel function for
 .
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Parzen Windows for Transformation-Invariant Data
 \end_layout
 
@@ -1160,7 +1163,7 @@ Make a note that for d not in D, A_dd=0, b=0
 
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Performance
 \end_layout
 
@@ -1177,7 +1180,7 @@ Big-O
 
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Multiple Data Sources
 \end_layout
 
@@ -1247,7 +1250,7 @@ x^{\nu} & \in[\mathbb{R},\textrm{Ø}]\end{align*}
  to show the same time.
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Single Channel Summary
 \end_layout
 
@@ -1278,7 +1281,7 @@ K_{\gamma}\left(w_{n}^{D},w_{m}^{D},X\right) & =\prod_{\nu\in\tilde{D}}\frac{1}{
 
 \end_layout
 
-\begin_layout Section
+\begin_layout Chapter
 Support Vector Optimizations
 \end_layout
 
@@ -1302,7 +1305,7 @@ Refer to big-O
 
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Generalized Parzen-SVM 
 \end_layout
 
@@ -1566,7 +1569,7 @@ Shouldn't the second term only have one kernel function? If not combine
 
 \end_layout
 
-\begin_layout Section
+\begin_layout Chapter
 Ensemble System
 \end_layout
 
@@ -1587,7 +1590,7 @@ how does one choose sets of dimension which will benefit from TI analysis,
  and how do we control the computational demands of an ensemble system?
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 VC Entropy and Bounds on the Rate of Convergence
 \end_layout
 
@@ -1861,7 +1864,7 @@ In other words the VC Dimension of a real-valued estimator is determined
 .
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Bounds of Convergence for TI Analysis
 \end_layout
 
@@ -1932,7 +1935,7 @@ It is clear therefore that the TI loss will be less than or equal to the
  
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Bayesian Model Averaging Ensemble Machine
 \end_layout
 
@@ -2063,7 +2066,7 @@ If that footnote is correct, it's odd that we need to normalize this.
 
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Merging Estimators with Shared Dimensional Sets
 \end_layout
 
@@ -2299,7 +2302,7 @@ Show a second iteration of this process
 
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Computational Considerations in Subset Selection
 \end_layout
 
@@ -2451,7 +2454,7 @@ h(n,X) & =b(n,X)-\lambda c(n,X)\end{align*}
 
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Hierarchical Ensemble Estimators
 \end_layout
 
@@ -2689,7 +2692,7 @@ In this way, estimates generated in higher layers can be integrated into
 Choice
 \end_layout
 
-\begin_layout Section
+\begin_layout Chapter
 Prediction and Conditional Prediction
 \end_layout
 
@@ -2731,7 +2734,7 @@ Reorganize this entire section to be based on various method of generating
 
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Generalized Prediction
 \end_layout
 
@@ -3151,11 +3154,11 @@ You probably need to define 'in a window' better for selecting points.
 
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Ensemble Predictions
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Dimension-Conditional Prediction
 \end_layout
 
@@ -3437,7 +3440,7 @@ Is this true? The selection of transform parameters may need to take the
 
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Set-Conditional Prediction
 \end_layout
 
@@ -3537,7 +3540,7 @@ In the TI SVM optimization, you used two windows; make sure that using a
 
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Discrete Iterative Prediction
 \end_layout
 
@@ -3868,7 +3871,7 @@ Controlling the convergence rate of an iterative prediction involves making
  
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Continuous Iterative Prediction
 \end_layout
 
@@ -3991,7 +3994,7 @@ There are multiple methods for handling changes in an emitter's
  
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Performance Considerations
 \end_layout
 
@@ -4087,7 +4090,7 @@ Where
  has been observed before moving on to randomly selecting SV's.
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Hierarchical Considerations
 \end_layout
 
@@ -4119,7 +4122,7 @@ I had originally planned to say that we only pass values up when they change,
 
 \end_layout
 
-\begin_layout Section
+\begin_layout Chapter
 Motivated Decision-Making
 \end_layout
 
@@ -4139,7 +4142,7 @@ Up to this point, our discussion has focused on data analysis.
  
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Actions and Incentives
 \end_layout
 
@@ -4244,7 +4247,7 @@ m_{\theta}(x^{i})=1 & \longmapsto\text{no preference}\end{align*}
 
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Motivated Prediction
 \end_layout
 
@@ -4516,7 +4519,7 @@ We have refined our understanding of the motivated prediction process; the
  
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Choice
 \end_layout
 
@@ -4604,7 +4607,7 @@ If this was a regression function the output would be a lot smoother.
 
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Curiosity
 \end_layout
 
@@ -4704,7 +4707,7 @@ Make sure p is stationary here - if it's not motivating any specific value
 .
 \end_layout
 
-\begin_layout Section
+\begin_layout Chapter
 Conclusion
 \end_layout
 
@@ -4744,28 +4747,28 @@ bibliographystyle{plain}
 
 \end_layout
 
-\begin_layout Section
+\begin_layout Chapter
 \start_of_appendix
 Results
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Eunite Competition Data
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Santa Fe Data
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 CATS Benchmark Data
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Results Summary
 \end_layout
 
-\begin_layout Section
+\begin_layout Chapter
 Discussion of Existing Work
 \end_layout
 
@@ -4925,7 +4928,7 @@ url{http://en.wikipedia.org/wiki/Linear_discriminant_analysis}
 
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Hidden Markov Model
 \end_layout
 
@@ -4962,7 +4965,7 @@ status open
 
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Box-Jenkins
 \end_layout
 
@@ -5000,7 +5003,7 @@ status open
 
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Spectral Analysis
 \end_layout
 
@@ -5025,7 +5028,7 @@ status open
 
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Shrinking-
 \begin_inset Formula $\epsilon$
 \end_inset
@@ -5053,15 +5056,15 @@ status open
 
 \end_layout
 
-\begin_layout Section
+\begin_layout Chapter
 SVM Details & Optimizations
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Quadratic Optimization Problem
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Support Vector Decomposition 
 \end_layout
 
@@ -5084,7 +5087,7 @@ Due to the simplicity of the constraints in the optimization problem, it
  requirements of the Parzen-SVM algorithm.
 \end_layout
 
-\begin_layout Subsubsection
+\begin_layout Subsection
  Sub-Problem Definition 
 \end_layout
 
@@ -5139,7 +5142,7 @@ P_{ij} & P_{jj}\end{bmatrix}\begin{bmatrix}\beta_{i}\\
 
 \end_layout
 
-\begin_layout Subsubsection
+\begin_layout Subsection
  Working Set Selection 
 \end_layout
 
@@ -5191,7 +5194,7 @@ a_{it} & \text{if}\ a_{it}>0\\
 
 \end_layout
 
-\begin_layout Subsubsection
+\begin_layout Subsection
 Stopping Condition 
 \end_layout
 
@@ -5204,7 +5207,7 @@ Stopping Condition
 
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Cascade SVM
 \end_layout
 
@@ -5218,7 +5221,7 @@ key "Hazan08"
 
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Parallel SVM Decomposition
 \end_layout
 
@@ -5232,11 +5235,11 @@ key "Graf04"
 
 \end_layout
 
-\begin_layout Section
+\begin_layout Chapter
 Further Research
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Data Pre-Processing
 \end_layout
 
@@ -5296,7 +5299,7 @@ status open
 
 \end_layout
 
-\begin_layout Subsection
+\begin_layout Section
 Performance
 \end_layout
 
