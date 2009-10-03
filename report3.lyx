@@ -79,13 +79,6 @@ kerinin@gmail.com
 \end_layout
 
 \begin_layout Standard
-\begin_inset Newpage pagebreak
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
 \begin_inset CommandInset toc
 LatexCommand tableofcontents
 
@@ -121,115 +114,100 @@ LatexCommand printnomenclature
 Introduction
 \end_layout
 
-\begin_layout Section
-General Overview
+\begin_layout Standard
+Wikipedia defines 
+\begin_inset Quotes eld
+\end_inset
+
+Machine Learning
+\begin_inset Quotes erd
+\end_inset
+
+ as 
+\emph on
+a scientific discipline that is concerned with the design and development
+ of algorithms that allow computers to learn based on data
+\emph default
+.
+ Machine learning deals with the development of Learning Machines (LM's)
+ capable of autonomously generating probabalistic models using sets of observati
+ons.
+ This text builds upon the foundation of Machine Learning to develop an
+ Acting Machine (AM); a system capable of interacting with with its environment
+ in a motivated way.
+ 
 \end_layout
 
 \begin_layout Standard
-\begin_inset Note Note
-status open
+Our acting machine is built from two basic operations; a learning machine
+ capable of developing models of the AM's environment based on a set of
+ observations and a volitive algorithm which generates specific actions
+ based on a set of motivational parameters.
+ We will refer to these two operations as 
+\begin_inset Quotes eld
+\end_inset
 
-\begin_layout Plain Layout
-re-write introduction to describe the general idea of an acting machine,
- develop the basic pieces, and introduce the chapters of the book
+estimation
+\begin_inset Quotes erd
+\end_inset
+
+ and and 
+\begin_inset Quotes eld
+\end_inset
+
+choice
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The term estimation refers to the probabalistic nature of the model.
+ In statistical terms the generation of a model is framed as the estimation
+ of an unknown probability distribution function (PDF) based on a set of
+ observations.
+ The tern choice refers to the process of selecting a specific action from
+ the set of possible actions.
+ This selection process is informed by a set of motivational parameters
+ which quantify the types of outcomes the AM seeks to cause through a given
+ selection.
+ This text is organized into two parts; the first develops a robust estimation
+ procedure, and the second develops the choice procedure.
+ 
 \end_layout
 
+\begin_layout Standard
+\begin_inset Newpage pagebreak
 \end_inset
 
 
 \end_layout
 
-\begin_layout Standard
-For any estimator of a probability density function, the accuracy (measured
- by the risk) of the estimator can be shown to depend on two factors; the
- number of observations from which the estimates are made and the amount
- of information the estimator is capable of extracting from from those observati
-ons.
- Existing estimators, such as the Parzen Window estimator extract information
- about the probability of a given point by comparing the distance between
- that point and the set of points previously observed; the greater the number
- of points in that are "close", the higher the probability.
- It is possible to determine the confidence interval of such an estimator
- using the VC Entropy of the estimating function.
- The VC Entropy of an estimator is based on the number of points which are
- needed to "cover" the observations with some level of closeness.
- This is to say that if the set of observations contain multiple points
- which are "close" to each other, the estimator can ignore all but one in
- generating estimates (provided the number of similar points is retained).
+\begin_layout Part
+Estimation
+\end_layout
+
+\begin_layout Section*
+Formal Setting: Estimation
 \end_layout
 
 \begin_layout Standard
-Our task is to develop a set of estimators whose confidence interval is
- less than the confidence interval determined by the VC Entropy, and we
- do so by extending the concept of VC Entropy to sets of observations under
- linear transformations.
- Where the VC Entropy is determined by the number of points necessary to
- "cover" the set of observations, we define the Transformation-Invariant
- Entropy (TI Entropy) as the number of 
-\emph on
-sets of points
-\emph default
- necessary to "cover" the observations under linear transformations.
- In the same way that the VC Entropy is determined by the similarity between
- individual observations, the TI Entropy is determined between sets of observati
-ons.
- 
-\end_layout
-
-\begin_layout Standard
-The distance between two points can easily be determined using well-known
- distance metrics; the distance between two sets of points requires that
- we develop a new distance metric.
- This distance metric measures the potential similarity between two sets
- when one has been subjected to some linear transformation.
- For simplicity we will integrate this similarity measure over all possible
- transformations; the resulting similarity measure will describe the net
- similarity of the two sets under 
-\emph on
-any
-\emph default
- linear transformation.
- It is for this reason that we refer to our extension of the VC Entropy
- as Transformation-Invariant.
- It will be shown that the TI Entropy is necessarily less than or equal
- to the VC Entropy, and that as a result the confidence interval of an estimator
- based on the TI-distance between sets of observations is necessarily greater
- than or equal to that of estimators based on the distance between individual
- points.
- 
-\end_layout
-
-\begin_layout Standard
-Because the computational complexity of TI-based estimators is higher than
- that of traditional estimators we will develop search heuristics allowing
- us to confine the TI analysis to subsets of the observations which are
- likely to provide useful results.
- We will develop an ensemble system capable of applying TI analysis to multiple
- subsets and combining the results of these analyses.
- 
-\end_layout
-
-\begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Intro motivation and decision-making
-\end_layout
-
+We define the estimation problem as the generation of a Probability Density
+ Functions which describes a random process 
+\begin_inset Formula $X$
 \end_inset
 
+, where the PDF is unknown, but 
+\begin_inset Formula $\ell$
+\end_inset
 
-\end_layout
+ sample data points 
+\begin_inset Formula $x_{i}$
+\end_inset
 
-\begin_layout Section
-Formal Setting
-\end_layout
+ of arbitrary dimension 
+\begin_inset Formula $d$
+\end_inset
 
-\begin_layout Standard
-We define our problem as one of estimating a Probability Density Functions
- (PDF), so we define the set of observations as a random variable of arbitrary
- dimensions:
+ are given:
 \end_layout
 
 \begin_layout Standard
@@ -342,166 +320,131 @@ description "Slack variable"
 
 \end_layout
 
-\begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Organize as follows: 1)Introduction and formal setting 2) Distance measure
- 3) Parzen Estimator and SV Estimator 4) TI Entropy measure 5) Ensemble
- System 6) Motivated Decision Making
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Reorganize paper: 1) definition of similarity between subsets 2) probability
- estimation over subsets 3) algorithm for choosing subsets, A1) SVM, A2)
- ensemble system
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Newpage pagebreak
-\end_inset
-
-
-\end_layout
-
-\begin_layout Part
-Estimation
-\end_layout
-
 \begin_layout Chapter
-Transformation-Invariant Metric
+Set Metrics
 \end_layout
 
 \begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Re-write this whole section, moving parts to the PW portion
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-The crucial distinction between i.i.d data from a static PDF and data which
- exhibits TI is that when estimating the probability of a point, you must
- consider to context of the point as well as the location of the point in
- 
-\begin_inset Formula $\Omega$
-\end_inset
-
-.
- In this paper we will establish the context of 
-\begin_inset Formula $x$
-\end_inset
-
- by defining a "neighborhood" of points around 
-\begin_inset Formula $x$
-\end_inset
-
- which we will refer to as a window 
-\begin_inset Formula $w$
-\end_inset
-
- on 
+We begin our discussion of estimation by considering the nature of the observati
+ons 
 \begin_inset Formula $X$
 \end_inset
 
 .
- Because a TI analysis may be applicable to some dimensions of 
+ Multiple methods exist to generate PDF estimates from a set of observations
+ (indeed we will rely on two such methods), however these approaches generally
+ require a distance metric 
+\begin_inset Formula $\|\cdot,\cdot\|$
+\end_inset
+
+ defined over the abstract space 
 \begin_inset Formula $\Omega$
 \end_inset
 
- and not other, we will define the set of dimensions for which TI analysis
- is used as 
-\begin_inset Formula $D$
+.
+ The most significant element of the AM approach to estimation is that we
+ will assume there exists 
+\begin_inset Quotes eld
 \end_inset
 
-, the the set of dimensions 
-\emph on
-not 
-\emph default
-used for TI analysis as 
-\begin_inset Formula $\tilde{D}$
+local structure
+\begin_inset Quotes erd
 \end_inset
 
-, and the set of all dimensions of 
-\begin_inset Formula $\Omega$
+ to the set of observations 
+\begin_inset Formula $X$
 \end_inset
 
- as 
-\begin_inset Formula $D^{X}$
+.
+ More specifically, we assume that there are similarities between the local
+ distribution of 
+\begin_inset Formula $\mathcal{P}$
 \end_inset
 
-:
+ in different 
+\begin_inset Quotes eld
+\end_inset
+
+neighborhoods
+\begin_inset Quotes erd
+\end_inset
+
+.
+ We will see in Chapter 3 that such similarities allow us to estimate probabilit
+ies, and in Chapter 4 that such similarities allow us to reduce the computationa
+l demands of estimation.
+ We therefore develop a formal understanding of a 
+\begin_inset Quotes eld
+\end_inset
+
+neighborhood
+\begin_inset Quotes erd
+\end_inset
+
+ as well as a metric between two 
+\begin_inset Quotes eld
+\end_inset
+
+neighborhoods
+\begin_inset Quotes erd
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-D^{X} & =[0,...,d]\\
-D & \subseteq D^{X}\\
-\tilde{D} & =[n\in D^{X}|\ n\notin D]\\
-\vec{x}_{i} & \longmapsto w_{i}^{D}\\
-w_{i}^{D} & =[x_{i}^{n}|\ n\in D]\\
-w_{i}^{n} & =x_{i}^{n}\end{align*}
-
+We define neighborhoods using two parameters; the location of the neighborhood
+ and the width of the neighborhood.
+ We will restrict our attention to neighborhoods whose location is defined
+ by a point 
+\begin_inset Formula $x\in X$
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
-While the window 
-\begin_inset Formula $w$
-\end_inset
-
- describes the 
-\emph on
-location 
-\emph default
-of a window, we still must define its extents.
- We will do so through the use of a windowing kernel function 
-\begin_inset Formula $\omega(\cdot)$
-\end_inset
-
- parametrized by some variable 
+, and use the parameter 
 \begin_inset Formula $\alpha$
 \end_inset
 
- which returns a value describing the degree of inclusion of an arbitrary
- point and 
+ to control the width of a neighborhood.
+ We describe points 
+\begin_inset Formula $x_{i}\in X$
+\end_inset
+
+ as being 
+\begin_inset Quotes eld
+\end_inset
+
+included in
+\begin_inset Quotes erd
+\end_inset
+
+ a neighborhood, and describe the extent to which a point 
+\begin_inset Formula $x_{i}$
+\end_inset
+
+ is included in a neighborhood using a value bounded by 
+\begin_inset Formula $(0,\infty)$
+\end_inset
+
+.
+ We do so through the use of a windowing kernel function 
+\begin_inset Formula $\omega_{\alpha}(\cdot)$
+\end_inset
+
+ which returns a the extent to which an observation 
+\begin_inset Formula $x_{i}$
+\end_inset
+
+ is included in the window defined by 
 \begin_inset Formula $x$
 \end_inset
 
- in the window 
-\begin_inset Formula $w$
-\end_inset
 
-:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\omega_{\alpha}(w,x) & \Rightarrow[0,\infty)\\
-\int_{-\infty}^{\infty}\omega_{\alpha}(w,x)dx_{i} & =1\end{align*}
+\omega_{\alpha}(x,x_{i}) & \Rightarrow(0,\infty)\\
+\int_{-\infty}^{\infty}\omega_{\alpha}(x,x_{i})dx_{i} & =1\end{align*}
 
 \end_inset
 
@@ -509,7 +452,16 @@ of a window, we still must define its extents.
 \end_layout
 
 \begin_layout Standard
-We can use any kernel function for 
+For simplicity, we will refer to the neighborhood located at a point 
+\begin_inset Formula $x$
+\end_inset
+
+ as the window 
+\begin_inset Formula $w$
+\end_inset
+
+.
+ We can use any kernel function for 
 \begin_inset Formula $\omega(\cdot)$
 \end_inset
 
@@ -531,153 +483,37 @@ We can use any kernel function for
 .
 \end_layout
 
-\begin_layout Section
-Parzen Windows for Transformation-Invariant Data
-\end_layout
-
 \begin_layout Standard
-Because we must establish a context for TI data, we must think of the set
- of observations 
+Developing a metric for comparing two neighborhoods is therefore treated
+ as developing a metric for comparing two windows.
+ There are multiple divergence measures available which can be used to define
+ a "distance" between two sets.
+ We will use the general class of f-divergences, which define the divergence
+ between two probability distributions.
+ We will use an estimation function 
+\begin_inset Formula $\varphi$
+\end_inset
+
+ based on two sets of observations 
 \begin_inset Formula $X$
-\end_inset
-
- as part of both the problem definition and the solution.
- This means that we can no longer simply calculate the kernel distance between
- 
-\begin_inset Formula $x$
-\end_inset
-
- and each of the observations in 
-\begin_inset Formula $X$
-\end_inset
-
- independently - we must compare the 
-\emph on
-context
-\emph default
- of 
-\begin_inset Formula $x$
-\end_inset
-
- with contexts of 
-\begin_inset Formula $X$
-\end_inset
-
-.
- This requires a kernel function capable of comparing two 
-\emph on
-sets of points
-\emph default
-.
-\end_layout
-
-\begin_layout Standard
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\noun off
-\color none
-\begin_inset Formula \begin{align*}
-\mathcal{K}_{\gamma}\left(X_{i},X_{j}\right) & =\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|X_{i},X_{j}\|}\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-We can simplify this equation by observing that we are not actually dealing
- with two sets; we're dealing with two windows 
-\begin_inset Formula $w_{n}$
 \end_inset
 
  and 
-\begin_inset Formula $w_{m}$
+\begin_inset Formula $Y$
 \end_inset
 
- within 
-\begin_inset Formula $X$
-\end_inset
-
-:
-\end_layout
-
-\begin_layout Standard
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\noun off
-\color none
-\begin_inset Formula \begin{align*}
-\mathcal{K}_{\gamma}\left(w_{n}^{X},w_{m}^{X}\right) & =\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|w_{n}^{X},w_{n}^{X}\|}\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-We can extend this basic result to multiple dimensions by using the tensor
- product of the kernel values:
-\end_layout
-
-\begin_layout Standard
-
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\noun off
-\color none
-\begin_inset Formula \begin{align*}
-\mathcal{K}_{\gamma}\left(w_{n}^{X},w_{m}^{Y}:\ D\right) & =\prod_{\nu\in D}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|w_{n}^{X},w_{n}^{Y}:\ \nu\|}\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-There are multiple divergence measures available which can be used to define
- a "distance" between two sets.
- We will later show the importance of the distance metric 
+ as our two probability distributions.
+ It will later be shown the importance of the distance metric 
 \begin_inset Formula $\|\cdot,\cdot\|$
 \end_inset
 
  being integrable; for this reason we will use the Pearson Divergence as
- our distance metric when comparing sets.
- In order to accommodate linear affine transformations, we add a 
-\begin_inset Formula $d\times d$
-\end_inset
-
- transformation matrix 
-\begin_inset Formula $\mathbf{A}$
-\end_inset
-
- and a 
-\begin_inset Formula $d\times1$
-\end_inset
-
- shift matrix 
-\begin_inset Formula $\mathbf{b}$
-\end_inset
-
-:
+ our distance metric
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\|X^{\nu},Y^{\nu}\| & =\sum_{x^{\nu}\in\{X\cup Y\}}\left(\frac{\varphi(x^{\nu}:\ \mathbf{A}^{\nu}X^{\nu}+\mathbf{b}_{\nu})}{\varphi(x^{\nu}:\ Y^{\nu})}-1\right)^{2}\end{align*}
+\|X,Y\| & =\sum_{x\in\{X\cup Y\}}\left(\frac{\varphi(x:\ X)}{\varphi(x:\ Y)}-1\right)^{2}\end{align*}
 
 \end_inset
 
@@ -685,13 +521,69 @@ There are multiple divergence measures available which can be used to define
 \end_layout
 
 \begin_layout Standard
-Because the Pearson Divergence is a summation, we can control the influence
+Our interest is in comparing two windows over a given set.
+ This introduces a complication; windows over a single set of observations
+ will diverge as the window locations diverge, and the distance between
+ two sets of observations does not describe a useful measure of the similarity
+ between two windows.
+ For this reason we introduce affine transformations to one of the windows.
+ Affine transformations describe a class of linear transformations defined
+ by two parameters 
+\begin_inset Formula $(\mathbf{A},\mathbf{b})$
+\end_inset
+
+.
+ The affine transformation of a set 
+\begin_inset Formula $X$
+\end_inset
+
+ is defined as
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+f(X:\ \mathbf{A},\mathbf{b}) & =\mathbf{A}X+\mathbf{b}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In other words, the transformation matrix 
+\begin_inset Formula $\mathbf{A}$
+\end_inset
+
+ scales, rotates, and shears 
+\begin_inset Formula $X$
+\end_inset
+
+ while the transformation vector 
+\begin_inset Formula $\mathbf{b}$
+\end_inset
+
+ shifts it.
+ The objective of affine transformations is to determine the divergence
+ between windows under multiple possible transformations.
+ We would like the divergence measure to reflect all possible transformations
+ and describe the average 
+\emph on
+potential 
+\emph default
+divergence between two windows.
+ One approach to this is to explicitly determine values for the two matrices
+ and to determine the distance 
+\begin_inset Formula $\|\cdot,\cdot\|$
+\end_inset
+
+ using these values.
+ Because the Pearson Divergence is a summation, we can control the influence
  of each point by scaling it using the windowing function:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\|w_{n}^{X},w_{m}^{X}:\ \nu\| & =\sum_{i=1}^{\ell}\omega_{\alpha}(w_{n}^{\nu},x_{i}^{\nu})\left(\frac{\varphi(x_{i}^{\nu}:\ w_{m}^{D},\mathbf{A}X+\mathbf{b})}{\varphi(x_{i}^{\nu}:\ w_{m}^{D},X)}-1\right)^{2}\\
+\|w_{X},w_{X}:\ \nu\| & =\sum_{i=1}^{\ell}\omega_{\alpha}(w_{\nu},x_{\nu})\left(\frac{\varphi(x_{\nu}:\ w_{D},\mathbf{A}X+\mathbf{b})}{\varphi(x_{i}^{\nu}:\ w_{D},X)}-1\right)^{2}\\
 \varphi(x^{\nu}:\ w_{n}^{D},X) & =\sum_{i=1}^{\ell}\frac{\omega_{\alpha}(w_{n}^{\nu},x_{i}^{\nu})}{\sum_{j=1}^{\ell}\omega_{\alpha}(w_{n}^{\nu},x_{j}^{\nu})}K_{\gamma}(x^{\nu},x_{i}^{\nu})\\
  & =\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(w_{n}^{\nu},x_{i}^{\nu},X)\ K_{\gamma}(x^{\nu},x_{i}^{\nu})\end{align*}
 
@@ -701,66 +593,35 @@ Because the Pearson Divergence is a summation, we can control the influence
 \end_layout
 
 \begin_layout Standard
-These two matrix transformations are used to shift, scale, rotate, shear
- or mirror the observations in the window 
-\begin_inset Formula $w_{n}^{D}$
+\begin_inset Formula \begin{align*}
+\mathbf{A}X_{n}+\mathbf{b} & =X_{m}\\
+f(X_{n},X_{m}) & \longmapsto\mathbf{b}=\left(X_{n}\right)_{1}-\left(X_{m}\right)_{1}\\
+g(X_{n},X_{m}) & \longmapsto\mathbf{A}=\left(X_{n}\right)_{i\neq1}\left(X_{m}\right)_{i\neq1}\end{align*}
+
 \end_inset
 
- of 
-\begin_inset Formula $X$
-\end_inset
 
-.
- The first transformation matrix 
-\begin_inset Formula $\mathbf{A}$
-\end_inset
-
- is a 
-\begin_inset Formula $d\times d$
-\end_inset
-
- matrix.
- The linear operator 
-\begin_inset Formula $\mathbf{A}X$
-\end_inset
-
- allows us to scale, rotate, shear, and mirror 
-\begin_inset Formula $X$
-\end_inset
-
- depending on the matrix values of 
-\begin_inset Formula $\mathbf{A}$
-\end_inset
-
-.
- The second transformation matrix 
-\begin_inset Formula $\mathbf{b}$
-\end_inset
-
- is a 
-\begin_inset Formula $d\times1$
-\end_inset
-
- matrix; adding these terms together allows us to shift 
-\begin_inset Formula $X$
-\end_inset
-
- along any axis based on the values of 
-\begin_inset Formula $\mathbf{b}$
-\end_inset
-
-.
- 
 \end_layout
 
 \begin_layout Standard
-One approach to these transformations is to explicitly determine values
- for the two matrices and to determine the distance 
-\begin_inset Formula $\|\cdot,\cdot\|$
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Work this through as a summation over partitions of 
+\begin_inset Formula $X$
 \end_inset
 
- using these values.
- A more robust approach is to integrate over all possible values of 
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+A more robust approach is to integrate over all possible values of 
 \begin_inset Formula $(\mathbf{A},\mathbf{b}):$
 \end_inset
 
@@ -812,12 +673,6 @@ Because
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-\end{align*}
-
-\end_inset
-
-
 \begin_inset Formula \begin{align*}
 \int\int_{-\infty}^{\infty}\left(\frac{\varphi(x_{i}^{\nu}:\ w_{m}^{\nu},\mathbf{A}X+\mathbf{b})}{\varphi(x_{i}^{\nu}:\ w_{m}^{\nu},X^{\nu})}-1\right)^{2}d\mathbf{A}d\mathbf{b} & =\int...\int_{-\infty}^{\infty}\left(\frac{\varphi(x_{i}^{\nu}:\ w_{m}^{\nu},\mathbf{A}X+\mathbf{b})}{\varphi(x_{i}^{\nu}:\ w_{m}^{\nu},X^{\nu})}-1\right)^{2}d\mathbf{A}_{\nu,0},...,d\mathbf{A}_{\nu,d}d\mathbf{b}\end{align*}
 
@@ -879,16 +734,12 @@ Make a note that for d not in D, A_dd=0, b=0
 
 \end_layout
 
-\begin_layout Section
-Performance
-\end_layout
-
 \begin_layout Standard
 \begin_inset Note Note
 status open
 
 \begin_layout Plain Layout
-Big-O
+Re-write this whole section, moving parts to the PW portion
 \end_layout
 
 \end_inset
@@ -1022,6 +873,19 @@ Where
 
 \begin_layout Section
 Parzen Windows for Transformation-Invariant Data
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+re-write this to refer to previous section
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -2383,7 +2247,7 @@ D^{n} & \subseteq D^{X}\end{align*}
 \end_layout
 
 \begin_layout Standard
-With associated risk bounds
+With associated risk bounds:
 \begin_inset Foot
 status collapsed
 
@@ -2395,7 +2259,7 @@ In the case of Parzen Estimators we can set the empirical risk to 0, in
 
 \end_inset
 
-:
+
 \end_layout
 
 \begin_layout Standard
@@ -2423,7 +2287,7 @@ Where
  Using Bayesian Model Averaging (BMA) we can average the estimators weighted
  by their respective risks:
 \begin_inset Foot
-status open
+status collapsed
 
 \begin_layout Plain Layout
 Technically, they are being weighted by the probability that each estimator
@@ -2824,7 +2688,7 @@ The benefit portion of the heuristic can be easily constructed from previous
  Recall that the maximal risk is determined by the number of observations
  used by the estimator, the empirical risk of the estimator, and the estimator's
  growth function; all three of these values are known for a given estimator
- without additional computation
+ without additional computation.
 \begin_inset Foot
 status collapsed
 
@@ -2836,7 +2700,6 @@ The empirical risk for an SVM estimator is the minimal value of the optimization
 
 \end_inset
 
-.
  We can therefore define the benefit function for a given estimator as 
 \begin_inset Formula $b(n,X^{i})$
 \end_inset
@@ -3152,6 +3015,111 @@ In this way, estimates generated in higher layers can be integrated into
 Choice
 \end_layout
 
+\begin_layout Section*
+Formal Setting: Choice
+\end_layout
+
+\begin_layout Standard
+We assume that such a system influences 
+\begin_inset Formula $\mathcal{P}$
+\end_inset
+
+ through actions which are discrete and quantifiable.
+ Each action is therefore described as a vector 
+\begin_inset Formula $\vec{a}$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\vec{a}_{i} & =\left[a_{i}^{1},...,a_{i}^{\pi}\right]\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In order to correlate actions with changes in 
+\begin_inset Formula $\mathcal{P}$
+\end_inset
+
+, we treat each action as an observation of 
+\begin_inset Formula $X$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+X & =(\Omega,\mathcal{F},\mathcal{P})\\
+\Omega & \in\mathbb{R}^{d+\pi}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In this case, our observations are of dimension 
+\begin_inset Formula $d+\pi$
+\end_inset
+
+, the first 
+\begin_inset Formula $d$
+\end_inset
+
+ dimensions describe the system's 'environment' and the last 
+\begin_inset Formula $\pi$
+\end_inset
+
+ describe the system's "actions".
+ 
+\end_layout
+
+\begin_layout Standard
+In order to choose between possible actions, the system must prefer certain
+ states of the input space 
+\begin_inset Formula $\Omega$
+\end_inset
+
+ over others.
+ We describe these preferred states as the system's using a function 
+\begin_inset Formula $m_{\theta}(x)$
+\end_inset
+
+ we'll refer to as the motivator with control parameter 
+\begin_inset Formula $\theta$
+\end_inset
+
+.
+ For a given dimension of 
+\begin_inset Formula $\Omega$
+\end_inset
+
+, the motivator function returns a positive real value describing the system's
+ preference for the state 
+\begin_inset Formula $x^{i}$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+m_{\theta}(x^{i}) & \in\mathbb{R}\\
+m_{\theta}(x^{i})>0 & \longmapsto\text{preferred state}\\
+m_{\theta}(x^{i})<0 & \longmapsto\text{discouraged state}\\
+m_{\theta}(x^{i})=0 & \longmapsto\text{no preference}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Chapter
 Prediction and Conditional Prediction
 \end_layout
@@ -3260,7 +3228,7 @@ We will generate random variates using the Inverse Transform Sampling (ITS)
 \begin_inset Formula $Z\in(0,1)$
 \end_inset
 
- into a set of predictions which conform to the PDF in question
+ into a set of predictions which conform to the PDF in question.
 \begin_inset Foot
 status collapsed
 
@@ -3283,7 +3251,6 @@ In this paper, we will always use the random variable
 
 \end_inset
 
-.
  The general approach is to determine the inverse of the PDF's cumulative
  distribution function (CDF).
  Since the CDF is bounded by 
@@ -3806,7 +3773,7 @@ We can therefore determine
 \begin_inset Formula $\Pr(X^{\hat{D}})$
 \end_inset
 
- by restricting the estimator to the appropriate dimensions
+ by restricting the estimator to the appropriate dimensions:
 \begin_inset Foot
 status collapsed
 
@@ -3832,7 +3799,7 @@ For estimating
 
 \end_inset
 
-:
+
 \end_layout
 
 \begin_layout Standard
@@ -4468,111 +4435,6 @@ Up to this point, our discussion has focused on data analysis.
 \end_layout
 
 \begin_layout Section
-Actions and Incentives
-\end_layout
-
-\begin_layout Standard
-We assume that such a system influences 
-\begin_inset Formula $\mathcal{P}$
-\end_inset
-
- through actions which are discrete and quantifiable.
- Each action is therefore described as a vector 
-\begin_inset Formula $\vec{a}$
-\end_inset
-
-:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-\vec{a}_{i} & =\left[a_{i}^{1},...,a_{i}^{\pi}\right]\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-In order to correlate actions with changes in 
-\begin_inset Formula $\mathcal{P}$
-\end_inset
-
-, we treat each action as an observation of 
-\begin_inset Formula $X$
-\end_inset
-
-:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-X & =(\Omega,\mathcal{F},\mathcal{P})\\
-\Omega & \in\mathbb{R}^{d+\pi}\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-In this case, our observations are of dimension 
-\begin_inset Formula $d+\pi$
-\end_inset
-
-, the first 
-\begin_inset Formula $d$
-\end_inset
-
- dimensions describe the system's 'environment' and the last 
-\begin_inset Formula $\pi$
-\end_inset
-
- describe the system's "actions".
- 
-\end_layout
-
-\begin_layout Standard
-In order to choose between possible actions, the system must prefer certain
- states of the input space 
-\begin_inset Formula $\Omega$
-\end_inset
-
- over others.
- We describe these preferred states as the system's using a function 
-\begin_inset Formula $m_{\theta}(x)$
-\end_inset
-
- we'll refer to as the motivator with control parameter 
-\begin_inset Formula $\theta$
-\end_inset
-
-.
- For a given dimension of 
-\begin_inset Formula $\Omega$
-\end_inset
-
-, the motivator function returns a positive real value describing the system's
- preference for the state 
-\begin_inset Formula $x^{i}$
-\end_inset
-
-:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-m_{\theta}(x^{i}) & \in\mathbb{R}\\
-m_{\theta}(x^{i})>0 & \longmapsto\text{preferred state}\\
-m_{\theta}(x^{i})<0 & \longmapsto\text{discouraged state}\\
-m_{\theta}(x^{i})=0 & \longmapsto\text{no preference}\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Section
 Motivated Prediction
 \end_layout
 
@@ -4869,7 +4731,7 @@ We have now developed a robust architecture for estimating correlation between
 \begin_inset Formula $t$
 \end_inset
 
-
+.
 \begin_inset Foot
 status collapsed
 
@@ -4885,8 +4747,7 @@ We assume that the time
 
 \end_inset
 
-.
- 
+
 \end_layout
 
 \begin_layout Standard
@@ -5042,38 +4903,6 @@ Conclusion
 
 \begin_layout Standard
 Eat it, bitches
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-nocite{Moreno03}
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-bibliographystyle{plain}
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Chapter
