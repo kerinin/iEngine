@@ -65,7 +65,7 @@ theorems-ams
 \begin_body
 
 \begin_layout Title
-Motivated Decision-Making using Transformation Invariant Probability Estimates
+Acting Machines
 \end_layout
 
 \begin_layout Author
@@ -126,20 +126,25 @@ General Overview
 \end_layout
 
 \begin_layout Standard
-The goal is to create a method of statistical inference capable of processing
- multiple sources of data which are both multi-variate and exhibit transformatio
-n-invariant behaviors.
- This type of data is common, and developing a robust method of analysis
- has applications in many domains.
- 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+re-write introduction to describe the general idea of an acting machine,
+ develop the basic pieces, and introduce the chapters of the book
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
 For any estimator of a probability density function, the accuracy (measured
- by the confidence interval) of the estimator can be shown to depend on
- two factors; the number of observations from which the estimates are made
- and the amount of information the estimator is capable of extracting from
- from those observations.
+ by the risk) of the estimator can be shown to depend on two factors; the
+ number of observations from which the estimates are made and the amount
+ of information the estimator is capable of extracting from from those observati
+ons.
  Existing estimators, such as the Parzen Window estimator extract information
  about the probability of a given point by comparing the distance between
  that point and the set of points previously observed; the greater the number
@@ -219,150 +224,6 @@ Intro motivation and decision-making
 
 \begin_layout Section
 Formal Setting
-\end_layout
-
-\begin_layout Standard
-We use the notation of Vapnik - given three components:
-\end_layout
-
-\begin_layout Enumerate
-A generator (G) of random vectors 
-\begin_inset Formula $x\in\mathbb{R}^{n}$
-\end_inset
-
-, drawn independently from a fixed but unknown probability distribution
- function 
-\begin_inset Formula $F(x)$
-\end_inset
-
-
-\end_layout
-
-\begin_layout Enumerate
-A supervisor (S) who returns an output value 
-\begin_inset Formula $y$
-\end_inset
-
- to every input vector 
-\begin_inset Formula $x$
-\end_inset
-
-, according to a conditional distribution function 
-\begin_inset Formula $F(y|x)$
-\end_inset
-
-, also fixed but unknown
-\end_layout
-
-\begin_layout Enumerate
-A learning machine (LM) capable of implementing a set of functions 
-\begin_inset Formula $\varphi(x,\alpha),\ \alpha\in\Lambda$
-\end_inset
-
-, where 
-\begin_inset Formula $\Lambda$
-\end_inset
-
- is a set of parameters
-\end_layout
-
-\begin_layout Standard
-Our goal is to choose the function which best approximates the supervisor's
- response, given a set of vector observations:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-X & =\vec{x}_{1},...,\vec{x}_{\ell}\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset CommandInset nomenclature
-LatexCommand nomenclature
-symbol "$X$"
-description "Set of observations to be evaluated"
-
-\end_inset
-
-
-\begin_inset CommandInset nomenclature
-LatexCommand nomenclature
-symbol "$x_i$"
-description "Individual observations"
-
-\end_inset
-
-
-\begin_inset CommandInset nomenclature
-LatexCommand nomenclature
-symbol "$\\ell$"
-description "The number of observations "
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-We choose between potential functions based on the empirical risk function
- using the loss (discrepancy) 
-\begin_inset Formula $L(y,f(x,\alpha))$
-\end_inset
-
- between the response 
-\begin_inset Formula $y$
-\end_inset
-
- for a given value of 
-\begin_inset Formula $x$
-\end_inset
-
- and the predicted value 
-\begin_inset Formula $f(x,\alpha)$
-\end_inset
-
-:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-R_{\text{emp}}(\alpha) & =\frac{1}{\ell}\sum_{i=1}^{\ell}L(y_{i},f(\vec{x}_{i},\alpha))\\
- & =\frac{1}{\ell}\sum_{i=1}^{\ell}Q(z_{i},\alpha)\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset CommandInset nomenclature
-LatexCommand nomenclature
-symbol "$R_\\text{emp}(\\alpha)$"
-description "Empirical Risk "
-
-\end_inset
-
-
-\begin_inset CommandInset nomenclature
-LatexCommand nomenclature
-symbol "$L(\\cdot)$"
-description "Loss function"
-
-\end_inset
-
-
-\begin_inset CommandInset nomenclature
-LatexCommand nomenclature
-symbol "$Q(\\cdot)$"
-description "Loss Function"
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
@@ -523,145 +384,20 @@ Estimation
 \end_layout
 
 \begin_layout Chapter
-Transformation Invariant Parzen Windows
-\end_layout
-
-\begin_layout Section
-Parzen Windows for i.i.d.
- Data
+Transformation-Invariant Metric
 \end_layout
 
 \begin_layout Standard
-Our task is to estimate the probability of a given vector 
-\begin_inset Formula $\vec{x}$
-\end_inset
+\begin_inset Note Note
+status open
 
- in the abstract space 
-\begin_inset Formula $\Omega$
-\end_inset
-
- based on a set of observations 
-\begin_inset Formula $X$
-\end_inset
-
-.
- One method of accomplishing this is by using the Parzen Window (PW) method.
- We choose the Parzen Window method because it allows us to estimate probabiliti
-es of unordered sets, provided they have an addition operation and a kernel
- function exists to provide a distance metric.
- The basic operation of the PW method is to estimate the probability of
- a point based on the sum of the distance from that point to each point
- in a set of prior observations.
- The Parzen Window approach to probability density function (PDF) estimation
- is as follows; given a set of prior observations 
-\begin_inset Formula $X$
-\end_inset
-
- and a kernel function 
-\begin_inset Formula $K_{\gamma}(\cdot,\cdot)$
-\end_inset
-
- with width parameter 
-\begin_inset Formula $\gamma$
-\end_inset
-
-, the probability of a point 
-\begin_inset Formula $\vec{x}$
-\end_inset
-
- is determined by :
+\begin_layout Plain Layout
+Re-write this whole section, moving parts to the PW portion
 \end_layout
 
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-\varphi(\vec{x}:\ X) & =\sum_{i}^{\ell}\frac{1}{\ell}K_{\gamma}(\vec{x},\vec{x}_{i})\end{align*}
-
 \end_inset
 
 
-\end_layout
-
-\begin_layout Standard
-\begin_inset CommandInset nomenclature
-LatexCommand nomenclature
-symbol "$K_\\gamma (x,y)$"
-description "Kernel function"
-
-\end_inset
-
-
-\begin_inset CommandInset nomenclature
-LatexCommand nomenclature
-symbol "$\\gamma$"
-description "Kernel width parameter"
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Multiple kernel functions exist, in this paper we will use the Radial Basis
- Function (RBF) kernel:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-K_{\gamma}\left(\vec{x},\vec{y}\right) & =\prod_{\upsilon=1}^{d}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|x^{\nu},y^{\nu}\|^{2}}\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset CommandInset nomenclature
-LatexCommand nomenclature
-symbol "$\\|\\cdot,\\cdot\\|$"
-description "Distance metric"
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Where 
-\begin_inset Formula $\|\cdot,\cdot\|$
-\end_inset
-
- is some metric, for instance the 
-\begin_inset Formula $L^{2}$
-\end_inset
-
- distance:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-\|x,y\| & =\left(x-y\right)^{2}\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-This approach is useful in the context of a set of observations drawn i.i.d.
- from a static PDF, however it is unable to address transformation invariance.
- Transformation invariance (TI) refers to data-sets in which one or multiple
- PDF's occur in various transformed states within the data-set, for example
- a given sound (described by a known PDF) could be repeated multiple times
- in an audio recording, or a given image could appear in multiple locations
- in a larger image.
- While the PW method can generate an estimate in the presence of data generated
- by transformed PDF's, its inability to recognize multiple instances of
- a single PDF limits its rate of convergence.
- 
-\end_layout
-
-\begin_layout Section
-Contextual Estimation
 \end_layout
 
 \begin_layout Standard
@@ -890,27 +626,7 @@ We can simplify this equation by observing that we are not actually dealing
 
 \begin_layout Standard
 We can extend this basic result to multiple dimensions by using the tensor
- product of the kernel values.
- In this context we must distinguish between TI dimensions and non-TI dimensions
-, as the distance metric will be different for e
-\family roman
-\series medium
-\shape up
-\size normal
-\emph off
-\bar no
-\noun off
-\color none
-ach
-\family default
-\series default
-\shape default
-\size default
-\emph default
-\bar default
-\noun default
-\color inherit
-:
+ product of the kernel values:
 \end_layout
 
 \begin_layout Standard
@@ -940,7 +656,7 @@ There are multiple divergence measures available which can be used to define
 
  being integrable; for this reason we will use the Pearson Divergence as
  our distance metric when comparing sets.
- In order to accommodate linear transformations, we add a 
+ In order to accommodate linear affine transformations, we add a 
 \begin_inset Formula $d\times d$
 \end_inset
 
@@ -986,7 +702,7 @@ Because the Pearson Divergence is a summation, we can control the influence
 
 \begin_layout Standard
 These two matrix transformations are used to shift, scale, rotate, shear
- or mirror the window 
+ or mirror the observations in the window 
 \begin_inset Formula $w_{n}^{D}$
 \end_inset
 
@@ -999,7 +715,496 @@ These two matrix transformations are used to shift, scale, rotate, shear
 \begin_inset Formula $\mathbf{A}$
 \end_inset
 
- is an 
+ is a 
+\begin_inset Formula $d\times d$
+\end_inset
+
+ matrix.
+ The linear operator 
+\begin_inset Formula $\mathbf{A}X$
+\end_inset
+
+ allows us to scale, rotate, shear, and mirror 
+\begin_inset Formula $X$
+\end_inset
+
+ depending on the matrix values of 
+\begin_inset Formula $\mathbf{A}$
+\end_inset
+
+.
+ The second transformation matrix 
+\begin_inset Formula $\mathbf{b}$
+\end_inset
+
+ is a 
+\begin_inset Formula $d\times1$
+\end_inset
+
+ matrix; adding these terms together allows us to shift 
+\begin_inset Formula $X$
+\end_inset
+
+ along any axis based on the values of 
+\begin_inset Formula $\mathbf{b}$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+One approach to these transformations is to explicitly determine values
+ for the two matrices and to determine the distance 
+\begin_inset Formula $\|\cdot,\cdot\|$
+\end_inset
+
+ using these values.
+ A more robust approach is to integrate over all possible values of 
+\begin_inset Formula $(\mathbf{A},\mathbf{b}):$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\|w_{n}^{X},w_{m}^{X}:\ \nu\| & =\sum_{i=1}^{\ell}\omega_{\alpha}(w_{n}^{\nu},x_{i}^{\nu})\int\int_{-\infty}^{\infty}\left(\frac{\varphi(x_{i}^{\nu}:\ w_{m}^{\nu},\mathbf{A}X+\mathbf{b})}{\varphi(x_{i}^{\nu}:\ w_{m}^{\nu},X^{\nu})}-1\right)^{2}d\mathbf{A}d\mathbf{b}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This approach allows us to compare the distance between 
+\emph on
+any
+\emph default
+ linear transformation 
+\begin_inset Formula $\mathbf{A}X+\mathbf{b}$
+\end_inset
+
+ and 
+\begin_inset Formula $X$
+\end_inset
+
+, a far more powerful and less computationally demanding approach.
+ Doing so requires that we calculate the following integral:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \[
+\int\int_{-\infty}^{\infty}\left(\frac{\varphi(x_{i}^{\nu}:\ w_{m}^{\nu},\mathbf{A}X+\mathbf{b})}{\varphi(x_{i}^{\nu}:\ w_{m}^{\nu},X^{\nu})}-1\right)^{2}d\mathbf{A}d\mathbf{b}\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Because 
+\begin_inset Formula $(\mathbf{A},\mathbf{b})$
+\end_inset
+
+ is a pair of matrix transformation, we must integrate the previous equation
+ element-wise:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\end{align*}
+
+\end_inset
+
+
+\begin_inset Formula \begin{align*}
+\int\int_{-\infty}^{\infty}\left(\frac{\varphi(x_{i}^{\nu}:\ w_{m}^{\nu},\mathbf{A}X+\mathbf{b})}{\varphi(x_{i}^{\nu}:\ w_{m}^{\nu},X^{\nu})}-1\right)^{2}d\mathbf{A}d\mathbf{b} & =\int...\int_{-\infty}^{\infty}\left(\frac{\varphi(x_{i}^{\nu}:\ w_{m}^{\nu},\mathbf{A}X+\mathbf{b})}{\varphi(x_{i}^{\nu}:\ w_{m}^{\nu},X^{\nu})}-1\right)^{2}d\mathbf{A}_{\nu,0},...,d\mathbf{A}_{\nu,d}d\mathbf{b}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Explain all this shit below
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+f([x^{0},...,x^{d}]:\ a,b,c,f,h) & =\left(a\ \exp\left(-b\left(\left(x^{d}\right)^{2}+x^{d}\sum_{i=1}^{d-1}x^{i}c^{i}+f\right)\right)-h\right)^{2}\\
+\int...\int f([x^{0},...,x^{d}]:\ a,b,c,f,h)\ dx^{0},...,dx^{d} & =\int...\int f\left([x^{0},...,x^{d-1}]:\ \frac{\sqrt{\frac{\pi}{2}}a^{2}}{\sqrt{b}},-\frac{b}{2},-2bf,0\right)\ dx^{0},...,dx^{d-1}\\
+ & \qquad\qquad+\int f\left([x^{0},...,x^{d-1}]:\ \frac{-2a\sqrt{\pi}}{\sqrt{b}},-\frac{b}{4},-4f,0\right)\ dx^{0},...,dx^{d-1}\\
+\int f([x^{0}]:\ a,b,f,h)\ dx^{0} & =\frac{\sqrt{\frac{\pi}{2}}a^{2}}{\sqrt{b}}\exp\left(-\frac{1}{2}b^{2}f\right)-\frac{2a\sqrt{\pi}}{\sqrt{b}}\exp\left(-bf\right)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\int\int_{-\infty}^{\infty}\left(\frac{\varphi(x^{\nu}:\ w_{n}^{\nu},\mathbf{A}X+\mathbf{b})}{\varphi(x^{\nu}:\ w_{n}^{\nu},X)}-1\right)^{2}d\mathbf{A}d\mathbf{b} & =\int...\int\left(\frac{\varphi\left(x^{\nu}:\ w_{n}^{\nu},\left[\mathbf{b}_{\nu}+\sum_{n=1}^{|D|}\mathbf{A}_{\nu,n}x_{i}^{n}|\ x_{i}\in X\right]\right)}{\varphi(x^{\nu}:\ w_{n}^{\nu},X)}-1\right)^{2}d\mathbf{A}d\mathbf{b}\\
+ & =\int...\int f([x^{0},...,x^{d}]:\ a,b,c,f,h)\ dx^{0},...,dx^{d}d\mathbf{b}_{\nu}\\
+a & =\frac{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(w_{n}^{\nu},x_{i}^{\nu},X)}{\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(w_{n}^{\nu},x_{i}^{\nu},X)\ \exp\left(-\frac{1}{\gamma}\left(x^{\nu}-x_{i}^{\nu}\right)^{2}\right)}\\
+b & =\frac{1}{\gamma}\\
+c & =???\\
+f & =\left(x^{\nu}\right)^{2}-2x^{\nu}\mathbf{b}_{\nu}+\mathbf{b}_{\nu}^{2}\\
+h & =1\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Make a note that for d not in D, A_dd=0, b=0
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Performance
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Big-O
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Chapter
+Parzen Window Estimators
+\end_layout
+
+\begin_layout Section
+Parzen Windows for i.i.d.
+ Data
+\end_layout
+
+\begin_layout Standard
+Our task is to estimate the probability of a given vector 
+\begin_inset Formula $\vec{x}$
+\end_inset
+
+ in the abstract space 
+\begin_inset Formula $\Omega$
+\end_inset
+
+ based on a set of observations 
+\begin_inset Formula $X$
+\end_inset
+
+.
+ One method of accomplishing this is by using the Parzen Window (PW) method.
+ We choose the Parzen Window method because it allows us to estimate probabiliti
+es of unordered sets, provided they have an addition operation and a kernel
+ function exists to provide a distance metric.
+ The basic operation of the PW method is to estimate the probability of
+ a point based on the sum of the distance from that point to each point
+ in a set of prior observations.
+ The Parzen Window approach to probability density function (PDF) estimation
+ is as follows; given a set of prior observations 
+\begin_inset Formula $X$
+\end_inset
+
+ and a kernel function 
+\begin_inset Formula $K_{\gamma}(\cdot,\cdot)$
+\end_inset
+
+ with width parameter 
+\begin_inset Formula $\gamma$
+\end_inset
+
+, the probability of a point 
+\begin_inset Formula $\vec{x}$
+\end_inset
+
+ is determined by :
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\varphi(\vec{x}:\ X) & =\sum_{i}^{\ell}\frac{1}{\ell}K_{\gamma}(\vec{x},\vec{x}_{i})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset nomenclature
+LatexCommand nomenclature
+symbol "$K_\\gamma (x,y)$"
+description "Kernel function"
+
+\end_inset
+
+
+\begin_inset CommandInset nomenclature
+LatexCommand nomenclature
+symbol "$\\gamma$"
+description "Kernel width parameter"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Multiple kernel functions exist, in this paper we will use the Radial Basis
+ Function (RBF) kernel:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+K_{\gamma}\left(\vec{x},\vec{y}\right) & =\prod_{\upsilon=1}^{d}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|x^{\nu},y^{\nu}\|^{2}}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset nomenclature
+LatexCommand nomenclature
+symbol "$\\|\\cdot,\\cdot\\|$"
+description "Distance metric"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Where 
+\begin_inset Formula $\|\cdot,\cdot\|$
+\end_inset
+
+ is some metric, for instance the 
+\begin_inset Formula $L^{2}$
+\end_inset
+
+ distance:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\|x,y\| & =\left(x-y\right)^{2}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Parzen Windows for Transformation-Invariant Data
+\end_layout
+
+\begin_layout Standard
+Because we must establish a context for TI data, we must think of the set
+ of observations 
+\begin_inset Formula $X$
+\end_inset
+
+ as part of both the problem definition and the solution.
+ This means that we can no longer simply calculate the kernel distance between
+ 
+\begin_inset Formula $x$
+\end_inset
+
+ and each of the observations in 
+\begin_inset Formula $X$
+\end_inset
+
+ independently - we must compare the 
+\emph on
+context
+\emph default
+ of 
+\begin_inset Formula $x$
+\end_inset
+
+ with contexts of 
+\begin_inset Formula $X$
+\end_inset
+
+.
+ This requires a kernel function capable of comparing two 
+\emph on
+sets of points
+\emph default
+.
+\end_layout
+
+\begin_layout Standard
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+\begin_inset Formula \begin{align*}
+\mathcal{K}_{\gamma}\left(X_{i},X_{j}\right) & =\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|X_{i},X_{j}\|}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We can simplify this equation by observing that we are not actually dealing
+ with two sets; we're dealing with two windows 
+\begin_inset Formula $w_{n}$
+\end_inset
+
+ and 
+\begin_inset Formula $w_{m}$
+\end_inset
+
+ within 
+\begin_inset Formula $X$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+\begin_inset Formula \begin{align*}
+\mathcal{K}_{\gamma}\left(w_{n}^{X},w_{m}^{X}\right) & =\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|w_{n}^{X},w_{n}^{X}\|}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We can extend this basic result to multiple dimensions by using the tensor
+ product of the kernel values:
+\end_layout
+
+\begin_layout Standard
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\noun off
+\color none
+\begin_inset Formula \begin{align*}
+\mathcal{K}_{\gamma}\left(w_{n}^{X},w_{m}^{Y}:\ D\right) & =\prod_{\nu\in D}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|w_{n}^{X},w_{n}^{Y}:\ \nu\|}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+There are multiple divergence measures available which can be used to define
+ a "distance" between two sets.
+ We will later show the importance of the distance metric 
+\begin_inset Formula $\|\cdot,\cdot\|$
+\end_inset
+
+ being integrable; for this reason we will use the Pearson Divergence as
+ our distance metric when comparing sets.
+ In order to accommodate linear affine transformations, we add a 
+\begin_inset Formula $d\times d$
+\end_inset
+
+ transformation matrix 
+\begin_inset Formula $\mathbf{A}$
+\end_inset
+
+ and a 
+\begin_inset Formula $d\times1$
+\end_inset
+
+ shift matrix 
+\begin_inset Formula $\mathbf{b}$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\|X^{\nu},Y^{\nu}\| & =\sum_{x^{\nu}\in\{X\cup Y\}}\left(\frac{\varphi(x^{\nu}:\ \mathbf{A}^{\nu}X^{\nu}+\mathbf{b}_{\nu})}{\varphi(x^{\nu}:\ Y^{\nu})}-1\right)^{2}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Because the Pearson Divergence is a summation, we can control the influence
+ of each point by scaling it using the windowing function:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\|w_{n}^{X},w_{m}^{X}:\ \nu\| & =\sum_{i=1}^{\ell}\omega_{\alpha}(w_{n}^{\nu},x_{i}^{\nu})\left(\frac{\varphi(x_{i}^{\nu}:\ w_{m}^{D},\mathbf{A}X+\mathbf{b})}{\varphi(x_{i}^{\nu}:\ w_{m}^{D},X)}-1\right)^{2}\\
+\varphi(x^{\nu}:\ w_{n}^{D},X) & =\sum_{i=1}^{\ell}\frac{\omega_{\alpha}(w_{n}^{\nu},x_{i}^{\nu})}{\sum_{j=1}^{\ell}\omega_{\alpha}(w_{n}^{\nu},x_{j}^{\nu})}K_{\gamma}(x^{\nu},x_{i}^{\nu})\\
+ & =\sum_{i=1}^{\ell}\ddot{\omega}_{\alpha}(w_{n}^{\nu},x_{i}^{\nu},X)\ K_{\gamma}(x^{\nu},x_{i}^{\nu})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+These two matrix transformations are used to shift, scale, rotate, shear
+ or mirror the observations in the window 
+\begin_inset Formula $w_{n}^{D}$
+\end_inset
+
+ of 
+\begin_inset Formula $X$
+\end_inset
+
+.
+ The first transformation matrix 
+\begin_inset Formula $\mathbf{A}$
+\end_inset
+
+ is a 
 \begin_inset Formula $d\times d$
 \end_inset
 
@@ -1191,9 +1396,6 @@ Consider the case where data from multiple data sources contributes to our
 \end_inset
 
 , for instance the data drawn from a microphone and a video camera.
- Let us assume that both input sources are timestamped, but the sampling
- frequency is different for each source and that the vector data points
- have different dimensionality.
  We will refer to observations of the former as 
 \begin_inset Formula $X=(\Omega^{X},\mathcal{F}^{X},\mathcal{P}^{X})$
 \end_inset
@@ -1203,8 +1405,7 @@ Consider the case where data from multiple data sources contributes to our
 \end_inset
 
 .
- In this situation we can treat the time-stamp as a "shared" dimension,
- but all other dimensions of the two vectors are independent.
+ In this situation all dimensions of the two vectors are independent.
  It is clear that if we intend to establish a PDF of the joint probability
  space 
 \begin_inset Formula $(\Omega^{Y,X},\mathcal{P}^{Y,X},\mathcal{F}^{Y,X})$
@@ -1219,8 +1420,6 @@ Consider the case where data from multiple data sources contributes to our
 \end_inset
 
  as orthonormal to each other.
- The fact that both event spaces share a time dimension means that a TI
- analysis over the two time dimensions is likely to produce useful results.
  
 \end_layout
 
@@ -1242,12 +1441,7 @@ x^{\nu} & \in[\mathbb{R},\textrm{Ø}]\end{align*}
 
  In this case we only include operations between real-valued dimensions
  in our analysis.
- We can easily accommodate the shared time dimension by including the two
- time dimensions in our TI analysis.
- This allows us to consider not only the situation where both inputs are
- timestamped with accurate clocks, but the situation where the two clocks
- are independently inaccurate and some transformation is required for them
- to show the same time.
+ 
 \end_layout
 
 \begin_layout Section
@@ -1258,15 +1452,11 @@ Single Channel Summary
 We have developed a PDF estimation technique which allows us to take advantage
  of TI data.
  The solution uses a novel distance metric to compare the similarity between
- two sets of points in the context of arbitrary linear transformations of
+ two sets of points in the context of arbitrary affine transformations of
  one set.
- The solution proposed is restricted to observations with shared dimensionality,
- however it imposes no restrictions on which dimensions are TI.
  The types of transformations considered by the proposed solution are restricted
- to linear matrix transformations shifts.
- In the next section we will extend the solution to cases where multiple
- "channels" of data are present allowing us to handle TI between observations
- with non-shared dimensions.
+ to affine transformations.
+ In the next section we will develop a sparse method of estimating PDF's.
 \end_layout
 
 \begin_layout Standard
@@ -1390,7 +1580,7 @@ s a set of weights
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\varphi(\vec{x}:\ \beta,X) & =\sum_{i=1}^{\ell}\beta_{i}\mathcal{K}_{\gamma}(w^{X},w_{i}^{X}:\ D)\end{align*}
+\varphi_{\beta}(\vec{x}:\ X) & =\sum_{i=1}^{\ell}\beta_{i}\mathcal{K}_{\gamma}(w^{X},w_{i}^{X}:\ D)\end{align*}
 
 \end_inset
 
@@ -1431,7 +1621,7 @@ The support vector approach requires that we define an optimization problem
  The set of weights used in the Support Vector estimation must have a discrete
  number of elements; for simplicity we choose to assign a weight to each
  window defined by the time value of an observation in the training set
- and the constant parameter 
+ and the windowing parameter 
 \begin_inset Formula $\alpha$
 \end_inset
 
@@ -1440,7 +1630,7 @@ The support vector approach requires that we define an optimization problem
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-W(\beta:\ X) & \longmapsto\min_{\beta}\sum_{i=1}^{\ell}\left(\varphi(\vec{x}_{i}:\ X)-\varphi(\vec{x}_{i}:\ \beta,X)\right)^{2}+\beta\Omega(\lambda,X)\end{align*}
+W(\beta:\ X) & \longmapsto\min_{\beta}\sum_{i=1}^{\ell}\left(\varphi(\vec{x}_{i}:\ X)-\varphi_{\beta}(\vec{x}_{i}:\ X)\right)^{2}+\beta\Omega(\lambda,X)\end{align*}
 
 \end_inset
 
@@ -1497,7 +1687,7 @@ Update all these kernel notations
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\sum_{i=1}^{\ell}\left(\varphi(\vec{x}_{i}:\ X)-\varphi(\vec{x}_{i}:\ \beta,X)\right)^{2} & =\sum_{i=1}^{\ell}\left(\varphi(\vec{x}_{i}:\ X)\right)^{2}-2\left(\varphi(\vec{x}_{i}:\ X)\varphi(\vec{x}_{i}:\ \beta,X)\right)+\left(\varphi(\vec{x}_{i}:\ \beta,X)\right)^{2}\end{align*}
+\sum_{i=1}^{\ell}\left(\varphi(\vec{x}_{i}:\ X)-\varphi_{\beta}(\vec{x}_{i}:\ X)\right)^{2} & =\sum_{i=1}^{\ell}\left(\varphi(\vec{x}_{i}:\ X)\right)^{2}-2\left(\varphi(\vec{x}_{i}:\ X)\varphi_{\beta}(\vec{x}_{i}:\ X)\right)+\left(\varphi_{\beta}(\vec{x}_{i}:\ X)\right)^{2}\end{align*}
 
 \end_inset
 
@@ -1608,9 +1798,153 @@ VC Entropy and Bounds on the Rate of Convergence
 \end_layout
 
 \begin_layout Standard
+We use the notation of Vapnik - given three components:
+\end_layout
+
+\begin_layout Enumerate
+A generator (G) of random vectors 
+\begin_inset Formula $x\in\mathbb{R}^{n}$
+\end_inset
+
+, drawn independently from a fixed but unknown probability distribution
+ function 
+\begin_inset Formula $F(x)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+A supervisor (S) who returns an output value 
+\begin_inset Formula $y$
+\end_inset
+
+ to every input vector 
+\begin_inset Formula $x$
+\end_inset
+
+, according to a conditional distribution function 
+\begin_inset Formula $F(y|x)$
+\end_inset
+
+, also fixed but unknown
+\end_layout
+
+\begin_layout Enumerate
+A learning machine (LM) capable of implementing a set of functions 
+\begin_inset Formula $\varphi(x,\alpha),\ \alpha\in\Lambda$
+\end_inset
+
+, where 
+\begin_inset Formula $\Lambda$
+\end_inset
+
+ is a set of parameters
+\end_layout
+
+\begin_layout Standard
+Our goal is to choose the function which best approximates the unknown PDF,
+ given a set of vector observations:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+X & =\vec{x}_{1},...,\vec{x}_{\ell}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset nomenclature
+LatexCommand nomenclature
+symbol "$X$"
+description "Set of observations to be evaluated"
+
+\end_inset
+
+
+\begin_inset CommandInset nomenclature
+LatexCommand nomenclature
+symbol "$x_i$"
+description "Individual observations"
+
+\end_inset
+
+
+\begin_inset CommandInset nomenclature
+LatexCommand nomenclature
+symbol "$\\ell$"
+description "The number of observations "
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We choose between potential functions based on the empirical risk function
+ using the loss (discrepancy) 
+\begin_inset Formula $L(y,f(x,\alpha))$
+\end_inset
+
+ between the response 
+\begin_inset Formula $y$
+\end_inset
+
+ for a given value of 
+\begin_inset Formula $x$
+\end_inset
+
+ and the predicted value 
+\begin_inset Formula $f(x,\alpha)$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+R_{\text{emp}}(\alpha) & =\frac{1}{\ell}\sum_{i=1}^{\ell}L(y_{i},f(\vec{x}_{i},\alpha))\\
+ & =\frac{1}{\ell}\sum_{i=1}^{\ell}Q(z_{i},\alpha)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset nomenclature
+LatexCommand nomenclature
+symbol "$R_\\text{emp}(\\alpha)$"
+description "Empirical Risk "
+
+\end_inset
+
+
+\begin_inset CommandInset nomenclature
+LatexCommand nomenclature
+symbol "$L(\\cdot)$"
+description "Loss function"
+
+\end_inset
+
+
+\begin_inset CommandInset nomenclature
+LatexCommand nomenclature
+symbol "$Q(\\cdot)$"
+description "Loss Function"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 We begin by describing the VC entropy of a set of estimators using their
  risk values 
-\begin_inset Formula $Q(x:\ \alpha)$
+\begin_inset Formula $Q(x:\ \beta)$
 \end_inset
 
  defined by the set of parameters 
@@ -1631,7 +1965,7 @@ We begin by describing the VC entropy of a set of estimators using their
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-q(\alpha) & =[Q(x_{1},\alpha),...,Q(x_{\ell},\alpha)]\end{align*}
+q(\beta) & =[Q(x_{1}:\ \beta),...,Q(x_{\ell}:\ \beta)]\end{align*}
 
 \end_inset
 
@@ -1640,7 +1974,7 @@ q(\alpha) & =[Q(x_{1},\alpha),...,Q(x_{\ell},\alpha)]\end{align*}
 
 \begin_layout Standard
 Each vector describes the loss of a given element of 
-\begin_inset Formula $\alpha$
+\begin_inset Formula $\beta$
 \end_inset
 
  for the observations 
@@ -1648,8 +1982,10 @@ Each vector describes the loss of a given element of
 \end_inset
 
 .
+ In the context of an SVM estimator, this refers to the divergence between
+ the SVM and PW estimators.
  We define the minimum number of vectors required to "cover" 
-\begin_inset Formula $q(\alpha)$
+\begin_inset Formula $q(\beta)$
 \end_inset
 
  with some arbitrarily small measure of closeness 
@@ -1683,7 +2019,7 @@ For example, if
 \end_inset
 
  of the set of functions 
-\begin_inset Formula $Q(x,\alpha)$
+\begin_inset Formula $Q(x:\ \beta)$
 \end_inset
 
 :
@@ -1692,6 +2028,19 @@ For example, if
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
 H^{\Lambda}(\varepsilon:\ell) & =\ln N^{\Lambda}(\varepsilon:x_{1},...,x_{\ell})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+can we formalize N?
+\end_layout
 
 \end_inset
 
@@ -1718,7 +2067,7 @@ The VC Entropy essentially describes the number of observations in
 -close to each other, we can eliminate all but one in our estimator.
  The VC Entropy is distribution-specific; it depends on the specific set
  of vectors 
-\begin_inset Formula $q(\alpha)$
+\begin_inset Formula $q(\beta)$
 \end_inset
 
 .
@@ -1732,7 +2081,7 @@ The VC Entropy essentially describes the number of observations in
 \end_inset
 
  for any distribution given the set of estimators defined by 
-\begin_inset Formula $Q(x:\ \alpha)$
+\begin_inset Formula $Q(x:\ \beta)$
 \end_inset
 
 :
@@ -1760,7 +2109,35 @@ It can be shown that the following equations hold true with probability
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
 \Psi & =4\frac{G^{\Lambda}\left(2\ell\right)-\ln\left(\eta/4\right)}{\ell}\\
-R(\alpha) & \le R_{\text{emp}}(\alpha)+\frac{\Psi}{2}\left(1+\sqrt{1+\frac{4R_{\text{emp}}(\alpha)}{\Psi}}\right)\end{align*}
+R(\beta) & \le R_{\text{emp}}(\beta)+\frac{\Psi}{2}\left(1+\sqrt{1+\frac{4R_{\text{emp}}(\beta)}{\Psi}}\right)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Make sure the R(
+\backslash
+beta) notation has been explained
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Can we use H in the above equation?
+\end_layout
 
 \end_inset
 
@@ -1770,15 +2147,15 @@ R(\alpha) & \le R_{\text{emp}}(\alpha)+\frac{\Psi}{2}\left(1+\sqrt{1+\frac{4R_{\
 \begin_layout Standard
 This equation describes the upper bound on the risk of estimators from the
  set 
-\begin_inset Formula $Q(x:\ \alpha)$
+\begin_inset Formula $Q(x:\ \beta)$
 \end_inset
 
- for 
+ based on the number of observations 
 \begin_inset Formula $\ell$
 \end_inset
 
- observations, when the empirical risk is equal to 
-\begin_inset Formula $R_{\text{emp }}(\alpha)$
+ and the empirical risk 
+\begin_inset Formula $R_{\text{emp }}(\beta)$
 \end_inset
 
 .
@@ -1802,7 +2179,7 @@ Where
  describes the VC Dimension of the estimator, defined as the maximum number
  of vectors that can be linearly separated by the estimator (in the case
  of binary estimators) or as the VC Dimension of the set of indicators 
-\begin_inset Formula $I(x,\alpha,\beta)$
+\begin_inset Formula $I(x,\beta,\vartheta)$
 \end_inset
 
 :
@@ -1810,7 +2187,7 @@ Where
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-I(x,\alpha,\beta) & =\theta(Q(x:\ \alpha)-\beta),\ \alpha\in\Lambda,\ \beta\in(0,1)\\
+I(x,\beta,\vartheta) & =\theta(Q(x:\ \beta)-\vartheta),\ \beta\in\Lambda,\ \vartheta\in(0,1)\\
 \theta(x) & =\begin{cases}
 0 & \quad\text{if}\ x<0,\\
 1 & \quad\text{if}\ x\ge0\end{cases}\end{align*}
@@ -1821,16 +2198,21 @@ I(x,\alpha,\beta) & =\theta(Q(x:\ \alpha)-\beta),\ \alpha\in\Lambda,\ \beta\in(0
 \end_layout
 
 \begin_layout Standard
-In other words the VC Dimension of a real-valued estimator is determined
+Where 
+\begin_inset Formula $\vartheta$
+\end_inset
+
+ is some constant.
+ In other words the VC Dimension of a real-valued estimator is determined
  by the maximum number of vectors which can be enclosed by a region with
  radius 
-\begin_inset Formula $1-\beta$
+\begin_inset Formula $1-\vartheta$
 \end_inset
 
 .
  In practical terms, this means that the VC Dimension is defined by the
  granularity of the estimator 
-\begin_inset Formula $Q(x:\ \alpha)$
+\begin_inset Formula $Q(x:\ \beta)$
 \end_inset
 
 .
@@ -1839,17 +2221,17 @@ In other words the VC Dimension of a real-valued estimator is determined
 \end_inset
 
 ; this means that each dimension of any loss vector 
-\begin_inset Formula $q(\alpha_{n})$
+\begin_inset Formula $q(\beta_{n})$
 \end_inset
 
- must be between 
+ is also bounded by 
 \begin_inset Formula $(0,1)$
 \end_inset
 
 .
  Therefore the VC Dimension of an estimator is determined by the maximum
  number of regions with radius 
-\begin_inset Formula $1-\beta$
+\begin_inset Formula $1-\vartheta$
 \end_inset
 
  which can be defined on the interval 
@@ -1861,19 +2243,20 @@ In other words the VC Dimension of a real-valued estimator is determined
 \end_inset
 
  dimensions.
- In the case of SVM estimators, the value 
-\begin_inset Formula $h$
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Check this paragraph
+\end_layout
+
 \end_inset
 
- can be determined after optimizing for 
-\begin_inset Formula $\beta$
-\end_inset
 
- as the ratio of Support Vectors to 
-\begin_inset Formula $\ell$
-\end_inset
-
-.
 \end_layout
 
 \begin_layout Section
@@ -1883,17 +2266,22 @@ Bounds of Convergence for TI Analysis
 \begin_layout Standard
 The growth function is used to characterize the worst-case performance for
  a specific type of estimator; we now show that the worst-case performance
- of an estimator capable of TI analysis is upper bounded by the growth function.
+ of an estimator capable of TI analysis is upper bounded by the risk of
+ a non-TI estimator defined on the same dimensional set 
+\begin_inset Formula $D$
+\end_inset
+
+.
  Consider the PDF generated by a given estimator 
 \begin_inset Formula $\varphi(x:\ \alpha_{n})$
 \end_inset
 
  and two loss functions; the loss function 
-\begin_inset Formula $Q(x:\ \alpha)$
+\begin_inset Formula $Q(x:\ \beta)$
 \end_inset
 
  defined by the distance between 
-\begin_inset Formula $\varphi(x:\ \alpha_{n})$
+\begin_inset Formula $\varphi(x:\ \beta_{n})$
 \end_inset
 
  and 
@@ -1901,16 +2289,16 @@ The growth function is used to characterize the worst-case performance for
 \end_inset
 
 , and the loss function 
-\begin_inset Formula $Q_{TI}(x:\ \alpha)$
+\begin_inset Formula $Q_{TI}(x:\ \beta)$
 \end_inset
 
  defined by the TI distance between the same.
  It can easily be shown that 
-\begin_inset Formula $Q(x:\ \alpha)$
+\begin_inset Formula $Q(x:\ \beta)$
 \end_inset
 
  is a special case of 
-\begin_inset Formula $Q_{TI}(x:\ \alpha)$
+\begin_inset Formula $Q_{TI}(x:\ beta$
 \end_inset
 
 :
@@ -1918,7 +2306,7 @@ The growth function is used to characterize the worst-case performance for
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-Q(x:\ \alpha) & =Q_{TI}(x:\ \alpha),\quad\mathbf{A}=I,\ \mathbf{b}=0\end{align*}
+Q(x:\ \beta) & =Q_{TI}(x:\ \beta),\quad\mathbf{A}=I,\ \mathbf{b}=0\end{align*}
 
 \end_inset
 
@@ -1942,8 +2330,7 @@ Recall that TI estimators are generated from the integral of the distance
 
 \begin_layout Standard
 It is clear therefore that the TI loss will be less than or equal to the
- distance loss, and that the growth function for a given closeness parameter
- will be less for the TI estimator than the distance estimator.
+ distance loss.
  
 \end_layout
 
@@ -1998,12 +2385,12 @@ D^{n} & \subseteq D^{X}\end{align*}
 \begin_layout Standard
 With associated risk bounds
 \begin_inset Foot
-status open
+status collapsed
 
 \begin_layout Plain Layout
 In the case of Parzen Estimators we can set the empirical risk to 0, in
  the case of SVM estimators we can set the empirical risk to the minimal
- value of the optimization problem.
+ value of the optimization problem minus the regularizer term.
 \end_layout
 
 \end_inset
@@ -2014,7 +2401,7 @@ In the case of Parzen Estimators we can set the empirical risk to 0, in
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
 \Psi^{n} & =4\frac{G^{\Lambda}\left(2|X^{n}|\right)-\ln\left(\eta/4\right)}{|X^{n}|}\\
-R^{n}(\alpha) & \le R_{\text{emp}}^{n}(\alpha)+\frac{\Psi}{2}\left(1+\sqrt{1+\frac{4R_{\text{emp}}^{n}(\alpha)}{\Psi}}\right)\end{align*}
+R^{n}(\beta) & \le R_{\text{emp}}^{n}(\beta)+\frac{\Psi}{2}\left(1+\sqrt{1+\frac{4R_{\text{emp}}^{n}(\beta)}{\Psi}}\right)\end{align*}
 
 \end_inset
 
@@ -2022,22 +2409,21 @@ R^{n}(\alpha) & \le R_{\text{emp}}^{n}(\alpha)+\frac{\Psi}{2}\left(1+\sqrt{1+\fr
 \end_layout
 
 \begin_layout Standard
-Consider the case of multiple partial estimators which makes estimates of
+Where 
+\begin_inset Formula $|\cdot|$
+\end_inset
+
+ refers to the cardinality of a set.
+ Consider the case of multiple partial estimators which make estimates of
  
 \begin_inset Formula $\Pr(x|X)$
 \end_inset
 
  which we would like to combine.
- Consider the two resulting estimates of the probability of a given point
- 
-\begin_inset Formula $x$
-\end_inset
-
-.
  Using Bayesian Model Averaging (BMA) we can average the estimators weighted
- by their respective confidence interval
+ by their respective risks:
 \begin_inset Foot
-status collapsed
+status open
 
 \begin_layout Plain Layout
 Technically, they are being weighted by the probability that each estimator
@@ -2046,15 +2432,21 @@ Technically, they are being weighted by the probability that each estimator
 \end_inset
 
 .
- Given a confidence interval, the relative probability that each estimate
- is accurate is determined by the confidence interval of the estimators.
- In this context, the concepts of risk and confidence interval are interchangeab
-le.
 \end_layout
 
 \end_inset
 
-:
+
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+reword this with 'Risk'
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -2075,7 +2467,7 @@ If that footnote is correct, it's odd that we need to normalize this.
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
 \Pr(x|X) & \approx\sum_{n}\Pr(x|\varphi^{n},X)\Pr(\varphi^{n}|X)\\
- & \approx\frac{1}{\sum_{n}1-R^{n}(\alpha)}\sum_{n}\varphi^{n}(x:\ X^{n},D^{n})(1-R^{n}(\alpha))\end{align*}
+ & \approx\frac{1}{\sum_{n}1-R^{n}(\beta)}\sum_{n}\varphi^{n}(x:\ X^{n},D^{n})(1-R^{n}(\beta))\end{align*}
 
 \end_inset
 
@@ -2095,36 +2487,19 @@ This result allows us to create hybrid estimates based on a set of estimators
 
  used by the estimators.
  We now consider a similar situation; combining the estimates of estimators
- based on the same dimensional set.
+ in the case where the estimators share a dimensional set.
  In this context it is possible to to generate an estimator using the union
  of the observations from the two original estimators.
  This approach has a significant benefit over the BMA approach described
  above; it allows the hybrid estimator to generate estimates using the joint
  entropy of the observations, rather than the posterior probability of the
  marginal entropy of the two estimators.
- If we describe the entropy of two estimators as 
-\begin_inset Formula $H(X^{1})$
-\end_inset
-
- and 
-\begin_inset Formula $H(X^{2})$
-\end_inset
-
-, the entropy of the union of these two subsets is lower bounded by the
- sum of the marginal entropies:
+ Practically speaking, this means that we can reduce the number of SV's
+ required to make estimates with a given risk.
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-H(X^{1}\cap X^{2}) & \ge H(X^{1})+H(X^{2})\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Unfortunately we cannot simply combine the two subsets 
+Given two estimators based on subsets 
 \begin_inset Formula $X^{1}$
 \end_inset
 
@@ -2132,7 +2507,19 @@ Unfortunately we cannot simply combine the two subsets
 \begin_inset Formula $X^{2}$
 \end_inset
 
-; doing so would violate the i.i.d.
+, both defined over a dimensional set 
+\begin_inset Formula $D$
+\end_inset
+
+, we cannot simply combine the two subsets 
+\begin_inset Formula $X^{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $X^{2}$
+\end_inset
+
+; doing so could violate the i.i.d.
  requirement of the PW estimator.
  To demonstrate this, consider a situation in which both subsets are drawn
  randomly from 
@@ -2148,7 +2535,7 @@ Unfortunately we cannot simply combine the two subsets
 \end_inset
 
  defined along some dimension of 
-\begin_inset Formula $X$
+\begin_inset Formula $D$
 \end_inset
 
  (ie we draw 
@@ -2160,9 +2547,9 @@ Unfortunately we cannot simply combine the two subsets
 \end_inset
 
  from a specific time window).
- Within the context of each estimator the i.i.d.
- constraints are met within the defined bounds, however combining these
- two sets will only produce i.i.d.
+ Within the context of the bounds of each estimator the i.i.d.
+ constraints are met, however combining these two sets will only produce
+ i.i.d.
  data if 
 \begin_inset Formula $a^{1}=a^{2},\ b^{1}=b^{2}$
 \end_inset
@@ -2177,8 +2564,15 @@ Consider the requirement of i.i.d.
  the sum of the kernel distance to each observation used by the estimator.
  More observations in a given region increases the probability estimate
  for any point near that region.
- Let us assume that the bounds of one estimator are contained in and smaller
- than the bounds of a second:
+ Let us assume that the bounds of 
+\begin_inset Formula $\varphi^{2}$
+\end_inset
+
+ are contained in and smaller than the bounds of 
+\begin_inset Formula $\varphi^{1}$
+\end_inset
+
+:
 \end_layout
 
 \begin_layout Standard
@@ -2220,13 +2614,20 @@ In this case, a PW estimator would incorrectly generate elevated probability
 
  so that the estimates of a PW estimator based on the union of two i.i.d.
  data sets remain accurate estimates of the underlying PDF.
- We now show that the weighting mechanism must be based on the risk of the
- two estimators; given two estimators 
+ 
+\end_layout
+
+\begin_layout Standard
+Given two estimators 
 \begin_inset Formula $\varphi^{n}(x:\ X^{n},D^{i})$
 \end_inset
 
  and 
 \begin_inset Formula $\varphi^{m}(x:\ X^{m},D^{i})$
+\end_inset
+
+ which we wish to merge into a single estimator 
+\begin_inset Formula $\varphi^{n,m}$
 \end_inset
 
 
@@ -2235,13 +2636,13 @@ In this case, a PW estimator would incorrectly generate elevated probability
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
 \varphi(x:\ X,D) & =\sum_{i=1}^{\ell}\frac{1}{\ell}K_{\gamma}(x,x_{i})\\
-\varphi^{n,m}(x:\ X^{n}\cap X^{m}:D^{i}) & =\frac{\varphi^{n}(x:\ X^{n},D^{i})(1-R^{n}(\alpha))+\varphi^{n}(x:\ X^{n},D^{i})(1-R^{m}(\alpha))}{2-R^{n}(\alpha)-R^{m}(\alpha)}\\
- & =\frac{(1-R^{n}(\alpha))}{2-R^{n}(\alpha)-R^{m}(\alpha)}\sum_{x_{i}\in X^{n}}\frac{1}{|X^{n}|}K_{\gamma}(x,x_{i})+\frac{(1-R^{m}(\alpha))}{2-R^{n}(\alpha)-R^{m}(\alpha)}\sum_{x_{i}\in X^{m}}\frac{1}{|X^{m}|}K_{\gamma}(x,x_{i})\\
+\varphi^{n,m}(x:\ X^{n}\cap X^{m}:D^{i}) & =\frac{\varphi^{n}(x:\ X^{n},D^{i})(1-R^{n}(\beta))+\varphi^{n}(x:\ X^{n},D^{i})(1-R^{m}(\beta))}{2-R^{n}(\beta)-R^{m}(\beta)}\\
+ & =\frac{(1-R^{n}(\beta))}{2-R^{n}(\beta)-R^{m}(\beta)}\sum_{x_{i}\in X^{n}}\frac{1}{|X^{n}|}K_{\gamma}(x,x_{i})+\frac{(1-R^{m}(\beta))}{2-R^{n}(\beta)-R^{m}(\beta)}\sum_{x_{i}\in X^{m}}\frac{1}{|X^{m}|}K_{\gamma}(x,x_{i})\\
  & =\sum_{x_{i}\in X^{n}\cup X^{m}}\rho(x_{i}:\ \varphi^{n},\varphi^{m})\frac{1}{|X^{n}|+|X^{m}|}K_{\gamma}(x,x_{i})\\
 \rho(x:\ \varphi^{n},\varphi^{m}) & =\begin{cases}
-\frac{(1-R^{n}(\alpha))}{|X^{n}|\left(2-R^{n}(\alpha)-R^{m}(\alpha)\right)} & \quad x\in X^{n},x\notin X^{m}\\
-\frac{(1-R^{m}(\alpha))}{|X^{m}|\left(2-R^{n}(\alpha)-R^{m}(\alpha)\right)} & \quad x\notin X^{n},x\in X^{m}\\
-\frac{(1-R^{n}(\alpha))}{|X^{n}|\left(2-R^{n}(\alpha)-R^{m}(\alpha)\right)}+\frac{(1-R^{m}(\alpha))}{|X^{m}|\left(2-R^{n}(\alpha)-R^{m}(\alpha)\right)} & \quad x\in X^{n},x\in X^{m}\end{cases}\end{align*}
+\frac{(1-R^{n}(\beta))}{|X^{n}|\left(2-R^{n}(\beta)-R^{m}(\beta)\right)} & \quad x\in X^{n},x\notin X^{m}\\
+\frac{(1-R^{m}(\beta))}{|X^{m}|\left(2-R^{n}(\beta)-R^{m}(\beta)\right)} & \quad x\notin X^{n},x\in X^{m}\\
+\frac{(1-R^{n}(\beta))}{|X^{n}|\left(2-R^{n}(\beta)-R^{m}(\beta)\right)}+\frac{(1-R^{m}(\beta))}{|X^{m}|\left(2-R^{n}(\beta)-R^{m}(\beta)\right)} & \quad x\in X^{n},x\in X^{m}\end{cases}\end{align*}
 
 \end_inset
 
@@ -2254,7 +2655,7 @@ This can be extended to SVM estimators:
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\varphi^{n,m}(x:\ \beta,X) & =\sum_{x_{i}\in X^{n}\cup X^{m}}\beta_{i}\rho(x:\ \varphi^{n},\varphi^{m})K_{\gamma}(x,x_{i})\\
+\varphi_{\beta}^{n,m}(x:\ X) & =\sum_{x_{i}\in X^{n}\cup X^{m}}\beta_{i}\rho(x:\ \varphi^{n},\varphi^{m})K_{\gamma}(x,x_{i})\\
 W(\beta:\ X) & \longmapsto\min_{\beta}\sum_{\begin{array}{c}
 x_{i}\in X^{n}\cup X^{m}\\
 x_{j}\in X^{n}\cup X^{m}\\
@@ -2292,8 +2693,17 @@ ons in isolation cannot be added.
 \begin_inset Formula $R(\alpha)$
 \end_inset
 
- is also a worst-case scenario, rather than an exact measure; the more points
+ is also a worst-case scenario rather than an exact measure; the more points
  in a given subset.
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+?
+\end_layout
+
+\end_inset
+
  This can be accommodated by combining sets with sufficient observations
  that the contribution of the empirical risk is greater than the contribution
  of the growth function.
@@ -2326,9 +2736,9 @@ Computational Considerations in Subset Selection
 In general, computational demands will vary with different classes of estimators.
  TI estimators have far higher computational cost than point-based estimators.
  We assume that there exist more classes of estimators than are necessary
- to produce a given risk for a given set of observation, which leaves us
- with the task of selecting which estimators to apply to an estimation problem
- and how to assign observations to the selected estimators.
+ to produce estimates with a given risk for a given set of observation,
+ which leaves us with the task of selecting which estimators to apply to
+ an estimation problem and how to assign observations to the selected estimators.
  To make these decisions, we develop a selection heuristic based on the
  costs and benefits of using a given estimator.
 \end_layout
@@ -2355,7 +2765,7 @@ The basic approach we will describe is an iterative one; we first select
  This approach allows us to control both the set of estimators used and
  the observations assigned to each estimator; more importantly it allows
  us to do so based on the nature of the observations 
-\begin_inset Formula $X$
+\begin_inset Formula $X'$
 \end_inset
 
 .
@@ -2372,11 +2782,16 @@ The simplest portion of the heuristic to define is the cost of using an
 \emph on
 a priori
 \emph default
- as a function of the number and dimensionality of the estimator.
+ as a function of the number and dimensionality of the observations used
+ by the estimator.
  In some cases optimizations exist which are data-dependent; in these cases
  we will assume a worst-case scenario for additional observations.
- We define the cost function for a given estimator as 
-\begin_inset Formula $c(n,X)$
+ We define the cost function for a given estimator 
+\begin_inset Formula $\varphi^{i}$
+\end_inset
+
+ as 
+\begin_inset Formula $c(n,X^{i})$
 \end_inset
 
  where 
@@ -2384,7 +2799,7 @@ a priori
 \end_inset
 
  denotes the number of observations which will be added and 
-\begin_inset Formula $X$
+\begin_inset Formula $X^{i}$
 \end_inset
 
  denotes the observations used by the estimator.
@@ -2403,8 +2818,8 @@ The benefit portion of the heuristic can be easily constructed from previous
  describes the lowest possible accuracy of a given estimator.
  It is clear therefore that the utility of adding observations to an estimator
  is determined by the change in the expected risk as a result of adding
- observations; estimators which we expect to gain a high reduction in risk
- should be preferred over estimators which we expect to gain a small reduction
+ observations; estimators which we expect to produce a high reduction in
+ risk are preferred over estimators which we expect to produce a small reduction
  in risk.
  Recall that the maximal risk is determined by the number of observations
  used by the estimator, the empirical risk of the estimator, and the estimator's
@@ -2423,7 +2838,7 @@ The empirical risk for an SVM estimator is the minimal value of the optimization
 
 .
  We can therefore define the benefit function for a given estimator as 
-\begin_inset Formula $b(n,X)$
+\begin_inset Formula $b(n,X^{i})$
 \end_inset
 
  where 
@@ -2431,7 +2846,7 @@ The empirical risk for an SVM estimator is the minimal value of the optimization
 \end_inset
 
  denotes the number of observations which will be added and 
-\begin_inset Formula $X$
+\begin_inset Formula $X^{i}$
 \end_inset
 
  denotes the observations used by the estimator:
@@ -2439,9 +2854,22 @@ The empirical risk for an SVM estimator is the minimal value of the optimization
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-b(n,X) & =R(\alpha)-R(\alpha_{n})\\
-R(\alpha_{n}) & =R_{\text{emp}}(\alpha)+n+\frac{\Psi_{n}}{2}\left(1+\sqrt{1+\frac{4R_{\text{emp}}(\alpha)+4n}{\Psi_{n}}}\right)\\
-\Psi_{n} & =4\frac{G^{\Lambda}\left(2\left(|X|+n\right)\right)-\ln\left(\eta/4\right)}{|X|+n}\end{align*}
+b(n,X^{i}) & =R^{i}(\beta)-R^{i}(\beta_{n})\\
+R^{i}(\beta_{n}) & =R_{\text{emp}}^{i}(\beta)+n+\frac{\Psi_{n}}{2}\left(1+\sqrt{1+\frac{4R_{\text{emp}}^{i}(\beta)+4n}{\Psi_{n}}}\right)\\
+\Psi_{n} & =4\frac{G^{i}\left(2\left(|X^{i}|+n\right)\right)-\ln\left(\eta/4\right)}{|X^{i}|+n}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Mention the G^i notation
+\end_layout
 
 \end_inset
 
@@ -2464,6 +2892,22 @@ We can now define our heuristic
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
 h(n,X) & =b(n,X)-\lambda c(n,X)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+\begin_inset Formula $\frac{b}{c^{\lambda}}$
+\end_inset
+
+?
+\end_layout
 
 \end_inset
 
@@ -2716,10 +3160,11 @@ Prediction and Conditional Prediction
 Now that we have developed a robust architecture for estimating the probability
  of a point, we turn our attention to the inverse problem; predicting observatio
 ns which conform the the PDF, possibly under some set of conditions.
- In this sense, we are shifting our focus from probability fields to points.
+ In this sense, we are shifting our focus from probability densities to
+ points.
  In general, when we refer to "prediction", we will be referring to the
  generation of points, as opposed to "estimation", by which we mean the
- generation of probability fields.
+ generation of probability densities.
 \end_layout
 
 \begin_layout Standard
@@ -2875,6 +3320,19 @@ Unfortunately, there is no analytical solution to the inverse CDF of either
 \end_layout
 
 \begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Start this all off with a discussion of rho
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 \begin_inset Formula \begin{align*}
 \varphi(x:\ X) & =\sum_{i=1}^{\ell}\frac{1}{\ell}K_{\gamma}(x,x_{i})\end{align*}
 
@@ -2924,15 +3382,6 @@ In the case of the RBF kernel, multiple methods exist to generate random
 .
  In the context of SVM estimators, the prediction function can take advantage
  of the fact that some observations have been eliminated from the estimator.
- Recall that SVM coefficients 
-\begin_inset Formula $\beta$
-\end_inset
-
- reflect the entropy of a given observation; observations with large 
-\begin_inset Formula $\beta$
-\end_inset
-
- values have high similarity to other observations.
  Rather than selecting observations at random, we can select observations
  at random, weighted by their coefficients.
  This allows us to generate random deviates without using non-SV observations.
@@ -2955,7 +3404,11 @@ Z & \in\left(0,\sum_{i=1}^{\ell}\beta_{i}\right)\end{align*}
 
 \begin_layout Standard
 Generating random variates from TI estimators is less straightforward.
- In the case of a TI estimator, each window over the observations 
+ In the case of a TI estimator, each 
+\emph on
+window
+\emph default
+ over the observations 
 \begin_inset Formula $X$
 \end_inset
 
@@ -2978,7 +3431,7 @@ Generating random variates from TI estimators is less straightforward.
 .
  In order to generate a prediction, we must choose a specific affine transformat
 ion defined by 
-\begin_inset Formula $(\mathbf{A},\mathbf{b})$
+\begin_inset Formula $(\bar{\mathbf{A}},\bar{\mathbf{b}})$
 \end_inset
 
 .
@@ -3009,8 +3462,15 @@ Rather than evaluating this over the integral of all possible values of
 \begin_inset Formula $(\mathbf{A},\mathbf{b})$
 \end_inset
 
-, we can formulate an equivalent process; select two sets of points in the
- windows 
+, we can formulate an equivalent process; select two sets of points 
+\begin_inset Formula $\bar{X}_{n}$
+\end_inset
+
+ and 
+\begin_inset Formula $\bar{X}_{m}$
+\end_inset
+
+ in the windows 
 \begin_inset Formula $w_{n}$
 \end_inset
 
@@ -3049,6 +3509,19 @@ In order to define a unique transformation, it is sufficient to select
 \mathbf{A}X_{n}+\mathbf{b} & =X_{m}\\
 f(X_{n},X_{m}) & \longmapsto\mathbf{b}=\left(X_{n}\right)_{1}-\left(X_{m}\right)_{1}\\
 g(X_{n},X_{m}) & \longmapsto\mathbf{A}=\left(X_{n}\right)_{i\neq1}\left(X_{m}\right)_{i\neq1}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Make sure this holds
+\end_layout
 
 \end_inset
 
@@ -3135,8 +3608,11 @@ Using the above definition of the TI metric, we can randomly select values
 \end_inset
 
 .
- The window's random variate is transformed into a prediction by applying
- the transformation 
+ The window's random variate 
+\begin_inset Formula $\bar{x}$
+\end_inset
+
+ is transformed into a prediction by applying the transformation 
 \begin_inset Formula $f(\bar{X}_{n},\bar{X}_{m})\bar{x}+g(\bar{X}_{n},\bar{X}_{m})$
 \end_inset
 
@@ -3145,10 +3621,10 @@ Using the above definition of the TI metric, we can randomly select values
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\phi(\vec{z}_{1}\vec{z}_{2},z_{3},z_{4}:\ \varphi^{D}) & =f(\bar{X}_{n},\bar{X}_{m})\phi(z_{3}:\ w_{4})+g(\bar{X}_{n},\bar{X}_{m})\\
-\phi(z:\ w) & =\begin{cases}
-\phi(z:\ K_{\gamma}(x,x_{i})) & \sum_{j=1}^{i}\beta_{j}\le z<\sum_{j=1}^{\ell}\beta_{j}-\sum_{j=i+1}^{\ell}\beta_{j}\\
+\phi(\vec{z}_{1}\vec{z}_{2},z_{3},z_{4}:\ \varphi^{D}) & =\begin{cases}
+f(\bar{X}_{n},\bar{X}_{m})\phi(z_{3}:\ w_{z_{4}})+g(\bar{X}_{n},\bar{X}_{m})\quad & \sum_{j=1}^{i}\beta_{j}\le z<\sum_{j=1}^{\ell}\beta_{j}-\sum_{j=i+1}^{\ell}\beta_{j}\\
 \emptyset & \text{otherwise}\end{cases}\\
+\phi(z:\ w) & =\phi(z:\ K_{\gamma}(x,x_{i}))\\
 \bar{X}_{n} & =[x_{z_{1}^{1}},...,x_{z_{1}^{|D|}}]\\
 \bar{X}_{n} & =[x_{z_{2}^{1}},...,x_{z_{2}^{|D|}}]\\
 Z_{1},Z_{2} & \in\mathbb{N}^{|D|},\ 1\le Z_{1}^{d}\le\ell\\
@@ -3178,14 +3654,27 @@ You probably need to define 'in a window' better for selecting points.
 Ensemble Predictions
 \end_layout
 
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Section
 Dimension-Conditional Prediction
 \end_layout
 
 \begin_layout Standard
 We now consider conditional probability distributions.
- Conditional distributions describe the probability of points in 
-\begin_inset Formula $\Omega$
+ Conditional distributions describe 
+\begin_inset Formula $\mathcal{P}$
 \end_inset
 
  in a given context.
@@ -3202,7 +3691,7 @@ We now consider conditional probability distributions.
 
  and some context in which we are estimating.
  Our task is to restrict the estimation task to some subset 
-\begin_inset Formula $\bar{\Omega}$
+\begin_inset Formula $\hat{\Omega}$
 \end_inset
 
  of 
@@ -3218,8 +3707,8 @@ given
 \begin_inset Formula $x\in\Omega$
 \end_inset
 
-, given some set of observations 
-\begin_inset Formula $\bar{X}$
+, conditional upon some set of observations 
+\begin_inset Formula $\hat{X}$
 \end_inset
 
 .
@@ -3252,13 +3741,13 @@ Depending on how we define the events
 \end_inset
 
  in different contexts.
- We begin by considering the situation where the two events describe two
- disjoint dimensional sets 
+ We begin by considering the situation where the two events describe outcomes
+ in two disjoint dimensional sets 
 \begin_inset Formula $\tilde{D}$
 \end_inset
 
  and 
-\begin_inset Formula $\bar{D}$
+\begin_inset Formula $\hat{D}$
 \end_inset
 
  .
@@ -3267,13 +3756,17 @@ Depending on how we define the events
 \begin_inset Formula $\tilde{x}\in X^{\tilde{D}}$
 \end_inset
 
- in the following conditional probability distribution:
+ conditional upon 
+\begin_inset Formula $X^{\hat{D}}$
+\end_inset
+
+in the following conditional probability distribution:
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\Pr(X^{\tilde{D}}=\tilde{x}\ |\ X^{\bar{D}}=\bar{x}) & =\frac{\Pr(X^{\tilde{D}}=\tilde{x}\ \cap\ X^{\bar{D}}=\bar{x})}{\Pr(X^{\bar{D}}=\bar{x})}\\
- & =\frac{\Pr(X^{\tilde{D}\cap\bar{D}}=\tilde{x}\cap\bar{x})}{\Pr(X^{\bar{D}}=\bar{x})}\end{align*}
+\Pr(X^{\tilde{D}}=\tilde{x}\ |\ X^{\hat{D}}=\hat{x}) & =\frac{\Pr(X^{\tilde{D}}=\tilde{x}\ \cap\ X^{\hat{D}}=\hat{x})}{\Pr(X^{\hat{D}}=\hat{x})}\\
+ & =\frac{\Pr(X^{\tilde{D}\cap\hat{D}}=\tilde{x}\cap\hat{x})}{\Pr(X^{\hat{D}}=\hat{x})}\end{align*}
 
 \end_inset
 
@@ -3283,11 +3776,11 @@ Depending on how we define the events
 \begin_layout Standard
 Determining this distribution requires us to determine the probability of
  
-\begin_inset Formula $\bar{x}$
+\begin_inset Formula $\hat{x}$
 \end_inset
 
  and 
-\begin_inset Formula $\tilde{x}\cap\bar{x}$
+\begin_inset Formula $\tilde{x}\cap\hat{x}$
 \end_inset
 
 , restricted to the dimensions for which these two points are defined.
@@ -3297,8 +3790,7 @@ Determining this distribution requires us to determine the probability of
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\varphi(\vec{x}:\ \beta,X) & =\sum_{i=1}^{\ell}\beta_{i}K_{\gamma}(\vec{x},\vec{x}_{i})\\
-K_{\gamma}\left(\vec{x},\vec{y}\right) & =\prod_{\upsilon=1}^{d}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|x^{\nu},y^{\nu}\|^{2}}\end{align*}
+\Pr(X^{\tilde{D}}=\tilde{x}|X^{\hat{D}}=\hat{x}) & \approx\frac{\varphi(\tilde{x}:\ \beta,X,\tilde{D}\cap\hat{D})}{\varphi(\tilde{x}:\ \beta,X,\hat{D})}\end{align*}
 
 \end_inset
 
@@ -3307,11 +3799,11 @@ K_{\gamma}\left(\vec{x},\vec{y}\right) & =\prod_{\upsilon=1}^{d}\frac{1}{\gamma\
 
 \begin_layout Standard
 We can therefore determine 
-\begin_inset Formula $\Pr(X^{\tilde{D}\cap\bar{D}})$
+\begin_inset Formula $\Pr(X^{\tilde{D}\cap\hat{D}})$
 \end_inset
 
  and 
-\begin_inset Formula $\Pr(X^{\bar{D}})$
+\begin_inset Formula $\Pr(X^{\hat{D}})$
 \end_inset
 
  by restricting the estimator to the appropriate dimensions
@@ -3320,7 +3812,7 @@ status collapsed
 
 \begin_layout Plain Layout
 For estimating 
-\begin_inset Formula $\Pr(X^{\tilde{D}\cap\bar{D}})$
+\begin_inset Formula $\Pr(X^{\tilde{D}\cap\hat{D}})$
 \end_inset
 
 , we use a single point 
@@ -3332,7 +3824,7 @@ For estimating
 \end_inset
 
  and 
-\begin_inset Formula $x^{d}=\tilde{x},\ d\in\tilde{D}$
+\begin_inset Formula $x^{d}=\hat{x},\ d\in\hat{D}$
 \end_inset
 
 .
@@ -3345,7 +3837,7 @@ For estimating
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\varphi(\vec{x}:\ \beta,X,D) & =\sum_{i=1}^{\ell}\beta_{i}K_{\gamma}(\vec{x},\vec{x}_{i}:\ D)\\
+\varphi_{\beta}(\vec{x}:\ X,D) & =\sum_{i=1}^{\ell}\beta_{i}K_{\gamma}(\vec{x},\vec{x}_{i}:\ D)\\
 K_{\gamma}\left(\vec{x},\vec{y}:\ D\right) & =\prod_{\upsilon\in D}\frac{1}{\gamma\sqrt{2\pi}}e^{-\frac{1}{\gamma}\|x^{\nu},y^{\nu}\|^{2}}\end{align*}
 
 \end_inset
@@ -3360,7 +3852,7 @@ We now consider generating random deviates from the conditional probability
  and transform them into predictions using a transformation which conforms
  to our probability distribution.
  In this case, some dimensional values of are determined by 
-\begin_inset Formula $\bar{x}$
+\begin_inset Formula $\hat{x}$
 \end_inset
 
 ; our task is to generate deviates for the dimensional values 
@@ -3381,7 +3873,7 @@ We now consider generating random deviates from the conditional probability
 \end_inset
 
  given 
-\begin_inset Formula $\bar{D}$
+\begin_inset Formula $\hat{D}$
 \end_inset
 
 .
@@ -3394,7 +3886,7 @@ We now consider generating random deviates from the conditional probability
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\rho_{i} & =\frac{\varphi(x_{i}:\ \beta,X,\tilde{D}\cap\bar{D})}{\varphi(x_{i}:\ \beta_{i},X,\bar{D})}\end{align*}
+\rho_{i} & =\frac{\varphi_{\beta}(x_{i}:\ X,\tilde{D}\cap\hat{D})}{\varphi_{\beta}(x_{i}:\ X,\hat{D})}\end{align*}
 
 \end_inset
 
@@ -3465,15 +3957,15 @@ Set-Conditional Prediction
 \end_layout
 
 \begin_layout Standard
-Because TI estimators are contingent on the distance between sets of observation
-s, we can consider conditional probability distributions where one of the
- events is a set of observations.
+Because TI estimators are contingent on the context of observations, we
+ can consider conditional probability distributions where one of the events
+ is a set of observations.
  In this case, rather than comparing two windows over the observations 
 \begin_inset Formula $X$
 \end_inset
 
 , we consider windows over some set of observations 
-\begin_inset Formula $\bar{X}$
+\begin_inset Formula $\hat{X}$
 \end_inset
 
  and the set of observations 
@@ -3495,7 +3987,7 @@ s, we can consider conditional probability distributions where one of the
 \end_inset
 
 , and the second event is the occurrence of the set of observations 
-\begin_inset Formula $\bar{X}$
+\begin_inset Formula $\hat{X}$
 \end_inset
 
 
@@ -3503,7 +3995,7 @@ s, we can consider conditional probability distributions where one of the
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\Pr(A=x\ |\ B=\bar{X}) & =\frac{\Pr(A=x\ \cap\ B=\bar{X})}{\Pr(B=\bar{X})}\end{align*}
+\Pr(A=x\ |\ B=\hat{X}) & =\frac{\Pr(A=x\ \cap\ B=\hat{X})}{\Pr(B=\hat{X})}\end{align*}
 
 \end_inset
 
@@ -3512,21 +4004,21 @@ s, we can consider conditional probability distributions where one of the
 
 \begin_layout Standard
 We can reduce the numerator to the probability of the set 
-\begin_inset Formula $\bar{X}\cup x$
+\begin_inset Formula $\hat{X}\cup x$
 \end_inset
 
-, which leaves us with the problem of determining the probability of some
- arbitrary set given the observations 
+, which leaves us with the problem of determining the conditional probability
+ of some arbitrary set given the observations 
 \begin_inset Formula $X$
 \end_inset
 
 .
  Because we are dealing with TI estimators, we can treat both 
-\begin_inset Formula $\bar{X}$
+\begin_inset Formula $\hat{X}$
 \end_inset
 
  and 
-\begin_inset Formula $\bar{X\cup x}$
+\begin_inset Formula $\hat{X}\cup x$
 \end_inset
 
  as single points and evaluate the probability of those points.
@@ -3539,7 +4031,7 @@ We can reduce the numerator to the probability of the set
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\rho_{i} & =\frac{\varphi(w_{i}:\ \beta,\bar{X}\cup x,X,D)}{\varphi(w_{i}:\ \beta,\bar{X},X,D)}\end{align*}
+\rho_{i} & =\frac{\varphi_{\beta}(w_{i}:\ \hat{X}\cup x,X,D)}{\varphi_{\beta}(w_{i}:\ \hat{X},X,D)}\end{align*}
 
 \end_inset
 
@@ -3561,7 +4053,7 @@ In the TI SVM optimization, you used two windows; make sure that using a
 \end_layout
 
 \begin_layout Section
-Discrete Iterative Prediction
+Iterative Prediction
 \end_layout
 
 \begin_layout Standard
@@ -3693,216 +4185,13 @@ In this case, the PDF of
 \end_layout
 
 \begin_layout Standard
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-Get rid of this squelching shit - it duplicates the conditional prediction
- functionality (I think)
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-It is possible that successive prediction iterations generate predictions
- whose PDF does not converge.
- In other cases the number of iterations required for convergence will be
- undesirably high.
- We now develop a method to control the rate of convergence.
- We can describe the divergence between iterations as the conditional risk
- of the predictions
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-|\bar{X}_{1},\bar{X}_{2}| & =R_{c}(\bar{X}_{1},\bar{X}_{2})\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-We assume that the conditional risk of both predictions relative to 
-\begin_inset Formula $X$
-\end_inset
-
- is the same:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-R_{c}(\bar{X}_{1},X) & \approx R_{c}(\bar{X}_{2},X)\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Since both estimates are drawn with from the PDF of 
-\begin_inset Formula $\varphi$
-\end_inset
-
-, we know that the conditional risk of each prediction is upper bounded
- by the risk of the estimator
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-R_{c}(\bar{X}_{1},X) & \le R(X)\\
-R_{c}(\bar{X}_{2},X) & \le R(X)\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-We can therefore state that the conditional risk of the two predictions
- is upper bounded by the risk of 
-\begin_inset Formula $\varphi$
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula \begin{align*}
-|\bar{X}_{1},\bar{X}_{2}| & \le R(\varphi)\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-We can now state that the divergence between predictions is determined by
- the risk of the estimators from which the predictions were generated.
- Controlling the convergence rate of iterative predictions requires controlling
- the risk of the underlying estimator.
- For a given random variable 
-\begin_inset Formula $X$
-\end_inset
-
-, we cannot legitimately change the risk.
- The empirical risk is determined by 
-\begin_inset Formula $X$
-\end_inset
-
- and the maximal risk is determined by the estimator and number of observations.
- We can, however, 
-\emph on
-simulate
-\emph default
- a lower risk value by increasing the "contrast" of the estimator 
-\begin_inset Formula $\varphi$
-\end_inset
-
-.
- In general, risk refers to the extent to which 
-\begin_inset Formula $X$
-\end_inset
-
- is truly random.
- As the risk increases the spread of observations along 
-\begin_inset Formula $\Omega$
-\end_inset
-
- increases, and thus the PDF estimate of 
-\begin_inset Formula $X$
-\end_inset
-
- becomes more homogeneous.
- Simulating reduced risk can be accomplished by decreasing the homogeneity
- of 
-\begin_inset Formula $\varphi$
-\end_inset
-
-; accentuating it's peaks and deepening its valleys.
- The simplest way of doing this is to raise each probability estimate to
- some power 
-\begin_inset Formula $\eta>1$
-\end_inset
-
-.
- Points with lower probability will be decreased more than points with higher
- probability.
- The net result is to decrease the width parameter 
-\begin_inset Formula $\gamma$
-\end_inset
-
- of the estimator.
- We will refer to this process as squelching.
-\end_layout
-
-\begin_layout Standard
-Generating estimates from squelched data is possible, however it require
- re-normalizing the resulting PDF.
- Fortunately in the context of prediction this is not necessary - we can
- simply squelch 
-\begin_inset Formula $\rho$
-\end_inset
-
-:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula $ $
-\end_inset
-
-
-\begin_inset Formula \begin{align*}
-\phi(z:\ \eta,\varphi,\hat{x},\tilde{D}) & =\sum_{i=1}^{\ell}\phi(z:\ \left(\rho_{i}\right)^{\eta},x_{i},\tilde{D})\\
-\phi(z:\ \rho_{i},x_{i},\tilde{D}) & =\begin{cases}
-[\phi(z:\ K_{\gamma}(x^{d},x_{i}^{d})):\ d\in\tilde{D}] & \quad\sum_{j=1}^{i}\rho_{j}\le z<\sum_{j=1}^{\ell}\rho_{j}-\sum_{j=i+1}^{\ell}\rho_{j}\\
-\emptyset & \text{\quad otherwise}\end{cases}\\
-Z & \in\left(0,\sum_{i=1}^{\ell}\left(\rho_{i}\right)^{\eta}\right)\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-This is possible because 
-\begin_inset Formula $\rho$
-\end_inset
-
- is only used to distinguish the probability of selecting points for generating
- random variates; the actual value of 
-\begin_inset Formula $\rho$
-\end_inset
-
- is inconsequential.
-\end_layout
-
-\begin_layout Standard
-Controlling the convergence rate of an iterative prediction involves making
- a trade-off between the robustness of the solution and the computational
- requirements of determining a convergent prediction - large values of 
-\begin_inset Formula $\eta$
-\end_inset
-
- are equivalent to single iterations.
- 
-\end_layout
-
-\begin_layout Section
-Continuous Iterative Prediction
-\end_layout
-
-\begin_layout Standard
 We have described the generation of random variates as a process in which
  a set of random variates is generated at each iterative step.
  We can take a different approach to the prediction task and formulate equivalen
 t results by assuming that the generation of random variates is a continuous
  process.
  The iterative approach implies a temporal processing structure; in order
- for formulate a continuous approach we must explicitly define the temporal
+ to formulate a continuous approach we must explicitly define the temporal
  aspect of the process.
  In the continuous approach, the time 
 \begin_inset Formula $t_{i}$
@@ -3995,8 +4284,7 @@ If we do not update
  time will coincide with the iterative approach.
  The utility of the continous approach is that it can be implemented in
  a distributed manner without the requirement of synchronization between
- iterations.
- 
+ iterations and allows fluid integration with new observations.
 \end_layout
 
 \begin_layout Standard
@@ -4012,6 +4300,19 @@ There are multiple methods for handling changes in an emitter's
  set, while the influence of the transition in the latter is not immediately
  available to the system.
  
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+That's a lot of text without any math...
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
@@ -4056,8 +4357,12 @@ noise
 \begin_inset Formula $\varphi$
 \end_inset
 
- will be more significant than marginal changes in the emission rate.
- A simple method of reducing the computation demands of iterative prediction
+ will be more significant than marginal changes in that emission rate.
+ 
+\end_layout
+
+\begin_layout Standard
+A simple method of reducing the computation demands of iterative prediction
  is prioritize emitters in the neighborhood of emitters whose emission rate
  has been changed significantly.
  Fortunately, the kernel matrix for each SV must be computed during the
@@ -4090,7 +4395,7 @@ noise
 
 \begin_layout Standard
 Where 
-\begin_inset Formula $\triangle\rho$
+\begin_inset Formula $\triangle\rho_{i}$
 \end_inset
 
  is the most recent change in 
@@ -4257,10 +4562,10 @@ In order to choose between possible actions, the system must prefer certain
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-m_{\theta}(x^{i}) & \in\mathbb{R}^{+}\\
-m_{\theta}(x^{i})>1 & \longmapsto\text{preferred state}\\
-m_{\theta}(x^{i})<1 & \longmapsto\text{discouraged state}\\
-m_{\theta}(x^{i})=1 & \longmapsto\text{no preference}\end{align*}
+m_{\theta}(x^{i}) & \in\mathbb{R}\\
+m_{\theta}(x^{i})>0 & \longmapsto\text{preferred state}\\
+m_{\theta}(x^{i})<0 & \longmapsto\text{discouraged state}\\
+m_{\theta}(x^{i})=0 & \longmapsto\text{no preference}\end{align*}
 
 \end_inset
 
@@ -4281,8 +4586,6 @@ Before discussing motivated prediction, let us lay out a few assumptions
 \end_inset
 
  includes at least one TI estimator.
- Finally, we assume that the prediction function uses the Random Variate
- Set method.
  
 \end_layout
 
@@ -4302,13 +4605,7 @@ environment
 
  as a result of taking specific actions, an assumption inherently based
  on a temporal view of the probability space.
- While explicit discussion of time will be minimized for the sake of general
- solutions, it is worth noting that estimation and prediction contexts will
- often refer to varying behaviors of 
-\begin_inset Formula $X$
-\end_inset
-
- at different points in time.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -4318,32 +4615,42 @@ We split the motivated decision making process into two general categories;
  between functions; the prediction task is to explore potential system states
  and the choice task is to select actions from the available predictions.
  The prediction task as described in the previous section involved exploring
- possible sets of observations in order to learn something about the PDF
- of 
-\begin_inset Formula $\varphi$
+ possible sets of observations in order to learn something about 
+\begin_inset Formula $\mathcal{P}$
 \end_inset
 
  and its nature in different contexts.
  Motivated prediction constitutes the same general process, however our
- objective now is to learn the consequences of potential actions.
- We can now quantify a given prediction's utility based on the amount of
- information it contains regarding the correspondance between actions and
- consequences, and our task is to modify the prediction process to be biased
- towards exploring the nature of 
-\begin_inset Formula $\varphi$
+ objective now is to learn the 
+\emph on
+consequences
+\emph default
+ of potential 
+\emph on
+actions
+\emph default
+.
+ We describe a given prediction's 
+\begin_inset Quotes eld
+\end_inset
+
+utility
+\begin_inset Quotes erd
+\end_inset
+
+ as the amount of information it contains regarding the correspondance between
+ actions and consequences, and our task is to modify the prediction process
+ to be biased towards exploring the nature of 
+\begin_inset Formula $\mathcal{P}$
 \end_inset
 
  in these contexts.
 \end_layout
 
 \begin_layout Standard
-We begin by quantifying the utility of a given prediction 
-\begin_inset Formula $\bar{x}$
-\end_inset
-
-.
- We wish to quantify the extent to which an estimate consitutes either a
- preferred or discouraged point in 
+We begin by quantifying the utility of a given SV.
+ We wish to quantify the extent to which an SV consitutes either a preferred
+ or discouraged point in 
 \begin_inset Formula $\Omega$
 \end_inset
 
@@ -4361,7 +4668,7 @@ We begin by quantifying the utility of a given prediction
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-u_{\theta}(x) & =\frac{1}{|\tilde{D}|}\sum_{d\in\tilde{D}}|m_{\theta}(x^{d})|\end{align*}
+u_{\theta}(x) & =\frac{1}{d}\sum_{i}^{d}|m_{\theta}(x^{i})|\end{align*}
 
 \end_inset
 
@@ -4384,14 +4691,14 @@ u_{\theta}(w) & =\frac{1}{\sum_{x_{i}\in X}\omega(w,x_{i})}\sum_{x_{i}\in X}\ome
 
 \begin_layout Standard
 Evaluating the utility of a prediction is less straightforward.
- Because predictions describe potential states (rather than observed states),
- we can no know based solely on the prediction its utility.
+ Because predictions describe potential states (rather than observed states),we
+ can't know the prediction's utility based solely on the prediction itself.
  We must evaluate the utility of a prediction in the context not only of
- previous observations, but of the other sets in 
+ previous observations, but of the other points in 
 \begin_inset Formula $\bar{X}$
 \end_inset
 
-
+.
 \begin_inset Foot
 status collapsed
 
@@ -4427,17 +4734,15 @@ Recall the conditional prediction scenario where the conditional probabilities
 
 \end_inset
 
-.
  We therefore adopt an iterative approach to determining the utility of
  a prediction.
- We begin by evaluating the utility of a prediction using the utility of
- each observation and the conditional probability of the prediction given
- the observation
+ We begin by evaluating a prediction using the utility of each SV and the
+ conditional probability of the prediction given the SV
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-u_{\theta}^{1}(\bar{x}) & =\sum_{x_{i}\in X}u_{\theta}(x_{i})\varphi(x:\ x_{i})+\sum_{w_{i}\in X}u_{\theta}(w_{i})\varphi(w:\ w_{i})\end{align*}
+u_{\theta}^{1}(\bar{x}) & =\sum_{x_{i}\in X}u_{\theta}(x_{i})\varphi(x:\ x_{i})+\sum_{w_{i}\in X}u_{\theta}(w_{i})\varphi(\bar{w}:\ w_{i})\end{align*}
 
 \end_inset
 
@@ -4446,11 +4751,11 @@ u_{\theta}^{1}(\bar{x}) & =\sum_{x_{i}\in X}u_{\theta}(x_{i})\varphi(x:\ x_{i})+
 
 \begin_layout Standard
 Where 
-\begin_inset Formula $w$
+\begin_inset Formula $\bar{w}$
 \end_inset
 
  refers to the window defined by 
-\begin_inset Formula $x$
+\begin_inset Formula $\bar{x}$
 \end_inset
 
 .
@@ -4462,17 +4767,7 @@ Where
 \begin_inset Formula $\bar{x}_{i}$
 \end_inset
 
- is conditional upon also are assigned high utility; if it's useful to keep
- 
-\begin_inset Formula $\bar{x}_{i}$
-\end_inset
-
-, it is also useful to keep any points which increase the probability of
- predicting 
-\begin_inset Formula $\bar{x}_{i}$
-\end_inset
-
-.
+ is conditional upon also are assigned high utility.
  We then use the conditional probabilities of the other estimates given
  
 \begin_inset Formula $\bar{x}$
@@ -4492,8 +4787,8 @@ u_{\theta}^{i}(\bar{x}) & =\sum_{\bar{x}_{i}\in\bar{X}}u_{\theta}^{i-1}(\bar{x}_
 
 \begin_layout Standard
 As this iterative step updates the utility of each observation, it can be
- evaluated for as many iterations are necessary to provide a suitable level
- of accuracy.
+ evaluated for as many iterations as are necessary to provide a suitable
+ level of accuracy.
 \end_layout
 
 \begin_layout Standard
@@ -4537,6 +4832,19 @@ We have refined our understanding of the motivated prediction process; the
  prediction task constitutes selecting points of interest from a set of
  predictions and passing them to future iterations of the prediction process.
  
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Again - lots of words...
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Section
@@ -4592,8 +4900,8 @@ It cannot be assumed that a prediction at time
 \end_inset
 
 .
- We select from the prediction actions 
-\begin_inset Formula $\bar{A}$
+ We select from the predictions 
+\begin_inset Formula $\bar{X}$
 \end_inset
 
  the action 
@@ -4606,7 +4914,7 @@ It cannot be assumed that a prediction at time
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\ddot{a}^{t} & =\max_{\bar{a}_{i}\in\bar{A}}\omega_{\gamma}(t,a)\ u_{\theta}(a_{i})\end{align*}
+\ddot{a}(t) & =\max_{\bar{a}_{i}\in\bar{A}}\omega_{\gamma}(t,a)\ u_{\theta}(a_{i})\end{align*}
 
 \end_inset
 
@@ -4619,7 +4927,8 @@ status open
 
 \begin_layout Plain Layout
 If this was a regression function the output would be a lot smoother.
- Just make sure you don't end up between peaks.
+ Just make sure you don't end up between peaks - this may require some work
+ to the motivated prediction section
 \end_layout
 
 \end_inset
@@ -5256,6 +5565,21 @@ key "Graf04"
 \end_layout
 
 \begin_layout Chapter
+Implementation details
+\end_layout
+
+\begin_layout Standard
+Catanzaro frames SMO optimization as MapReduce, although it's still an iterative
+ process (each iteration is a MapReduce)
+\end_layout
+
+\begin_layout Standard
+CouchDB provides erlang-based MapReduce using javascript 'views' on unstructured
+ data.
+ 
+\end_layout
+
+\begin_layout Chapter
 Further Research
 \end_layout
 
@@ -5326,8 +5650,9 @@ Performance
 \begin_layout Standard
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
+btprint "btPrintAll"
 bibfiles "Research/research.bib"
-options "plain"
+options "bibtotoc,plain"
 
 \end_inset
 
