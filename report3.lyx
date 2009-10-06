@@ -70,12 +70,6 @@ Acting Machines
 
 \begin_layout Author
 Ryan Michael
-\begin_inset Newline newline
-\end_inset
-
- 
-\family typewriter
-kerinin@gmail.com
 \end_layout
 
 \begin_layout Standard
@@ -133,13 +127,13 @@ a scientific discipline that is concerned with the design and development
  capable of autonomously generating probabalistic models using sets of observati
 ons.
  This text builds upon the foundation of Machine Learning to develop an
- Acting Machine (AM); a system capable of interacting with with its environment
- in a motivated way.
+ Acting Machine (AM); a learning machine capable of interacting with with
+ its environment in a motivated way.
  
 \end_layout
 
 \begin_layout Standard
-Our acting machine is built from two basic operations; a learning machine
+The acting machine is built from two basic operations; a learning machine
  capable of developing models of the AM's environment based on a set of
  observations and a volitive algorithm which generates specific actions
  based on a set of motivational parameters.
@@ -164,11 +158,17 @@ choice
  In statistical terms the generation of a model is framed as the estimation
  of an unknown probability distribution function (PDF) based on a set of
  observations.
- The tern choice refers to the process of selecting a specific action from
- the set of possible actions.
+ The term choice refers to the process of selecting a 
+\emph on
+specific
+\emph default
+ action from the set of 
+\emph on
+possible
+\emph default
+ actions.
  This selection process is informed by a set of motivational parameters
- which quantify the types of outcomes the AM seeks to cause through a given
- selection.
+ which quantify the types of outcomes the AM seeks to cause by a given selection.
  This text is organized into two parts; the first develops a robust estimation
  procedure, and the second develops the choice procedure.
  
@@ -185,6 +185,40 @@ choice
 Estimation
 \end_layout
 
+\begin_layout Standard
+Estimation is the process by which a set of observations of a random variable
+ are used to generate an estimate of the unknown probability distribution
+ of the random variable.
+ The approach to estimation we will use generates an estimate of the probability
+ of a specific point based on a set of observations.
+ In order to estimate the probablility of such a point, we will establish
+ a method of measuring the distance from the point to each of the given
+ observations.
+ The closer the point whose probability is being estimated lies to the set
+ of observations, the higher the estimated probability of the point will
+ be.
+ The intuitive principle behind this approach is that for a sample of a
+ random variable, the higher the probability in a given area, the more observati
+ons we will see in that area.
+\end_layout
+
+\begin_layout Standard
+The estimation chapters are organized as follows; Chapter 2 defines the
+ metric which will be used to determine the 
+\begin_inset Quotes eld
+\end_inset
+
+closeness
+\begin_inset Quotes erd
+\end_inset
+
+ of two points, Chapter 3 applies this metric to a PDF estimate function
+ called the Parzen Window estimator, Chapter 4 develops an equivalent function
+ which requires less computational resources to generate estimates, and
+ Chapter 5 discusses methods of integrating multiple estimators into an
+ ensemble system.
+\end_layout
+
 \begin_layout Section*
 Formal Setting: Estimation
 \end_layout
@@ -195,16 +229,82 @@ We define the estimation problem as the generation of a Probability Density
 \begin_inset Formula $X$
 \end_inset
 
-, where the PDF is unknown, but 
+.
+ The random process takes values in a domain defined by its abstract space
+ 
+\begin_inset Formula $\Omega$
+\end_inset
+
+ which is limited to the set of real numbers 
+\begin_inset Formula $\mathbb{R}$
+\end_inset
+
+ of dimension 
+\begin_inset Formula $d$
+\end_inset
+
+.
+ We define the set of events over the abstract space a 
+\begin_inset Formula $\mathcal{F}$
+\end_inset
+
+, which we will assume to be the Borel 
+\begin_inset Formula $\sigma$
+\end_inset
+
+-algebra 
+\begin_inset Formula $\mathcal{B}$
+\end_inset
+
+ over 
+\begin_inset Formula $\Omega$
+\end_inset
+
+.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Generally, the Borel 
+\begin_inset Formula $\sigma$
+\end_inset
+
+-algebra is the set of all possible contiguous subsets of 
+\begin_inset Formula $\mathbb{R}^{d}$
+\end_inset
+
+.
+ The event space 
+\begin_inset Formula $\mathcal{F}$
+\end_inset
+
+ therefore includes any interval of the abstract space.
+\end_layout
+
+\end_inset
+
+ Finally, we assume there exists a probability measure 
+\begin_inset Formula $\mathcal{P}$
+\end_inset
+
+ defined for each element of 
+\begin_inset Formula $\mathcal{F}$
+\end_inset
+
+; the estimation task is to generate an estimate of 
+\begin_inset Formula $\mathcal{P}$
+\end_inset
+
+ for any point in 
+\begin_inset Formula $\Omega$
+\end_inset
+
+ given 
 \begin_inset Formula $\ell$
 \end_inset
 
- sample data points 
-\begin_inset Formula $x_{i}$
-\end_inset
-
- of arbitrary dimension 
-\begin_inset Formula $d$
+ independant and identitically distributed (i.i.d.) sample data points 
+\begin_inset Formula $x_{1},...,x_{\ell}$
 \end_inset
 
  are given:
@@ -214,6 +314,15 @@ We define the estimation problem as the generation of a Probability Density
 \begin_inset Formula \begin{align*}
 X & =(\Omega,\mathcal{F},\mathcal{P})\\
 \Omega & \in\mathbb{R}^{d}\\
+\mathcal{F} & =\mathcal{B}(\Omega)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
 X & =[\vec{x}_{1},...,\vec{x}_{\ell}]\end{align*}
 
 \end_inset
@@ -269,7 +378,7 @@ Our objective is to develop an estimate
 \begin_inset Formula $\varphi(x:\ X)$
 \end_inset
 
- of the probability of the given point 
+ of the probability of the point 
 \begin_inset Formula $x$
 \end_inset
 
@@ -320,6 +429,35 @@ description "Slack variable"
 
 \end_layout
 
+\begin_layout Standard
+We will develop methods of estimation using kernel distance functions 
+\begin_inset Formula $K_{\gamma}(x,y)$
+\end_inset
+
+ which transform the distance 
+\begin_inset Formula $\|\cdot,\cdot\|$
+\end_inset
+
+ between two points into a more suitable distance for probability estimation.
+ The kernel distance between a point and itself is defined as 1, and the
+ cumulative distance between any point and 
+\begin_inset Formula $\Omega$
+\end_inset
+
+ is defined as 1.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+K_{\gamma}(x,y) & =f(\|x,y\|)\\
+K_{\gamma}(x,x) & =1\\
+\int_{\Omega}K_{\gamma}(x,y)dy & =1\end{align*}
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Chapter
 Set Metrics
 \end_layout
@@ -328,17 +466,6 @@ Set Metrics
 We begin our discussion of estimation by considering the nature of the observati
 ons 
 \begin_inset Formula $X$
-\end_inset
-
-.
- Multiple methods exist to generate PDF estimates from a set of observations
- (indeed we will rely on two such methods), however these approaches generally
- require a distance metric 
-\begin_inset Formula $\|\cdot,\cdot\|$
-\end_inset
-
- defined over the abstract space 
-\begin_inset Formula $\Omega$
 \end_inset
 
 .
@@ -392,6 +519,10 @@ neighborhoods
 .
 \end_layout
 
+\begin_layout Section
+Windowing
+\end_layout
+
 \begin_layout Standard
 We define neighborhoods using two parameters; the location of the neighborhood
  and the width of the neighborhood.
@@ -404,7 +535,7 @@ We define neighborhoods using two parameters; the location of the neighborhood
 \begin_inset Formula $\alpha$
 \end_inset
 
- to control the width of a neighborhood.
+ to describe the width of a neighborhood.
  We describe points 
 \begin_inset Formula $x_{i}\in X$
 \end_inset
@@ -434,7 +565,11 @@ included in
 \begin_inset Formula $x_{i}$
 \end_inset
 
- is included in the window defined by 
+ is included in the window 
+\begin_inset Formula $w$
+\end_inset
+
+ defined by 
 \begin_inset Formula $x$
 \end_inset
 
@@ -443,8 +578,8 @@ included in
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\omega_{\alpha}(x,x_{i}) & \Rightarrow(0,\infty)\\
-\int_{-\infty}^{\infty}\omega_{\alpha}(x,x_{i})dx_{i} & =1\end{align*}
+\omega_{\alpha}(w,x_{i}) & \Rightarrow(0,\infty)\\
+\int_{-\infty}^{\infty}\omega_{\alpha}(w,x_{i})dx_{i} & =1\end{align*}
 
 \end_inset
 
@@ -452,39 +587,63 @@ included in
 \end_layout
 
 \begin_layout Standard
-For simplicity, we will refer to the neighborhood located at a point 
-\begin_inset Formula $x$
-\end_inset
-
- as the window 
-\begin_inset Formula $w$
-\end_inset
-
-.
- We can use any kernel function for 
+We can use any kernel function for 
 \begin_inset Formula $\omega(\cdot)$
 \end_inset
 
 , however we assume that the windowing function has a peak at 
-\begin_inset Formula $w_{i}=[x_{j}^{n}|\ n\in D]$
+\begin_inset Formula $\omega_{\alpha}(w,x)$
 \end_inset
 
  and that it drops off as 
-\begin_inset Formula $\left\Vert w_{i}-[x_{j}^{n}|\ n\in D]\right\Vert \rightarrow\pm\infty$
+\begin_inset Formula $\left\Vert x-x_{i}\right\Vert \rightarrow\infty$
 \end_inset
 
 .
- Notice that we use a real-valued rather than Boolean inclusion metric -
- this allows us to "smear" the context of a given window into adjacent areas
- of 
-\begin_inset Formula $X^{D}$
-\end_inset
+ 
+\end_layout
 
-.
+\begin_layout Section
+Set Divergence
 \end_layout
 
 \begin_layout Standard
-Developing a metric for comparing two neighborhoods is therefore treated
+Multiple methods exist to generate PDF estimates from a set of observations
+ (indeed we will rely on two such methods), however these approaches generally
+ require a distance metric 
+\begin_inset Formula $\|\cdot,\cdot\|$
+\end_inset
+
+ defined over the abstract space 
+\begin_inset Formula $\Omega$
+\end_inset
+
+.
+ In the context of defining the distance between two points, we can use
+ the 
+\begin_inset Formula $L^{1}$
+\end_inset
+
+ (manhattan) distance or the 
+\begin_inset Formula $L^{2}$
+\end_inset
+
+ (euclidian) distance:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\|x,y\|^{L^{1}} & =\sum_{d}\left|x^{d}-y^{d}\right|\\
+\|x,y\|^{L^{2}} & =\sqrt{\sum_{d}\left(x^{d}-y^{d}\right)^{2}}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+These metrics are restricted to distances between points.
+ Developing a metric for comparing two neighborhoods is therefore treated
  as developing a metric for comparing two windows.
  There are multiple divergence measures available which can be used to define
  a "distance" between two sets.
