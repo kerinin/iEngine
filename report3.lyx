@@ -3445,6 +3445,360 @@ where
  have some meaning.
 \end_layout
 
+\begin_layout Plain Layout
+Let's try to get a better handle on these terms.
+ We'll start by defining an action set (this is a little misleading - the
+ action set contains non-action values as well) as 
+\begin_inset Formula $\phi$
+\end_inset
+
+.
+ In this context, the optimization problem is to determine the action set
+ with the highest expected reward
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+W(\phi) & =\max_{\phi}E(r(\phi))\\
+ & =\max_{\phi}\Pr(\phi)r(\phi)\\
+ & =\max_{\phi}\varphi(\phi)r(\phi)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+So, the question is how we control (and as a result, define) 
+\begin_inset Formula $\phi$
+\end_inset
+
+.
+ We can treat a probability field as the underlying field plus one dimension
+ (each point's probability), so it should be possible to treat a probability
+ field *as* an action set.
+ Let's assume this will work, and treat 
+\begin_inset Formula $\phi$
+\end_inset
+
+ as a PDF.
+ Before we go and define how the PDF is determined, let's establish the
+ two functions above
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\varphi(\phi) & =1-\int_{\Omega}\|\varphi(x),\phi(x)\|dx\end{align*}
+
+\end_inset
+
+ In other words, we'll treat the probability of a field given 
+\begin_inset Formula $\varphi$
+\end_inset
+
+ as the divergence between them.
+ If they are completely convergent, the probability will be one, if they
+ are completely divergent the probability will be 0.
+ We can leave the reward function undefined, but assume that it is the integral
+ over possible values
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+r(\phi) & =\int_{\Omega}\phi(x)r(x)dx\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+OK, so now we need to develop the actual PDF definition.
+ I think we can restrict our attention to a combination of transformed previous
+ observations.
+ We have a couple options here, we could select transforms and observations
+ and start building sets.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+One option would be to do this iteratively; we select an observation (somehow)
+ then optimize the transform based on the above optimization problem.
+ This could be repeated until the optimization problem stabalized.
+ We could potentially also cull selections from the active set - possibly
+ removing the least useful one once we've reached some threshold defined
+ by the computational resources allocated to the search.
+\end_layout
+
+\begin_layout Plain Layout
+This is an interesting approach, as it allows us to operate over a set of
+ SV/transform pairs.
+ These pairs would uniquely define an action set (no need for recursive
+ references to previous iterations or whatever).
+\end_layout
+
+\begin_layout Plain Layout
+We could refine this further if it were possible to encode arbitrary transforms
+ into a single matrix.
+ I doubt that's possible though.
+ Maybe a better approach would be to maintain a set of transforms for each
+ observation, and add/remove transforms as the optimization problem.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+Earlier, we had been working off of 
+\begin_inset Formula $\rho$
+\end_inset
+
+.
+ In this case I think it's redundant; rather than specifying the influence
+ of a given SV, we simply allow it to be transformed in the same way multiple
+ times.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+OK, so just to play this out, well call a given affine transform 
+\begin_inset Formula $a=(n,\mathbf{A},\mathbf{b})$
+\end_inset
+
+, and the set of transforms which define an action set as 
+\begin_inset Formula $A$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\phi_{A}(x) & =\sum_{i=1}^{|A|}\frac{1}{|A|}K_{\gamma}(x,\mathbf{A}_{i}x_{n_{i}}+\mathbf{b}_{i})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+This allows us to reduce our optimization task to an iterative one in which
+ each step finds the otimal value for a single transform given the a set
+ of transforms
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+W(a:\ A) & =\max_{a}\varphi(\phi_{a\cup A})r(\phi_{a\cup A})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+We can make this even simpler by specifying beforehand how many transforms
+ we want, then optimizing over that many terms
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+W(A) & =\max_{A}\varphi(\phi_{A})r(\phi_{A})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+I think the existing approach can be seen as a naive method of implementing
+ this optimization.
+ I seriously doubt that selecting a transform is convex - multiple transforms
+ could provide the same reward.
+ In any case, I think having a solid foundation for what we're trying to
+ do is helpful.
+\end_layout
+
+\begin_layout Plain Layout
+
+\lyxline
+
+\end_layout
+
+\begin_layout Plain Layout
+This is a huge fucking mess.
+ I'm not sure how we evaluate the probability of a set.
+ Let's go back to the actual set thing.
+ We need to evaluate the joint probability of the points in the set.
+ OK, give a set of points X, we can break this down into a sequence of joint
+ probabilities.
+ First, we define a subset of X which is the first n elements of X
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+X_{n} & =[x_{i}\in X,\ i<n]\\
+X_{n+1} & =X_{n}\cup x_{n+1}\\
+X_{0} & =\emptyset\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+Now, let's start trying to evaluate the probability of the set X.
+ We first break out one element of X and determine the joint probability
+ of the element and the rest of X
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\varphi(X) & =\varphi(x_{\ell}\cap X_{\ell-1})\\
+ & =\varphi(x_{\ell}|X_{\ell-1})\varphi(X_{\ell-1})\\
+ & =\varphi(x_{\ell}|X_{\ell-1})\varphi(x_{\ell-2}|X_{\ell-2})\varphi(X_{\ell-2})\\
+ & \vdots\\
+ & =\prod_{n=1}^{\ell}\varphi(x_{n}|X_{n-1})\\
+\varphi(x|\emptyset) & =\varphi(x)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+Now, the reason this is good is that we can evaluate the conditional probability
+ of a point given a set of observations using the regular old Parzen Estimator
+ - right? I mean, I'm pretty sure that the parzen estimator of x given X
+ can be expressed as 
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\varphi_{X}(x) & =\varphi(x|X)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+This trick will only work in the discrete case.
+ Turning this into an integral doesn't make any sense.
+ *But* our field is determined by a set of points - it may not be necessary.
+ Let's expand that bit above
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\varphi_{X}(\bar{X}) & =\prod_{n=1}^{\bar{\ell}}\varphi_{X}(x_{n}|\bar{X}_{n-1})\\
+ & =\prod_{n=1}^{\bar{\ell}}\varphi_{X\cup\bar{X}_{n-1}}(x_{n})\\
+ & =\prod_{n=1}^{\bar{\ell}}\sum_{i=1}^{\ell+n}\frac{1}{\ell}K(x_{n},x_{i})\\
+ & =\left(\sum_{i=1}^{\ell+1}K(x_{1},x_{i})\right)\prod_{n=2}^{\bar{\ell}}\sum_{i=1}^{\ell+n}\frac{1}{\ell}K(x_{n},x_{i})\\
+ & =\left(K(x_{1},x_{\ell+1})\varphi_{X}(x_{1})\right)\prod_{n=2}^{\bar{\ell}}\sum_{i=1}^{\ell+n}\frac{1}{\ell}K(x_{n},x_{i})\\
+ & =\left(K(x_{1},x_{\ell+1})+\varphi_{X}(x_{1})\right)\left(\sum_{i=1}^{\ell+2}K(x_{2},x_{i})\right)\prod_{n=3}^{\bar{\ell}}\sum_{i=1}^{\ell+n}\frac{1}{\ell}K(x_{n},x_{i})\\
+ & =\left(K(x_{1},x_{\ell+1})+\varphi_{X}(x_{1})\right)\left(K(x_{2},x_{\ell+1})+K(x_{2},x_{\ell+2})+\varphi_{X}(x_{2})\right)\prod_{n=3}^{\bar{\ell}}\sum_{i=1}^{\ell+n}\frac{1}{\ell}K(x_{n},x_{i})\\
+ & \vdots\\
+ & =\prod_{n=1}^{\bar{\ell}}\left(\varphi_{X}(\bar{x}_{n})+\varphi_{\bar{X}_{n}}(\bar{x}_{n})\right)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+OK, so we know that we can determine the probability of a field if it's
+ generated by points.
+\end_layout
+
+\begin_layout Plain Layout
+Another interesting bit is that we can add a single optimal point my optimizing
+ those two terms 
+\begin_inset Formula $\varphi_{X}(\bar{x})+\varphi_{\bar{X}}(\bar{x})$
+\end_inset
+
+.
+ This should work both ways - we should be able to add a point this way
+ as well as do a leave-one-out- analysis of the weakest point and remove
+ it.
+ We could proably do this in parallel; take each point and see if a better
+ point can be found (given the rest of the points) then use all those points.
+ Maybe not actually, the problem is that we'd be completely changing the
+ context, and there's no guarantee that the new context will be 'better'
+ than the old one, since the relationships *between* the new contexts hasn't
+ been established.
+\end_layout
+
+\begin_layout Plain Layout
+Let's think about adding a new point.
+ Again, the point needs to be both a SV and a transform.
+ We can get a rough idea how well each SV will work by doing the integral
+ over all transforms, but this might prefer points with a low broad similarity
+ over points with a single peak - in this case we'd prefer to peak to any
+ of the points in the broad spectrum.
+ Maybe this is where uncertainty comes in - if we could evaluate both the
+ average similarity *and* the uncertainty of the similarity, we could combine
+ them somehow.
+ Is this possible?
+\end_layout
+
+\begin_layout Plain Layout
+We can certainly determine the uncertainty if we restrict the search to
+ transformations defined by points - just take the sum of plogp.
+ But - can we take the integral of this over transformations?
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+H(\varphi) & =\int\varphi(x^{T})\log\varphi(x^{T})dT\\
+ & =\int\left(\sum_{i=1}^{\ell}\beta_{i}K(x,x_{i}^{T})\right)\log\left(\sum_{i=1}^{\ell}\beta_{i}K(x,x_{i}^{T})\right)dT\\
+ & =\int\left(\sum_{i=1}^{\ell}\beta_{i}e^{-\frac{1}{\gamma}\|x,x_{i}^{T}\|}\right)\log\left(\sum_{i=1}^{\ell}\beta_{i}e^{-\frac{1}{\gamma}\|x,x_{i}^{T}\|}\right)dT\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+Returning to the definition of entropy
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+H(X) & =E(I(X))\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+Where I is the self-information of X.
+ The conversion to the probability assumes that we're dealing with points
+ in the domain - we can probably restrict this by using randomly chosed
+ transform values (this would we could use a subset of possible values to
+ make things a little less demanding computationally).
+ In this case, we simply divide by the number of samples
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+H(X) & =\frac{1}{n}\sum_{i=1}^{n}I(x_{n})\\
+ & =\sum_{i=1}^{n}\log(\varphi(x_{n}))\\
+ & =\frac{1}{n}\log\left(\prod_{i=1}^{n}\varphi(x_{n})\right)\\
+ & =\frac{1}{n}\log\left(\prod_{i=1}^{n}\sum_{j=1}^{\ell}\beta_{j}K(x_{i},x_{j})\right)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+Yeah, this doesn't really get us anywhere.
+\end_layout
+
+\begin_layout Plain Layout
+We need to develop heuristics again.
+\end_layout
+
 \end_inset
 
 
