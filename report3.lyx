@@ -3284,6 +3284,173 @@ Prediction and Conditional Prediction
 \end_layout
 
 \begin_layout Standard
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+OK, thinking through prediction without variates.
+ The reason prediction isn't simple is that TI estimators are context sensitive,
+ so the result of a prediction task can invfluence the result of a second
+ prediction task.
+ Thus far we've handled this by generating sets of points, and using them
+ as the conditional inputs to the next iteration - in order for this to
+ work without variates we would need to generate a full probability field
+ (rather than simply a set of points) and then use that field to determine
+ the next iterative step.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+So the first question is if the probability field is the same as the random
+ variates.
+ Let's assume we're at the first iteration of the process.
+ In this case, the field will be identical - the field is generated relative
+ to the observations, so as the number of variates increases it will converge
+ on the field.
+ We can use the same process we would have used in generating random variates
+ to generate the resulting field.
+ The random deviates are drawn from the SV's based on the probability of
+ the SV (in the case of TI estimators, we also use a random transformation).
+ Because of that transformation step, the probabilities of the SV's *must*
+ be paired with the set generating them.
+ The probability of an SV is determined by the conditional probability of
+ the SV, given X.
+\end_layout
+
+\begin_layout Plain Layout
+So let's assume now that we're moving to the second iterative step.
+ In this case, we're evaluating the probability of each SV based on the
+ generated field, and again adding random transformations.
+ In this case the probability of an SV is determined by the conditional
+ probability given the previous field (which is conditional on the original
+ observations).
+ In this case we again can't divorce the prediction from the previous prediction
+, due to the TI estimators.
+ OK, so let's see if we can formalize this
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\Pr(\rho_{n}^{i}|\rho_{n-1}) & =\frac{\Pr(\rho_{n}^{i}\cup\rho_{n-1})}{\Pr(\rho_{n-1})}\\
+\Pr(\rho_{1}) & =\bigcap_{i}\Pr(\rho_{1}^{i}|X)\\
+\Pr(\rho_{1}^{i}) & =\Pr(SV_{i}|X)\\
+ & =\bigcap_{x\in SV_{i}}\Pr(x)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+OK, here lies the problem.
+ We're working on determining the probability of a given rho value given
+ the past one - even if we can determine this probability, we still are
+ left with the problem of selecting a new value of rho.
+ This is the non-linear optimization problem we've been having.
+ The new value needs to be the probability of an SV given a field! Let's
+ use the following notation to denote that field
+\end_layout
+
+\begin_layout Plain Layout
+OK, we *have* to start with conditional sets, otherwise rho will equal beta.
+ Treat these as testing observations.
+ So the first iterative step is the same; determine rho based on the testing
+ set (and the training set).
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\varphi^{1}(x) & =\Pr(x|X)\\
+ & =\sum_{i=1}^{\ell}\frac{1}{\ell}K(x,x_{i})\\
+\rho_{i}^{1} & =\Pr(w_{i}|X)\\
+ & =\varphi^{1}(w_{i})\\
+\phi(\rho^{1}) & =?\\
+\varphi^{2}(x) & =\Pr(x|\phi(\rho))\\
+\varphi^{2}(x) & =\Pr(x|\varphi^{i-1})\\
+\\\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+Here's the challenge, how do we pivot from probability estimates to conditional
+ values?
+\end_layout
+
+\begin_layout Plain Layout
+If this is going to work, you need to establish a set of equivalent equations
+ between what's already developed and rho sets.
+ Probability fields are *not* the same as a set of observations.
+ The PDF of the set of equations might match, but there is a significant
+ difference.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Let's think about this from the other end.
+ The basic goal is to explore sets of actions to find an action set which
+ will maximize the expected reward for the system.
+ We can also state that an action set is defined as a set of rho values
+ and a conditional set (possibly X as the conditional set, but probably
+ a previous iteration, as the result of a rho value will be different for
+ different contexts).
+ This means we can formulate our objective as an optimization task 
+\begin_inset Formula $W(\rho)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+W(\rho) & =\max_{\rho}E(r(\phi(\rho,\phi)))\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+where 
+\begin_inset Formula $\phi(\rho,\phi)$
+\end_inset
+
+ is the action set given 
+\begin_inset Formula $\rho$
+\end_inset
+
+ and a conditional set 
+\begin_inset Formula $\phi$
+\end_inset
+
+, and 
+\begin_inset Formula $r(\cdot)$
+\end_inset
+
+ is some reward function.
+ This function likely needs constraints, namely that 
+\begin_inset Formula $\rho$
+\end_inset
+
+ have some meaning.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 Now that we have developed a robust architecture for estimating the probability
  of a point, we turn our attention to the inverse problem; predicting observatio
 ns which conform the the PDF, possibly under some set of conditions.
