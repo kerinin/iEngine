@@ -3394,7 +3394,7 @@ If this is going to work, you need to establish a set of equivalent equations
 
 \begin_layout Standard
 \begin_inset Note Note
-status open
+status collapsed
 
 \begin_layout Plain Layout
 Let's think about this from the other end.
@@ -3797,6 +3797,612 @@ Yeah, this doesn't really get us anywhere.
 
 \begin_layout Plain Layout
 We need to develop heuristics again.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+OK, working off that last set of equations to describe the probability of
+ a set.
+ Let's think about a different approach - we forget the SV's and transforms
+ and all that, we simply select points.
+ We can caluclate the impact of each point in the set, which allows us to
+ update the expected reward with each addition.
+ We also know easily which points to remove.
+ If we re-frame this as point selection, instead of choosing an SV and a
+ transformation set (d^2+d+1) we just select a point (d).
+ not only that, but we can probably define a rigorous heuristic for selecting
+ points.
+\end_layout
+
+\begin_layout Plain Layout
+Given a set of points 
+\begin_inset Formula $\bar{X}$
+\end_inset
+
+, our task is to select a new point.
+ We know that the revised probability of the set will be the previous probabilit
+y times the probability given X plus the probability given 
+\begin_inset Formula $\bar{X}$
+\end_inset
+
+, and that the revised reward will be the point's kernel distance to each
+ SV times the SV's reward (I think).
+ Here's where I think we can generate a heuristic; it may be possible to
+ generate a PDF which describes the probability of any point.
+ Given this PDF, we can generate random deviates.
+ But we can also scale the random deviate weights by the reward of each
+ SV.
+ This means that we'll easily generate a random point, weighted towards
+ high expected reward.
+ We also want to generate points which are novel, so we can probably take
+ the probability of points given 
+\begin_inset Formula $X\cup\bar{X}$
+\end_inset
+
+ and subtract from it the probability of points given 
+\begin_inset Formula $\bar{X}$
+\end_inset
+
+.
+ I don't think this will simply produce the probability of 
+\begin_inset Formula $X$
+\end_inset
+
+, but I might be wrong.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+In any case, *if* this works, it seems like the ideal method of doing all
+ this.
+ It probably won't parallelize very well, but we could always execute multiple
+ parallel searches in the same vein.
+ OK, so let's try to formalize this from the start.
+\end_layout
+
+\begin_layout Plain Layout
+We begin by establishing the probability of a prediction 
+\begin_inset Formula $\bar{X}$
+\end_inset
+
+ with 
+\begin_inset Formula $\bar{\ell}$
+\end_inset
+
+ elements, given the PDF of 
+\begin_inset Formula $X$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+X_{n} & =[x_{i}\in X,\ i>n]\\
+X_{n+1} & =X_{n}\cup x_{n+1}\\
+X_{0} & =\emptyset\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\varphi_{X}(\bar{X}) & =\varphi_{X}(\bar{x}_{1}\cap\bar{X}_{\bar{\ell}-1})\\
+ & =\varphi_{X}(\bar{x}_{1}|\bar{X}_{\bar{\ell}-1})\varphi_{X}(\bar{X}_{\bar{\ell}-1})\\
+ & =\varphi_{X}(\bar{x}_{1}|\bar{X}_{\bar{\ell}-1})\varphi(\bar{x}_{2}|\bar{X}_{\ell-2})\varphi(\bar{X}_{\ell-2})\\
+ & \vdots\\
+ & =\prod_{n=1}^{\ell}\varphi(\bar{x}_{n}|\bar{X}_{n-1})\\
+\varphi(\bar{x}|\emptyset) & =\varphi(\bar{x})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+We can define the estimate of 
+\begin_inset Formula $x$
+\end_inset
+
+ generate from the set of observations 
+\begin_inset Formula $X$
+\end_inset
+
+ as the conditional probability 
+\begin_inset Formula $\Pr(x|X)$
+\end_inset
+
+.
+ In this case, we simply treat 
+\begin_inset Formula $X$
+\end_inset
+
+ as the union of the observations which constitute it.
+ We can therefore add the observations in a given 
+\begin_inset Formula $\bar{X}_{n}$
+\end_inset
+
+ to produce 
+\begin_inset Formula $\varphi_{X}(\bar{x}|\bar{X}_{n})$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\varphi_{X}(x) & =\varphi(x|X)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\varphi_{X}(\bar{X}) & =\prod_{n=1}^{\bar{\ell}}\varphi_{X}(\bar{x}_{n}|\bar{X}_{n-1})\\
+ & =\prod_{n=1}^{\bar{\ell}}\varphi_{X\cup\bar{X}_{n-1}}(\bar{x}_{n})\\
+ & =\prod_{n=1}^{\bar{\ell}}\left(\left(\sum_{i=1}^{\ell}\frac{1}{1+n}\beta_{i}K(\bar{x}_{n},x_{i})\right)+\left(\sum_{i=1}^{n}\frac{1}{\ell+n}K(\bar{x}_{n},\bar{x}_{i})\right)\right)\\
+ & =\prod_{n=1}^{\bar{\ell}}(1+n)\varphi_{X}(\bar{x}_{n})+\left(1+\ell\right)\varphi_{\bar{X}_{n-1}}(\bar{x}_{n})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+We can extend this to a set-conditional PDF by iterating
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\varphi_{X}(x|\bar{X}) & =\left((1+\bar{\ell})\varphi_{X}(\bar{X})\varphi_{X}(x)\right)+\left(\left(1+\ell\right)\varphi_{X}(\bar{X})\varphi_{\bar{X}}(x)\right)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+The PDF above describes the probability of a point given the estimate.
+ Using this as the determinant of 
+\begin_inset Formula $\rho$
+\end_inset
+
+ allows us to generate random devaites from the previous PDF.
+ To control the novelty of deviates, we can subtract the PDF 
+\begin_inset Formula $\varphi_{\bar{X}}(x)$
+\end_inset
+
+ from the PDF 
+\begin_inset Formula $\varphi_{X}(\bar{X})$
+\end_inset
+
+ to generate the novel PDF 
+\begin_inset Formula $\varphi_{N}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\varphi_{N}(x) & =\varphi_{X}(x|\bar{X})-\lambda\varphi_{\bar{X}}(x)\\
+ & =(1+\bar{\ell})\varphi_{X}(\bar{X})\varphi_{X}(x)+\left(1+\ell\right)\varphi_{X}(\bar{X})\varphi_{\bar{X}}(x)-\lambda\varphi_{\bar{X}}(x)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+Similarly, we can select points to remove from the estimate by examining
+ the difference between the set and the set without the point
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\triangle x & =\varphi_{X}(\bar{X})-\varphi_{X}(\bar{X}\vee x)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+In this case, the first term will be constant, so we can reduce the difference
+ to the second term
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\triangle x & =\varphi_{X}(\bar{X}\vee x)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+If we treat 
+\begin_inset Formula $x$
+\end_inset
+
+ as the last term in the series, this is a fairly trivial modification
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\varphi_{X}(\bar{X}\vee x) & =\prod_{n=1}^{\bar{\ell}-1}(1+n)\varphi_{X}(\bar{x}_{n})+\left(1+\ell\right)\varphi_{\bar{X}_{n-1}}(\bar{x}_{n})\\
+ & =\frac{\varphi_{X}(\bar{X})}{(1+\bar{\ell})\varphi_{X}(x)+\left(1+\ell\right)\varphi_{\bar{X}\vee x}(x)}\\
+ & =\frac{\varphi_{X}(\bar{X})}{(1+\bar{\ell})\varphi_{X}(x)+\left(1+\ell\right)\left(\varphi_{\bar{X}}(x)-\frac{1}{\bar{\ell}}K(x,x)\right)}\\
+ & =\frac{\varphi_{X}(\bar{X})}{(1+\bar{\ell})\varphi_{X}(x)+\left(1+\ell\right)\left(\varphi_{\bar{X}}(x)-\frac{1}{\bar{\ell}}\right)}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+In the motivated case, we can compare the delta reward
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\triangle x\ r(x)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+I think that takes care of choice - the utility and uncertainty heuristics
+ developed earlier can be applied directly, and this is a much cleaner version
+ of the algorithm
+\end_layout
+
+\begin_layout Plain Layout
+What' I'm worried about now is the TI prediction approach.
+ I had been picking randomly from the TI SV's weighted probability space,
+ then transforming randomly given two transform sets.
+ The problem with this approach is that all possible transform sets do not
+ contribute equally to the probability of a TI SV being expressed in a probabili
+ty measure; for this to work we must select transform sets weighted by the
+ probability of the associated affine transformation.
+\end_layout
+
+\begin_layout Plain Layout
+I doubt this can be determined analytically.
+ It may be possible to run each integration backwards one at a time using
+ random variables for each, but I'm not sure if this would produce the same
+ result as running the whole thing backwards.
+ The problem with doing it all at once is that each element of the transform
+ matrices become independant variables, but we only have one target value;
+ so you have a system of hundreds of equations and 1 known.
+ If we can reverse the integration 1 element at a time, this may be preferable.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+The other possibility is randomly selecting weighted point pairs.
+ Imagine we take all the points and throw them randomly in a circle (their
+ radial measure determined by their probability) and flicked a wheel-of-fortune
+ type selector.
+ The probability of selecting a given point won't depend on the order of
+ the points, so long as the probability of selecting any point on the circle
+ is uniform.
+ What this means, is we can select a number from 0-1, then start evaluating
+ randomly selected transform points.
+ Each time, the probability of the selected point gets added to a running
+ sum, when a point pushes the running sum over the random number, we select
+ that point.
+\end_layout
+
+\begin_layout Plain Layout
+Now, I don't like this method - if we're dealing with hundreds of thousands
+ of prediction points, we're going to have to sum half of them (on average)
+ each time we generate a new point.
+ If we can do an element-wise reversal that would reduce the computation
+ to the size of the TI set, potentially a much smaller amount.
+ Both these methods might be worth mentioning though...
+\end_layout
+
+\begin_layout Plain Layout
+Polar coordinates?
+\end_layout
+
+\begin_layout Plain Layout
+OK, thinking about reversing that integration.
+ The problem is that we have a lot of variables to solve for but just one
+ value, so what if we selected random values for each integrand? It may
+ be possible to back them out one at a time, but we'll have to peel it like
+ an onion, and each random value will have to be relevant to the layer -
+ I think we'll need to choose from 0-1 for the first layer, but then choose
+ from 0-? for the second.
+ Maybe.
+ The only reason this *might* work is that each step of the integration
+ *may* be reversable by itself.
+ If it works, it's going to need a computer to crunch the system of equations,
+ and they're going to be fucking messy.
+ Maybe there are other ways of handling the TI distance in general.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+Thinking more about the prediction problem.
+ I think we've developed four potential methods to select points
+\end_layout
+
+\begin_layout Enumerate
+If the PDF of the distribution is integrable for x, we can use a bisection
+ search to find points in the PDF with a given probability.
+ For multidimensional PDF's this can be done one dimension at a time, using
+ the conditional probability of previous selections.
+ The PDF may or may not be integrable, but I'm afraid it isn't.
+ Ideally, we would use the expected reward instead and bisect that distribution
+\end_layout
+
+\begin_layout Enumerate
+If the PDF isn't integrable, we can still use the bisection search to find
+ probable transformations.
+ In this case, we return the the SV variate model and use the bisection
+ search to determine the transformation
+\end_layout
+
+\begin_layout Enumerate
+The lattice diffusion method still seems promising.
+ This could be done in two ways; we could either use point probability values
+ as the pressure or we could use integral values.
+ One nice thing about the integral method is that it allows iterative refinement.
+ I'm not sure if the point method would be work with the refinement bit
+ - my guess is it wouldn't.
+ Using the point method, I think we can either use a lattice or the points
+ in the estimate; if we have to use a lot of points for the resolution to
+ be acceptable, it's probable that using actual estimates will produce better
+ results than a regular lattice - they capture the most information about
+ the distribution for a given set of points.
+ Another way to think about this is that if we use the points, we want to
+ equalize the area between adjacent points, which means that we should be
+ able to select an interstitial area weighted by it's area.
+ This would require determining an adjacency matrix.
+ There exist algorithms for the Delaunay triangulation with O(n log n) performan
+ce, and they work by adding points one at a time, which would work well
+ in our context (the time for adding a single point is O(log n) ).
+ Apparently, these algorithms don't scale well with dimensionality though
+ (exponential)
+\end_layout
+
+\begin_layout Enumerate
+Since the scope of windows is limited by the windowing function, I think
+ we can assume that points within the window width of high-value points
+ have a higher probability of being high-value than random points.
+ We can probably allow an existing set to bleed into adjacent areas.
+ In this case we'd be selecting partially at random, and would have to expect
+ than many of the generated points would need to be eliminated.
+\end_layout
+
+\begin_layout Plain Layout
+An interesting way to visualize this is to imagine a 3d triangulated plane
+ whose vertices are scattered randomly on the horizontal.
+ The height of each vertex is an expected reward value.
+ The goal is to refine the plane so that the resolution is biased towards
+ the peaks.
+ This idea clarifies the utility of option (4) - once we find a peak we
+ expand it outward to determine where it starts to fall off.
+ Option (1) allows us to randomly select peakish values, as does (2) - in
+ a roundabout way.
+ How can we think of the lattice diffusion method? The problem with lattice
+ is that if we're just guessing at points, diffusion doesn't tell us anything
+ the points don't.
+ So we only really need to care about it if it's integrable, in which case
+ the bisection method describes the lattice approach.
+ So screw the lattices.
+\end_layout
+
+\begin_layout Plain Layout
+Let's think some more about the creep approach.
+ Given a point with high expected reward, we can assume that nearby points
+ will also have high expected reward (possibly higher).
+ There is utility in exploring the neighborhoods of such points.
+ This gets complex when we consider that our prediction set is being culled
+ of points with low expected reward; in this context we can't know if a
+ neighborhood has already been explored and then eliminated (in which case
+ there's no point in exploring it again) or if it constitutes a truly unknown
+ portion of the search space.
+ What would be nice is to have some measure of the uncertainty of a point
+ as well as it's nearness to points with high expected reward.
+ We can probably determine this, however it leaves us with another field
+ to be explored - a better approach would be to start with points already
+ in the prediction, then work our way out.
+ In this case, we'd be estimating the uncertainty of adjacent areas.
+ We don't, for example, want to explore the neighborhood of points which
+ are embedded in well-known areas.
+\end_layout
+
+\begin_layout Plain Layout
+We can start approaching this problem by defining the prediction density
+ in the neighborhood of points.
+ Points with lower density and high expected return should be investigated
+ first.
+ This allows us to avoid examining well understood areas, but we're still
+ left with the culling problem.
+ I think the simple solution here is to incorporate this into the culling
+ heuristic; we need to eliminate points which are both low in expected reward
+ and in areas of low density.
+ This would allow us to retain the low-reward perimeter of high-reward areas.
+ Doing so would increase the density of high-reward points, reducing the
+ probability of checking nearby points, but ideally we could still make
+ selections based on the high-reward points.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+Another benefit of the density approach is that it would tend to set an
+ upper bound on the density of predictions.
+ In this sense, the distribution of the prediction wouldn't match the density
+ of the expected return field, but it *would* give us a decent approximation
+ of that field.
+ The important bit is that we can't treat the prediction set as a density.
+ Another interesting bit is that in this context, it's not really useful
+ to retain lots of points which provide redundant information; it would
+ be useful to remove points which have lower than average uncertainty.
+ So our culling algorithm needs to take three things into account; the expected
+ reward of an estimate (higher is better), the adjacency to points with
+ high reward (closer is better), and the uncertainty of the point (higher
+ is better).
+ This gives us two control variables for culling; one that controls the
+ perimeter width and one that controls the average density of the prediction.
+\end_layout
+
+\begin_layout Plain Layout
+Moving back to the prediction-not densities thing, I think in order to determine
+ the expected reward distribution of a prediction, we need to use the regression
+ of the prediction set.
+ In other words, the expected reward at a given point is the weighted average
+ of the prediction point's expected reward in that neighborhood.
+ We could also use the actual expected return equation, but using the regression
+ give us a faster computation (if the set of predictions is smaller than
+ the set of SV's).
+\end_layout
+
+\begin_layout Plain Layout
+OK, let's think briefly about how we choose an action to take.
+ I still think the best option here is to use regression for the action
+ dimensions.
+ This means we need to have a uni-modal expected reward distribution at
+ the time of action selection.
+ In order to do this, we need to cull points which are outside the dominant
+ 'peak'.
+ I think we can do this by establishing what I'll call the indecision metric
+ (to distinguish it from the uncertainty of a point).
+ The indecision metric is calculated at a given point in time for the action
+ dimensions (only).
+ It's calculated as the entropy, which is essentially lateral inhibition.
+ We'll need to be careful to restrict indecision culling to times that are
+ imminent, otherwise we end up biasing the prediction.
+ Maybe this isn't such a problem really - we're only enforcing the ability
+ to execute a coherent set of actions; any 'plan' which would require doing
+ two things at once probably should be eliminated.
+ Regardless, I think it's a bad idea to do this for all predictions.
+ maybe we make this a meta-variable and let the sytem decide what to do.
+ I think this is a good idea, it allows indecision to be controlled contextually.
+ For example, if you commit to doing something, you're forced to make a
+ decision you wouldn't otherwise have had to make at that point in time.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+OK, stepping way back to consider the basic system architecture.
+ So far I've been assuming that prediction and memory are two discrete system
+ facets.
+ This assumption was made in order to allow the 'prediction' portion of
+ the system to take different states as options were explored.
+ In other words, in order to make a plan from multiple possibilities, you
+ must be able to consider each possibility in isolation.
+ This implies some type of quickly-changing exploration space.
+\end_layout
+
+\begin_layout Plain Layout
+The problem with this is that if you have a quickly-changing prediction
+ space with no inherent memory, task switching become difficult (specifically,
+ switching to a previous task).
+ This also seems odd in the context of remembering previous though processes.
+ In the current architecture, the system would 'remember' actions which
+ were taken, but not necessarily the planning which led to those actions.
+ This is clearly at odds with human experience, and it makes sense that
+ the planning would be remembered - it reduces the search necessary when
+ a similar planning task is encountered.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+So, here's the proposition; predictions are treated the exact same way observati
+ons are treated.
+ This means that the SV optimization recieves prediction directly.
+ There is no architectural distinction between a prediction and an observation.
+ Any 'culling' of predictions must take place by the SV optimization procedure.
+ The system has two processes; one which generates estimates, and one which
+ generates predictions.
+ No retained set of predictions.
+ No removal rules.
+ No elimination of indecision points.
+ In this case, changing state between plans is done by modifying the SV
+ multiplier.
+ The benefit of this is that (if it's possible to change the multipliers
+ in this way) even ideas which have been suppressed can still be active
+ in the system - they just end up with a low SV multiplier (but non null).
+ 
+\end_layout
+
+\begin_layout Plain Layout
+This raises two questions; can the SV optimization problem handle this and
+ can we really treat old memories and current ideation as the same process?
+ If the answer to either is 'no', there is another option; we use two optimizati
+on processes; one which behaves a the existing SV one does, and another
+ which implements the prediction set.
+ At some point control passes from one system to another (probably gradually).
+\end_layout
+
+\begin_layout Plain Layout
+Let's start with the first question.
+ We'll still have a prediction algorithm, so we can ignore anything it does.
+ The question is if the culling algorithm can be implemented in an SV.
+ The exploration is produced through the intersection of the SVM and the
+ prediction algorithm; so long as the SVM can quickly eliminate SV's, that
+ elimination will influence the prediction algorithm, which will produce
+ exploration (I think).
+ We were talking about the culling algorithm eliminating points with low
+ expected reward and far away from points with high expected reward, or
+ points with low uncertainty.
+ The SVM optimization already eliminates points with low uncertainty (redundancy
+).
+ If we think of the significance of a point in reducing loss as similar
+ to the expected reward, the SVM already probably does the former as well.
+ We simply need to restate the SVM problem as one of estimating expected
+ reward, rather than probability.
+ This may or may not be possible - it depends on how we define the expected
+ reward.
+ I seem to remember that being an iterative process.
+ We might be able to do this in the regularizer using a set number of iterations.
+ We might also be limited to two iterations if the iteration increases the
+ power of the multiplier (since we're restricted to quadratic optimization).
+ Think about this today...
 \end_layout
 
 \end_inset
