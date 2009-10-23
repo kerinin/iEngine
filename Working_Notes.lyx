@@ -1,0 +1,2348 @@
+#LyX 1.6.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\language english
+\inputencoding auto
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+OK, thinking through prediction without variates.
+ The reason prediction isn't simple is that TI estimators are context sensitive,
+ so the result of a prediction task can invfluence the result of a second
+ prediction task.
+ Thus far we've handled this by generating sets of points, and using them
+ as the conditional inputs to the next iteration - in order for this to
+ work without variates we would need to generate a full probability field
+ (rather than simply a set of points) and then use that field to determine
+ the next iterative step.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+So the first question is if the probability field is the same as the random
+ variates.
+ Let's assume we're at the first iteration of the process.
+ In this case, the field will be identical - the field is generated relative
+ to the observations, so as the number of variates increases it will converge
+ on the field.
+ We can use the same process we would have used in generating random variates
+ to generate the resulting field.
+ The random deviates are drawn from the SV's based on the probability of
+ the SV (in the case of TI estimators, we also use a random transformation).
+ Because of that transformation step, the probabilities of the SV's *must*
+ be paired with the set generating them.
+ The probability of an SV is determined by the conditional probability of
+ the SV, given X.
+\end_layout
+
+\begin_layout Plain Layout
+So let's assume now that we're moving to the second iterative step.
+ In this case, we're evaluating the probability of each SV based on the
+ generated field, and again adding random transformations.
+ In this case the probability of an SV is determined by the conditional
+ probability given the previous field (which is conditional on the original
+ observations).
+ In this case we again can't divorce the prediction from the previous prediction
+, due to the TI estimators.
+ OK, so let's see if we can formalize this
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\Pr(\rho_{n}^{i}|\rho_{n-1}) & =\frac{\Pr(\rho_{n}^{i}\cup\rho_{n-1})}{\Pr(\rho_{n-1})}\\
+\Pr(\rho_{1}) & =\bigcap_{i}\Pr(\rho_{1}^{i}|X)\\
+\Pr(\rho_{1}^{i}) & =\Pr(SV_{i}|X)\\
+ & =\bigcap_{x\in SV_{i}}\Pr(x)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+OK, here lies the problem.
+ We're working on determining the probability of a given rho value given
+ the past one - even if we can determine this probability, we still are
+ left with the problem of selecting a new value of rho.
+ This is the non-linear optimization problem we've been having.
+ The new value needs to be the probability of an SV given a field! Let's
+ use the following notation to denote that field
+\end_layout
+
+\begin_layout Plain Layout
+OK, we *have* to start with conditional sets, otherwise rho will equal beta.
+ Treat these as testing observations.
+ So the first iterative step is the same; determine rho based on the testing
+ set (and the training set).
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\varphi^{1}(x) & =\Pr(x|X)\\
+ & =\sum_{i=1}^{\ell}\frac{1}{\ell}K(x,x_{i})\\
+\rho_{i}^{1} & =\Pr(w_{i}|X)\\
+ & =\varphi^{1}(w_{i})\\
+\phi(\rho^{1}) & =?\\
+\varphi^{2}(x) & =\Pr(x|\phi(\rho))\\
+\varphi^{2}(x) & =\Pr(x|\varphi^{i-1})\\
+\\\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+Here's the challenge, how do we pivot from probability estimates to conditional
+ values?
+\end_layout
+
+\begin_layout Plain Layout
+If this is going to work, you need to establish a set of equivalent equations
+ between what's already developed and rho sets.
+ Probability fields are *not* the same as a set of observations.
+ The PDF of the set of equations might match, but there is a significant
+ difference.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Probably not possible to eliminate random varaites and just use fields.
+\end_layout
+
+\begin_layout Standard
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Let's think about this from the other end.
+ The basic goal is to explore sets of actions to find an action set which
+ will maximize the expected reward for the system.
+ We can also state that an action set is defined as a set of rho values
+ and a conditional set (possibly X as the conditional set, but probably
+ a previous iteration, as the result of a rho value will be different for
+ different contexts).
+ This means we can formulate our objective as an optimization task 
+\begin_inset Formula $W(\rho)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+W(\rho) & =\max_{\rho}E(r(\phi(\rho,\phi)))\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+where 
+\begin_inset Formula $\phi(\rho,\phi)$
+\end_inset
+
+ is the action set given 
+\begin_inset Formula $\rho$
+\end_inset
+
+ and a conditional set 
+\begin_inset Formula $\phi$
+\end_inset
+
+, and 
+\begin_inset Formula $r(\cdot)$
+\end_inset
+
+ is some reward function.
+ This function likely needs constraints, namely that 
+\begin_inset Formula $\rho$
+\end_inset
+
+ have some meaning.
+\end_layout
+
+\begin_layout Plain Layout
+Let's try to get a better handle on these terms.
+ We'll start by defining an action set (this is a little misleading - the
+ action set contains non-action values as well) as 
+\begin_inset Formula $\phi$
+\end_inset
+
+.
+ In this context, the optimization problem is to determine the action set
+ with the highest expected reward
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+W(\phi) & =\max_{\phi}E(r(\phi))\\
+ & =\max_{\phi}\Pr(\phi)r(\phi)\\
+ & =\max_{\phi}\varphi(\phi)r(\phi)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+So, the question is how we control (and as a result, define) 
+\begin_inset Formula $\phi$
+\end_inset
+
+.
+ We can treat a probability field as the underlying field plus one dimension
+ (each point's probability), so it should be possible to treat a probability
+ field *as* an action set.
+ Let's assume this will work, and treat 
+\begin_inset Formula $\phi$
+\end_inset
+
+ as a PDF.
+ Before we go and define how the PDF is determined, let's establish the
+ two functions above
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\varphi(\phi) & =1-\int_{\Omega}\|\varphi(x),\phi(x)\|dx\end{align*}
+
+\end_inset
+
+ In other words, we'll treat the probability of a field given 
+\begin_inset Formula $\varphi$
+\end_inset
+
+ as the divergence between them.
+ If they are completely convergent, the probability will be one, if they
+ are completely divergent the probability will be 0.
+ We can leave the reward function undefined, but assume that it is the integral
+ over possible values
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+r(\phi) & =\int_{\Omega}\phi(x)r(x)dx\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+OK, so now we need to develop the actual PDF definition.
+ I think we can restrict our attention to a combination of transformed previous
+ observations.
+ We have a couple options here, we could select transforms and observations
+ and start building sets.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+One option would be to do this iteratively; we select an observation (somehow)
+ then optimize the transform based on the above optimization problem.
+ This could be repeated until the optimization problem stabalized.
+ We could potentially also cull selections from the active set - possibly
+ removing the least useful one once we've reached some threshold defined
+ by the computational resources allocated to the search.
+\end_layout
+
+\begin_layout Plain Layout
+This is an interesting approach, as it allows us to operate over a set of
+ SV/transform pairs.
+ These pairs would uniquely define an action set (no need for recursive
+ references to previous iterations or whatever).
+\end_layout
+
+\begin_layout Plain Layout
+We could refine this further if it were possible to encode arbitrary transforms
+ into a single matrix.
+ I doubt that's possible though.
+ Maybe a better approach would be to maintain a set of transforms for each
+ observation, and add/remove transforms as the optimization problem.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+Earlier, we had been working off of 
+\begin_inset Formula $\rho$
+\end_inset
+
+.
+ In this case I think it's redundant; rather than specifying the influence
+ of a given SV, we simply allow it to be transformed in the same way multiple
+ times.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+OK, so just to play this out, well call a given affine transform 
+\begin_inset Formula $a=(n,\mathbf{A},\mathbf{b})$
+\end_inset
+
+, and the set of transforms which define an action set as 
+\begin_inset Formula $A$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\phi_{A}(x) & =\sum_{i=1}^{|A|}\frac{1}{|A|}K_{\gamma}(x,\mathbf{A}_{i}x_{n_{i}}+\mathbf{b}_{i})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+This allows us to reduce our optimization task to an iterative one in which
+ each step finds the otimal value for a single transform given the a set
+ of transforms
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+W(a:\ A) & =\max_{a}\varphi(\phi_{a\cup A})r(\phi_{a\cup A})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+We can make this even simpler by specifying beforehand how many transforms
+ we want, then optimizing over that many terms
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+W(A) & =\max_{A}\varphi(\phi_{A})r(\phi_{A})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+I think the existing approach can be seen as a naive method of implementing
+ this optimization.
+ I seriously doubt that selecting a transform is convex - multiple transforms
+ could provide the same reward.
+ In any case, I think having a solid foundation for what we're trying to
+ do is helpful.
+\end_layout
+
+\begin_layout Plain Layout
+
+\lyxline
+
+\end_layout
+
+\begin_layout Plain Layout
+This is a huge fucking mess.
+ I'm not sure how we evaluate the probability of a set.
+ Let's go back to the actual set thing.
+ We need to evaluate the joint probability of the points in the set.
+ OK, give a set of points X, we can break this down into a sequence of joint
+ probabilities.
+ First, we define a subset of X which is the first n elements of X
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+X_{n} & =[x_{i}\in X,\ i<n]\\
+X_{n+1} & =X_{n}\cup x_{n+1}\\
+X_{0} & =\emptyset\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+Now, let's start trying to evaluate the probability of the set X.
+ We first break out one element of X and determine the joint probability
+ of the element and the rest of X
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\varphi(X) & =\varphi(x_{\ell}\cap X_{\ell-1})\\
+ & =\varphi(x_{\ell}|X_{\ell-1})\varphi(X_{\ell-1})\\
+ & =\varphi(x_{\ell}|X_{\ell-1})\varphi(x_{\ell-2}|X_{\ell-2})\varphi(X_{\ell-2})\\
+ & \vdots\\
+ & =\prod_{n=1}^{\ell}\varphi(x_{n}|X_{n-1})\\
+\varphi(x|\emptyset) & =\varphi(x)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+Now, the reason this is good is that we can evaluate the conditional probability
+ of a point given a set of observations using the regular old Parzen Estimator
+ - right? I mean, I'm pretty sure that the parzen estimator of x given X
+ can be expressed as 
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\varphi_{X}(x) & =\varphi(x|X)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+This trick will only work in the discrete case.
+ Turning this into an integral doesn't make any sense.
+ *But* our field is determined by a set of points - it may not be necessary.
+ Let's expand that bit above
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\varphi_{X}(\bar{X}) & =\prod_{n=1}^{\bar{\ell}}\varphi_{X}(x_{n}|\bar{X}_{n-1})\\
+ & =\prod_{n=1}^{\bar{\ell}}\varphi_{X\cup\bar{X}_{n-1}}(x_{n})\\
+ & =\prod_{n=1}^{\bar{\ell}}\sum_{i=1}^{\ell+n}\frac{1}{\ell}K(x_{n},x_{i})\\
+ & =\left(\sum_{i=1}^{\ell+1}K(x_{1},x_{i})\right)\prod_{n=2}^{\bar{\ell}}\sum_{i=1}^{\ell+n}\frac{1}{\ell}K(x_{n},x_{i})\\
+ & =\left(K(x_{1},x_{\ell+1})\varphi_{X}(x_{1})\right)\prod_{n=2}^{\bar{\ell}}\sum_{i=1}^{\ell+n}\frac{1}{\ell}K(x_{n},x_{i})\\
+ & =\left(K(x_{1},x_{\ell+1})+\varphi_{X}(x_{1})\right)\left(\sum_{i=1}^{\ell+2}K(x_{2},x_{i})\right)\prod_{n=3}^{\bar{\ell}}\sum_{i=1}^{\ell+n}\frac{1}{\ell}K(x_{n},x_{i})\\
+ & =\left(K(x_{1},x_{\ell+1})+\varphi_{X}(x_{1})\right)\left(K(x_{2},x_{\ell+1})+K(x_{2},x_{\ell+2})+\varphi_{X}(x_{2})\right)\prod_{n=3}^{\bar{\ell}}\sum_{i=1}^{\ell+n}\frac{1}{\ell}K(x_{n},x_{i})\\
+ & \vdots\\
+ & =\prod_{n=1}^{\bar{\ell}}\left(\varphi_{X}(\bar{x}_{n})+\varphi_{\bar{X}_{n}}(\bar{x}_{n})\right)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+OK, so we know that we can determine the probability of a field if it's
+ generated by points.
+\end_layout
+
+\begin_layout Plain Layout
+Another interesting bit is that we can add a single optimal point my optimizing
+ those two terms 
+\begin_inset Formula $\varphi_{X}(\bar{x})+\varphi_{\bar{X}}(\bar{x})$
+\end_inset
+
+.
+ This should work both ways - we should be able to add a point this way
+ as well as do a leave-one-out- analysis of the weakest point and remove
+ it.
+ We could proably do this in parallel; take each point and see if a better
+ point can be found (given the rest of the points) then use all those points.
+ Maybe not actually, the problem is that we'd be completely changing the
+ context, and there's no guarantee that the new context will be 'better'
+ than the old one, since the relationships *between* the new contexts hasn't
+ been established.
+\end_layout
+
+\begin_layout Plain Layout
+Let's think about adding a new point.
+ Again, the point needs to be both a SV and a transform.
+ We can get a rough idea how well each SV will work by doing the integral
+ over all transforms, but this might prefer points with a low broad similarity
+ over points with a single peak - in this case we'd prefer to peak to any
+ of the points in the broad spectrum.
+ Maybe this is where uncertainty comes in - if we could evaluate both the
+ average similarity *and* the uncertainty of the similarity, we could combine
+ them somehow.
+ Is this possible?
+\end_layout
+
+\begin_layout Plain Layout
+We can certainly determine the uncertainty if we restrict the search to
+ transformations defined by points - just take the sum of plogp.
+ But - can we take the integral of this over transformations?
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+H(\varphi) & =\int\varphi(x^{T})\log\varphi(x^{T})dT\\
+ & =\int\left(\sum_{i=1}^{\ell}\beta_{i}K(x,x_{i}^{T})\right)\log\left(\sum_{i=1}^{\ell}\beta_{i}K(x,x_{i}^{T})\right)dT\\
+ & =\int\left(\sum_{i=1}^{\ell}\beta_{i}e^{-\frac{1}{\gamma}\|x,x_{i}^{T}\|}\right)\log\left(\sum_{i=1}^{\ell}\beta_{i}e^{-\frac{1}{\gamma}\|x,x_{i}^{T}\|}\right)dT\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+Returning to the definition of entropy
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+H(X) & =E(I(X))\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+Where I is the self-information of X.
+ The conversion to the probability assumes that we're dealing with points
+ in the domain - we can probably restrict this by using randomly chosed
+ transform values (this would we could use a subset of possible values to
+ make things a little less demanding computationally).
+ In this case, we simply divide by the number of samples
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+H(X) & =\frac{1}{n}\sum_{i=1}^{n}I(x_{n})\\
+ & =\sum_{i=1}^{n}\log(\varphi(x_{n}))\\
+ & =\frac{1}{n}\log\left(\prod_{i=1}^{n}\varphi(x_{n})\right)\\
+ & =\frac{1}{n}\log\left(\prod_{i=1}^{n}\sum_{j=1}^{\ell}\beta_{j}K(x_{i},x_{j})\right)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+Yeah, this doesn't really get us anywhere.
+\end_layout
+
+\begin_layout Plain Layout
+We need to develop heuristics again.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+OK, working off that last set of equations to describe the probability of
+ a set.
+ Let's think about a different approach - we forget the SV's and transforms
+ and all that, we simply select points.
+ We can caluclate the impact of each point in the set, which allows us to
+ update the expected reward with each addition.
+ We also know easily which points to remove.
+ If we re-frame this as point selection, instead of choosing an SV and a
+ transformation set (d^2+d+1) we just select a point (d).
+ not only that, but we can probably define a rigorous heuristic for selecting
+ points.
+\end_layout
+
+\begin_layout Plain Layout
+Given a set of points 
+\begin_inset Formula $\bar{X}$
+\end_inset
+
+, our task is to select a new point.
+ We know that the revised probability of the set will be the previous probabilit
+y times the probability given X plus the probability given 
+\begin_inset Formula $\bar{X}$
+\end_inset
+
+, and that the revised reward will be the point's kernel distance to each
+ SV times the SV's reward (I think).
+ Here's where I think we can generate a heuristic; it may be possible to
+ generate a PDF which describes the probability of any point.
+ Given this PDF, we can generate random deviates.
+ But we can also scale the random deviate weights by the reward of each
+ SV.
+ This means that we'll easily generate a random point, weighted towards
+ high expected reward.
+ We also want to generate points which are novel, so we can probably take
+ the probability of points given 
+\begin_inset Formula $X\cup\bar{X}$
+\end_inset
+
+ and subtract from it the probability of points given 
+\begin_inset Formula $\bar{X}$
+\end_inset
+
+.
+ I don't think this will simply produce the probability of 
+\begin_inset Formula $X$
+\end_inset
+
+, but I might be wrong.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+In any case, *if* this works, it seems like the ideal method of doing all
+ this.
+ It probably won't parallelize very well, but we could always execute multiple
+ parallel searches in the same vein.
+ OK, so let's try to formalize this from the start.
+\end_layout
+
+\begin_layout Plain Layout
+We begin by establishing the probability of a prediction 
+\begin_inset Formula $\bar{X}$
+\end_inset
+
+ with 
+\begin_inset Formula $\bar{\ell}$
+\end_inset
+
+ elements, given the PDF of 
+\begin_inset Formula $X$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+X_{n} & =[x_{i}\in X,\ i>n]\\
+X_{n+1} & =X_{n}\cup x_{n+1}\\
+X_{0} & =\emptyset\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\varphi_{X}(\bar{X}) & =\varphi_{X}(\bar{x}_{1}\cap\bar{X}_{\bar{\ell}-1})\\
+ & =\varphi_{X}(\bar{x}_{1}|\bar{X}_{\bar{\ell}-1})\varphi_{X}(\bar{X}_{\bar{\ell}-1})\\
+ & =\varphi_{X}(\bar{x}_{1}|\bar{X}_{\bar{\ell}-1})\varphi(\bar{x}_{2}|\bar{X}_{\ell-2})\varphi(\bar{X}_{\ell-2})\\
+ & \vdots\\
+ & =\prod_{n=1}^{\ell}\varphi(\bar{x}_{n}|\bar{X}_{n-1})\\
+\varphi(\bar{x}|\emptyset) & =\varphi(\bar{x})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+We can define the estimate of 
+\begin_inset Formula $x$
+\end_inset
+
+ generate from the set of observations 
+\begin_inset Formula $X$
+\end_inset
+
+ as the conditional probability 
+\begin_inset Formula $\Pr(x|X)$
+\end_inset
+
+.
+ In this case, we simply treat 
+\begin_inset Formula $X$
+\end_inset
+
+ as the union of the observations which constitute it.
+ We can therefore add the observations in a given 
+\begin_inset Formula $\bar{X}_{n}$
+\end_inset
+
+ to produce 
+\begin_inset Formula $\varphi_{X}(\bar{x}|\bar{X}_{n})$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\varphi_{X}(x) & =\varphi(x|X)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\varphi_{X}(\bar{X}) & =\prod_{n=1}^{\bar{\ell}}\varphi_{X}(\bar{x}_{n}|\bar{X}_{n-1})\\
+ & =\prod_{n=1}^{\bar{\ell}}\varphi_{X\cup\bar{X}_{n-1}}(\bar{x}_{n})\\
+ & =\prod_{n=1}^{\bar{\ell}}\left(\left(\sum_{i=1}^{\ell}\frac{1}{1+n}\beta_{i}K(\bar{x}_{n},x_{i})\right)+\left(\sum_{i=1}^{n}\frac{1}{\ell+n}K(\bar{x}_{n},\bar{x}_{i})\right)\right)\\
+ & =\prod_{n=1}^{\bar{\ell}}(1+n)\varphi_{X}(\bar{x}_{n})+\left(1+\ell\right)\varphi_{\bar{X}_{n-1}}(\bar{x}_{n})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+We can extend this to a set-conditional PDF by iterating
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\varphi_{X}(x|\bar{X}) & =\left((1+\bar{\ell})\varphi_{X}(\bar{X})\varphi_{X}(x)\right)+\left(\left(1+\ell\right)\varphi_{X}(\bar{X})\varphi_{\bar{X}}(x)\right)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+The PDF above describes the probability of a point given the estimate.
+ Using this as the determinant of 
+\begin_inset Formula $\rho$
+\end_inset
+
+ allows us to generate random devaites from the previous PDF.
+ To control the novelty of deviates, we can subtract the PDF 
+\begin_inset Formula $\varphi_{\bar{X}}(x)$
+\end_inset
+
+ from the PDF 
+\begin_inset Formula $\varphi_{X}(\bar{X})$
+\end_inset
+
+ to generate the novel PDF 
+\begin_inset Formula $\varphi_{N}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\varphi_{N}(x) & =\varphi_{X}(x|\bar{X})-\lambda\varphi_{\bar{X}}(x)\\
+ & =(1+\bar{\ell})\varphi_{X}(\bar{X})\varphi_{X}(x)+\left(1+\ell\right)\varphi_{X}(\bar{X})\varphi_{\bar{X}}(x)-\lambda\varphi_{\bar{X}}(x)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+Similarly, we can select points to remove from the estimate by examining
+ the difference between the set and the set without the point
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\triangle x & =\varphi_{X}(\bar{X})-\varphi_{X}(\bar{X}\vee x)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+In this case, the first term will be constant, so we can reduce the difference
+ to the second term
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\triangle x & =\varphi_{X}(\bar{X}\vee x)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+If we treat 
+\begin_inset Formula $x$
+\end_inset
+
+ as the last term in the series, this is a fairly trivial modification
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\varphi_{X}(\bar{X}\vee x) & =\prod_{n=1}^{\bar{\ell}-1}(1+n)\varphi_{X}(\bar{x}_{n})+\left(1+\ell\right)\varphi_{\bar{X}_{n-1}}(\bar{x}_{n})\\
+ & =\frac{\varphi_{X}(\bar{X})}{(1+\bar{\ell})\varphi_{X}(x)+\left(1+\ell\right)\varphi_{\bar{X}\vee x}(x)}\\
+ & =\frac{\varphi_{X}(\bar{X})}{(1+\bar{\ell})\varphi_{X}(x)+\left(1+\ell\right)\left(\varphi_{\bar{X}}(x)-\frac{1}{\bar{\ell}}K(x,x)\right)}\\
+ & =\frac{\varphi_{X}(\bar{X})}{(1+\bar{\ell})\varphi_{X}(x)+\left(1+\ell\right)\left(\varphi_{\bar{X}}(x)-\frac{1}{\bar{\ell}}\right)}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+In the motivated case, we can compare the delta reward
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\triangle x\ r(x)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+I think that takes care of choice - the utility and uncertainty heuristics
+ developed earlier can be applied directly, and this is a much cleaner version
+ of the algorithm
+\end_layout
+
+\begin_layout Plain Layout
+What' I'm worried about now is the TI prediction approach.
+ I had been picking randomly from the TI SV's weighted probability space,
+ then transforming randomly given two transform sets.
+ The problem with this approach is that all possible transform sets do not
+ contribute equally to the probability of a TI SV being expressed in a probabili
+ty measure; for this to work we must select transform sets weighted by the
+ probability of the associated affine transformation.
+\end_layout
+
+\begin_layout Plain Layout
+I doubt this can be determined analytically.
+ It may be possible to run each integration backwards one at a time using
+ random variables for each, but I'm not sure if this would produce the same
+ result as running the whole thing backwards.
+ The problem with doing it all at once is that each element of the transform
+ matrices become independant variables, but we only have one target value;
+ so you have a system of hundreds of equations and 1 known.
+ If we can reverse the integration 1 element at a time, this may be preferable.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+The other possibility is randomly selecting weighted point pairs.
+ Imagine we take all the points and throw them randomly in a circle (their
+ radial measure determined by their probability) and flicked a wheel-of-fortune
+ type selector.
+ The probability of selecting a given point won't depend on the order of
+ the points, so long as the probability of selecting any point on the circle
+ is uniform.
+ What this means, is we can select a number from 0-1, then start evaluating
+ randomly selected transform points.
+ Each time, the probability of the selected point gets added to a running
+ sum, when a point pushes the running sum over the random number, we select
+ that point.
+\end_layout
+
+\begin_layout Plain Layout
+Now, I don't like this method - if we're dealing with hundreds of thousands
+ of prediction points, we're going to have to sum half of them (on average)
+ each time we generate a new point.
+ If we can do an element-wise reversal that would reduce the computation
+ to the size of the TI set, potentially a much smaller amount.
+ Both these methods might be worth mentioning though...
+\end_layout
+
+\begin_layout Plain Layout
+Polar coordinates?
+\end_layout
+
+\begin_layout Plain Layout
+OK, thinking about reversing that integration.
+ The problem is that we have a lot of variables to solve for but just one
+ value, so what if we selected random values for each integrand? It may
+ be possible to back them out one at a time, but we'll have to peel it like
+ an onion, and each random value will have to be relevant to the layer -
+ I think we'll need to choose from 0-1 for the first layer, but then choose
+ from 0-? for the second.
+ Maybe.
+ The only reason this *might* work is that each step of the integration
+ *may* be reversable by itself.
+ If it works, it's going to need a computer to crunch the system of equations,
+ and they're going to be fucking messy.
+ Maybe there are other ways of handling the TI distance in general.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Thinking more about the prediction problem.
+ I think we've developed four potential methods to select points
+\end_layout
+
+\begin_layout Enumerate
+If the PDF of the distribution is integrable for x, we can use a bisection
+ search to find points in the PDF with a given probability.
+ For multidimensional PDF's this can be done one dimension at a time, using
+ the conditional probability of previous selections.
+ The PDF may or may not be integrable, but I'm afraid it isn't.
+ Ideally, we would use the expected reward instead and bisect that distribution
+\end_layout
+
+\begin_layout Enumerate
+If the PDF isn't integrable, we can still use the bisection search to find
+ probable transformations.
+ In this case, we return the the SV variate model and use the bisection
+ search to determine the transformation
+\end_layout
+
+\begin_layout Enumerate
+The lattice diffusion method still seems promising.
+ This could be done in two ways; we could either use point probability values
+ as the pressure or we could use integral values.
+ One nice thing about the integral method is that it allows iterative refinement.
+ I'm not sure if the point method would be work with the refinement bit
+ - my guess is it wouldn't.
+ Using the point method, I think we can either use a lattice or the points
+ in the estimate; if we have to use a lot of points for the resolution to
+ be acceptable, it's probable that using actual estimates will produce better
+ results than a regular lattice - they capture the most information about
+ the distribution for a given set of points.
+ Another way to think about this is that if we use the points, we want to
+ equalize the area between adjacent points, which means that we should be
+ able to select an interstitial area weighted by it's area.
+ This would require determining an adjacency matrix.
+ There exist algorithms for the Delaunay triangulation with O(n log n) performan
+ce, and they work by adding points one at a time, which would work well
+ in our context (the time for adding a single point is O(log n) ).
+ Apparently, these algorithms don't scale well with dimensionality though
+ (exponential)
+\end_layout
+
+\begin_layout Enumerate
+Since the scope of windows is limited by the windowing function, I think
+ we can assume that points within the window width of high-value points
+ have a higher probability of being high-value than random points.
+ We can probably allow an existing set to bleed into adjacent areas.
+ In this case we'd be selecting partially at random, and would have to expect
+ than many of the generated points would need to be eliminated.
+\end_layout
+
+\begin_layout Plain Layout
+An interesting way to visualize this is to imagine a 3d triangulated plane
+ whose vertices are scattered randomly on the horizontal.
+ The height of each vertex is an expected reward value.
+ The goal is to refine the plane so that the resolution is biased towards
+ the peaks.
+ This idea clarifies the utility of option (4) - once we find a peak we
+ expand it outward to determine where it starts to fall off.
+ Option (1) allows us to randomly select peakish values, as does (2) - in
+ a roundabout way.
+ How can we think of the lattice diffusion method? The problem with lattice
+ is that if we're just guessing at points, diffusion doesn't tell us anything
+ the points don't.
+ So we only really need to care about it if it's integrable, in which case
+ the bisection method describes the lattice approach.
+ So screw the lattices.
+\end_layout
+
+\begin_layout Plain Layout
+Let's think some more about the creep approach.
+ Given a point with high expected reward, we can assume that nearby points
+ will also have high expected reward (possibly higher).
+ There is utility in exploring the neighborhoods of such points.
+ This gets complex when we consider that our prediction set is being culled
+ of points with low expected reward; in this context we can't know if a
+ neighborhood has already been explored and then eliminated (in which case
+ there's no point in exploring it again) or if it constitutes a truly unknown
+ portion of the search space.
+ What would be nice is to have some measure of the uncertainty of a point
+ as well as it's nearness to points with high expected reward.
+ We can probably determine this, however it leaves us with another field
+ to be explored - a better approach would be to start with points already
+ in the prediction, then work our way out.
+ In this case, we'd be estimating the uncertainty of adjacent areas.
+ We don't, for example, want to explore the neighborhood of points which
+ are embedded in well-known areas.
+\end_layout
+
+\begin_layout Plain Layout
+We can start approaching this problem by defining the prediction density
+ in the neighborhood of points.
+ Points with lower density and high expected return should be investigated
+ first.
+ This allows us to avoid examining well understood areas, but we're still
+ left with the culling problem.
+ I think the simple solution here is to incorporate this into the culling
+ heuristic; we need to eliminate points which are both low in expected reward
+ and in areas of low density.
+ This would allow us to retain the low-reward perimeter of high-reward areas.
+ Doing so would increase the density of high-reward points, reducing the
+ probability of checking nearby points, but ideally we could still make
+ selections based on the high-reward points.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+Another benefit of the density approach is that it would tend to set an
+ upper bound on the density of predictions.
+ In this sense, the distribution of the prediction wouldn't match the density
+ of the expected return field, but it *would* give us a decent approximation
+ of that field.
+ The important bit is that we can't treat the prediction set as a density.
+ Another interesting bit is that in this context, it's not really useful
+ to retain lots of points which provide redundant information; it would
+ be useful to remove points which have lower than average uncertainty.
+ So our culling algorithm needs to take three things into account; the expected
+ reward of an estimate (higher is better), the adjacency to points with
+ high reward (closer is better), and the uncertainty of the point (higher
+ is better).
+ This gives us two control variables for culling; one that controls the
+ perimeter width and one that controls the average density of the prediction.
+\end_layout
+
+\begin_layout Plain Layout
+Moving back to the prediction-not densities thing, I think in order to determine
+ the expected reward distribution of a prediction, we need to use the regression
+ of the prediction set.
+ In other words, the expected reward at a given point is the weighted average
+ of the prediction point's expected reward in that neighborhood.
+ We could also use the actual expected return equation, but using the regression
+ give us a faster computation (if the set of predictions is smaller than
+ the set of SV's).
+\end_layout
+
+\begin_layout Plain Layout
+OK, let's think briefly about how we choose an action to take.
+ I still think the best option here is to use regression for the action
+ dimensions.
+ This means we need to have a uni-modal expected reward distribution at
+ the time of action selection.
+ In order to do this, we need to cull points which are outside the dominant
+ 'peak'.
+ I think we can do this by establishing what I'll call the indecision metric
+ (to distinguish it from the uncertainty of a point).
+ The indecision metric is calculated at a given point in time for the action
+ dimensions (only).
+ It's calculated as the entropy, which is essentially lateral inhibition.
+ We'll need to be careful to restrict indecision culling to times that are
+ imminent, otherwise we end up biasing the prediction.
+ Maybe this isn't such a problem really - we're only enforcing the ability
+ to execute a coherent set of actions; any 'plan' which would require doing
+ two things at once probably should be eliminated.
+ Regardless, I think it's a bad idea to do this for all predictions.
+ maybe we make this a meta-variable and let the sytem decide what to do.
+ I think this is a good idea, it allows indecision to be controlled contextually.
+ For example, if you commit to doing something, you're forced to make a
+ decision you wouldn't otherwise have had to make at that point in time.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+OK, stepping way back to consider the basic system architecture.
+ So far I've been assuming that prediction and memory are two discrete system
+ facets.
+ This assumption was made in order to allow the 'prediction' portion of
+ the system to take different states as options were explored.
+ In other words, in order to make a plan from multiple possibilities, you
+ must be able to consider each possibility in isolation.
+ This implies some type of quickly-changing exploration space.
+\end_layout
+
+\begin_layout Plain Layout
+The problem with this is that if you have a quickly-changing prediction
+ space with no inherent memory, task switching become difficult (specifically,
+ switching to a previous task).
+ This also seems odd in the context of remembering previous though processes.
+ In the current architecture, the system would 'remember' actions which
+ were taken, but not necessarily the planning which led to those actions.
+ This is clearly at odds with human experience, and it makes sense that
+ the planning would be remembered - it reduces the search necessary when
+ a similar planning task is encountered.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+So, here's the proposition; predictions are treated the exact same way observati
+ons are treated.
+ This means that the SV optimization recieves prediction directly.
+ There is no architectural distinction between a prediction and an observation.
+ Any 'culling' of predictions must take place by the SV optimization procedure.
+ The system has two processes; one which generates estimates, and one which
+ generates predictions.
+ No retained set of predictions.
+ No removal rules.
+ No elimination of indecision points.
+ In this case, changing state between plans is done by modifying the SV
+ multiplier.
+ The benefit of this is that (if it's possible to change the multipliers
+ in this way) even ideas which have been suppressed can still be active
+ in the system - they just end up with a low SV multiplier (but non null).
+ 
+\end_layout
+
+\begin_layout Plain Layout
+This raises two questions; can the SV optimization problem handle this and
+ can we really treat old memories and current ideation as the same process?
+ If the answer to either is 'no', there is another option; we use two optimizati
+on processes; one which behaves a the existing SV one does, and another
+ which implements the prediction set.
+ At some point control passes from one system to another (probably gradually).
+\end_layout
+
+\begin_layout Plain Layout
+Let's start with the first question.
+ We'll still have a prediction algorithm, so we can ignore anything it does.
+ The question is if the culling algorithm can be implemented in an SV.
+ The exploration is produced through the intersection of the SVM and the
+ prediction algorithm; so long as the SVM can quickly eliminate SV's, that
+ elimination will influence the prediction algorithm, which will produce
+ exploration (I think).
+ We were talking about the culling algorithm eliminating points with low
+ expected reward and far away from points with high expected reward, or
+ points with low uncertainty.
+ The SVM optimization already eliminates points with low uncertainty (redundancy
+).
+ If we think of the significance of a point in reducing loss as similar
+ to the expected reward, the SVM already probably does the former as well.
+ We simply need to restate the SVM problem as one of estimating expected
+ reward, rather than probability.
+ This may or may not be possible - it depends on how we define the expected
+ reward.
+ I seem to remember that being an iterative process.
+ We might be able to do this in the regularizer using a set number of iterations.
+ We might also be limited to two iterations if the iteration increases the
+ power of the multiplier (since we're restricted to quadratic optimization).
+ Think about this today...
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+OK, so I just read two papers about stationary mixing processes, and I think
+ the ideas need to be incorporated into both the prediction algorithm and
+ the ensemble architecture.
+ The basic idea is that it is possible to quantify the extent to which a
+ set of observations are time dependant (I'll just use the time dimension
+ for shorthand).
+ The basic operation is to compare the probability of a point at different
+ time values.
+ The quantification is based on the difference between the conditional and
+ marginal probabilities of the point between the time values.
+ In other words, the extent to which the PDF at time t depends on the PDF
+ at time t-n is described by a mixing coefficient.
+ Multiple specific quantifications of this exist, and depending on the type
+ of quantification used different risk bounds can be obtained.
+\end_layout
+
+\begin_layout Plain Layout
+In the context of my problem, what this means is that if we can quantify
+ the temporal dependance of the observations, we can determine the risk
+ of a point based on it's proximity to other observations.
+ I really don't know how this works in the context of parzen estimators
+ - for the parzen bit to work we *must* assume that the samples are i.i.d.
+ Under this assumption there's no point in determining the risk of observations
+ individually.
+ The only utility of this seems to be in evaluating the risk of *predictions*,
+ since they are not i.i.d.
+ If the mixing value is very low, the risk of a prediction is determined
+ by the risk of the parzen estimator.
+ This means that if we're estimating outside of the observation bounds (in
+ the future) we can quantify the risk of a prediction.
+ What does this mean for estimating inside the observed bounds? I think
+ it means that we can use the parzen risk.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+Let's think a bit about combining estimators.
+ The point here is that we're combining bounded estimators.
+ The earlier work may still hold - we may be able to combine them and use
+ multipliers to weight their influence.
+ What's more interesting here is that it means that the risk of the resulting
+ estimator is not uniform across the observation bounds; if there is overlap
+ between then the risk will be lower.
+ Not only will the risk be lower - we can probably determine the risk based
+ on the multipliers, since the multipliers are generated from the original
+ risk.
+ In other words, predictions inside the observed bounds will not have uniform
+ risk if the estimator is a composite.
+ In the same way that we can determine the risk of an out-of-bound prediction
+ based on the risk of the estimator risk, we might be able to determine
+ the risk of an in-bounds prediction based on the risk of adjacent risk
+ intervals.
+\end_layout
+
+\begin_layout Plain Layout
+This is going to require a good deal of thought, but for now let's assume
+ that it's possible to evaluate point-specific risk for both predictions
+ and point estimates (the multipliers in the estimator describe the risk
+ of a given observation, but the risk of an actual estimate will be based
+ on the mixing bit as discussed last paragraph).
+ What does this mean for the prediction and learning process? We ended up
+ here hoping that it would be possible to use a single set of observations
+ for both prediction and learning.
+ In this context, each prediction is treated the same as an observation;
+ the hope was that we could make predictions less robust than observations
+ and that the risk of the prediction would facilitate this.
+ This requires that each point has an associated risk (even if observations
+ all share a single risk value).
+ 
+\end_layout
+
+\begin_layout Plain Layout
+We must think in more detail about how these risk values are determined
+ - the first question is if prediction risk is determined only by the observatio
+ns, or if they should also take other predictions into account.
+ Using only observations leads to the splitting behavior I was trying to
+ avoid, so let's explore the implications of the risk being determined by
+ both observations and predictions.
+ The primary result of this is that clustered predictions would have reduced
+ risk.
+ So the question is if we want to internal consistency of such a cluster
+ to define their risk (because otherwise any random prediction would be
+ considered equally valid as actual observations).
+ I can't think of a justification for risk being based on probability -
+ it's a circular argument.
+ Risk is based on the *known* information about the system - predictions
+ don't seem to constitute new information.
+ I'm fairly certain that the risk needs to be based purely on observations.
+ We can describe the probability of a given cluster - this is not the same
+ as evaluating the accuracy of that probability.
+\end_layout
+
+\begin_layout Plain Layout
+OK, so let's think about the predictions-as-observations bit.
+ What would the implications be of using the risk in the regularizer? I'm
+ not sure if this is even possible for starters, because the risk will be
+ dependant on the mixing coef, which is dependent on the conditional probabiliti
+es.
+ I guess if we use the Parzen estimate to determine conditional probabilities
+ it might be feasible.
+ In any case, we would want to use observations with low risk, which means
+ that the estimator would be biased towards information in high-density
+ areas and would be more likely to eliminate sparse points.
+ This is probably a good thing anyway, it means that the patterns we're
+ looking at have good support.
+ I think this may be a good approach actually.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+Here's a situation, imagine we made some predictions, then as time goes
+ by we get data which is in the neighborhood of those predictions and conflicts
+ with them.
+ At that point, the risk of the predictions would be the same as the system,
+ and we'd be biased towards the predictions without merit.
+ I think the simple solution to this is to set the risk of the prediction
+ at the time of prediction and not update the risk as more observations
+ come online.
+\end_layout
+
+\begin_layout Plain Layout
+Conceptually, this all seems to fit together.
+ I suspect that the unified space will work, I suspect that we can determine
+ the risk of points.
+ I think we should ignore the point risk in generating predictions - this
+ allows us to predict in the hypothesis space, but keep the hypothesis space
+ definition reality-based.
+ As long as the SVM optimization can keep pace with the new observations,
+ this should keep our prediction risk low.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+OK, so results from the 
+\begin_inset Formula $\alpha$
+\end_inset
+
+-mixing paper finally.
+ We start with the following equation which defines the probability that
+ the difference between the empirical risk and the actual risk is larger
+ than some constant
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\mu\left(\left\{ \omega\in\Omega:\ \left|\mathcal{R}_{L,P}(f_{P_{n},\lambda_{n}})-\mathcal{R}_{L,P}(f_{T_{n}(\omega),\lambda_{n}})\right|<\varepsilon\right\} \right) & \le\frac{(1+C)\bar{C}_{L,p}\bar{C}_{p}^{2}}{\varepsilon^{2}\lambda_{n}^{2p}n^{\beta}}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+We want to switch this around; given a probability measure, what is maximal
+ variance between the empirical and actual risk.
+ To do this, we simply set the probability equal to 
+\begin_inset Formula $\eta$
+\end_inset
+
+ and solve for 
+\begin_inset Formula $\varepsilon$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\eta & =\frac{(1+C)\bar{C}_{L,p}\bar{C}_{p}^{2}}{\varepsilon^{2}\lambda_{n}^{2p}n^{\beta}}\\
+\varepsilon^{2}\lambda_{n}^{2p}n^{\beta} & =\frac{(1+C)\bar{C}_{L,p}\bar{C}_{p}^{2}}{\eta}\\
+\varepsilon^{2} & =\frac{(1+C)\bar{C}_{L,p}\bar{C}_{p}^{2}}{\eta\lambda_{n}^{2p}n^{\beta}}\\
+\varepsilon & =\frac{\bar{C}_{p}\sqrt{(1+C)\bar{C}_{L,p}}}{\eta^{\frac{1}{2}}\lambda_{n}^{p}n^{\frac{\beta}{2}}}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+That's the easy part, now we have to determine the values of all those constants.
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+The evaluation of risk generally establishes risk based on the empirical
+ risk of a function, the VC entropy of the estimator, and the number of
+ observations in the estimate.
+ In order to handle non-identically distributed data, we begin by reversing
+ one of these parameters; rather than using the number of observations used
+ by the estimators, we use the sampling rate of the estimator (we will restrict
+ our attention to the case of totally bounded estimators).
+ Since we're dealing with bounded functions, the number of observations
+ used by an estimator can be expressed as the interval of the bounds divided
+ by the sampling rate.
+\end_layout
+
+\begin_layout Plain Layout
+In this case, each observation has an associated sample rate.
+ The intuitive approach to handling non-identically distributed observations
+ is to use the average sampling rate of the observations used in a estimate,
+ weighted by the influence of each sample on the estimate.
+ This gives us the composite sample rate of an estimate, from which we can
+ calculate the risk associated with the estimate.
+ In the case where the sample rate is uniform (ie the data is identically
+ distributed), this reduces to the general risk function.
+ I'm not sure how to rigorously demonstrate the correctness of this averaging
+ approach, but for now I'm going to ignore that - hopefully when we start
+ formalizing the approach this will shake out of the equations.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+To handle dependent data, we must assume that we're dealing with an 
+\begin_inset Formula $\alpha$
+\end_inset
+
+-mixing distribution - that there exist dependencies between observations,
+ and that this dependency diminishes as the space between observations increases.
+ In general, the 
+\begin_inset Formula $\alpha$
+\end_inset
+
+-mixing coefficient 
+\begin_inset Formula $\alpha(\beta)$
+\end_inset
+
+ is defined by the greatest dependency between any events separated by at
+ least 
+\begin_inset Formula $\beta$
+\end_inset
+
+.
+ This is to say that the coefficient is generalized to the set of data as
+ a whole.
+ We have two options here; we can either take the mixing coefficient as
+ an upper bound on the dependency, or we can determine the dependency of
+ a specific estimate.
+\end_layout
+
+\begin_layout Plain Layout
+Let's start with the upper bound approach.
+ In this case, we know that the maximal dependancy of an estimate 
+\begin_inset Formula $\bar{x}$
+\end_inset
+
+ and an observation 
+\begin_inset Formula $x$
+\end_inset
+
+ is the mixing value 
+\begin_inset Formula $\alpha(\bar{x}-x)$
+\end_inset
+
+.
+ Let's frame this as a concrete example; we have a set of observations which
+ are strongly dependent, and equally distributed between two bounds.
+ Since the mixing coefficient is directional, the risk associated with an
+ estimate at the end of the bounds should be lower than an estimate at the
+ beginning.
+ In this situation, we must think outside the bounds of the Parzen estimator;
+ the estimate of a point must be based on the conditional probability of
+ the point given the points before it.
+\end_layout
+
+\begin_layout Plain Layout
+But we don't want to do that; we want to use TI estimators.
+ This means that we can't actually use the 
+\begin_inset Formula $\alpha$
+\end_inset
+
+-mixing assumption - it doesn't fit our task.
+ What we really need is some mixing assumption that deals with TI estimators.
+ What could our mixing assumption be? The assumption is that the data is
+ drawn from a mixture of transformed distributions.
+ We can still quantify the extent of mixing though - in this case the extent
+ of the mixing reflects the extent to which multiple distributions are present
+ in a given set of observations, or perhaps more specifically the number
+ of distributions which are present in a given set of observations.
+ This would seem to reduce to the entropy of a set of observations; the
+ more the observations are self-similar (the less entropy), the lower the
+ number of distributions needed to describe the observations.
+ In this case, we can probably even describe the entropy of a subset as
+ the information entropy relative to the full set.
+\end_layout
+
+\begin_layout Plain Layout
+I think we can frame this in the classical sense.
+ Given a set of 
+\begin_inset Formula $\ell$
+\end_inset
+
+ observation windows, we can determine the VC entropy of the estimator based
+ on the number of windows needed to 'cover' the observations to some degree
+ of closeness.
+ In other words, if we only need two windows to cover the observations,
+ the VC entropy of the estimator is the log of the number of windows.
+ From this we can determine the risk of the estimator as a uniform quantity.
+ Vapnik uses the growth function, but we can use the actual number of windows
+ (the VC entropy), since we have to determine this in order to make predictions
+ anyway.
+\end_layout
+
+\begin_layout Plain Layout
+So the question remains; is it possible to determine prediction-specific
+ risk? It would seem that we can use a similar approach; determine the VC
+ entropy of the prediction (the number of windows needed to cover the prediction
+ to some accuracy), and use 
+\begin_inset Formula $\ell=1$
+\end_inset
+
+ in the risk equation.
+ In this case, however, we probably don't want to use the VC entropy of
+ the estimator - we want to use the VC Entropy of the estimate; the number
+ of windows needed to cover the the estimate (in this case we're assuming
+ the estimate contains multiple points).
+ This doesn't seem to make sense though - if the estimate was a single point
+ only one window would be needed, which would provide a minimal risk.
+\end_layout
+
+\begin_layout Plain Layout
+Here's an observation; if windows are limited to with w, any estimate farther
+ than w from observations should have the same risk, regardless of its distance
+ from observations.
+ Let's reframe the discussion a bit.
+ If we're dealing with TI windows, we shouldn't be thinking in terms of
+ windows over a set of observations, we should be thinking of each window
+ as a 'point'.
+ The relationship between these points is irrelevant, thanks to the TI bit.
+ In this sense, each window is an independent observation.
+ This means that if a predicted point (in the non-window sense) lies near
+ other points, those points become part of the window which defines the
+ prediction, and thus become part of the data which must be covered.
+ This at least clarifies the observation at the beginning of this paragraph.
+ It also implies that both the number of windows needed to cover the observation
+s *and* the number of points in each window needs to be accounted for in
+ determining the risk of a prediction.
+\end_layout
+
+\begin_layout Plain Layout
+Let's focus our attention on predictions in a given window which includes
+ some other points.
+ In this case we can think of the window as a parzen estimator defined by
+ the points in the window.
+ In this case, we can determine the risk of an estimate in the window by
+ using the VC entropy of the parzen estimator (defined by the kernel width
+ parameter) and the number of points in the window.
+ This allows us to determine the risk of a point based on the window defined
+ by that point, in the context of simply using the points in that window
+ as the observations.
+ To make this useful, we must consider the fact that we're also using other
+ windows to estimate the probability of a given point.
+ Let's begin by assuming a single 'other' window and a single transformation.
+ In this case, we can determine the risk of our estimate using both the
+ points near the estimate and the transformed points from the other window.
+ In this case, we are back to dealing with non-identically distributed points;
+ the points from the 'other' window are only distributed the same as the
+ prediction window if the transformation puts the two windows right on top
+ of each other.
+ This means that we need to take the average sampling rate of each point,
+ where the sampling rate is determined by each point's windowing parameter.
+ The remaining question is how we deal with the divergence between the predictio
+n window and the other window.
+ Obviously, we can only treat the points in the other window as additional
+ observations if the divergence is low - we use this explicitly in the probabili
+ty evaluation.
+ This should also allow us to scale the composite number of observations;
+ as the divergence increases, the composite 
+\begin_inset Formula $\ell$
+\end_inset
+
+ should decrease.
+ Again, I'm not sure if there's a good theoretical method for proving this
+ - for instance how should the divergence be related to the composite 
+\begin_inset Formula $\ell$
+\end_inset
+
+ value? If we can establish this relationship, we should be able to integrate
+ over all transformations and windows, so this approach would make sense.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+OK, this proof needs to be organized as follows:
+\end_layout
+
+\begin_layout Plain Layout
+The first task is to determine the effective sample rate of a window.
+ This can be done by averaging the sample rates of any observations in the
+ window based on their window inclusion.
+ Using the sample rate of the window and the area of the window we can determine
+ the effective 
+\begin_inset Formula $\ell$
+\end_inset
+
+ of the window.
+ This quantity will have little to do with the actual number of observations
+ in the window, but it allows us to quantify the certainty of the distribution
+ generated from the window (keep in mind we need to separate probability
+ from certainty).
+ 
+\end_layout
+
+\begin_layout Plain Layout
+The second task is to determine the effective 
+\begin_inset Formula $\ell$
+\end_inset
+
+ of a prediction.
+ We begin by determining the effective 
+\begin_inset Formula $\ell$
+\end_inset
+
+ of the prediction window itself.
+ Since we're treating windows as TI samples of the same variable, we can
+ treat the points in other windows as observations within the prediction
+ window.
+ We should be able to add the summation of the effective 
+\begin_inset Formula $\ell$
+\end_inset
+
+ values of each observation window scaled by the divergence between the
+ prediction window and the observation window.
+ This is analagous to the prediction process in which we use the divergence
+ between the prediction and observation windows as a scaling parameter to
+ control the influence of each observation window on the prediction, and
+ the quantification of these two processes should be the same.
+ In other words, if we're using data to make a prediction, the extent to
+ which we're using that data should determine the extent to which that data
+ qualifies as information (and hence the extent to which the risk is reduced).
+ 
+\end_layout
+
+\begin_layout Plain Layout
+The third task to to determine the VC entropy of a predictor.
+ We can probably use the growth function defined by the area of the window
+ and the kernel width.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+Finally, we need to address how this integrates into the SV optimization
+ process, both in terms of the effective 
+\begin_inset Formula $\ell$
+\end_inset
+
+ of SV's and the way we handle predictions-as-observations.
+ I can't justify this, but I think that multiplying the effective 
+\begin_inset Formula $\ell$
+\end_inset
+
+ of an SV's window by the ratio of it's weight to the inverse of 
+\begin_inset Formula $\ell$
+\end_inset
+
+ will produce a good result.
+ This effectively allows the observations from similar windows to be shifted
+ to a single window as their weights diverge.
+ It can at least be shown that the cumulative 
+\begin_inset Formula $\ell$
+\end_inset
+
+ of the SV's will equal the 
+\begin_inset Formula $\ell$
+\end_inset
+
+.
+ The issue of handling predictions as observations isn't as clear.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+The VC Entropy of the windows should end up impacting the risk of a prediction.
+ If the VC Entropy is low, there will be multiple observation windows similar
+ to a given prediction, and the summation of the effective 
+\begin_inset Formula $\ell$
+\end_inset
+
+ will be high.
+ If the VC Entropy is high, less observations will be similar, and the resulting
+ effective 
+\begin_inset Formula $\ell$
+\end_inset
+
+ will be lower.
+ With the growth function as a constant, this means that as the VC Entropy
+ of the windows increases the risk will also increase.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+The amount of information in the window defined by a prediction will also
+ end up affecting the risk of the prediction.
+ If we're looking at a single point, the divergence between the point and
+ the defined windows will be high, reducing the effective 
+\begin_inset Formula $\ell$
+\end_inset
+
+ of the observation.
+ If there are a lot of points in the prediction window and they conform
+ to other windows, the divergence will decrease, making the effective 
+\begin_inset Formula $\ell$
+\end_inset
+
+ larger.
+ This allows predictions to become less 'risky' as we elaborate on them.
+ It also means that out-of-bounds predictions will have higher risk than
+ in-bounds predictions, since the in-bounds predictions will have more context
+ (and hence lower potential divergence).
+ 
+\end_layout
+
+\begin_layout Plain Layout
+This should allow us to treat predictions as essentially the same as observation
+s - the only difference is that the sample rate of predictions is set to
+ null.
+ We can still use them as SV's, and we can control the SV optimization using
+ the risk of each point (in this case we use the effective 
+\begin_inset Formula $\ell$
+\end_inset
+
+ of the window defined by each observation to determine its risk).
+ This probably also requires that we augment the window 
+\begin_inset Formula $\ell$
+\end_inset
+
+ with the rest of the system in the same way we discussed for predictions
+ - let's make sure though that we don't end up with the sum of effective
+ 
+\begin_inset Formula $\ell$
+\end_inset
+
+ being larger than the actual number of observations (right?).
+ I think if we do this, it essentially provides the entropy regularization
+ discussed earlier.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+What if we approach this from the opposite end? I've been thinking in terms
+ of 'effective-
+\begin_inset Formula $\ell$
+\end_inset
+
+', but it may be easier to demonstrate the validity of working this from
+ the perspective of the growth function (or VC Entropy, to be precise).
+ I already thought about the possibility that the number of SV windows can
+ be treated as the number of points needed to 'cover' a set of observations
+ to some level of accuracy.
+ If we think of the SV windows as the prediction function, this describes
+ the estimator's shattering ability.
+ What's nice about this approach is that we don't have to dig through the
+ proof for the original risk equations and adjust them for 
+\begin_inset Formula $\ell$
+\end_inset
+
+ values - we simply plug in the number of SV's and work with the existing
+ proofs.
+\end_layout
+
+\begin_layout Plain Layout
+So let's think about how this approach might work.
+ We need to basic properties; the ability to deal with varying sample rates
+ (non-identically distributed points) as well as the ability to determine
+ point-specific risk values.
+ Let's start with the varying sample rates.
+ One thing I thought about is that is makes more sense to assign sample
+ rates to intervals over the abstract space than to specific observations.
+ The only case in which sample rates make any sense is when we're combining
+ observations drawn identically distributed over some bounds and combining
+ such sets with different bounds.
+ If the bounds are always the same, then combining them doesn't require
+ any special math.
+ The other benefit of this approach is that we don't rely on any observations
+ occurring near any specific point to know the sample rate at that point.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+So how do we deal with this? One observation is that if a window spans regions
+ with different sample rates, the window itself is not homogenous.
+ Let's ignore windows for a minute and return to the sample rate issue.
+ We can still determine the sample rate for points, and if we can justify
+ the weighting mechanism it means we can still generate distributions for
+ spaces with differing sample rates.
+ This inevitably means that the risk for different predictions will be different.
+ How can we do this without resorting to effective-
+\begin_inset Formula $\ell$
+\end_inset
+
+? What if we treat this as a BMA scenario? We treat the points in each sampling
+ window as independent estimators, then combine them.
+ Can we adjust risk for the BMA estimator? Perhaps more importantly, how
+ do we handle out-of-bounds predictions in this case?
+\end_layout
+
+\begin_layout Plain Layout
+Let's go back and think about some things.
+ Let's first assume we're using a hard-edged kernel function, so points
+ outside some bounds are not used in the prediction.
+ This means that for each prediction, we can pretend as though we're estimating
+ only in the context of the points within those bounds.
+ This means that our estimation function is bounded by the kernel width.
+ We can't completely ignore the rest of the system though - the probability
+ of the points in the bounds is also dependent on observations outside those
+ bounds, but those points only serve to scale the prediction (as the number
+ of points outside the bounds increases, the prediction must be scaled down).
+ In any case, what I was working toward was trying to justify using the
+ number of points in the bounds as 
+\begin_inset Formula $\ell$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+Maybe we take a more general approach; given the risk of an estimator with
+ a given bound, what do we know about the risk of an estimator defined over
+ a subset of those bounds, and using only the observations which fall within
+ those bounds? I think that if we can scale the subset based on the cumulative
+ probability of it vs the converse we can retain the same predictions.
+ And if we are using the same prediction, the loss at any given point will
+ be the same, which means the risk of the subset should be the same if noise
+ is identically distributed.
+ This doesn't seem to match with the risk equations.
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+R(\alpha) & \le R_{\text{emp}}(\alpha)+\frac{(B-A)}{2}\sqrt{4\frac{G(2\ell)-\ln(\eta/4)}{\ell}}\\
+ & \le R_{\text{emp}}(\alpha)+(B-A)\sqrt{\frac{G(2\ell)-\ln(\eta/4)}{\ell}}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+The problem here is that the relationship between the bounds and the number
+ of observations isn't linear - if reducing the bounds by half produces
+ the same risk, you would expect that this reduction would imply a halving
+ of 
+\begin_inset Formula $\ell$
+\end_inset
+
+.
+ In other words
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\left(B_{1}-A_{1}\right)\sqrt{\frac{G(2\ell_{1})-\ln(\eta/4)}{\ell_{1}}} & =\left(B_{2}-A_{2}\right)\sqrt{\frac{G(2\ell_{2})-\ln(\eta/4)}{\ell_{2}}}\\
+\frac{B_{1}-A_{1}}{B_{2}-A_{2}} & =\sqrt{\frac{G(2\ell_{2})-\ln(\eta/4)}{\ell_{2}}\frac{\ell_{1}}{G(2\ell_{1})-\ln(\eta/4)}}\\
+ & =\sqrt{\frac{\ell_{1}G(2\ell_{2})-\ell_{1}\ln(\eta/4)}{\ell_{2}G(2\ell_{1})-\ell_{2}\ln(\eta/4)}}\\
+\left(\frac{B_{1}-A_{1}}{B_{2}-A_{2}}\right)^{2} & =\frac{\ell_{1}G(2\ell_{2})-\ell_{1}\ln(\eta/4)}{\ell_{2}G(2\ell_{1})-\ell_{2}\ln(\eta/4)}\\
+ & =\frac{\ell_{1}G(2\ell_{1}\left(\frac{B_{2}-A_{2}}{B_{1}-A_{1}}\right))-\ell_{1}\ln(\eta/4)}{\ell_{1}\left(\frac{B_{2}-A_{2}}{B_{1}-A_{1}}\right)\left(G(2\ell_{1})-\ln(\eta/4)\right)}\\
+\left(\frac{B_{1}-A_{1}}{B_{2}-A_{2}}\right)^{3} & =\frac{G(2\ell_{1}\left(\frac{B_{2}-A_{2}}{B_{1}-A_{1}}\right))-\ln(\eta/4)}{G(2\ell_{1})-\ln(\eta/4)}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+I just don't see how this could reduce to 
+\begin_inset Formula $\ell_{2}=\ell_{1}\left(\frac{B_{2}-A_{2}}{B_{1}-A_{1}}\right)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+Also not sure what this tells us.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+OK, I'm fairly sure that we're going to have to deal with this sample rate
+ issue.
+ I don't like the amateurish approach of effective 
+\begin_inset Formula $\ell$
+\end_inset
+
+, so I think I'd like to try to derive actual risk bounds.
+ This needs to be worked from basic assumptions upwards, so I'll need to
+ figure out exactly how those bounds were achieved.
+\end_layout
+
+\begin_layout Plain Layout
+The general approach probably needs to be based on partitioning the abstract
+ space into iid partitions.
+ The estimator function will take all of them into account, but I'm hoping
+ if I work the bound proof through something useful will fall out.
+ OK, I'm going to start with the Rademacher complexity bounds paper as a
+ template
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\beta(k) & =\sup_{n}\mathbb{E}_{B\in\sigma_{-\infty}^{n}}\left[\sup_{A\in\sigma_{n+k}^{\infty}}\left|\Pr\left[A|B\right]-\Pr\left[A\right]\right|\right]\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\hat{\Re}_{S}(H) & =\frac{1}{m}\mathbb{E}_{\sigma}\left[\sup_{h\in H}\left|\sum_{i=1}^{m}\sigma_{i}h(x_{i})\right|\ |\ S=(x_{1},...,x_{m})\right]\\
+\Re_{m}(H) & =\mathbb{E}_{S}\left[\hat{\Re}(H)\ |\ |S|=m\right]\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\hat{R}_{S}(h) & =\frac{1}{m}\sum_{i=1}^{m}h(z_{i})\\
+R(h) & =\mathbb{E}_{S}\left[\hat{R}_{S}(h)\right]\\
+\Phi(S) & =\sup_{h\in H}\ R(h)-\hat{R}_{S}(h)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+S_{a,b} & =\left[z_{i}\ |\ a\le z_{i}<b\right]\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\Pr_{S}[\Phi(S)>\epsilon] & =\Pr_{S}\left[\sup_{h}\left(R(h)-\hat{R}_{S}(h)\right)>\epsilon\right]\\
+ & =\Pr_{S}\left[\sup_{h}\left(\frac{1}{\sum_{a,b}(b-a)}\sum_{a,b}\left(b-a\right)\left(R(h)-R_{S_{a,b}}(h)\right)\right)>\epsilon\right]\\
+ & \le\Pr_{S}\left[\left(\frac{1}{\sum_{a,b}(b-a)}\sum_{a,b}\left(b-a\right)\left(\sup_{h}\ R(h)-R_{S_{a,b}}(h)\right)\right)>\epsilon\right]\\
+ & =\Pr_{S}\left[\left(\frac{1}{\sum_{a,b}(b-a)}\sum_{a,b}\left(b-a\right)\left(\Phi(S_{a,b})\right)\right)>\epsilon\right]\\
+ & \le\frac{1}{\sum_{a,b}(b-a)}\sum_{a,b}\left(b-a\right)\Pr_{S_{a,b}}\left[\Phi(S_{a,b})>\epsilon\right]\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+From here, we can determine quite easily the risk of each 
+\begin_inset Formula $\Phi(S_{a,b})$
+\end_inset
+
+ using existing approaches.
+ What this doesn't tell us is how the risk affects specific estimates, and
+ this doesn't take into account the mixing inherent in a kernel estimator.
+ The mixing can probably be added, but the specific estimate risk isn't
+ very clear to me.
+ This would have been simpler by simply observing that risk is an integral
+ and then bounding the integral to a subset of the observations.
+\end_layout
+
+\begin_layout Plain Layout
+What if we use the block technique more the way it was originally used;
+ we take two sets of alternating blocks of uniform width.
+ The only difference will be that we assume each block has its own sample
+ rate, which means we can't simply combine them thanks to stationarity.
+ Instead we get similar result to what's above, but with unique expectations
+ for each summand.
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\Pr_{S}[\Phi(S)>\epsilon] & =\Pr_{S}\left[\sup_{h}\left(R(h)-\hat{R}_{S}(h)\right)>\epsilon\right]\\
+ & =\Pr_{S}\left[\sup_{h}\left(\frac{1}{n}\sum_{n}\left(R(h)-\hat{R}_{S_{n}}(h)\right)\right)>\epsilon\right]\\
+ & \le\Pr_{S}\left[\left(\frac{1}{n}\sum_{n}\left(\sup_{h}\ R(h)-\hat{R}_{S_{n}}(h)\right)\right)>\epsilon\right]\\
+ & =\Pr_{S}\left[\left(\frac{1}{n}\sum_{n}\Phi(S_{n})\right)>\epsilon\right]\\
+ & \le\frac{1}{n}\sum_{n}\Pr_{S_{n}}\left[\Phi(S_{n})>\epsilon\right]\\
+ & =\frac{1}{n}\sum_{n}\Pr_{S_{n}}\left[\Phi(S_{n})-\mathbb{E}_{\tilde{S}_{n}}[\Phi(\tilde{S}_{n})]>\epsilon'\right]\\
+ & \le\frac{1}{n}\sum_{n}(\mu-1)\beta(a)+\Pr_{S_{n}}\left[\Phi(\tilde{S}_{n})-\mathbb{E}_{\tilde{S}_{n}}[\Phi(\tilde{S}_{n})]>\epsilon'\right]\\
+ & =(\mu-1)\beta(a)+\frac{1}{n}\sum_{n}\Pr_{S_{n}}\left[\Phi(\tilde{S}_{n})-\mathbb{E}_{\tilde{S}_{n}}[\Phi(\tilde{S}_{n})]>\epsilon'\right]\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\Pr_{S_{n}}\left[\Phi(\tilde{S}_{n})-\mathbb{E}_{\tilde{S}_{n}}[\Phi(\tilde{S}_{n})]>\epsilon'\right] & \le\exp\left(\frac{-2\mu\epsilon'^{2}}{M^{2}}\right)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+Now we just need to figure out how to make 
+\begin_inset Formula $\epsilon'$
+\end_inset
+
+ block-specific (which it may be anyway).
+\end_layout
+
+\begin_layout Plain Layout
+I just realized something interesting.
+ Since 
+\begin_inset Formula $\tilde{S}_{n}$
+\end_inset
+
+ is independent, we can probably treat it as it's own estimator - bounds
+ on 
+\begin_inset Formula $\tilde{S}$
+\end_inset
+
+ should hold for anything within the block.
+ My suspicion is that the definition of 
+\begin_inset Formula $\tilde{S}$
+\end_inset
+
+ defines the potential mixture influence from nearby blocks.
+\end_layout
+
+\begin_layout Plain Layout
+Here's my hope
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\Pr_{S_{n}}\left[\Phi(S_{n})>\epsilon\right] & \le\Pr_{\tilde{S}_{n}}\left[\Phi(\tilde{S}_{n})-\mathbb{E}_{\tilde{S}_{n}}[\Phi(\tilde{S}_{n})]>\epsilon'\right]+\beta(a)\\
+\epsilon' & =\epsilon-\Re_{S_{n}}(H)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+I'm fairly confident this will all work out.
+ Unfortunately I don't have the motivation to run the proofs, so I'm going
+ to come back to this later.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+I was thinking about how the risk of a prediciton would impact a hierarchical
+ system.
+ For starters, let's recall (this may be new actually) that the data for
+ higher layers is being generated at each observation or each prediction.
+ Essentially, each prediciton is translated into the next layer's input
+ space using its kernel distance from known SV's.
+ This should produce a sample rate for the higher layer that's the same
+ as the lower layer.
+ This sample rate could be reduced by randomly choosing which points to
+ pass up with some set probability.
+ Each time a point is passed up, it probably makes sense to pass the time
+ of transfer as one of the dimensions.
+ This information might be useful.
+\end_layout
+
+\begin_layout Plain Layout
+Anyway, the point is that predictions are not of the same class as observations;
+ observations are data - predictions aren't (they essentially reflect known
+ information about the estimate at the time of prediction).
+ How do we distinguish between them? What I thought might be interesting
+ would be to force the kernel width to respond to the risk of each point;
+ estimates would have a wider influence (less determinism) than observations.
+ Before getting into how this would work in the context of higher levels,
+ I want to observe that this seems like a great (and possible necessary)
+ way to handle predictions in the context of non-uniformly distributed observati
+ons.
+ Basically, when generating an estimate, it makes sense that points with
+ higher sample rates would have smaller widths.
+ This allows the prediction (as well as the risk) to respond to the differing
+ risk of the variables.
+ If we think of risk as confidence interval, this approach is obvious.
+ We would still need a universal scaling parameter which we can still call
+ 
+\begin_inset Formula $\gamma$
+\end_inset
+
+, but the kernel function will need to use 
+\begin_inset Formula $\gamma\cdot R$
+\end_inset
+
+.
+ This might be a pain in the ass - it means that each time the sample rate
+ of an observation changes (say when we're combining estimators) the kernel
+ matrix of all the points in the interval will need to be updated.
+ For estimation this probably isn't a big deal, as we'd have to calculate
+ the kernel matrix for the estimation point anyway.
+\end_layout
+
+\begin_layout Plain Layout
+OK, coming back to how this variable width thing affects hierarchical systems.
+ What this would mean is that as predictions get further into the future
+ they begin to bleed into each other more and more - essentially destroying
+ any resolution that might have existed.
+ From a technical point of view this is probably correct - the known behavior
+ of points in the future is highly indeterminate.
+ The challenge here is that this loss of resolution makes it very difficult
+ to coherently explore predictions using multiple layers.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+This may or may not be a problem.
+ One way to think about this is that information flowing up the layers is
+ providing *new* data, while information flowing down is providing context.
+ We could think of prediction as primarily a top-down process.
+ Informally, this makes some sense - thought about the future is usually
+ general.
+ I don't ususally envision the specific muscular movements I'll be making
+ in the future so much as the general ideas.
+ It also allows predictions about the future to be time-general; top layers
+ project further ahead than bottom layers, so any prediction from top layers
+ will be sufficiently outside the bounds of lower layers that predictions
+ based on the higher layers would be completely independent of current condition
+s.
+ Maybe this isn't really a problem; the top layers would make predictions
+ close enough to their bounds that the risk wasn't too spread out - as these
+ filtered down the lower layers would be further and further from their
+ bounds, having less and less impact on the higher layers.
+ For now I'm going to assume this approach makes sense and move on.
+\end_layout
+
+\begin_layout Plain Layout
+An issue that's bugged be for awhile is that of time-flexible planning.
+ For instance, I can plan to get dinner tonight without specifying a specific
+ time in which it's going to happen.
+ This can be thought of as predicting subsets of points; I predict the process
+ of eating and being full, but omit the details of location or time.
+ Could this work with the certainty problem discussed earlier? Maybe rather
+ than forcing the estimation distribution to converge to a point, we simply
+ omit dimensions which are indeterminate.
+ In this case we run into an odd problem; how do we handle the absence of
+ data if that absence is significant.
+ If I go to get dinner but don't take any money the absence of that money
+ will cause problems.
+ Since we were planning to simply ignore kernel evaluations between null
+ values, this absence doesn't really show up in the equations - is this
+ a problem? Can we avoid it by assuming that the absence of a value is somehow
+ encoded *as* a value? Furthermore, if we're making (let's say) unspecific
+ time predictions, how does that prediction have any different impact on
+ the system than the fact that similar actions existed in the past?
+\end_layout
+
+\begin_layout Plain Layout
+Anyway, moving to the dinner example and how to distinguish dinner tonight
+ from dinner yesterday; it should be possible to use a generalized time
+ description (today) as a dimension.
+ In other words, if the values in the prediction are diverse enough, it
+ should still be possible to isolate the prediction from past observations.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+The null value issue seems rather odd.
+ Not only is is a mathematical black hole, the null values are explicitly
+ defined by the least certain parts of the system.
+ It might make sense to motivate the system to fill in these holes, but
+ I can't think of any other way to handle them.
+ Let's think about this in the abstract; why would we want to handle null
+ values anyway? It seems like the reason is that not specifying a value
+ could have consequences.
+ So what about this; we treat null values as identical, and assign them
+ 0 distance.
+ In this case, all null values are the same (which makes sense) but the
+ relationship between null values and determined values is indeterminate
+ (they're not calculated).
+ This allows us to build an understanding of what it means to omit values
+ (by comparing instances where they're omitted) without making an invalid
+ assumptions about the relationship between a choice and a non-choice.
+ This might fuck up the estimator though - we end up with points being 'closer'
+ than they might should be.
+ In any case, it seems like a potentially superior curiousity motivator;
+ if null values are correlated with discouraged states, the system would
+ be encouraged to fill in the gaps.
+ If they have no influence on the system, it could ignore them.
+ I actually really like this the more I think about it - it allows us to
+ explore specific portions of possibility without bothering with parts of
+ the abstract space that aren't relevant to the exploration.
+ We'll need a fast way to determine the uncertainty.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+If we're using risk-determined widths, that means that the kernel distance
+ isn't necessarily symmetric.
+ Specifically, if we're dealing with two points with different widths, it's
+ not clear which one to use.
+ One solution is to use the intersection of the two gaussian distributions
+ rather than the value of the point at the other point's distribution.
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+K(x,y) & =\int\min\left[e^{-\gamma_{x}(a-x)^{2}},e^{-\gamma_{y}(a-y)^{2}}\right]da\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+We can determine this by first solving for the intersection of the two functions
+, then integration over each segment, using only the smaller of the two
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+e^{-\gamma_{x}(a-x)^{2}} & =e^{-\gamma_{y}(a-y)^{2}}\\
+\gamma_{x}(a-x)^{2} & =\gamma_{y}(a-y)^{2}\\
+\sqrt{\gamma_{x}}(a-x) & =\pm\sqrt{\gamma_{y}}(a-y)\\
+a\sqrt{\gamma_{x}}-x\sqrt{\gamma_{x}} & =\pm\left(a\sqrt{\gamma_{y}}-y\sqrt{\gamma_{y}}\right)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+a_{1}\sqrt{\gamma_{x}}-x\sqrt{\gamma_{x}} & =a_{1}\sqrt{\gamma_{y}}-y\sqrt{\gamma_{y}}\\
+a_{1}\sqrt{\gamma_{x}}-a_{1}\sqrt{\gamma_{y}} & =x\sqrt{\gamma_{x}}-y\sqrt{\gamma_{y}}\\
+a_{1} & =\frac{x\sqrt{\gamma_{x}}-y\sqrt{\gamma_{y}}}{\sqrt{\gamma_{x}}-\sqrt{\gamma_{y}}}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+a_{2}\sqrt{\gamma_{x}}-x\sqrt{\gamma_{x}} & =y\sqrt{\gamma_{y}}-a_{2}\sqrt{\gamma_{y}}\\
+a_{2}\sqrt{\gamma_{x}}+a_{2}\sqrt{\gamma_{y}} & =x\sqrt{\gamma_{x}}+y\sqrt{\gamma_{y}}\\
+a_{2} & =\frac{x\sqrt{\gamma_{x}}+y\sqrt{\gamma_{y}}}{\sqrt{\gamma_{x}}+\sqrt{\gamma_{y}}}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+This clearly shows that if the two points have the same width only one intersect
+ion point will exist (the denominator will be 0).
+ Unfortunately, extending this to multiple dimensions seems to be a problem
+ - we end up with a sum of squares in the exponent, which means we can't
+ just take the square root and solve for +/- the other term.
+ Let's just see if we can reduce this to somthing friendlier
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+\int e^{-\gamma(a-x)^{2}}da & =-\frac{\sqrt{\pi}\text{erf}\left(\sqrt{\gamma}(a-x)\right)}{2\sqrt{\gamma}}\\
+\int_{-\infty}^{a}e^{-\gamma(a-x)^{2}}da & =-\frac{\sqrt{\pi}\text{erf}\left(\sqrt{\gamma}(a-x)\right)}{2\sqrt{\gamma}}+\lim_{n\rightarrow-\infty}\frac{\sqrt{\pi}\text{erf}\left(\sqrt{\gamma}(n-x)\right)}{2\sqrt{\gamma}}\\
+ & =-\frac{\sqrt{\pi}\text{erf}\left(\sqrt{\gamma}(a-x)\right)}{2\sqrt{\gamma}}\\
+\int_{a}^{\infty}e^{-\gamma_{y}(a-y)^{2}}da & =\lim_{n\rightarrow\infty}\frac{\sqrt{\pi}\text{erf}\left(\sqrt{\gamma}(n-y)\right)}{2\sqrt{\gamma}}+\frac{\sqrt{\pi}\text{erf}\left(\sqrt{\gamma}(a-y)\right)}{2\sqrt{\gamma}}\\
+ & =\frac{\sqrt{\pi}}{2\sqrt{\gamma}}+\frac{\sqrt{\pi}\text{erf}\left(\sqrt{\gamma}(a-y)\right)}{2\sqrt{\gamma}}\\
+\int_{-\infty}^{\infty}\min\left[e^{-\gamma_{x}(a-x)^{2}},e^{-\gamma_{y}(a-y)^{2}}\right]da & =\frac{\sqrt{\pi}}{2\sqrt{\gamma}}+\frac{\sqrt{\pi}\text{erf}\left(\sqrt{\gamma}(a-y)\right)}{2\sqrt{\gamma}}-\frac{\sqrt{\pi}\text{erf}\left(\sqrt{\gamma}(a-x)\right)}{2\sqrt{\gamma}}\\
+ & =\frac{\sqrt{\pi}}{2\sqrt{\gamma}}\left(1+\text{erf}\left(\sqrt{\gamma}(a-y)\right)-\text{erf}\left(\sqrt{\gamma}(a-x)\right)\right)\\
+ & =\frac{\sqrt{\pi}}{2\sqrt{\gamma}}\left(1+\frac{2}{\sqrt{\pi}}\int_{\sqrt{\gamma}(a-x)}^{\sqrt{\gamma}(a-y)}e^{-t^{2}}dt\right)\\
+ & =\frac{\sqrt{\pi}}{2\sqrt{\gamma}}+\frac{1}{\sqrt{\gamma}}\int_{\sqrt{\gamma}(a-x)}^{\sqrt{\gamma}(a-y)}e^{-t^{2}}dt\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+I don't see this becoming something pretty.
+ Let's ignore this whole line of though and just force the kernel function
+ to be symmetric by doing it with both widths.
+ We can take either the arithmatic or geometric mean.
+ This is probably a good thing to test on data, we're essentially talking
+ about a kernel function so comparisons should be simple.
+ The geometric mean has the advantage that can be reduced nicely:
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula \begin{align*}
+K_{sym}(x,y) & =\left(K_{\gamma_{x}}(x,y)K_{\gamma_{y}}(y,x)\right)^{\frac{1}{2}}\\
+ & =\left(e^{-\gamma_{x}(x-y)^{2}}e^{-\gamma_{y}(y-x)^{2}}\right)^{\frac{1}{2}}\\
+ & =\left(e^{-\gamma_{x}(x-y)^{2}-\gamma_{y}(y-x)^{2}}\right)^{\frac{1}{2}}\\
+ & =\left(e^{-\gamma_{x}(x-y)^{2}-\gamma_{y}(x-y)^{2}}\right)^{\frac{1}{2}}\\
+ & =\left(e^{-(\gamma_{x}+\gamma_{y})(x-y)^{2}}\right)^{\frac{1}{2}}\\
+ & =e^{-\left(\frac{\gamma_{x}+\gamma_{y}}{2}\right)(x-y)^{2}}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
