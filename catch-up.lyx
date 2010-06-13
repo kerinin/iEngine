@@ -1,0 +1,241 @@
+#LyX 1.6.5 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\language english
+\inputencoding auto
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+There seem to be a couple major outstanding issues:
+\end_layout
+
+\begin_layout Itemize
+Establishing risk bounds for non-i.i.d.
+ processes.
+ This will be essential in ensemble systems, as the risk is used to distinguish
+ between 'useful' and irrelevant data subsets
+\end_layout
+
+\begin_layout Itemize
+Generation of estimates from a PDF without computing the inverse of the
+ CDF.
+ This is required to actually generate actions.
+ This may have been resolved through random selection of SV points and affine
+ transformations.
+ The challenge is demonstrating that the mean divergence of randomly selected
+ affine transformations over points generated from two windows approaches
+ the divergence metric of the two windows.
+\end_layout
+
+\begin_layout Itemize
+Everything past the prediction section is 'old'.
+ The whole motivation, choice, exploration/curiousity etc sections need
+ to be revisited.
+\end_layout
+
+\begin_layout Section
+New thoughts
+\end_layout
+
+\begin_layout Standard
+The idea of ensemble/hierarchical systems is clunky.
+ A much more elegant way of looking at this is to extend the traditional
+ SVM with a concept of 'degree'.
+ By degree I mean that for each observation, we allow multiple 
+\begin_inset Formula $\beta$
+\end_inset
+
+ values to be assigned, each corresponding to a different degree of computation.
+ 
+\end_layout
+
+\begin_layout Standard
+As a concrete example, we can treat a scalar value as a 0-degree observation,
+ and extend these to 1-degree by considering multi-dimensional points.
+ In this scenario, each dimension has its own 
+\begin_inset Formula $\beta$
+\end_inset
+
+ multiplier.
+ This allows the optimization algorithm to eliminate not only points, but
+ specific dimensions of points.
+ This approach encapsulates the idea of dimensional set based partial SVM's.
+\end_layout
+
+\begin_layout Standard
+This approach can be extended to incorporate 'windows' in a similar fashion.
+ In this case an additional 
+\begin_inset Formula $\beta$
+\end_inset
+
+ multiplier is added to each point to describe the influence of the window
+ centered on the point.
+ The optimization problem remains unchanged from its current form, as does
+ the approach to prediction.
+\end_layout
+
+\begin_layout Standard
+Finally, we can extend this approach to address the 'hierarchical' organization
+ by adding an additional 
+\begin_inset Formula $\beta$
+\end_inset
+
+ multiplier to describe sets of windows.
+ In this case each point's compound window includes the set of adjacent
+ windows.
+ In the same way that independent multipliers allows the optimization problem
+ to eliminate points or dimensions of points, we can now eliminate windows
+ from a compound window.
+\end_layout
+
+\begin_layout Standard
+For this approach to be workable, we must define a few things for each degree;
+ a procedure for determining set inclusion, a kernel function over sets,
+ and a procedure for generating predictions given a PDF describing a set's
+ probability.
+ 
+\end_layout
+
+\begin_layout Standard
+In the case of dimensions, set inclusion is determined by the concept of
+ 'point'; the scalar dimensional values of each point are each elements
+ of the set defined by the point.
+ In the case of windows set inclusion is determined by a center point and
+ a window width.
+ Compound windows are essentially the same as single windows; they are defined
+ by a center point and a (presumably larger) compound window width.
+ The kernel functions and prediction procedures for these have been developed
+ (with the exception of compound sets) already.
+\end_layout
+
+\begin_layout Standard
+The true power of this approach lies in the fact that these three components
+ can be domain-specific; if we were attempting to parse natural language
+ it could be useful to use sets defined by letters (as the scalar base),
+ words, paragraphs, and chapters.
+ Parsing speech could use sets defined by phonemes and spaces between silence.
+ Further, this approach allows sets to be overlapping; in the case of speech
+ sets could be defined both for word boundaries (defined as the sound between
+ silences) and tonal inflection (for instance the difference between an
+ assertion and a question).
+ In this case each data point would simultaneously include information about
+ the 'word' and the 'intonation'.
+\end_layout
+
+\begin_layout Standard
+Some benefits of this approach:
+\end_layout
+
+\begin_layout Itemize
+We are not forced to estimate an SVM's risk value as part of the AM's algorithm.
+ Nevertheless, based on one of those papers I printed out, any SVM which
+ satisfies a law of large numbers will converge, so it's probably possible
+ to estimate risk.
+\end_layout
+
+\begin_layout Itemize
+We don't have to resort to Bayesian Model Averaging to combine predictors.
+\end_layout
+
+\begin_layout Itemize
+We don't have to develop algorithms to decide which dimensional sets to
+ compute.
+\end_layout
+
+\begin_layout Itemize
+There is no need to develop a system architecture for passing information
+ between layers.
+\end_layout
+
+\begin_layout Itemize
+There is explicit parity between 'dimensions' and 'sequences'; both are
+ treated uniformly by the optimization algorithm.
+\end_layout
+
+\begin_layout Section
+Next Steps
+\end_layout
+
+\begin_layout Itemize
+Is there a distinction between extending vertically (moving from points
+ to windows) and extending horizontally (adding dimensions)? The critical
+ point here seems to be that moving from points to windows gives us a predictor
+ which encapsulates the 'lower' levels , which adding dimensions doesn't
+\end_layout
+
+\begin_layout Itemize
+Formalize the requirements for a set; (inclusion, kernel, prediction) functions
+ and their requirements.
+\end_layout
+
+\begin_layout Itemize
+Investigate the implications on the dimensionality of 
+\begin_inset Formula $\beta$
+\end_inset
+
+; each dimension seems to require an additional 
+\begin_inset Formula $\beta$
+\end_inset
+
+, but when we move to windows does that allow us to return to a 1-d 
+\begin_inset Formula $\beta$
+\end_inset
+
+ or do we retain that dimensional data? How does this work when we move
+ to compound windows? This partially relates the the first point (horizontal
+ vs vertical).
+\end_layout
+
+\begin_layout Itemize
+Consider how to handle the computational implications of making 
+\begin_inset Formula $\beta$
+\end_inset
+
+ multi-dimensional.
+ Specifically, it would be nice to have some groundwork for eliminating
+ dimensions if they're not producing useful data.
+ This will also dovetail with the SV decomposition algorithms (hopefully).
+\end_layout
+
+\begin_layout Itemize
+Look at the kernel function for compound windows - this may become non-integrabl
+e...
+\end_layout
+
+\end_body
+\end_document
