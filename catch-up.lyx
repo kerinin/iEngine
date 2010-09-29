@@ -237,5 +237,181 @@ Look at the kernel function for compound windows - this may become non-integrabl
 e...
 \end_layout
 
+\begin_layout Section
+Virtual Dimensions
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\varphi(x) & =\sum_{i}^{\ell}\prod_{j}^{\nu}K_{j}(x,x_{i})^{\beta_{i,j}}\sum_{j}^{\nu}\beta_{i,j}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This equation is a complete failure.
+ There is no way to put this in a optimizable form.
+ The failure is due to the fact that we cannot simply compute a kernel matrix
+ and run with it.
+ To accomplish this we must eliminate the assumption that the vector constituent
+s of a point have any correlation to the point; each 'class' of observation
+ must be treated as an independent entity, even if there is shared data.
+ This forces us to define kernels not only within classes of observation
+ but *between* classes of observation.
+ This leads to the possibility of non-symmetrical kernel matrices.
+ It also raises the question; what is the context of the optimisation problem?
+ In the case of a single class of observations, we simply optimize the system's
+ ability to cover those observations; we now have multiple classes of observatio
+ns; we may be interested in covering only certain combinations of observations
+ (?).
+ Now - will this allow us to eliminate points from a window, or eliminate
+ windows from a compond window? Can we generate variates taking the multiple
+ classes of data into account simultaneously?
+\end_layout
+
+\begin_layout Standard
+Variates: We can't combine variates, however it's probably not necessary.
+ The optimization problem will eliminate input that's not relevant - if
+ we weight our random variate generation based on the SV weight we should
+ end up generating random variates which comply with the optimization problem.
+\end_layout
+
+\begin_layout Standard
+Assymetric kernel matrices: I suspect when we work through the optimization
+ problem this will go away - I seem to remember this being the case with
+ the earlier windowing methods.
+ We should end up with a symmemtric optimization matrix, even if the kernel
+ matrix isn't symmetric.
+\end_layout
+
+\begin_layout Standard
+Eliminting points from windows: it's probably not possible to literally
+ optimize for windows and points within windows at the same time (the latter
+ optimization will affect the kernel distance of the former).
+ We can quantify the extent to which a point is relevant to a window using
+ the covariance of the point's and window's kernel distance from other windows.
+ I wonder if it's possible to express the window distance without treating
+ windows as literal data (IE, the dimensional approach from before).
+ If we're going to avoid the trap above, we must keep one optimization variable
+ per observation.
+ This means maybe we add some dimensions to the observations (to describe
+ windows), but we don't add any coefficients.
+ This is sorta cool - we're essentially saying in this one dimension, these
+ points are close together, same as in the other dimensions.
+ 
+\end_layout
+
+\begin_layout Standard
+Let's think this virtual dimension bit out - it may work after all.
+ For windows, the dimension would seem to make the most sense to be defined
+ in association with a width parameter; this allows you to compare the distance
+ between any two points taking their neighborhoods into account.
+ We can still use the affine transformations without any modifications.
+ This will let us use multiple 'scales' of information simultaneously, but
+ it does not tell us anything about window membership or the relative usefulness
+ of dimensions & virtual dimensions.
+ This is due to the fact that we're treating each point as a point and a
+ window simultaneously.
+\end_layout
+
+\begin_layout Standard
+Let's step back from this a bit and consider the nature of 'windows'.
+ The original idea was to allow local structure to be observed and by using
+ affine transformations, reduce the covering number.
+ The challenge of course is the selection of local structures to use to
+ cover the rest of the data.
+ In an ideal world we would try every possible set of points under affine
+ transformations (preferring larger sets to capture more information).
+ As it is, that sucks.
+ We can assume, however that if a structure is relevant to the data, it
+ will be present in the data, so sampling the data and using that as our
+ starting point makes a lot of sense.
+ The challenge (that hasn't been addressed yet) is what to do with that
+ starting point.
+ We're currently just grabbing a bunch of sets and picking the best one.
+ Ideally, we would be starting from the data and then eliminating points
+ that aren't useful.
+ Lets assume we have a couple sets we want to eliminate points from.
+ Our goal is to end up with a set of points with maximal coverage given
+ a certain number of points.
+\end_layout
+
+\begin_layout Standard
+What if we don't use multiple sets, but rather window the target and use
+ the full input set.
+ In this case the task is to eliminate points in the input set.
+ This may work OK - our divergence is defined as
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\|X,Y\| & =\sum_{x\in\{X\cup Y\}}\left(\frac{\varphi(x:\ X)}{\varphi(x:\ Y)}-1\right)^{2}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Notice that this is a summation over the points in the input set; we should
+ be able to simply add a multiplier:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\|X,Y\| & =\sum_{x_{i}\in\{X\cup Y\}}\beta_{i}\left(\frac{\varphi(x_{i}:\ X)}{\varphi(x_{i}:\ Y)}-1\right)^{2}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This allows us to essentially 'ignore' some points in computing the distance
+ between two PDF's.
+ Our task will be to decide which points to ignore.
+ Thus far, we've been taking the RBF kernel distance from this value - doing
+ this gets us back where we started, with optimization parameters inside
+ the kernel function.
+ But I wonder if we could use this in the regularizer, or as part of some
+ other term in the optimization problem.
+ For starters, we would probably want to consider the impact of ignoring
+ a point on the cumulative distance between the input set and the output
+ set.
+ NOTE: even under affine transformations, a set of matching points will
+ have a higher closeness than a single point and the other set; we don't
+ need to worry about the closeness metric selecting for empty sets.
+ NOTE: does removing points this way fuck with the probability estimate?
+ I don't see any reason to keep the multipliers summing to 1...
+\end_layout
+
+\begin_layout Standard
+OK, so we've been trying to minimize the square loss between the SVM and
+ Parzen estimators with a regulator.
+ This works fine, but it's sort of roundabout.
+ What if we simply tried to minimize the weighted Pearson divergence under
+ affine transformations without the kernel function? We could use the kernel
+ function for the SVM using the optimized weights for PDF prediction.
+ What does this get us? We would need to define the windows and sum over
+ the divergence for all windows, given the weighted integral of affine transform
+ations for each window.
+ If this worked the way I'm hoping, it would give us a way to pick points
+ as SV's based on both their neighborhood's relevance to the data and their
+ significance to their neighborhood.
+ The use of multiple windows suggests we could also use multiple window
+ widths.
+ You'll still need a method to normalize the optimization problem; similarity?
+\end_layout
+
+\begin_layout Standard
+Extending this general approach, once we've obtained a subset of the input
+ observations, we could probably define a set of windows over them, and
+ then start applying these to larger windows over the output set - piecewise
+ approximation.
+ This is the hierarchy reasserting itself...
+\end_layout
+
 \end_body
 \end_document

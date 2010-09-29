@@ -1,0 +1,821 @@
+#LyX 1.6.5 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass amsbook
+\begin_preamble
+
+
+
+\usepackage{amsfonts}
+\end_preamble
+\use_default_options false
+\begin_modules
+theorems-ams
+eqs-within-sections
+figs-within-sections
+\end_modules
+\language english
+\inputencoding auto
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\paperfontsize 10
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks false
+\pdf_backref false
+\pdf_pdfusetitle true
+\papersize default
+\use_geometry true
+\use_amsmath 1
+\use_esint 0
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\leftmargin 1.5in
+\topmargin 1in
+\rightmargin 1.5in
+\bottommargin 1.25in
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation skip
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\author "" 
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Acting Machines
+\end_layout
+
+\begin_layout Author
+Ryan Michael
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset nomencl_print
+LatexCommand printnomenclature
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+Introduction
+\end_layout
+
+\begin_layout Standard
+Wikipedia defines 
+\begin_inset Quotes eld
+\end_inset
+
+Machine Learning
+\begin_inset Quotes erd
+\end_inset
+
+ as 
+\emph on
+a scientific discipline that is concerned with the design and development
+ of algorithms that allow computers to learn based on data
+\emph default
+.
+ Machine learning deals with the development of Learning Machines (LM's)
+ capable of autonomously generating probabalistic models using sets of observati
+ons.
+ This text builds upon the foundation of Machine Learning to develop an
+ Acting Machine (AM); a learning machine capable of interacting with with
+ its environment in a motivated way.
+ 
+\end_layout
+
+\begin_layout Chapter
+Motivation
+\end_layout
+
+\begin_layout Standard
+Our objective is to design an system capable of making informed choices
+ about the actions it takes in its environment.
+ In the most general sense, the system is composed of three types of data;
+ a set of 
+\emph on
+actions
+\emph default
+ which the system has taken in the past, a set of 
+\emph on
+internal states
+\emph default
+ whose values motivate the system and a set of 
+\emph on
+observations
+\emph default
+ describing the system's environment.
+ The system can be viewed as a process which takes this information describing
+ it's experience up to the present and generates a new set of actions which
+ are expected to have a specific effect on the system's internal states.
+\end_layout
+
+\begin_layout Standard
+We would like to design a system which makes as few assumptions about the
+ nature and behavior of its environment as possible, and we would like to
+ show that the system provides the best possible performance under those
+ assumptions.
+ In cases where computational resources determine the best possible performance
+ of the system, we would like to use controlling parameters which are intuitive
+ and directly relevant to the underlying processes.
+\end_layout
+
+\begin_layout Chapter
+Causal States
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\epsilon$
+\end_inset
+
+-machines, mixing processes
+\end_layout
+
+\begin_layout Chapter
+Hierarchy
+\end_layout
+
+\begin_layout Standard
+Extension / Layering
+\end_layout
+
+\begin_layout Chapter
+Discretization
+\end_layout
+
+\begin_layout Standard
+Pearson / KL divergence
+\end_layout
+
+\begin_layout Chapter
+Probabalistic Data
+\end_layout
+
+\begin_layout Standard
+Hidden process w/ noise, SVM compression
+\end_layout
+
+\begin_layout Chapter
+Choice
+\end_layout
+
+\begin_layout Standard
+Motivation, internal states, path exploration
+\end_layout
+
+\begin_layout Chapter
+Performance
+\end_layout
+
+\begin_layout Standard
+Rates of convergence, algorithmic complexity, distributed architecture
+\end_layout
+
+\begin_layout Chapter
+Discussion
+\end_layout
+
+\begin_layout Itemize
+Transform invariance other than time/shift
+\end_layout
+
+\begin_layout Itemize
+Robustness of generalization ability
+\end_layout
+
+\begin_layout Itemize
+Complex, context-sensitive planning
+\end_layout
+
+\begin_layout Itemize
+Motivational creep
+\end_layout
+
+\begin_layout Itemize
+Lateral inhibition
+\end_layout
+
+\begin_layout Itemize
+Testing scenarios; quantifying success
+\end_layout
+
+\begin_layout Chapter
+\start_of_appendix
+Results
+\end_layout
+
+\begin_layout Section
+Eunite Competition Data
+\end_layout
+
+\begin_layout Section
+Santa Fe Data
+\end_layout
+
+\begin_layout Section
+CATS Benchmark Data
+\end_layout
+
+\begin_layout Section
+Results Summary
+\end_layout
+
+\begin_layout Chapter
+Discussion of Existing Work
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%http://en.wikipedia.org/wiki/Expectation-maximization_algorithm
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%http://en.wikipedia.org/wiki/Stationary_process
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%http://en.wikipedia.org/wiki/Ergodicity
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%http://en.wikipedia.org/wiki/Mixing_(mathematics)
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%http://en.wikipedia.org/wiki/Lyapunov_exponent
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%http://en.wikipedia.org/wiki/Recurrence_quantification_analysis
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%http://en.wikipedia.org/wiki/Recurrence_plot
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%http://en.wikipedia.org/wiki/Autoregressive_fractionally_integrated_moving_averag
+e
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%http://en.wikipedia.org/wiki/Autocorrelation
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%
+\backslash
+url{http://en.wikipedia.org/wiki/Linear_discriminant_analysis}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Hidden Markov Model
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+% cannot account for future states - only capable of prediction
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+% weak, short-term memory
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Box-Jenkins
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+% intended for simplistic processes with well-understood stationarity and
+ periodicity
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+% http://en.wikipedia.org/wiki/Box-Jenkins
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Spectral Analysis
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+% assumes some type of frequency-domain decomposition.
+  Frequency-domain signal representations do not do a very good job predicting
+ time-domain values.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Shrinking-
+\begin_inset Formula $\epsilon$
+\end_inset
+
+ SVM Regression
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+% theoretical foundation weak; only compensates for the relevance of recent
+ data.
+  See Markhov problem
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Chapter
+SVM Details & Optimizations
+\end_layout
+
+\begin_layout Section
+Quadratic Optimization Problem
+\end_layout
+
+\begin_layout Section
+Support Vector Decomposition 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Marginal
+status collapsed
+
+\begin_layout Plain Layout
+This section is probably better as an appendix
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Due to the simplicity of the constraints in the optimization problem, it
+ is possible to use the decomposition method of Osuna to reduce the memory
+ requirements of the Parzen-SVM algorithm.
+\end_layout
+
+\begin_layout Subsection
+Sub-Problem Definition 
+\end_layout
+
+\begin_layout Standard
+The decomposition algorithm breaks 
+\begin_inset Formula $X$
+\end_inset
+
+ into two working sets 
+\begin_inset Formula $B,N$
+\end_inset
+
+, and attempts to optimize 
+\begin_inset Formula $B$
+\end_inset
+
+ while keeping 
+\begin_inset Formula $N$
+\end_inset
+
+ fixed.
+ This results in the following iterative optimization problem where 
+\begin_inset Formula $\boldsymbol{\beta}^{k}$
+\end_inset
+
+ denotes the result of the previous iteration:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+W(\boldsymbol{\beta}_{B}) & =\frac{1}{2}\begin{bmatrix}\boldsymbol{\beta}_{B}^{T} & (\boldsymbol{\beta}_{N}^{k})^{T}\end{bmatrix}\begin{bmatrix}P_{BB} & P_{BN}\\
+P_{NB} & P_{NN}\end{bmatrix}\begin{bmatrix}\boldsymbol{\beta}_{B}\\
+\boldsymbol{\beta}_{N}^{k}\end{bmatrix}-\begin{bmatrix}q_{B}^{T} & q_{N}^{T}\end{bmatrix}\begin{bmatrix}\boldsymbol{\beta}_{B}\\
+\boldsymbol{\beta}_{N}^{k}\end{bmatrix}\\
+ & =\frac{1}{2}\boldsymbol{\beta}_{B}^{T}P_{BB}\boldsymbol{\beta}_{B}-(-q_{B}+P_{BN}\boldsymbol{\beta}_{N}^{k})^{T}\boldsymbol{\beta}_{B}\\
+ & =\frac{1}{2}\begin{bmatrix}\beta_{i} & \beta_{j}\end{bmatrix}\begin{bmatrix}P_{ii} & P_{ij}\\
+P_{ij} & P_{jj}\end{bmatrix}\begin{bmatrix}\beta_{i}\\
+\beta_{j}\end{bmatrix}-(-q_{B}+P_{BN}\boldsymbol{\beta}_{N}^{k})^{T}\begin{bmatrix}\beta_{i}\\
+\beta_{j}\end{bmatrix}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{equation}
+\text{subject to}\quad0\le\beta_{i},\beta_{j},\quad\beta_{i}+\beta_{j}=1-\mathbf{1}^{T}\boldsymbol{\beta}_{N}^{k}\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+ Working Set Selection 
+\end_layout
+
+\begin_layout Standard
+Select
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align}
+ & i\in\text{arg}\max_{t}\left\{ -\nabla f(\boldsymbol{\beta}^{k})_{t}\ |\quad t\in I(\boldsymbol{\beta}^{k})\right\} \\
+ & j\in\text{arg}\min_{t}\left\{ -\frac{b_{it}^{2}}{a_{it}}\ |\quad t\in I(\boldsymbol{\beta}^{k}),\quad-\nabla f(\boldsymbol{\beta}^{k})_{t}<-\nabla f(\boldsymbol{\beta}^{k})_{i}\right\} \end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Where 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+% This needs to be checked for the new optimization scenario
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align}
+I(\boldsymbol{\beta}) & \equiv\{t\ |\quad\beta_{t}<1\quad\text{or}\quad\beta_{t}>0\}\\
+ & a_{it}=P_{ii}+P_{tt}-2P_{it}\\
+ & \bar{a}_{it}=\begin{cases}
+a_{it} & \text{if}\ a_{it}>0\\
+\delta & \text{otherwise}\end{cases}\\
+ & b_{it}=-\nabla f(\boldsymbol{\beta}^{k})_{i}+\nabla f(\boldsymbol{\beta}^{k})_{t}\\
+\nabla f(\boldsymbol{\beta})_{i} & \equiv P_{i}\boldsymbol{\beta}-q_{i}\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Stopping Condition 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{equation}
+\max_{i\in I(\boldsymbol{\alpha}^{k})}-\nabla f(\boldsymbol{\alpha})_{i}+\min_{j\in I(\boldsymbol{\alpha}^{k})}\nabla f(\boldsymbol{\alpha})_{j}\le\epsilon\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Cascade SVM
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Hazan08"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Parallel SVM Decomposition
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Graf04"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Chapter
+Further Research
+\end_layout
+
+\begin_layout Section
+Data Pre-Processing
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+% logistic function using mean and sd to put most training points between
+ .1 and .9
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+% logistic function from delta using mean and sd in same way if data non-station
+ary
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+% iterative integration process until stationary data found ?
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Performance
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+btprint "btPrintAll"
+bibfiles "Research/research.bib"
+options "bibtotoc,plain"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
