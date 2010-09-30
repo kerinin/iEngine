@@ -1,4 +1,4 @@
-#LyX 1.6.7 created this file. For more info see http://www.lyx.org/
+#LyX 1.6.2 created this file. For more info see http://www.lyx.org/
 \lyxformat 345
 \begin_document
 \begin_header
@@ -502,7 +502,7 @@ We can now define the causal states of a process.
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\epsilon(\overleftarrow{s}) & \equiv\left\{ \overleftarrow{s\prime}|\ \Pr\left(\overrightarrow{S}\in F|\overleftarrow{S}=\overleftarrow{s}\right)=\Pr\left(\overrightarrow{S}\in F|\overleftarrow{S}=\overleftarrow{s\prime}\right),\ \forall F\in\sigma(\overrightarrow{S}),\overleftarrow{s\prime}\in\overleftarrow{S}\right\} \end{align*}
+\epsilon(\overleftarrow{x}) & \equiv\left\{ \overleftarrow{x\prime}|\ \Pr\left(\overrightarrow{X}\in F|\overleftarrow{X}=\overleftarrow{x}\right)=\Pr\left(\overrightarrow{X}\in F|\overleftarrow{X}=\overleftarrow{x\prime}\right),\ \forall F\in\sigma(\overrightarrow{X}),\overleftarrow{x\prime}\in\overleftarrow{X}\right\} \end{align*}
 
 \end_inset
 
@@ -511,15 +511,15 @@ We can now define the causal states of a process.
 
 \begin_layout Standard
 In other words, a causal state 
-\begin_inset Formula $\epsilon(\overleftarrow{s})$
+\begin_inset Formula $\epsilon(\overleftarrow{x})$
 \end_inset
 
  is the set of all histories 
-\begin_inset Formula $\overleftarrow{s\prime}$
+\begin_inset Formula $\overleftarrow{x\prime}$
 \end_inset
 
  for which the probability of the future 
-\begin_inset Formula $\overrightarrow{S}$
+\begin_inset Formula $\overrightarrow{X}$
 \end_inset
 
  taking some value 
@@ -530,11 +530,11 @@ In other words, a causal state
  A causal state encodes the set of paths through time leading to a given
  outcome.
  We denote a give causal state 
-\begin_inset Formula $\mathcal{S}_{i}$
+\begin_inset Formula $\mathcal{X}_{i}$
 \end_inset
 
  and the set of all causal states for a process 
-\begin_inset Formula $\boldsymbol{\mathcal{S}}$
+\begin_inset Formula $\boldsymbol{\mathcal{X}}$
 \end_inset
 
 .
@@ -558,7 +558,7 @@ sufficient statistic
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-I[\overrightarrow{S};\mathcal{S}] & =I[\overrightarrow{S};\overleftarrow{S}]\end{align*}
+I[\overrightarrow{X};\mathcal{X}] & =I[\overrightarrow{X};\overleftarrow{X}]\end{align*}
 
 \end_inset
 
@@ -602,8 +602,8 @@ key "Shal01"
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-H[\overrightarrow{S}|\hat{\mathcal{R}}] & =H[\overrightarrow{S}|\mathcal{S}]\\
-H[\boldsymbol{\mathcal{S}}] & \le H[\hat{\boldsymbol{\mathcal{R}}}]\end{align*}
+H[\overrightarrow{X}|\hat{\mathcal{R}}] & =H[\overrightarrow{X}|\mathcal{X}]\\
+H[\boldsymbol{\mathcal{X}}] & \le H[\hat{\boldsymbol{\mathcal{R}}}]\end{align*}
 
 \end_inset
 
@@ -675,11 +675,11 @@ The concept of mixing processes has been briefly mentioned, however it deserves
 \end_inset
 
 -machines assumed that 
-\begin_inset Formula $S$
+\begin_inset Formula $X$
 \end_inset
 
  was stationary; that 
-\begin_inset Formula $\Pr(S_{i}=s)=\Pr(S_{j}=s),\ \forall i,j$
+\begin_inset Formula $\Pr(X_{i}=x)=\Pr(X_{j}=x),\ \forall i,j$
 \end_inset
 
 .
@@ -723,8 +723,8 @@ Mixing processes are stochastic processes in which the dependance of the
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-\lim_{\tau\rightarrow\infty}\Pr(\overrightarrow{S_{i+\tau}}|\overleftarrow{S_{i}}) & =\Pr(\overrightarrow{S_{i}})\\
-\int_{o}^{\infty}\Pr(\overrightarrow{S_{i+\tau}}|\overleftarrow{S_{i}})-\Pr(\overrightarrow{S_{i}}) & <\infty\end{align*}
+\lim_{\tau\rightarrow\infty}\Pr(\overrightarrow{X_{i+\tau}}|\overleftarrow{X_{i}}) & =\Pr(\overrightarrow{X_{i}})\\
+\int_{o}^{\infty}\Pr(\overrightarrow{X_{i+\tau}}|\overleftarrow{X_{i}})-\Pr(\overrightarrow{X_{i}}) & <\infty\end{align*}
 
 \end_inset
 
@@ -750,11 +750,11 @@ Finite Sequences
 It is now time to move away from infinite pasts, and thus from maximal reduction
 s in uncertainty.
  We have shown that the causal states 
-\begin_inset Formula $\boldsymbol{\mathcal{S}}$
+\begin_inset Formula $\boldsymbol{\mathcal{X}}$
 \end_inset
 
  represent the maximal reduction in uncertainty about 
-\begin_inset Formula $S$
+\begin_inset Formula $X$
 \end_inset
 
  possible.
@@ -766,12 +766,12 @@ s in uncertainty.
 
  which describes either the maximal uncertainty we are willing to 'trade'
  for shorter sequences in 
-\begin_inset Formula $\mathbf{S}$
+\begin_inset Formula $\mathbf{X}$
 \end_inset
 
  (when working from an infinite set) or the uncertainty resulting from a
  given set of sequences 
-\begin_inset Formula $\mathbf{S}$
+\begin_inset Formula $\mathbf{X}$
 \end_inset
 
  (when working from actual data).
@@ -780,7 +780,7 @@ s in uncertainty.
 
 \begin_layout Standard
 We can define the causal states 
-\begin_inset Formula $\boldsymbol{\mathcal{S}}^{L}$
+\begin_inset Formula $\boldsymbol{\mathcal{X}}^{L}$
 \end_inset
 
  of the set of finite sequences of length 
@@ -797,7 +797,7 @@ We can define the causal states
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-H[\boldsymbol{\mathcal{S}}^{L}]+\xi & \le H[\boldsymbol{\mathcal{S}}]\end{align*}
+H[\boldsymbol{\mathcal{X}}^{L}]+\xi & \le H[\boldsymbol{\mathcal{X}}]\end{align*}
 
 \end_inset
 
@@ -815,13 +815,176 @@ Fortunately it can be shown that under the assumption of sequences of length
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-I[\overrightarrow{S}^{L};\mathcal{S}^{L}] & =I[\overrightarrow{S}^{L};\overleftarrow{S}^{L}]\\
-H[\overrightarrow{S}^{L}|\hat{\mathcal{R}}^{L}] & =H[\overrightarrow{S}^{L}|\mathcal{S}^{L}]\\
-H[\boldsymbol{\mathcal{S}}^{L}] & \le H[\hat{\boldsymbol{\mathcal{R}}}^{L}]\end{align*}
+I[\overrightarrow{X}^{L};\mathcal{X}^{L}] & =I[\overrightarrow{X}^{L};\overleftarrow{X}^{L}]\\
+H[\overrightarrow{X}^{L}|\hat{\mathcal{R}}^{L}] & =H[\overrightarrow{X}^{L}|\mathcal{X}^{L}]\\
+H[\boldsymbol{\mathcal{X}}^{L}] & \le H[\hat{\boldsymbol{\mathcal{R}}}^{L}]\end{align*}
 
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+Another useful property of finite causal states is that reconstructing the
+ causal states for sequences of length 
+\begin_inset Formula $L$
+\end_inset
+
+ constitutes a partial reconstruction of sequences of length 
+\begin_inset Formula $L+1$
+\end_inset
+
+.
+ Intuitively, if a causal state 
+\begin_inset Formula $\mathcal{X}^{L}$
+\end_inset
+
+ of length 
+\begin_inset Formula $L$
+\end_inset
+
+ contains all the sequences preceeding some value 
+\begin_inset Formula $x$
+\end_inset
+
+, than it must be true that the sequence defined by the last 
+\begin_inset Formula $L$
+\end_inset
+
+ elements of any sequence in 
+\begin_inset Formula $\mathcal{X}^{L+1}$
+\end_inset
+
+ are members of 
+\begin_inset Formula $\mathcal{X}$
+\end_inset
+
+.
+ If we consider the causal states as a partioning of 
+\begin_inset Formula $\mathbf{X}$
+\end_inset
+
+, we can state that the causal states 
+\begin_inset Formula $\mathcal{X}^{L+1}$
+\end_inset
+
+ will be partitions of 
+\begin_inset Formula $\mathcal{X}^{L}$
+\end_inset
+
+, in the same way that 
+\begin_inset Formula $\mathcal{X}^{L}$
+\end_inset
+
+ will be partitions of 
+\begin_inset Formula $\mathbf{X}$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Section
+Reconstruction Deconstruction
+\end_layout
+
+\begin_layout Standard
+We approach the reconstruction problem by deconstructing it into a set of
+ smaller sub-problems; specifically we will describe an algorithm which
+ begins with 
+\begin_inset Formula $L=1$
+\end_inset
+
+ and recursively expands to describe arbitrary sequence lengths.
+ We know that the infinite causal states are maximally predictive of 
+\begin_inset Formula $X$
+\end_inset
+
+, we now begin to address the issue of computational complexity, and we
+ will develop some heuristics to optimize a problem's computational complexity
+ based on the structure of 
+\begin_inset Formula $X$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+We will deal with two methods of building from 
+\begin_inset Formula $L=1$
+\end_inset
+
+ to some more useful length; 
+\emph on
+extension
+\emph default
+ and 
+\emph on
+translation
+\emph default
+.
+ Extension allows us to extend the sequence length of a given set of causal
+ states, while translation builds a hierarchical layer which combines causal
+ states.
+\end_layout
+
+\begin_layout Standard
+Extension takes a set of causal states 
+\begin_inset Formula $\mathcal{X}^{L}$
+\end_inset
+
+ and determines the causal states of sequences one element longer.
+ We'll refer to the process of reconstruction through extension as 
+\begin_inset Formula $\psi:\mathcal{X}^{L}\times\mathbf{X}\longmapsto\mathcal{X}^{L+1}$
+\end_inset
+
+.
+ Each iteration of the extension process produces a longer set of causal
+ states.
+\end_layout
+
+\begin_layout Standard
+Translation on the other hand creates a new problem space defined over the
+ existing causal states.
+ Translation allows us to build a hierarchical system in which each layer
+ builds sequences of 
+\emph on
+causal states
+\emph default
+, rather than sequences of 
+\emph on
+observations
+\emph default
+.
+ We refer to the process of translation as a mapping 
+\begin_inset Formula $\mathcal{T}:\boldsymbol{\mathcal{X}}^{L}\longmapsto Y,\quad Y\in\mathcal{A}^{L}$
+\end_inset
+
+.
+ While extension adds a single element to a sequence, translation allows
+ us to add entire sequences together.
+\end_layout
+
+\begin_layout Itemize
+Heuristics
+\end_layout
+
+\begin_layout Section
+Transition Probabilities
+\end_layout
+
+\begin_layout Itemize
+each layer both encodes the transition probabilities of lower layers and
+ provides marginal probabilities for sequences with the layer
+\end_layout
+
+\begin_layout Section
+Expected Values
+\end_layout
+
+\begin_layout Itemize
+Conditional expected value can be calculated from marginal expected value
+ of sequences
 \end_layout
 
 \begin_layout Chapter
