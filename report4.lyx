@@ -1,4 +1,4 @@
-#LyX 1.6.5 created this file. For more info see http://www.lyx.org/
+#LyX 1.6.7 created this file. For more info see http://www.lyx.org/
 \lyxformat 345
 \begin_document
 \begin_header
@@ -661,6 +661,167 @@ Hierarchy
 
 \begin_layout Standard
 Extension / Layering
+\end_layout
+
+\begin_layout Section
+Mixing
+\end_layout
+
+\begin_layout Standard
+The concept of mixing processes has been briefly mentioned, however it deserves
+ more discussion.
+ The original formulation of 
+\begin_inset Formula $\epsilon$
+\end_inset
+
+-machines assumed that 
+\begin_inset Formula $S$
+\end_inset
+
+ was stationary; that 
+\begin_inset Formula $\Pr(S_{i}=s)=\Pr(S_{j}=s),\ \forall i,j$
+\end_inset
+
+.
+ While this assumption makes some of the math simpler, it is a relatiely
+ rigid constraint; many real-world processes which we would like to model
+ do not satisfy the constraint that their probability distribution is time-invar
+iant
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Notice that while the distribution of a stationary process is constant,
+ the paths traced by an observation of such a process can still have structure,
+ and that structure can change over time.
+ This is to say that while 
+\begin_inset Formula $\Pr(S)$
+\end_inset
+
+ is constant, 
+\begin_inset Formula $\Pr(S_{i}|S_{j})$
+\end_inset
+
+ need not be.
+\end_layout
+
+\end_inset
+
+.
+ We therefore use the weaker assumption of a mixing process.
+\end_layout
+
+\begin_layout Standard
+Mixing processes are stochastic processes in which the dependance of the
+ future on the past decreases with time.
+ We will make the two assumptions about the process 
+\begin_inset Formula $S$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\lim_{\tau\rightarrow\infty}\Pr(\overrightarrow{S_{i+\tau}}|\overleftarrow{S_{i}}) & =\Pr(\overrightarrow{S_{i}})\\
+\int_{o}^{\infty}\Pr(\overrightarrow{S_{i+\tau}}|\overleftarrow{S_{i}})-\Pr(\overrightarrow{S_{i}}) & <\infty\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In other words, the future is independant of the distant past, and the correlati
+on between the past and the future decays fast enough that the influence
+ of the past is bounded.
+ 
+\end_layout
+
+\begin_layout Itemize
+Address the implications of mixing on CM & proofs of minimality & sufficiency
+\end_layout
+
+\begin_layout Section
+Finite Sequences
+\end_layout
+
+\begin_layout Standard
+It is now time to move away from infinite pasts, and thus from maximal reduction
+s in uncertainty.
+ We have shown that the causal states 
+\begin_inset Formula $\boldsymbol{\mathcal{S}}$
+\end_inset
+
+ represent the maximal reduction in uncertainty about 
+\begin_inset Formula $S$
+\end_inset
+
+ possible.
+ We are unlikely to deal with infinite sequences of data in daily life;
+ any analysis of real-world data will necessarily be finite.
+ We can model this in our algorithm by adding an error term 
+\begin_inset Formula $\xi$
+\end_inset
+
+ which describes either the maximal uncertainty we are willing to 'trade'
+ for shorter sequences in 
+\begin_inset Formula $\mathbf{S}$
+\end_inset
+
+ (when working from an infinite set) or the uncertainty resulting from a
+ given set of sequences 
+\begin_inset Formula $\mathbf{S}$
+\end_inset
+
+ (when working from actual data).
+ 
+\end_layout
+
+\begin_layout Standard
+We can define the causal states 
+\begin_inset Formula $\boldsymbol{\mathcal{S}}^{L}$
+\end_inset
+
+ of the set of finite sequences of length 
+\begin_inset Formula $L$
+\end_inset
+
+; the uncertainty of the finite causal states differs from the uncertainty
+ of the infinite causal states by at most the error term 
+\begin_inset Formula $\xi$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+H[\boldsymbol{\mathcal{S}}^{L}]+\xi & \le H[\boldsymbol{\mathcal{S}}]\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortunately it can be shown that under the assumption of sequences of length
+ 
+\begin_inset Formula $L$
+\end_inset
+
+ the properties of minimality and sufficiency are retained.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+I[\overrightarrow{S}^{L};\mathcal{S}^{L}] & =I[\overrightarrow{S}^{L};\overleftarrow{S}^{L}]\\
+H[\overrightarrow{S}^{L}|\hat{\mathcal{R}}^{L}] & =H[\overrightarrow{S}^{L}|\mathcal{S}^{L}]\\
+H[\boldsymbol{\mathcal{S}}^{L}] & \le H[\hat{\boldsymbol{\mathcal{R}}}^{L}]\end{align*}
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Chapter
