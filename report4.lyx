@@ -1,4 +1,4 @@
-#LyX 1.6.2 created this file. For more info see http://www.lyx.org/
+#LyX 1.6.7 created this file. For more info see http://www.lyx.org/
 \lyxformat 345
 \begin_document
 \begin_header
@@ -971,6 +971,74 @@ Heuristics
 
 \begin_layout Section
 Transition Probabilities
+\end_layout
+
+\begin_layout Standard
+The traditional 
+\begin_inset Formula $ $
+\end_inset
+
+
+\begin_inset Formula $\epsilon$
+\end_inset
+
+-machine is a monoid 
+\begin_inset Formula $(\epsilon,T)$
+\end_inset
+
+ describing the set of causal states and the transition probability between
+ states.
+ The transition probability is concieved as the probability that the next
+ observation of the sequance 
+\begin_inset Formula $X$
+\end_inset
+
+ will induce the causal state 
+\begin_inset Formula $\mathcal{X}_{t+1}$
+\end_inset
+
+ given the current causal state 
+\begin_inset Formula $\mathcal{X}_{t}$
+\end_inset
+
+.
+ For our purposes, the transition probability function 
+\begin_inset Formula $T$
+\end_inset
+
+ will describe the probability that the next full sequence of length 
+\begin_inset Formula $L$
+\end_inset
+
+ will induce the causal state 
+\begin_inset Formula $\mathcal{X}_{t+L}$
+\end_inset
+
+ given the current causal state 
+\begin_inset Formula $\mathcal{X}$
+\end_inset
+
+.
+ That is, while the traditional formulation describes the probability of
+ observing a point 
+\begin_inset Formula $x\in\mathcal{A}$
+\end_inset
+
+ after having observed 
+\begin_inset Formula $\mathcal{X}_{i}$
+\end_inset
+
+, our approach will describe the probability of observing a causal state
+ 
+\begin_inset Formula $\mathcal{X}^{L}\in\boldsymbol{\mathcal{X}}^{L}$
+\end_inset
+
+ after having observed 
+\begin_inset Formula $\mathcal{X}_{i}^{L}$
+\end_inset
+
+.
+ 
 \end_layout
 
 \begin_layout Itemize
