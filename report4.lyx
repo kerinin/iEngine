@@ -171,7 +171,7 @@ We would like to design a system which makes as few assumptions about the
 \end_layout
 
 \begin_layout Chapter
-Causal States
+Epsilon-Machines
 \end_layout
 
 \begin_layout Standard
@@ -219,7 +219,7 @@ An
  In this sense, a pattern is a representation of some underlying structure,
  regularity, symmetry, etc contained in a data set.
  It is this underlying structure which allows us to make justifiable statements
- about the causal relations underlying a dataset.
+ about the causal relations underlying a data-set.
  The notion of causality which we will use is highly restricted; we will
  refer to an event 
 \begin_inset Formula $A$
@@ -240,6 +240,10 @@ An
 .
 \end_layout
 
+\begin_layout Section
+Histories and Futures
+\end_layout
+
 \begin_layout Standard
 We will begin our discussion of patterns by assuming discrete-valued, discrete-t
 ime mixing processes.
@@ -256,11 +260,399 @@ ime mixing processes.
 \end_inset
 
 , and the dependence between observations decreases with time; 
-\begin_inset Formula $\lim_{t\rightarrow\infty}\mathbb{P}(S_{t}|S_{i})=\mathbb{P}(S_{t})\quad\forall S_{i}$
+\begin_inset Formula $\lim_{t\rightarrow\infty}\Pr(S_{t}|S_{i})=\Pr(S_{t})\quad\forall S_{i}$
 \end_inset
 
 .
  
+\end_layout
+
+\begin_layout Standard
+Define the set of observations leading up to and including 
+\begin_inset Formula $s_{i}$
+\end_inset
+
+ as a 
+\emph on
+history
+\emph default
+ denoted 
+\begin_inset Formula $\overleftarrow{S_{i}}$
+\end_inset
+
+, and the set of observations after as a 
+\emph on
+future
+\emph default
+ denoted 
+\begin_inset Formula $\overrightarrow{S_{i}}$
+\end_inset
+
+.
+ Our goal is to predict the future
+\begin_inset Formula $ $
+\end_inset
+
+
+\begin_inset Formula $\overrightarrow{S}$
+\end_inset
+
+ based on the past 
+\begin_inset Formula $\overleftarrow{S}$
+\end_inset
+
+.
+ We begin by taking the set 
+\begin_inset Formula $\overleftarrow{\mathbf{S}}$
+\end_inset
+
+ of all pasts and splitting it into mutually exclusive subsets 
+\begin_inset Formula $\boldsymbol{\mathcal{R}}$
+\end_inset
+
+.
+ Each 
+\begin_inset Formula $\rho\in\boldsymbol{\mathcal{R}}$
+\end_inset
+
+ will be called a 
+\emph on
+state
+\emph default
+.
+ When the current history 
+\begin_inset Formula $\overleftarrow{s}$
+\end_inset
+
+ is included in the set 
+\begin_inset Formula $\rho$
+\end_inset
+
+ we refer to the process as being 
+\emph on
+in state
+\emph default
+ 
+\begin_inset Formula $\rho$
+\end_inset
+
+.
+ Thus, we define a mapping 
+\begin_inset Formula $\eta$
+\end_inset
+
+ from histories to effective states:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\eta:\overleftarrow{\mathbf{S}} & \longmapsto\boldsymbol{\mathcal{R}}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+A specific individual history 
+\begin_inset Formula $\overleftarrow{s}\in\overleftarrow{\mathbf{S}}$
+\end_inset
+
+ maps to a specific state 
+\begin_inset Formula $\rho\in\boldsymbol{\mathcal{R}}$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Section
+Information Entropy
+\end_layout
+
+\begin_layout Standard
+We would like to discuss the uncertainty of the future.
+ We will use the concept of information entropy 
+\begin_inset Formula $H[X]$
+\end_inset
+
+ to describe the amount of uncertainty a given future contains.
+ The information entropy describes the unpredictability of a random process.
+ For example, a series of coin tosses with a fair coin has maximum entropy,
+ since there is no way to predict what will come next.
+ A string of coin tosses with a two-headed coin has zero entropy, since
+ the coin will always come up heads.
+ The information entropy of a process 
+\begin_inset Formula $X$
+\end_inset
+
+ taking values in 
+\begin_inset Formula $\mathcal{A}$
+\end_inset
+
+ is defined as 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+H[X] & \equiv-\sum_{x\in\mathcal{A}}\Pr(X=x)\log\Pr(X=x)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We can likewise describe the joint information entropy; the unpredictability
+ of joint observations of two processes 
+\begin_inset Formula $X$
+\end_inset
+
+ and 
+\begin_inset Formula $Y$
+\end_inset
+
+ taking values in 
+\begin_inset Formula $\mathcal{A}$
+\end_inset
+
+ and 
+\begin_inset Formula $\mathcal{B}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+H[X,Y] & \equiv-\sum_{(x,y)\in\mathcal{A}\times\mathcal{B}}\Pr(X=x,Y=y)\log\Pr(X=x,Y=y)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+as well as the conditional information entropy; the unpredictability of
+ 
+\begin_inset Formula $X$
+\end_inset
+
+ given that the state of 
+\begin_inset Formula $Y$
+\end_inset
+
+ is known
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+H[X|Y] & \equiv H[X,Y]-H[Y]\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Finally, we can describe the mutual information 
+\begin_inset Formula $I[X;Y]$
+\end_inset
+
+ which describes the average reduction in uncertainty about 
+\begin_inset Formula $X$
+\end_inset
+
+ produced by knowing 
+\begin_inset Formula $Y$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $ $
+\end_inset
+
+
+\begin_inset Formula \begin{align*}
+I[X;Y] & \equiv H[X]-H[X|Y]\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Causal States
+\end_layout
+
+\begin_layout Standard
+We can now define the causal states of a process.
+ A process 
+\begin_inset Formula $X$
+\end_inset
+
+ has a set of causal states 
+\begin_inset Formula $\epsilon(\overleftarrow{s})$
+\end_inset
+
+ defined as 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\epsilon(\overleftarrow{s}) & \equiv\left\{ \overleftarrow{s\prime}|\ \Pr\left(\overrightarrow{S}\in F|\overleftarrow{S}=\overleftarrow{s}\right)=\Pr\left(\overrightarrow{S}\in F|\overleftarrow{S}=\overleftarrow{s\prime}\right),\ \forall F\in\sigma(\overrightarrow{S}),\overleftarrow{s\prime}\in\overleftarrow{S}\right\} \end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In other words, a causal state 
+\begin_inset Formula $\epsilon(\overleftarrow{s})$
+\end_inset
+
+ is the set of all histories 
+\begin_inset Formula $\overleftarrow{s\prime}$
+\end_inset
+
+ for which the probability of the future 
+\begin_inset Formula $\overrightarrow{S}$
+\end_inset
+
+ taking some value 
+\begin_inset Formula $F$
+\end_inset
+
+ is the same.
+ A causal state encodes the set of paths through time leading to a given
+ outcome.
+ We denote a give causal state 
+\begin_inset Formula $\mathcal{S}_{i}$
+\end_inset
+
+ and the set of all causal states for a process 
+\begin_inset Formula $\boldsymbol{\mathcal{S}}$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+Causal states are of interest to us because they fully describe the causal
+ structure of the process from which they are derived.
+ We describe the causal states as a 
+\emph on
+sufficient statistic
+\emph default
+ for the process 
+\begin_inset Formula $\mathbf{S}$
+\end_inset
+
+, which is to say that the mutual information between the future and the
+ past is the same as the between the future and the causal states
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+I[\overrightarrow{S};\mathcal{S}] & =I[\overrightarrow{S};\overleftarrow{S}]\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Anything you can learn about 
+\begin_inset Formula $\overrightarrow{S}$
+\end_inset
+
+ from the past can also be learned from the causal states.
+\end_layout
+
+\begin_layout Standard
+Another attractive property of the causal states is that they are the most
+ compact sufficient statistic possible.
+ We describe the causal states as a 
+\emph on
+minimal
+\emph default
+.
+ It can be shown
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Shal01"
+
+\end_inset
+
+ that the entropy of the causal states 
+\begin_inset Formula $H[\boldsymbol{\mathcal{S}}]$
+\end_inset
+
+ is smaller than any other partitioning of the past which is equally predictive
+ of the future 
+\begin_inset Formula $\hat{\boldsymbol{\mathcal{R}}}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+H[\overrightarrow{S}|\hat{\mathcal{R}}] & =H[\overrightarrow{S}|\mathcal{S}]\\
+H[\boldsymbol{\mathcal{S}}] & \le H[\hat{\boldsymbol{\mathcal{R}}}]\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This means that the causal states describe the future of 
+\begin_inset Formula $\mathbf{S}$
+\end_inset
+
+ using the least possible amount if information.
+\end_layout
+
+\begin_layout Section
+Reconstruction
+\end_layout
+
+\begin_layout Itemize
+Reconstruction
+\end_layout
+
+\begin_layout Itemize
+Transition Matrix
+\end_layout
+
+\begin_layout Section
+Conclusion
+\end_layout
+
+\begin_layout Standard
+We have established the foundations of an acting machine by describing a
+ generalized problem domain and showing the domain has several useful properties.
+ Having shown that the causal states fully and minimally describe the underlying
+ data-generating process we can now proceed to both refine our understanding
+ of causal states and develop an algorithm to reconstruct them from a set
+ of observations.
+ 
+\end_layout
+
+\begin_layout Standard
+Unfortunately the task of reconstruction remains undefined, and for infinite
+ sequences is computationally intractable.
+ In the next chapter we will begin making the 
+\begin_inset Formula $\epsilon$
+\end_inset
+
+-machine reconstruction task more tractable by considering finite sequences
+ and developing a general algorithm to implement reconstruction.
 \end_layout
 
 \begin_layout Chapter
@@ -280,7 +672,7 @@ Pearson / KL divergence
 \end_layout
 
 \begin_layout Chapter
-Probabalistic Data
+Probabilistic Data
 \end_layout
 
 \begin_layout Standard
@@ -890,7 +1282,6 @@ Performance
 \begin_layout Standard
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
-btprint "btPrintAll"
 bibfiles "Research/research.bib"
 options "bibtotoc,plain"
 
