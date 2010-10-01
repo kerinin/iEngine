@@ -1486,6 +1486,188 @@ The SVM task can now be stated as selecting a loss function
 Support Vector Machines
 \end_layout
 
+\begin_layout Standard
+Support Vector Machines implement the ERM principle using two assumptions.
+ The first assumption is that the estimator 
+\begin_inset Formula $\Lambda$
+\end_inset
+
+ is paramaterized by a set of observations 
+\begin_inset Formula $X=\{(x_{1},y_{1}),...,(x_{\ell},y_{\ell})\}$
+\end_inset
+
+ and a set of associated weights 
+\begin_inset Formula $\beta=\{\beta_{1},...,\beta_{\ell}\}$
+\end_inset
+
+.
+ The second assumption is that the set of observations 
+\begin_inset Formula $X$
+\end_inset
+
+ can be mapped into some feature space 
+\begin_inset Formula $\Psi$
+\end_inset
+
+ in which the optimization task is computationally tractable.
+\end_layout
+
+\begin_layout Standard
+The first assumption means that the estimator 
+\begin_inset Formula $\Lambda$
+\end_inset
+
+ generates estimates using the observations 
+\begin_inset Formula $X$
+\end_inset
+
+ in some way, 
+\emph on
+and no other information
+\emph default
+.
+ SVM's execute an optimization process to determine how to combine a set
+ of observations in some pre-determined manner, and the end result of the
+ optimization task is the set of weights 
+\begin_inset Formula $\beta$
+\end_inset
+
+.
+ The estimator is fully defined by the set 
+\begin_inset Formula $(\beta,X)$
+\end_inset
+
+.
+ It is possible that there exists a parameter 
+\begin_inset Formula $\alpha$
+\end_inset
+
+ with lower entropy than this set.
+\end_layout
+
+\begin_layout Standard
+The second assumption can be made more intuitive by considering the case
+ of binary classification.
+ Given a dataset where 
+\begin_inset Formula $x\in\mathbb{R}^{2},\ y\in\{0,1\}$
+\end_inset
+
+
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+This describes a set of points in two-dimensional space with an associated
+ value of either 0 or 1
+\end_layout
+
+\end_inset
+
+, the task is to produce a function which predicts if a given value of 
+\begin_inset Formula $x$
+\end_inset
+
+ will be 0 or 1.
+ If it happens that a line can be drawn across 
+\begin_inset Formula $\mathbb{R}^{2}$
+\end_inset
+
+ which separates the set 
+\begin_inset Formula $\{y:\ y=0\}$
+\end_inset
+
+ from the set 
+\begin_inset Formula $\{y:\ y=1\}$
+\end_inset
+
+ the optimization problem can be formulated as a simple linear optimization
+ task (Vapnik 5.2).
+ If this is not the case, however, selecting the optimal decision rule is
+ NP-complete
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+The time required to find a solution increases exponentially with the number
+ of observations.
+ 
+\end_layout
+
+\end_inset
+
+.
+ By mapping the set 
+\begin_inset Formula $X$
+\end_inset
+
+ into a high-dimensional space defined by the product space 
+\begin_inset Formula $X\times X$
+\end_inset
+
+
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Imagine X as a set of 
+\begin_inset Formula $\ell$
+\end_inset
+
+ real-valued observations arranged as a column vector.
+ The product space would be the 
+\begin_inset Formula $\ell\times\ell$
+\end_inset
+
+ matrix where each element 
+\begin_inset Formula $\psi_{i,j}$
+\end_inset
+
+ describes the product 
+\begin_inset Formula $x_{i}\cdot x_{j}$
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+, it is possible to formulate the problem as another linear optimization
+ task (Vapnik 5.4).
+ Conceptually, the NP-complete problem is defined by drawing boundaries
+ in 
+\begin_inset Formula $X$
+\end_inset
+
+, however we don't know how many partitions are needed or where they should
+ be placed.
+ Translating the set 
+\begin_inset Formula $X$
+\end_inset
+
+ into its product space allows us to restrict our attention to the relationships
+ between points - a much simpler problem
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+This may seem a little hand-wavey; the nature of the optimization problem
+ in 
+\begin_inset Formula $\Psi$
+\end_inset
+
+ depends on the class of estimator 
+\begin_inset Formula $\Lambda$
+\end_inset
+
+ - we will develop this issue further soon.
+\end_layout
+
+\end_inset
+
+.
+ 
+\end_layout
+
 \begin_layout Itemize
 Work directly with data
 \end_layout
@@ -1503,16 +1685,7 @@ elimination of redundant vectors
 \end_layout
 
 \begin_layout Standard
-We will see that this formulation is easier to work with.
- 
-\end_layout
-
-\begin_layout Standard
 Hidden process w/ noise, SVM compression
-\end_layout
-
-\begin_layout Standard
-
 \end_layout
 
 \begin_layout Standard
