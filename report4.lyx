@@ -1,4 +1,4 @@
-#LyX 1.6.7 created this file. For more info see http://www.lyx.org/
+#LyX 1.6.5 created this file. For more info see http://www.lyx.org/
 \lyxformat 345
 \begin_document
 \begin_header
@@ -884,6 +884,14 @@ Another useful property of finite causal states is that reconstructing the
  
 \end_layout
 
+\begin_layout Itemize
+Relevance of mixing to sequence length
+\end_layout
+
+\begin_layout Itemize
+Monotonicity of entropy convergence as L increases
+\end_layout
+
 \begin_layout Section
 Reconstruction Deconstruction
 \end_layout
@@ -966,7 +974,7 @@ observations
 \end_layout
 
 \begin_layout Itemize
-Heuristics
+Heuristics (later section - part of optimization?)
 \end_layout
 
 \begin_layout Section
@@ -990,7 +998,7 @@ The traditional
  states.
  The transition probability is concieved as the probability that the next
  observation of the sequance 
-\begin_inset Formula $X$
+\begin_inset Formula $\overleftarrow{X}_{t}$
 \end_inset
 
  will induce the causal state 
@@ -1002,7 +1010,7 @@ The traditional
 \end_inset
 
 .
- For our purposes, the transition probability function 
+ For our purposes however, the transition probability function 
 \begin_inset Formula $T$
 \end_inset
 
@@ -1015,7 +1023,7 @@ The traditional
 \end_inset
 
  given the current causal state 
-\begin_inset Formula $\mathcal{X}$
+\begin_inset Formula $\mathcal{X}_{t}$
 \end_inset
 
 .
@@ -1025,7 +1033,7 @@ The traditional
 \end_inset
 
  after having observed 
-\begin_inset Formula $\mathcal{X}_{i}$
+\begin_inset Formula $\mathcal{X}_{t}$
 \end_inset
 
 , our approach will describe the probability of observing a causal state
@@ -1034,16 +1042,101 @@ The traditional
 \end_inset
 
  after having observed 
-\begin_inset Formula $\mathcal{X}_{i}^{L}$
+\begin_inset Formula $\mathcal{X}_{t}^{L}$
 \end_inset
 
 .
  
 \end_layout
 
-\begin_layout Itemize
-each layer both encodes the transition probabilities of lower layers and
- provides marginal probabilities for sequences with the layer
+\begin_layout Standard
+This approach allows us to treat marginal probabilities in the domain 
+\begin_inset Formula $Y$
+\end_inset
+
+ as conditional probabilities in the domain 
+\begin_inset Formula $X$
+\end_inset
+
+.
+ Consider the case where causal states 
+\begin_inset Formula $\mathcal{Y}$
+\end_inset
+
+ are defined as binary pairs of causal states (in other words, 
+\begin_inset Formula $L=2$
+\end_inset
+
+) drawn from 
+\begin_inset Formula $\boldsymbol{\mathcal{X}}$
+\end_inset
+
+ where the marginal probability of 
+\begin_inset Formula $\boldsymbol{\mathcal{X}}$
+\end_inset
+
+ is known.
+ In this case determining the marginal probability 
+\begin_inset Formula $\Pr(\mathcal{Y})$
+\end_inset
+
+ where 
+\begin_inset Formula $\mathcal{Y}=\{\mathcal{X}_{i},\mathcal{X}_{j}\}$
+\end_inset
+
+ tells us the conditional probability 
+\begin_inset Formula $\Pr(\mathcal{X}_{j}|\mathcal{X}_{i})$
+\end_inset
+
+.
+ Working from the definition of conditional probability
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\Pr(A|B) & =\frac{\Pr(A\cap B)}{\Pr(B)}\\
+\Pr(\mathcal{X}_{j}|\mathcal{X}_{i}) & =\frac{\Pr(\mathcal{X}_{j}\cap\mathcal{X}_{i})}{\Pr(\mathcal{X}_{i})}\\
+ & =\frac{\Pr(\mathcal{Y})}{\Pr(\mathcal{X}_{i})}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Clearly this can be extended to sequences in 
+\begin_inset Formula $Y$
+\end_inset
+
+ of arbitrary length
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Notice that this equation holds for any 'missing' element of the set - we
+ could just as easily describe the conditional probability of the first
+ element give the rest, or any of the intermediate elements given their
+ compliment.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\Pr(\mathcal{X}_{n}|\mathcal{X}_{1},...,\mathcal{X}_{n-1}) & =\frac{\Pr(\mathcal{Y})}{\Pr(\mathcal{X}_{1},...,\mathcal{X}_{n-1})},\quad\mathcal{Y}=\{\mathcal{X}_{1},...,\mathcal{X}_{n}\}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This shows that as we translate the problem domain into higher dimensions
+ we extend our prediction horizion by increasing the amount of information
+ available to the system about the process.
 \end_layout
 
 \begin_layout Section
@@ -1053,6 +1146,62 @@ Expected Values
 \begin_layout Itemize
 Conditional expected value can be calculated from marginal expected value
  of sequences
+\end_layout
+
+\begin_layout Section
+Conclusion
+\end_layout
+
+\begin_layout Standard
+In the previous chapter we developed a general approach to learning about
+ the future from the past; in this chapter we have begun to develop an algorithm
+ for accomplishing that task.
+ We have seen that the problem of 
+\begin_inset Formula $\epsilon$
+\end_inset
+
+-machine reconstruction can be broken down into two basic operations; extension
+ and translation.
+ By combining these two operations we can simultaneously increase sequence
+ length and generate transition probability functions.
+ With this hierarchical description of a process in hand, we make contextual
+ predictions of the processes evolution over time.
+\end_layout
+
+\begin_layout Standard
+We have introduced the system's first control variable; the sequence length
+ 
+\begin_inset Formula $L$
+\end_inset
+
+.
+ Under the mixing assumption we know that there exists some value of 
+\begin_inset Formula $L$
+\end_inset
+
+ for which the entropy of the finite causal states is 'acceptably' close
+ to the entropy of the infinite causal states and that increasing 
+\begin_inset Formula $L$
+\end_inset
+
+ monotonically decreases the difference between the two.
+\end_layout
+
+\begin_layout Standard
+One aspect of the system which needs more consideration is the domain of
+ the process 
+\begin_inset Formula $\mathcal{A}$
+\end_inset
+
+.
+ We have restricted this domain to countable sets, however this restriction
+ requires some 'cheating' to work on many classes of real-world data.
+ In the next section we will develop a method to translate a broader class
+ of processes into the domain 
+\begin_inset Formula $\mathcal{A}$
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Chapter
