@@ -1156,16 +1156,15 @@ Conclusion
 In the previous chapter we developed a general approach to learning about
  the future from the past; in this chapter we have begun to develop an algorithm
  for accomplishing that task.
- We have seen that the problem of 
+ We have broken the problem of 
 \begin_inset Formula $\epsilon$
 \end_inset
 
--machine reconstruction can be broken down into two basic operations; extension
- and translation.
+-machine reconstruction into two basic operations; extension and translation.
  By combining these two operations we can simultaneously increase sequence
- length and generate transition probability functions.
- With this hierarchical description of a process in hand, we make contextual
- predictions of the processes evolution over time.
+ length and generate transition probabilites.
+ With this hierarchical description of a process in hand, we can make contextual
+ized predictions of the processes' evolution over time.
 \end_layout
 
 \begin_layout Standard
@@ -1180,7 +1179,7 @@ We have introduced the system's first control variable; the sequence length
 \end_inset
 
  for which the entropy of the finite causal states is 'acceptably' close
- to the entropy of the infinite causal states and that increasing 
+ to the entropy of the infinite causal states, and that increasing 
 \begin_inset Formula $L$
 \end_inset
 
@@ -1188,12 +1187,11 @@ We have introduced the system's first control variable; the sequence length
 \end_layout
 
 \begin_layout Standard
-One aspect of the system which needs more consideration is the domain of
- the process 
+One aspect of the system which needs more consideration is the domain 
 \begin_inset Formula $\mathcal{A}$
 \end_inset
 
-.
+ of the process.
  We have restricted this domain to countable sets, however this restriction
  requires some 'cheating' to work on many classes of real-world data.
  In the next section we will develop a method to translate a broader class
@@ -1205,19 +1203,328 @@ One aspect of the system which needs more consideration is the domain of
 \end_layout
 
 \begin_layout Chapter
+Probabalistic Data
+\end_layout
+
+\begin_layout Standard
+The discrete nature of 
+\begin_inset Formula $\mathcal{A}$
+\end_inset
+
+ would seem to limit the types of processes the system can handle.
+ In this chapter we will use concepts from machine learning to show that
+ a broader class of data can be treated as equivalent to 
+\begin_inset Formula $\mathcal{A}$
+\end_inset
+
+ for our purposes.
+ We will focus on real-valued discrete-time data of arbitrary dimension,
+ however we will show later that any metric space will suffice.
+ 
+\end_layout
+
+\begin_layout Standard
+To accomplish this we will introduce a noise parameter to 
+\begin_inset Formula $X$
+\end_inset
+
+, allowing us to treat unique observations as the same if they are sufficiently
+ similar.
+ We will then show how support vector machines (SVM's) can be applied to
+ the reconstruction task to retain the properties of uniqueness, minimality
+ and sufficiency for our causal states.
+\end_layout
+
+\begin_layout Section
+Noise
+\end_layout
+
+\begin_layout Standard
+We have been assuming that the process we are trying to model is directly
+ observable - that our observations 
+\begin_inset Formula $x_{i}$
+\end_inset
+
+ are direct realizations of the process 
+\begin_inset Formula $X$
+\end_inset
+
+.
+ Let us consider the case where our observations are drawn from a hidden
+ process 
+\begin_inset Formula $Z$
+\end_inset
+
+ with added noise
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+X & =Z+\xi\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Clearly, the nature of 
+\begin_inset Formula $\xi$
+\end_inset
+
+ is important; if it is unbounded and purely random it is possible that
+ the dynamics of 
+\begin_inset Formula $\xi$
+\end_inset
+
+ will entirely dominate the dynamics of 
+\begin_inset Formula $X$
+\end_inset
+
+.
+ We will assume that 
+\begin_inset Formula $\xi$
+\end_inset
+
+ is bounded and normally distributed.
+ We will see later that the magnitude of 
+\begin_inset Formula $\xi$
+\end_inset
+
+ will affect the rate at which the system is able to learn about 
+\begin_inset Formula $Z$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+While we are still trying to describe the dynamics of 
+\begin_inset Formula $Z$
+\end_inset
+
+, we must do so with corrupted observations.
+ We must take a probabalistic approach not only to the transition probabilities
+ between causal states, but to the definition of causal states themselves.
+ That is we must assume that a given sequence of observations has a specific
+ likelihood of exhibiting the dynamics of a given causal state.
+\end_layout
+
+\begin_layout Standard
+While the loss of certainty might seem unfortunate, it opens to door to
+ a richer class of data sets.
+ Without uncertainty we could only learn about a process if exact repetitions
+ existed in the set of observations - these repetitions allow us to correlate
+ the histories leading up to them and generate a set of causal states which
+ could be more compact than 
+\begin_inset Formula $\mathbf{S}$
+\end_inset
+
+.
+ With uncertainty, even if two observations have the same value we cannot
+ know if they were drawn from the same underlying values in 
+\begin_inset Formula $Z$
+\end_inset
+
+.
+ The best we can do is consider regions of the input space.
+ Using this approach, all the observations in a region of space are likely
+ to be drawn from the same value of 
+\begin_inset Formula $z$
+\end_inset
+
+, and thus are likely to have similar dynamics.
+ This shift of focus from values to regions will allow us to essentially
+ work with intervals over the reals.
+\end_layout
+
+\begin_layout Section
+SVM Preliminaries: ERM principle
+\end_layout
+
+\begin_layout Standard
+Support Vector Machines were developed as a way to directly estimate probability
+ distributions given a set of empirical observations.
+ The main benefits of SVM's is that the optimization problems they solve
+ have unique solutions, and those solutions can be shown to be the minimal
+ in solving the given problem.
+ SVM's have well-defined computational complexity and error bounds.
+\end_layout
+
+\begin_layout Standard
+The problem which an SVM solves is referred to as 
+\emph on
+empirical risk minimization
+\emph default
+ (ERM).
+ As it's name implies, empirical risk minimization attempts to minimize
+ the 
+\emph on
+risk
+\emph default
+ of a set of empirical observations of some underlying random variable.
+ The term 'risk' refers to the uncertainty associated with a model with
+ respect to the uncertainty of the underlying process.
+ 
+\end_layout
+
+\begin_layout Standard
+Following (Vapnik); given a random process 
+\begin_inset Formula $\Phi(x)\longmapsto(x,y)$
+\end_inset
+
+ which generates values for 
+\begin_inset Formula $y$
+\end_inset
+
+ based on some unknown conditional probability distribution 
+\begin_inset Formula $\Pr(y|x)$
+\end_inset
+
+, our task is to construct a function 
+\begin_inset Formula $\Lambda(x)\longmapsto(x,y)$
+\end_inset
+
+ which estimates the distribution of 
+\begin_inset Formula $y$
+\end_inset
+
+ based on a set of observations 
+\begin_inset Formula $(x_{1},y_{1}),...,(x_{\ell},y_{\ell})$
+\end_inset
+
+.
+ We will use a function called the loss 
+\begin_inset Formula $L(\Phi,\Lambda)$
+\end_inset
+
+ which describes the difference between the predicted and actual value of
+ 
+\begin_inset Formula $y$
+\end_inset
+
+ given 
+\begin_inset Formula $x$
+\end_inset
+
+.
+ The risk 
+\begin_inset Formula $R$
+\end_inset
+
+ is defined as the sum of the loss function over the set of 
+\begin_inset Formula $\ell$
+\end_inset
+
+ observations.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+R(\Lambda) & =\sum_{i=1}^{\ell}L(y_{i},\Lambda(x_{i}))\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The ERM principle should now be clear; we wish to find the function 
+\begin_inset Formula $\Lambda$
+\end_inset
+
+ with the smallest risk 
+\begin_inset Formula $R$
+\end_inset
+
+.
+ Another way of framing this problem is to treat 
+\begin_inset Formula $\Lambda$
+\end_inset
+
+ as a 
+\emph on
+class
+\emph default
+ of estimators whose behavior is determined by some parameter 
+\begin_inset Formula $\alpha$
+\end_inset
+
+; in this case we wish to find the value of 
+\begin_inset Formula $\alpha$
+\end_inset
+
+ which minimizes the equivalent risk function
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+R(\alpha) & =\sum_{i=1}^{\ell}L(y_{i},\Lambda(x_{i},\alpha))\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The SVM task can now be stated as selecting a loss function 
+\begin_inset Formula $L$
+\end_inset
+
+ and a class of estimators 
+\begin_inset Formula $\Lambda$
+\end_inset
+
+ in such a way that the problem of optimizing 
+\begin_inset Formula $\alpha$
+\end_inset
+
+ is computationally tractable and the resulting estimator has useful properties.
+\end_layout
+
+\begin_layout Section
+Support Vector Machines
+\end_layout
+
+\begin_layout Itemize
+Work directly with data
+\end_layout
+
+\begin_layout Itemize
+high-dimensional space (kernel function)
+\end_layout
+
+\begin_layout Itemize
+convex, quadratic optimization problem
+\end_layout
+
+\begin_layout Itemize
+elimination of redundant vectors
+\end_layout
+
+\begin_layout Standard
+We will see that this formulation is easier to work with.
+ 
+\end_layout
+
+\begin_layout Standard
+Hidden process w/ noise, SVM compression
+\end_layout
+
+\begin_layout Standard
+
+\end_layout
+
+\begin_layout Standard
+Distance metric, SVM compression
+\end_layout
+
+\begin_layout Chapter
 Discretization
 \end_layout
 
 \begin_layout Standard
 Pearson / KL divergence
-\end_layout
-
-\begin_layout Chapter
-Probabilistic Data
-\end_layout
-
-\begin_layout Standard
-Hidden process w/ noise, SVM compression
 \end_layout
 
 \begin_layout Chapter
