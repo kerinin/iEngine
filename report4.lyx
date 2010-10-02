@@ -789,7 +789,7 @@ We can define the causal states
 
 ; the uncertainty of the finite causal states differs from the uncertainty
  of the infinite causal states by at most the error term 
-\begin_inset Formula $\xi$
+\begin_inset Formula $\varepsilon$
 \end_inset
 
 
@@ -797,7 +797,7 @@ We can define the causal states
 
 \begin_layout Standard
 \begin_inset Formula \begin{align*}
-H[\boldsymbol{\mathcal{X}}^{L}]+\xi & \le H[\boldsymbol{\mathcal{X}}]\end{align*}
+H[\boldsymbol{\mathcal{X}}^{L}]+\varepsilon & \le H[\boldsymbol{\mathcal{X}}]\end{align*}
 
 \end_inset
 
@@ -990,7 +990,17 @@ The traditional
 \begin_inset Formula $\epsilon$
 \end_inset
 
--machine is a monoid 
+-machine is a monoid
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+A monoid is a set with an identity function
+\end_layout
+
+\end_inset
+
+ 
 \begin_inset Formula $(\epsilon,T)$
 \end_inset
 
@@ -1390,7 +1400,7 @@ Following (Vapnik); given a random process
 \end_inset
 
  based on a set of observations 
-\begin_inset Formula $(x_{1},y_{1}),...,(x_{\ell},y_{\ell})$
+\begin_inset Formula $(x_{1},y_{1}),\ldots,(x_{\ell},y_{\ell})$
 \end_inset
 
 .
@@ -1493,11 +1503,11 @@ Support Vector Machines implement the ERM principle using two assumptions.
 \end_inset
 
  is paramaterized by a set of observations 
-\begin_inset Formula $X=\{(x_{1},y_{1}),...,(x_{\ell},y_{\ell})\}$
+\begin_inset Formula $X=\{(x_{1},y_{1}),\ldots,(x_{\ell},y_{\ell})\}$
 \end_inset
 
  and a set of associated weights 
-\begin_inset Formula $\beta=\{\beta_{1},...,\beta_{\ell}\}$
+\begin_inset Formula $\beta=\{\beta_{1},\ldots,\beta_{\ell}\}$
 \end_inset
 
 .
@@ -1796,8 +1806,8 @@ The specific class of SVM we will be using estimates probability densities
 \end_inset
 
 
-\begin_inset Formula \begin{align*}
-W(\beta) & =\sum_{i,j=1}^{\ell}\beta_{i}\beta_{j}K(x_{i},x_{j})\end{align*}
+\begin_inset Formula \begin{align}
+W(\beta) & =\sum_{i,j=1}^{\ell}\beta_{i}\beta_{j}K(x_{i},x_{j})\label{eq:SVM_Density_Target_functional}\end{align}
 
 \end_inset
 
@@ -1809,13 +1819,13 @@ subject to the constraints
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-F_{\ell}(x)- & \sum_{j=1}^{\ell}\beta_{j}\int_{-\infty}^{x}K(x_{j,}y)dy\ \le\ \sigma_{\ell}\\
-F_{\ell}(x) & =\frac{1}{\ell}\sum_{i=1}^{\ell}\theta(x-x_{i})\\
+\begin_inset Formula \begin{align}
+F_{\ell}(x)- & \sum_{j=1}^{\ell}\beta_{j}\int_{-\infty}^{x}K(x_{j,}y)dy\ \le\ \sigma_{\ell}\label{eq:SVM_Density_Inequality_Constraint}\\
+F_{\ell}(x) & =\frac{1}{\ell}\sum_{i=1}^{\ell}\theta(x-x_{i})\label{eq:SVM_Density_Emprical_CDF}\\
 \theta(x) & =\begin{cases}
 1 & \text{all coordinates of }x\text{ are positive}\\
-0 & \text{otherwise}\end{cases}\\
-\sigma_{\ell} & =\frac{q(X)}{\sqrt{\ell}}\end{align*}
+0 & \text{otherwise}\end{cases}\label{eq:Step_Function}\\
+\sigma_{\ell} & =\frac{q(X)}{\sqrt{\ell}}\label{eq:SVM_Residual_Equation}\end{align}
 
 \end_inset
 
@@ -1898,16 +1908,394 @@ The 50% quantile of
  
 \end_layout
 
+\begin_layout Itemize
+Most 
+\begin_inset Formula $\beta$
+\end_inset
+
+ will go to 0, leaving the support vectors
+\end_layout
+
+\begin_layout Section
+Kernel Functions
+\end_layout
+
+\begin_layout Itemize
+General definition and conceptual function
+\end_layout
+
+\begin_layout Itemize
+Polynomial, RBF
+\end_layout
+
+\begin_layout Itemize
+tensor product for vectors
+\end_layout
+
+\begin_layout Itemize
+width parameter and nature as control variable
+\end_layout
+
 \begin_layout Section
 SVM Reconstruction
 \end_layout
 
 \begin_layout Standard
-Hidden process w/ noise, SVM compression
+The 
+\begin_inset Formula $\epsilon$
+\end_inset
+
+-machine reconstruction task requires that we determine the set of causal
+ states 
+\begin_inset Formula $\boldsymbol{\mathcal{X}}$
+\end_inset
+
+ of a set of histories 
+\begin_inset Formula $\mathbf{X}$
+\end_inset
+
+.
+ Following the work done in the hierarchy section, we will define the reconstruc
+tion algorithm for finite causal states of length 
+\begin_inset Formula $L$
+\end_inset
+
+.
+ Earlier we considered the implications of adding a noise term 
+\begin_inset Formula $\xi$
+\end_inset
+
+, namely that we could treat points 
+\begin_inset Formula $x$
+\end_inset
+
+ in a given neighborhood as likely drawn from the same value 
+\begin_inset Formula $z$
+\end_inset
+
+.
+ Recall that specifying the marginal probabilities of 
+\begin_inset Formula $\boldsymbol{\mathcal{X}},\boldsymbol{\mathcal{Y}}$
+\end_inset
+
+ is sufficient to determine the conditional probability 
+\begin_inset Formula $\mathcal{X}_{j}|\mathcal{X}_{i}$
+\end_inset
+
+ for any 
+\begin_inset Formula $i,j$
+\end_inset
+
+.
+ It should be clear that the density estimating SVM discussed in the last
+ section constitutes a candidate algorithm for hierarchical 
+\begin_inset Formula $\epsilon$
+\end_inset
+
+-machine reconstruction.
 \end_layout
 
 \begin_layout Standard
-Distance metric, SVM compression
+Support vector machines assume that the set of observations be i.i.d.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Independant and identically distributed
+\end_layout
+
+\end_inset
+
+ As we are explicitly trying to model the conditional dynamics of time series
+ data, this would seem to be a problem.
+ To avoid this conflict, we use finite histories from the set 
+\begin_inset Formula $\mathbf{X}^{L}$
+\end_inset
+
+ rather than individual points from the set 
+\begin_inset Formula $X$
+\end_inset
+
+.
+ We have already assumed that our estimator will contain some error margin
+ 
+\begin_inset Formula $\varepsilon$
+\end_inset
+
+ resulting from using sequences of length 
+\begin_inset Formula $L$
+\end_inset
+
+.
+ Since 
+\begin_inset Formula $\overleftarrow{X}^{L}$
+\end_inset
+
+ is a discrete-time sequence of length 
+\begin_inset Formula $L$
+\end_inset
+
+, we can use a simple mapping from from the history 
+\begin_inset Formula $\overleftarrow{X}^{L}$
+\end_inset
+
+ to a vector
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\phi(\overleftarrow{X}_{i}^{L}) & \longmapsto\dot{x}_{i}=(x_{i-L},\ldots,x_{i})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This mapping generates a set of vectors 
+\begin_inset Formula $\dot{X}$
+\end_inset
+
+ which are amenable to SVM estimation
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\phi(\mathbf{X}^{L}) & \longmapsto\dot{X}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Discuss how 
+\begin_inset Formula $K(x,y)$
+\end_inset
+
+ handles vectors in 
+\begin_inset Formula $\mathbb{R}^{d\times L}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+To generate a reconstruction using the SVM density approach we minimize
+ the functional (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:SVM_Density_Target_functional"
+
+\end_inset
+
+) subject to the constraints of (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:SVM_Density_Inequality_Constraint"
+
+\end_inset
+
+) using the data set 
+\begin_inset Formula $\dot{X}$
+\end_inset
+
+.
+ Elements of 
+\begin_inset Formula $\dot{X}$
+\end_inset
+
+ with non-trivial weights 
+\begin_inset Formula $\beta$
+\end_inset
+
+ are the resulting causal states, and their marginal probabilities are given
+ by the corresponding value of 
+\begin_inset Formula $\beta$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+You might want to justify the assumption that 
+\begin_inset Formula $\Pr(\dot{x}_{i})=\beta_{i}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+How does this relate to 
+\begin_inset Formula $\mathcal{A}$
+\end_inset
+
+? 
+\end_layout
+
+\begin_layout Section
+Probabalistic Extension and Translation
+\end_layout
+
+\begin_layout Itemize
+:(
+\end_layout
+
+\begin_layout Section
+Conclusion
+\end_layout
+
+\begin_layout Standard
+This chapter extended the 
+\begin_inset Formula $\epsilon$
+\end_inset
+
+-machine to the class of real-valued processes 
+\begin_inset Formula $X:\ x\in\mathbb{R}^{d}$
+\end_inset
+
+ by treating 
+\begin_inset Formula $X$
+\end_inset
+
+ as a noisy process generated by a hidden process 
+\begin_inset Formula $Z$
+\end_inset
+
+.
+ Several results from machine learning were adapted to accomplish the reconstruc
+tion task posed under the extended 
+\begin_inset Formula $\epsilon$
+\end_inset
+
+-machine definition.
+ The concept of Empirical Risk Minimization was adopted as a general optimizatio
+n goal, and Support Vector optimization was used to accomplish the optimization
+ task.
+ Finally it was shown that finite discrete-time sequences have obvious interpret
+ations as vectors, and that these vectors are within the class of admissable
+ observations for the SVM algorithm using a Radial Basis Function kernel.
+ In the process we introduced the second control variable, the kernel width
+ parameter 
+\begin_inset Formula $\gamma$
+\end_inset
+
+ which controls the trade-off between model complexity and accuracy.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+What are the implications on 
+\begin_inset Formula $\varepsilon$
+\end_inset
+
+ of combining elements of 
+\begin_inset Formula $\mathcal{A}$
+\end_inset
+
+?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Besides extending the class of admissable processes, the probabalistic framework
+ for 
+\begin_inset Formula $\epsilon$
+\end_inset
+
+-machine reconstruction has a significant benefit; it allows us to control
+ the complexity of 
+\begin_inset Formula $\Lambda$
+\end_inset
+
+.
+ Without the control variable 
+\begin_inset Formula $\gamma$
+\end_inset
+
+ our only way to control the computational cost of reconstruction and estimation
+ is by limiting our prediction horizon.
+ We can now control the sparseness of the estimator independant of the predictio
+n horizon; in essence allowing us to balance the 
+\emph on
+accuracy
+\emph default
+ and 
+\emph on
+duration
+\emph default
+ of our estimates, assuming fixed computational resources and a structural
+ complexity in 
+\begin_inset Formula $X$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+We have chosen the SVM process for reconstruction due to three features;
+ the uniqueness of it solutions, its ability to handle high-dimensional
+ data, and the simplicity of its control variables.
+ SVM optimization is not susceptable to local minima because the optimization
+ problem takes place in the feature space 
+\begin_inset Formula $\Psi$
+\end_inset
+
+ which is constructed such that the target function to be minimized decreases
+ monotinically
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+By contrast, other systems such as some types of neural networks require
+ complicated heuristics such as annealing to ensure that a local solution
+ is also a global solution.
+ This is due to the fact that the target functional does not decrease monotonica
+lly; it is possible to find a solution which is better than any similar
+ solutions, but worse than a radically different solution.
+\end_layout
+
+\end_inset
+
+.
+ The SVM approach was developed in part to address the 'curse of dimensionality'
+, the fact that the complexity of many optimization algorithms increases
+ exponentially with the dimensionality of the data being optimized.
+ The complexity of and SVM will generally increase linearly with the dimensional
+ity of 
+\begin_inset Formula $x$
+\end_inset
+
+, allowing us to extend the prediction horizon with minimal computational
+ cost.
+ Finally, the control parameter 
+\begin_inset Formula $\gamma$
+\end_inset
+
+ provides a simple and intuitive method to control computational costs.
+ 
+\end_layout
+
+\begin_layout Standard
+In the next chapter we will develop a method of handling data sets which
+ are neither discrete-time nor uniformly sampled.
 \end_layout
 
 \begin_layout Chapter
