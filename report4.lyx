@@ -1339,7 +1339,7 @@ While the loss of certainty might seem unfortunate, it opens to door to
 \end_layout
 
 \begin_layout Section
-SVM Preliminaries: ERM principle
+Emprirical Risk Minimization
 \end_layout
 
 \begin_layout Standard
@@ -1668,20 +1668,238 @@ This may seem a little hand-wavey; the nature of the optimization problem
  
 \end_layout
 
-\begin_layout Itemize
-Work directly with data
+\begin_layout Standard
+Various types of problems can be solved with SVM's; classification, regression,
+ density estimation and clustering, to name a few.
+ In general the problem is framed as either a linear or quadratic
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+A quadratic optimization problem is a problem which can be expressed in
+ the form 
+\begin_inset Formula $f(\mathbf{x})=\mathbf{x}^{T}Q\mathbf{x}+\mathbf{c}^{T}\mathbf{x}$
+\end_inset
+
+ subject to inequality constraints 
+\begin_inset Formula $A\mathbf{x}\le\mathbf{b}$
+\end_inset
+
+ and inequality constraints 
+\begin_inset Formula $E\mathbf{x}=\mathbf{d}$
+\end_inset
+
+, where 
+\begin_inset Formula $\mathbf{x}$
+\end_inset
+
+ is a set of 
+\begin_inset Formula $\ell$
+\end_inset
+
+ variables to be optimized, 
+\begin_inset Formula $Q$
+\end_inset
+
+ is an 
+\begin_inset Formula $\ell\times\ell$
+\end_inset
+
+ matrix, 
+\begin_inset Formula $\mathbf{c},A,E$
+\end_inset
+
+ are 
+\begin_inset Formula $1\times\ell$
+\end_inset
+
+ matrices and 
+\begin_inset Formula $f$
+\end_inset
+
+ is the function to be minimized.
+ Quadratic optimization problems are significant because their solutions
+ are unique and methods exist to efficiently compute the minimal value of
+ 
+\begin_inset Formula $\mathbf{x}$
+\end_inset
+
+.
 \end_layout
 
-\begin_layout Itemize
-high-dimensional space (kernel function)
+\end_inset
+
+ optimization problem where the product space 
+\begin_inset Formula $\Psi$
+\end_inset
+
+ is defined using a kernel function 
+\begin_inset Formula $K(x,y)$
+\end_inset
+
+ which follows the following rules
 \end_layout
 
-\begin_layout Itemize
-convex, quadratic optimization problem
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+K(x,x) & =1\\
+\int K(x,y)dy & =1\end{align*}
+
+\end_inset
+
+
 \end_layout
 
-\begin_layout Itemize
-elimination of redundant vectors
+\begin_layout Standard
+Kernel functions can be though of as defining a neighborhood around a point
+ 
+\begin_inset Formula $x$
+\end_inset
+
+ in the domain 
+\begin_inset Formula $X$
+\end_inset
+
+; the points outside the neighborhood will have values approaching 0, while
+ points within the neighborhood will have values describing their proximity
+ to the 'center' of the neighborhood
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+This makes some assumptions about the specific kernel function, namely that
+ it decreases with distance from 
+\begin_inset Formula $x$
+\end_inset
+
+.
+ We will generally be dealing with the radial basis kernel 
+\begin_inset Formula $K(x,y)=e^{-\gamma/(x-y)}$
+\end_inset
+
+, for which these assumptions are true.
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The specific class of SVM we will be using estimates probability densities
+ from a set of observations.
+ This class of SVM minimizes the function 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $ $
+\end_inset
+
+
+\begin_inset Formula \begin{align*}
+W(\beta) & =\sum_{i,j=1}^{\ell}\beta_{i}\beta_{j}K(x_{i},x_{j})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+subject to the constraints
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+F_{\ell}(x)- & \sum_{j=1}^{\ell}\beta_{j}\int_{-\infty}^{x}K(x_{j,}y)dy\ \le\ \sigma_{\ell}\\
+F_{\ell}(x) & =\frac{1}{\ell}\sum_{i=1}^{\ell}\theta(x-x_{i})\\
+\theta(x) & =\begin{cases}
+1 & \text{all coordinates of }x\text{ are positive}\\
+0 & \text{otherwise}\end{cases}\\
+\sigma_{\ell} & =\frac{q(X)}{\sqrt{\ell}}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+where 
+\begin_inset Formula $q(X)$
+\end_inset
+
+ is the 50% quantile of 
+\begin_inset Formula $X$
+\end_inset
+
+
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+The 50% quantile of 
+\begin_inset Formula $X$
+\end_inset
+
+ is the value of 
+\begin_inset Formula $x$
+\end_inset
+
+ for which the cumulative probability is .5.
+\end_layout
+
+\end_inset
+
+.
+ See (Vapnik 7.8) for a thorough discussion of SVMs for density estimation.
+ In general terms, the objective is to minimize the similarity of the input
+ vectors while keeping the resulting estimator as accurate as possible.
+ The term 
+\begin_inset Formula $\sigma_{\ell}$
+\end_inset
+
+ describes the expected error given 
+\begin_inset Formula $\ell$
+\end_inset
+
+ observations.
+ 
+\begin_inset Formula $F_{\ell}$
+\end_inset
+
+ is the empirical cumulative distribution, so the inequality constraint
+ limits the difference between the empirical CDF and the estimator's CDF
+ to the expected error for 
+\begin_inset Formula $\ell$
+\end_inset
+
+ observations.
+ Since the kernel distance 
+\begin_inset Formula $K(x,y)$
+\end_inset
+
+ is essentially a weighted distance measure, the kernel value of two nearby
+ points will be large.
+ To minimize the sum of such kernel distances the multiplier 
+\begin_inset Formula $\beta$
+\end_inset
+
+ must be small for one of the points.
+ The optimization problem is to find the set of points for which reducing
+ 
+\begin_inset Formula $\beta$
+\end_inset
+
+ minimizes 
+\begin_inset Formula $W$
+\end_inset
+
+ without sacrificing predictive accuracy.
+ These points are essentially points which are redundant.
+ 
+\end_layout
+
+\begin_layout Section
+SVM Reconstruction
 \end_layout
 
 \begin_layout Standard
