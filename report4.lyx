@@ -494,7 +494,7 @@ We can now define the causal states of a process.
 \end_inset
 
  has a set of causal states 
-\begin_inset Formula $\epsilon(\overleftarrow{s})$
+\begin_inset Formula $\epsilon(\overleftarrow{x})$
 \end_inset
 
  defined as 
@@ -2300,6 +2300,295 @@ In the next chapter we will develop a method of handling data sets which
 
 \begin_layout Chapter
 Discretization
+\end_layout
+
+\begin_layout Standard
+The assumption of discrete-time data is the next area we will examine.
+ Many data sources do not have obvious discrete-time interpretations.
+ Consider for example a system which gathers data from a distributed sensor
+ network in which each sensor's sample rate is independent and varies over
+ time.
+\end_layout
+
+\begin_layout Standard
+The general approach we will take is to discretize the set of observations
+ into histories defined by their duration 
+\begin_inset Formula $\tau$
+\end_inset
+
+ rather than their sequence length 
+\begin_inset Formula $L$
+\end_inset
+
+.
+ Histories defined in this way accept observations with real-valued time
+ stamps and do not impose any constraints on the timing of the observations,
+ however several questions are raised.
+ The first question is how to define a kernel function which operates over
+ arbitrarily sized sets of observations? The second question is how to handle
+ the set 
+\begin_inset Formula $\mathbf{X}$
+\end_inset
+
+ of all histories? Because 
+\begin_inset Formula $t$
+\end_inset
+
+ can concievably take infinitely many values, even if we specify the history
+ duration 
+\begin_inset Formula $\tau$
+\end_inset
+
+, the set 
+\begin_inset Formula $\mathbf{X}^{\tau}$
+\end_inset
+
+ is uncountable.
+\end_layout
+
+\begin_layout Standard
+We will begin by formalizing the notion of histories defined over time intervals
+ and then answer these questions one at a time.
+\end_layout
+
+\begin_layout Section
+Interval Histories
+\end_layout
+
+\begin_layout Standard
+Rather than dealing with a sequence of values terminating at 
+\begin_inset Formula $x_{i}$
+\end_inset
+
+, we will deal with a set of observations which take place in the time interval
+ 
+\begin_inset Formula $(t-\tau,t]$
+\end_inset
+
+.
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Another potential approach is to use a soft-margin windowing function in
+ which a point's inclusion in a given window is described by some function
+ 
+\begin_inset Formula $f(\bar{x})$
+\end_inset
+
+, for example the radial basis function.
+ We choose to use closed partitions for simplicity, and because it isn't
+ clear what benefit this type of smearing provides.
+\end_layout
+
+\end_inset
+
+ That is, the underlying process 
+\begin_inset Formula $X$
+\end_inset
+
+ is defined as a set of time-stamped observations
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+X & =\left\{ \bar{x}_{1},\ldots,\bar{x}_{\ell}\right\} \\
+\bar{x}_{i} & =(x_{i},t_{i})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We define a 
+\emph on
+history
+\emph default
+ as the set of points 
+\begin_inset Formula $ $
+\end_inset
+
+which fall in the interval 
+\begin_inset Formula $(t-\tau,t]$
+\end_inset
+
+ and a 
+\emph on
+future
+\emph default
+ as the set of points in the interval 
+\begin_inset Formula $(t,t+\tau)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\overleftarrow{x}_{t}^{\tau} & =\left\{ \bar{x}_{i}:\ t-\tau<t_{i}\le t\right\} \\
+\overrightarrow{x}_{t}^{\tau} & =\left\{ \bar{x}_{i}:\ t<t_{i}<t+\tau\right\} \end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We can re-state the causal states as the set
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\epsilon(\overleftarrow{x}_{t}^{\tau}) & \equiv\left\{ \overleftarrow{x}_{i}^{\tau}:\ \left|\Pr\left(\overrightarrow{X}^{\tau}\in F|\overleftarrow{X}^{\tau}=\overleftarrow{x}_{t}^{\tau}\right)-\Pr\left(\overrightarrow{X}^{\tau}\in F|\overleftarrow{X}^{\tau}=\overleftarrow{x}_{i}^{\tau}\right)\right|\le\varepsilon,\ \forall F\in\sigma(\overrightarrow{X}^{\tau}),\ \forall\overleftarrow{x}_{t}^{\tau}\in\overleftarrow{X}^{\tau}\right\} \end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We denote a give causal state 
+\begin_inset Formula $\mathcal{X}_{i}^{\tau}$
+\end_inset
+
+ and the set of all causal states for a process 
+\begin_inset Formula $\boldsymbol{\mathcal{X}}^{\tau}$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Section
+Divergence Kernel
+\end_layout
+
+\begin_layout Standard
+Kernel functions tranditionally operate over metric spaces.
+ We saw in the last chapter that discrete sequences of uniform length could
+ easily be mapped into a measurable vector space.
+ Defining some notion of 'distance' between two sets of continuous-time
+ observations of differing cardinality is less trivial.
+ To do so requires that we treat the observations not as vectors, but as
+ realizations of an underlying probability distribution.
+ 
+\end_layout
+
+\begin_layout Standard
+The set of histories 
+\begin_inset Formula $\mathbf{X}$
+\end_inset
+
+ has been discussed in the discrete-time context, but considering the set
+ of interval histories doesn't preclude us from considering 
+\begin_inset Formula $\mathbf{X}^{\tau}$
+\end_inset
+
+ as a random process from which individual histories 
+\begin_inset Formula $\overleftarrow{x}_{i}^{\tau}$
+\end_inset
+
+ are drawn, or that we could examine a greater number of sample trajectories
+ in some histories than in others.
+ In a sense, while a discrete-time sequence is fully specified, we must
+ consider a continuous-time history as a realization of the probability
+ density of 
+\begin_inset Formula $X$
+\end_inset
+
+ in the neighborhood of time 
+\begin_inset Formula $t$
+\end_inset
+
+.
+ Constructing a metric 
+\begin_inset Formula $\mu$
+\end_inset
+
+ between interval histories is therefore a task of determining the similarity
+ between the underlying distributions of the two histories given the set
+ of observations available; the more similar two distributions are the 'closer'
+ their corresponding histories.
+\end_layout
+
+\begin_layout Standard
+Returning to the concept of information entropy, we would like to describe
+ a property of two sets which follows the following guidelines:
+\end_layout
+
+\begin_layout Enumerate
+The measure should be minimal when the joint entropy of the sets is the
+ same as the marginal entropy of the sets (the sets together contain the
+ same information as they would independently)
+\end_layout
+
+\begin_layout Enumerate
+The measure of two sets should decrease as the uncertainty of the convergence
+ of their distributions decreases: 
+\end_layout
+
+\begin_layout Standard
+In general terms, we want the measure to tell us how certain we are that
+ the histories are drawn from the same distribution.
+ A candidate function for 
+\begin_inset Formula $\mu$
+\end_inset
+
+ is the Kullback-Liebler (KL) divergence:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+D(p\Vert q) & =\int p(x)\log\frac{p(x)}{q(x)}dx\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+where 
+\begin_inset Formula $p,q$
+\end_inset
+
+ are probability density functions of two random variables 
+\begin_inset Formula $P,Q$
+\end_inset
+
+.
+ The KL divergence can be expressed in terms of the joint and marginal entropy
+ of the random functions
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+D(p\Vert q) & =H[P,Q]-H[Q]\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+From this we can see that objective [1] is satisfied; the divergence will
+ be 0 if the joint and marginal entropy is the same.
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+But [2] isn't.
+ Find new divergence or re-consider the objectives
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Making X Finite
 \end_layout
 
 \begin_layout Standard
