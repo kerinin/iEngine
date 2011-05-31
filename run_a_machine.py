@@ -27,28 +27,25 @@ def run():
 	x = np.arange(xrange[0],xrange[1],xstep)
 	y = np.arange(yrange[0],yrange[1],ystep)
 	
-	print "Loading Dataset"
-	# Retrieve dataset
-	#data = getData('B1.dat')[:100]
-	#data = list()
-	#for i in range(100):
-	#	data.append( array( [gauss(2.0,.1), gauss(0.0,.1) ]) )
-	#for i in range(100):
-	#	data.append( array( [gauss(0.0,.1), gauss(2.0,.1) ]) )
-	##data = np.random.rand(10,3).astype('float32')
-	
+	# observations should be in format [sequence][observation][1][dimension]
 	observations = np.random.rand(1,10,1,2).astype('float32')
-	#test_points = observations.reshape(1,1,10,2).astype('float32')
-	test_points = X.astype('float32').reshape(1,1,xN*yN,2)
 	
+	# test_points should be in format [1][1][test_point][dimension]
+	test_points = X.astype('float32').reshape(1,1,xN*yN,2)
+	observation_label_points = observations.reshape(1,1,10,2)
+	
+	# NOTE: the PDF contours seem to be *displaying* properly (not being computed properly though)
 	pdf = am.parzen_function(observations,test_points)
+	#pdf = X.reshape(1,1,xN*yN,2).sum(3)
+	observation_probability = am.parzen_function(observations,observation_label_points)
 
 	z = pdf.reshape([xN,yN]).T
+	sizes = observation_probability.reshape(10)
+	sizes = sizes * ( 50/sizes.max() )
 	
 	
 	CS = plt.contour(x,y,z,10)
-	plt.scatter( observations[0,:,0,0], observations[0,:,0,1] )
-	
+	plt.scatter( observations[0,:,0,0], observations[0,:,0,1], sizes ) # NOTE: these points seem to be displaying properly
 	plt.clabel(CS, inline=1, fontsize=10)
 	plt.axis( [xrange[0],xrange[1],yrange[0],yrange[1]] )
 	plt.show()
