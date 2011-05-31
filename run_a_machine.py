@@ -9,12 +9,39 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
-_Functions = ['run']
+_Functions = ['run', 'test_parzen']
 	
 import theano.tensor as T
 from theano import function
 
 def run():
+  print "Starting"
+  
+  xrange = [0,1]
+  xstep = .01
+  xN = int((xrange[1]-xrange[0])/xstep)
+  x=np.arange(xrange[0],xrange[1],xstep).astype('float32')
+  
+  # 5 distributions containing 10 1-d points
+  distributions = np.random.rand(4,5,1,1).astype('float32')
+  base = np.random.rand(1,5,1,1).astype('float32')
+  
+  divergences = am.kl_divergence(distributions, base, base.reshape(1,1,5,1))
+  
+  for i in range(4):
+    ax = plt.subplot(2,2,i+1, title="Divergence: %s" % divergences[i])
+    
+    ax.plot(x, am.parzen_function( distributions[i].reshape(1,5,1,1), x.reshape(1,1,xN,1) ).reshape(xN), 'b' )
+    ax.plot(x, am.parzen_function( base.reshape(1,5,1,1), x.reshape(1,1,xN,1) ).reshape(xN), 'g--' )
+    ax.axis([0,1,0,None])
+    
+  print divergences
+  print divergences.shape
+  
+  plt.show()
+  
+  
+def test_parzen():
 	print "Starting"
 	
 	xrange = [0,1]
