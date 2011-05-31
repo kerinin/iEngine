@@ -1,5 +1,5 @@
-#LyX 1.6.5 created this file. For more info see http://www.lyx.org/
-\lyxformat 345
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
 \begin_document
 \begin_header
 \textclass amsbook
@@ -15,18 +15,26 @@ theorems-ams
 eqs-within-sections
 figs-within-sections
 \end_modules
+\maintain_unincluded_children false
 \language english
+\language_package default
 \inputencoding auto
+\fontencoding global
 \font_roman default
 \font_sans default
 \font_typewriter default
 \font_default_family default
+\use_non_tex_fonts false
 \font_sc false
 \font_osf false
 \font_sf_scale 100
 \font_tt_scale 100
 
 \graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
 \paperfontsize 10
 \spacing single
 \use_hyperref true
@@ -43,9 +51,18 @@ figs-within-sections
 \use_geometry true
 \use_amsmath 1
 \use_esint 0
+\use_mhchem 1
+\use_mathdots 1
 \cite_engine basic
 \use_bibtopic false
+\use_indices false
 \paperorientation portrait
+\suppress_date false
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
 \leftmargin 1.5in
 \topmargin 1in
 \rightmargin 1.5in
@@ -60,8 +77,9 @@ figs-within-sections
 \paperpagestyle default
 \tracking_changes false
 \output_changes false
-\author "" 
-\author "" 
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
 \end_header
 
 \begin_body
@@ -93,6 +111,7 @@ LatexCommand tableofcontents
 \begin_layout Standard
 \begin_inset CommandInset nomencl_print
 LatexCommand printnomenclature
+set_width "none"
 
 \end_inset
 
@@ -345,8 +364,10 @@ in state
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-\eta:\overleftarrow{\mathbf{S}} & \longmapsto\boldsymbol{\mathcal{R}}\end{align*}
+\begin_inset Formula 
+\begin{align*}
+\eta:\overleftarrow{\mathbf{S}} & \longmapsto\boldsymbol{\mathcal{R}}
+\end{align*}
 
 \end_inset
 
@@ -394,8 +415,10 @@ We would like to discuss the uncertainty of the future.
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-H[X] & \equiv-\sum_{x\in\mathcal{A}}\Pr(X=x)\log\Pr(X=x)\end{align*}
+\begin_inset Formula 
+\begin{align*}
+H[X] & \equiv-\sum_{x\in\mathcal{A}}\Pr(X=x)\log\Pr(X=x)
+\end{align*}
 
 \end_inset
 
@@ -424,8 +447,10 @@ We can likewise describe the joint information entropy; the unpredictability
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-H[X,Y] & \equiv-\sum_{(x,y)\in\mathcal{A}\times\mathcal{B}}\Pr(X=x,Y=y)\log\Pr(X=x,Y=y)\end{align*}
+\begin_inset Formula 
+\begin{align*}
+H[X,Y] & \equiv-\sum_{(x,y)\in\mathcal{A}\times\mathcal{B}}\Pr(X=x,Y=y)\log\Pr(X=x,Y=y)
+\end{align*}
 
 \end_inset
 
@@ -446,8 +471,10 @@ as well as the conditional information entropy; the unpredictability of
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-H[X|Y] & \equiv H[X,Y]-H[Y]\end{align*}
+\begin_inset Formula 
+\begin{align*}
+H[X|Y] & \equiv H[X,Y]-H[Y]
+\end{align*}
 
 \end_inset
 
@@ -475,8 +502,10 @@ Finally, we can describe the mutual information
 \end_inset
 
 
-\begin_inset Formula \begin{align*}
-I[X;Y] & \equiv H[X]-H[X|Y]\end{align*}
+\begin_inset Formula 
+\begin{align*}
+I[X;Y] & \equiv H[X]-H[X|Y]
+\end{align*}
 
 \end_inset
 
@@ -501,8 +530,10 @@ We can now define the causal states of a process.
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-\epsilon(\overleftarrow{x}) & \equiv\left\{ \overleftarrow{x\prime}|\ \Pr\left(\overrightarrow{X}\in F|\overleftarrow{X}=\overleftarrow{x}\right)=\Pr\left(\overrightarrow{X}\in F|\overleftarrow{X}=\overleftarrow{x\prime}\right),\ \forall F\in\sigma(\overrightarrow{X}),\overleftarrow{x\prime}\in\overleftarrow{X}\right\} \end{align*}
+\begin_inset Formula 
+\begin{align*}
+\epsilon(\overleftarrow{x}) & \equiv\left\{ \overleftarrow{x\prime}|\ \Pr\left(\overrightarrow{X}\in F|\overleftarrow{X}=\overleftarrow{x}\right)=\Pr\left(\overrightarrow{X}\in F|\overleftarrow{X}=\overleftarrow{x\prime}\right),\ \forall F\in\sigma(\overrightarrow{X}),\overleftarrow{x\prime}\in\overleftarrow{X}\right\} 
+\end{align*}
 
 \end_inset
 
@@ -557,8 +588,10 @@ sufficient statistic
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-I[\overrightarrow{X};\mathcal{X}] & =I[\overrightarrow{X};\overleftarrow{X}]\end{align*}
+\begin_inset Formula 
+\begin{align*}
+I[\overrightarrow{X};\mathcal{X}] & =I[\overrightarrow{X};\overleftarrow{X}]
+\end{align*}
 
 \end_inset
 
@@ -601,9 +634,11 @@ key "Shal01"
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 H[\overrightarrow{X}|\hat{\mathcal{R}}] & =H[\overrightarrow{X}|\mathcal{X}]\\
-H[\boldsymbol{\mathcal{X}}] & \le H[\hat{\boldsymbol{\mathcal{R}}}]\end{align*}
+H[\boldsymbol{\mathcal{X}}] & \le H[\hat{\boldsymbol{\mathcal{R}}}]
+\end{align*}
 
 \end_inset
 
@@ -722,9 +757,11 @@ Mixing processes are stochastic processes in which the dependance of the
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 \lim_{\tau\rightarrow\infty}\Pr(\overrightarrow{X_{i+\tau}}|\overleftarrow{X_{i}}) & =\Pr(\overrightarrow{X_{i}})\\
-\int_{o}^{\infty}\Pr(\overrightarrow{X_{i+\tau}}|\overleftarrow{X_{i}})-\Pr(\overrightarrow{X_{i}}) & <\infty\end{align*}
+\int_{o}^{\infty}\Pr(\overrightarrow{X_{i+\tau}}|\overleftarrow{X_{i}})-\Pr(\overrightarrow{X_{i}}) & <\infty
+\end{align*}
 
 \end_inset
 
@@ -796,8 +833,10 @@ We can define the causal states
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-H[\boldsymbol{\mathcal{X}}^{L}]+\varepsilon & \le H[\boldsymbol{\mathcal{X}}]\end{align*}
+\begin_inset Formula 
+\begin{align*}
+H[\boldsymbol{\mathcal{X}}^{L}]+\varepsilon & \le H[\boldsymbol{\mathcal{X}}]
+\end{align*}
 
 \end_inset
 
@@ -814,10 +853,12 @@ Fortunately it can be shown that under the assumption of sequences of length
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 I[\overrightarrow{X}^{L};\mathcal{X}^{L}] & =I[\overrightarrow{X}^{L};\overleftarrow{X}^{L}]\\
 H[\overrightarrow{X}^{L}|\hat{\mathcal{R}}^{L}] & =H[\overrightarrow{X}^{L}|\mathcal{X}^{L}]\\
-H[\boldsymbol{\mathcal{X}}^{L}] & \le H[\hat{\boldsymbol{\mathcal{R}}}^{L}]\end{align*}
+H[\boldsymbol{\mathcal{X}}^{L}] & \le H[\hat{\boldsymbol{\mathcal{R}}}^{L}]
+\end{align*}
 
 \end_inset
 
@@ -1103,10 +1144,12 @@ This approach allows us to treat marginal probabilities in the domain
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 \Pr(A|B) & =\frac{\Pr(A\cap B)}{\Pr(B)}\\
 \Pr(\mathcal{X}_{j}|\mathcal{X}_{i}) & =\frac{\Pr(\mathcal{X}_{j}\cap\mathcal{X}_{i})}{\Pr(\mathcal{X}_{i})}\\
- & =\frac{\Pr(\mathcal{Y})}{\Pr(\mathcal{X}_{i})}\end{align*}
+ & =\frac{\Pr(\mathcal{Y})}{\Pr(\mathcal{X}_{i})}
+\end{align*}
 
 \end_inset
 
@@ -1135,8 +1178,10 @@ Notice that this equation holds for any 'missing' element of the set - we
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-\Pr(\mathcal{X}_{n}|\mathcal{X}_{1},...,\mathcal{X}_{n-1}) & =\frac{\Pr(\mathcal{Y})}{\Pr(\mathcal{X}_{1},...,\mathcal{X}_{n-1})},\quad\mathcal{Y}=\{\mathcal{X}_{1},...,\mathcal{X}_{n}\}\end{align*}
+\begin_inset Formula 
+\begin{align*}
+\Pr(\mathcal{X}_{n}|\mathcal{X}_{1},...,\mathcal{X}_{n-1}) & =\frac{\Pr(\mathcal{Y})}{\Pr(\mathcal{X}_{1},...,\mathcal{X}_{n-1})},\quad\mathcal{Y}=\{\mathcal{X}_{1},...,\mathcal{X}_{n}\}
+\end{align*}
 
 \end_inset
 
@@ -1269,8 +1314,10 @@ We have been assuming that the process we are trying to model is directly
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-X & =Z+\xi\end{align*}
+\begin_inset Formula 
+\begin{align*}
+X & =Z+\xi
+\end{align*}
 
 \end_inset
 
@@ -1430,8 +1477,10 @@ Following (Vapnik); given a random process
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-R(\Lambda) & =\sum_{i=1}^{\ell}L(y_{i},\Lambda(x_{i}))\end{align*}
+\begin_inset Formula 
+\begin{align*}
+R(\Lambda) & =\sum_{i=1}^{\ell}L(y_{i},\Lambda(x_{i}))
+\end{align*}
 
 \end_inset
 
@@ -1468,8 +1517,10 @@ class
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-R(\alpha) & =\sum_{i=1}^{\ell}L(y_{i},\Lambda(x_{i},\alpha))\end{align*}
+\begin_inset Formula 
+\begin{align*}
+R(\alpha) & =\sum_{i=1}^{\ell}L(y_{i},\Lambda(x_{i},\alpha))
+\end{align*}
 
 \end_inset
 
@@ -1751,9 +1802,11 @@ A quadratic optimization problem is a problem which can be expressed in
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 K(x,x) & =1\\
-\int K(x,y)dy & =1\end{align*}
+\int K(x,y)dy & =1
+\end{align*}
 
 \end_inset
 
@@ -1806,8 +1859,10 @@ The specific class of SVM we will be using estimates probability densities
 \end_inset
 
 
-\begin_inset Formula \begin{align}
-W(\beta) & =\sum_{i,j=1}^{\ell}\beta_{i}\beta_{j}K(x_{i},x_{j})\label{eq:SVM_Density_Target_functional}\end{align}
+\begin_inset Formula 
+\begin{align}
+W(\beta) & =\sum_{i,j=1}^{\ell}\beta_{i}\beta_{j}K(x_{i},x_{j})\label{eq:SVM_Density_Target_functional}
+\end{align}
 
 \end_inset
 
@@ -1819,13 +1874,16 @@ subject to the constraints
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align}
+\begin_inset Formula 
+\begin{align}
 F_{\ell}(x)- & \sum_{j=1}^{\ell}\beta_{j}\int_{-\infty}^{x}K(x_{j,}y)dy\ \le\ \sigma_{\ell}\label{eq:SVM_Density_Inequality_Constraint}\\
 F_{\ell}(x) & =\frac{1}{\ell}\sum_{i=1}^{\ell}\theta(x-x_{i})\label{eq:SVM_Density_Emprical_CDF}\\
 \theta(x) & =\begin{cases}
 1 & \text{all coordinates of }x\text{ are positive}\\
-0 & \text{otherwise}\end{cases}\label{eq:Step_Function}\\
-\sigma_{\ell} & =\frac{q(X)}{\sqrt{\ell}}\label{eq:SVM_Residual_Equation}\end{align}
+0 & \text{otherwise}
+\end{cases}\label{eq:Step_Function}\\
+\sigma_{\ell} & =\frac{q(X)}{\sqrt{\ell}}\label{eq:SVM_Residual_Equation}
+\end{align}
 
 \end_inset
 
@@ -2043,8 +2101,10 @@ Independant and identically distributed
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-\phi(\overleftarrow{X}_{i}^{L}) & \longmapsto\dot{x}_{i}=(x_{i-L},\ldots,x_{i})\end{align*}
+\begin_inset Formula 
+\begin{align*}
+\phi(\overleftarrow{X}_{i}^{L}) & \longmapsto\dot{x}_{i}=(x_{i-L},\ldots,x_{i})
+\end{align*}
 
 \end_inset
 
@@ -2060,8 +2120,10 @@ This mapping generates a set of vectors
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-\phi(\mathbf{X}^{L}) & \longmapsto\dot{X}\end{align*}
+\begin_inset Formula 
+\begin{align*}
+\phi(\mathbf{X}^{L}) & \longmapsto\dot{X}
+\end{align*}
 
 \end_inset
 
@@ -2391,9 +2453,11 @@ Another potential approach is to use a soft-margin windowing function in
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 X & =\left\{ \bar{x}_{1},\ldots,\bar{x}_{\ell}\right\} \\
-\bar{x}_{i} & =(x_{i},t_{i})\end{align*}
+\bar{x}_{i} & =(x_{i},t_{i})
+\end{align*}
 
 \end_inset
 
@@ -2425,9 +2489,11 @@ future
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 \overleftarrow{x}_{t}^{\tau} & =\left\{ \bar{x}_{i}:\ t-\tau<t_{i}\le t\right\} \\
-\overrightarrow{x}_{t}^{\tau} & =\left\{ \bar{x}_{i}:\ t<t_{i}<t+\tau\right\} \end{align*}
+\overrightarrow{x}_{t}^{\tau} & =\left\{ \bar{x}_{i}:\ t<t_{i}<t+\tau\right\} 
+\end{align*}
 
 \end_inset
 
@@ -2439,8 +2505,10 @@ We can re-state the causal states as the set
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-\epsilon(\overleftarrow{x}_{t}^{\tau}) & \equiv\left\{ \overleftarrow{x}_{i}^{\tau}:\ \left|\Pr\left(\overrightarrow{X}^{\tau}\in F|\overleftarrow{X}^{\tau}=\overleftarrow{x}_{t}^{\tau}\right)-\Pr\left(\overrightarrow{X}^{\tau}\in F|\overleftarrow{X}^{\tau}=\overleftarrow{x}_{i}^{\tau}\right)\right|\le\varepsilon,\ \forall F\in\sigma(\overrightarrow{X}^{\tau}),\ \forall\overleftarrow{x}_{t}^{\tau}\in\overleftarrow{X}^{\tau}\right\} \end{align*}
+\begin_inset Formula 
+\begin{align*}
+\epsilon(\overleftarrow{x}_{t}^{\tau}) & \equiv\left\{ \overleftarrow{x}_{i}^{\tau}:\ \left|\Pr\left(\overrightarrow{X}^{\tau}\in F|\overleftarrow{X}^{\tau}=\overleftarrow{x}_{t}^{\tau}\right)-\Pr\left(\overrightarrow{X}^{\tau}\in F|\overleftarrow{X}^{\tau}=\overleftarrow{x}_{i}^{\tau}\right)\right|\le\varepsilon,\ \forall F\in\sigma(\overrightarrow{X}^{\tau}),\ \forall\overleftarrow{x}_{t}^{\tau}\in\overleftarrow{X}^{\tau}\right\} 
+\end{align*}
 
 \end_inset
 
@@ -2513,19 +2581,60 @@ The set of histories
 \end_layout
 
 \begin_layout Standard
-Returning to the concept of information entropy, we would like to describe
- a property of two sets which follows the following guidelines:
+Multiple methods of describing a 'distance' between two probability distribution
+s exist, and we will treat the specific function used in a similar manner
+ as the kernel function; we assume that different functions could be relevant
+ to different applications.
+ We will simply define the requirements of a suitable divergence measure,
+ and provide some example functions.
+\end_layout
+
+\begin_layout Standard
+Working from the definition of a set measure, we require the following for
+ a measure 
+\begin_inset Formula $\mu$
+\end_inset
+
+ to be admissable:
 \end_layout
 
 \begin_layout Enumerate
-The measure should be minimal when the joint entropy of the sets is the
- same as the marginal entropy of the sets (the sets together contain the
- same information as they would independently)
+Non-Negativity: 
+\begin_inset Formula $\mu(p,q)\ge0,\quad\forall p,q$
+\end_inset
+
+
 \end_layout
 
 \begin_layout Enumerate
-The measure of two sets should decrease as the uncertainty of the convergence
- of their distributions decreases: 
+Null Identity: 
+\begin_inset Formula $\mu(p,p)=0$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+Increases with Divergence: 
+\begin_inset Formula $I(p;q)>I(p;r)\longrightarrow\mu(p,q)>\mu(p,r)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+That last one is sort shakey.
+ The idea is that we provide some general criteria that forces the measure
+ to increase as the probabilities diverge
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -2539,8 +2648,10 @@ In general terms, we want the measure to tell us how certain we are that
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-D(p\Vert q) & =\int p(x)\log\frac{p(x)}{q(x)}dx\end{align*}
+\begin_inset Formula 
+\begin{align*}
+D(p\Vert q) & =\int p(x)\log\frac{p(x)}{q(x)}dx
+\end{align*}
 
 \end_inset
 
@@ -2562,37 +2673,46 @@ where
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-D(p\Vert q) & =H[P,Q]-H[Q]\end{align*}
+\begin_inset Formula 
+\begin{align*}
+D(p\Vert q) & =H[P,Q]-H[Q]
+\end{align*}
 
 \end_inset
 
 
 \end_layout
 
-\begin_layout Standard
-From this we can see that objective [1] is satisfied; the divergence will
- be 0 if the joint and marginal entropy is the same.
- 
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-But [2] isn't.
- Find new divergence or re-consider the objectives
+\begin_layout Itemize
+Constructing p&q from data
 \end_layout
 
-\end_inset
-
-
+\begin_layout Itemize
+resulting kernel function
 \end_layout
 
 \begin_layout Section
 Making X Finite
 \end_layout
 
+\begin_layout Chapter
+Prediction
+\end_layout
+
 \begin_layout Standard
-Pearson / KL divergence
+Random variate creation
+\end_layout
+
+\begin_layout Standard
+Random variate control parameters (to allow 'focus')
+\end_layout
+
+\begin_layout Standard
+Sparse variates
+\end_layout
+
+\begin_layout Standard
+How is invariance handled?
 \end_layout
 
 \begin_layout Chapter
@@ -2601,6 +2721,10 @@ Choice
 
 \begin_layout Standard
 Motivation, internal states, path exploration, non-discrete input space
+\end_layout
+
+\begin_layout Standard
+The role of variates in learning
 \end_layout
 
 \begin_layout Chapter
@@ -3009,16 +3133,24 @@ The decomposition algorithm breaks
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 W(\boldsymbol{\beta}_{B}) & =\frac{1}{2}\begin{bmatrix}\boldsymbol{\beta}_{B}^{T} & (\boldsymbol{\beta}_{N}^{k})^{T}\end{bmatrix}\begin{bmatrix}P_{BB} & P_{BN}\\
-P_{NB} & P_{NN}\end{bmatrix}\begin{bmatrix}\boldsymbol{\beta}_{B}\\
-\boldsymbol{\beta}_{N}^{k}\end{bmatrix}-\begin{bmatrix}q_{B}^{T} & q_{N}^{T}\end{bmatrix}\begin{bmatrix}\boldsymbol{\beta}_{B}\\
-\boldsymbol{\beta}_{N}^{k}\end{bmatrix}\\
+P_{NB} & P_{NN}
+\end{bmatrix}\begin{bmatrix}\boldsymbol{\beta}_{B}\\
+\boldsymbol{\beta}_{N}^{k}
+\end{bmatrix}-\begin{bmatrix}q_{B}^{T} & q_{N}^{T}\end{bmatrix}\begin{bmatrix}\boldsymbol{\beta}_{B}\\
+\boldsymbol{\beta}_{N}^{k}
+\end{bmatrix}\\
  & =\frac{1}{2}\boldsymbol{\beta}_{B}^{T}P_{BB}\boldsymbol{\beta}_{B}-(-q_{B}+P_{BN}\boldsymbol{\beta}_{N}^{k})^{T}\boldsymbol{\beta}_{B}\\
  & =\frac{1}{2}\begin{bmatrix}\beta_{i} & \beta_{j}\end{bmatrix}\begin{bmatrix}P_{ii} & P_{ij}\\
-P_{ij} & P_{jj}\end{bmatrix}\begin{bmatrix}\beta_{i}\\
-\beta_{j}\end{bmatrix}-(-q_{B}+P_{BN}\boldsymbol{\beta}_{N}^{k})^{T}\begin{bmatrix}\beta_{i}\\
-\beta_{j}\end{bmatrix}\end{align*}
+P_{ij} & P_{jj}
+\end{bmatrix}\begin{bmatrix}\beta_{i}\\
+\beta_{j}
+\end{bmatrix}-(-q_{B}+P_{BN}\boldsymbol{\beta}_{N}^{k})^{T}\begin{bmatrix}\beta_{i}\\
+\beta_{j}
+\end{bmatrix}
+\end{align*}
 
 \end_inset
 
@@ -3026,8 +3158,10 @@ P_{ij} & P_{jj}\end{bmatrix}\begin{bmatrix}\beta_{i}\\
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{equation}
-\text{subject to}\quad0\le\beta_{i},\beta_{j},\quad\beta_{i}+\beta_{j}=1-\mathbf{1}^{T}\boldsymbol{\beta}_{N}^{k}\end{equation}
+\begin_inset Formula 
+\begin{equation}
+\text{subject to}\quad0\le\beta_{i},\beta_{j},\quad\beta_{i}+\beta_{j}=1-\mathbf{1}^{T}\boldsymbol{\beta}_{N}^{k}
+\end{equation}
 
 \end_inset
 
@@ -3043,9 +3177,11 @@ Select
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align}
+\begin_inset Formula 
+\begin{align}
  & i\in\text{arg}\max_{t}\left\{ -\nabla f(\boldsymbol{\beta}^{k})_{t}\ |\quad t\in I(\boldsymbol{\beta}^{k})\right\} \\
- & j\in\text{arg}\min_{t}\left\{ -\frac{b_{it}^{2}}{a_{it}}\ |\quad t\in I(\boldsymbol{\beta}^{k}),\quad-\nabla f(\boldsymbol{\beta}^{k})_{t}<-\nabla f(\boldsymbol{\beta}^{k})_{i}\right\} \end{align}
+ & j\in\text{arg}\min_{t}\left\{ -\frac{b_{it}^{2}}{a_{it}}\ |\quad t\in I(\boldsymbol{\beta}^{k}),\quad-\nabla f(\boldsymbol{\beta}^{k})_{t}<-\nabla f(\boldsymbol{\beta}^{k})_{i}\right\} 
+\end{align}
 
 \end_inset
 
@@ -3072,14 +3208,17 @@ status open
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align}
+\begin_inset Formula 
+\begin{align}
 I(\boldsymbol{\beta}) & \equiv\{t\ |\quad\beta_{t}<1\quad\text{or}\quad\beta_{t}>0\}\\
  & a_{it}=P_{ii}+P_{tt}-2P_{it}\\
  & \bar{a}_{it}=\begin{cases}
 a_{it} & \text{if}\ a_{it}>0\\
-\delta & \text{otherwise}\end{cases}\\
+\delta & \text{otherwise}
+\end{cases}\\
  & b_{it}=-\nabla f(\boldsymbol{\beta}^{k})_{i}+\nabla f(\boldsymbol{\beta}^{k})_{t}\\
-\nabla f(\boldsymbol{\beta})_{i} & \equiv P_{i}\boldsymbol{\beta}-q_{i}\end{align}
+\nabla f(\boldsymbol{\beta})_{i} & \equiv P_{i}\boldsymbol{\beta}-q_{i}
+\end{align}
 
 \end_inset
 
@@ -3091,8 +3230,10 @@ Stopping Condition
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{equation}
-\max_{i\in I(\boldsymbol{\alpha}^{k})}-\nabla f(\boldsymbol{\alpha})_{i}+\min_{j\in I(\boldsymbol{\alpha}^{k})}\nabla f(\boldsymbol{\alpha})_{j}\le\epsilon\end{equation}
+\begin_inset Formula 
+\begin{equation}
+\max_{i\in I(\boldsymbol{\alpha}^{k})}-\nabla f(\boldsymbol{\alpha})_{i}+\min_{j\in I(\boldsymbol{\alpha}^{k})}\nabla f(\boldsymbol{\alpha})_{j}\le\epsilon
+\end{equation}
 
 \end_inset
 
@@ -3193,6 +3334,13 @@ status open
 
 \begin_layout Section
 Performance
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage clearpage
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard

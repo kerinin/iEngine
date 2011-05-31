@@ -1,0 +1,205 @@
+#LyX 1.6.5 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass amsbook
+\begin_preamble
+
+
+
+\usepackage{amsfonts}
+\end_preamble
+\use_default_options false
+\begin_modules
+theorems-ams
+eqs-within-sections
+figs-within-sections
+\end_modules
+\language english
+\inputencoding auto
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\paperfontsize 10
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks false
+\pdf_backref false
+\pdf_pdfusetitle true
+\papersize default
+\use_geometry true
+\use_amsmath 1
+\use_esint 0
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\leftmargin 1.5in
+\topmargin 1in
+\rightmargin 1.5in
+\bottommargin 1.25in
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation skip
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\author "" 
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Acting Machines Implementation Notes
+\end_layout
+
+\begin_layout Chapter
+Basic Architecture
+\end_layout
+
+\begin_layout Standard
+We'll start with the most basic architecture capable of implementing the
+ concept; a set of causal states organized as a binary hierarchy with motivated
+ internal states.
+ This model will not use SVM optimization or modify the hierarchy structure.
+\end_layout
+
+\begin_layout Standard
+The system is consistes of two primary components: a 
+\emph on
+model
+\emph default
+ structured as a set of hierarchical layers, and a 
+\emph on
+controller
+\emph default
+ which executes actions.
+ The two components operate concurrently, with the model continually updating
+ it's internal representation of the environment, and the controller continually
+ responding to the model's internal state by optionally executing actions.
+\end_layout
+
+\begin_layout Standard
+The model is constructed as a set of hierarchical layers, each layer being
+ defined by an 
+\emph on
+observer
+\emph default
+ and a set of 
+\emph on
+sequences
+\emph default
+.
+ New data vectors are introduced into each layer when the observer generates
+ a new sequence.
+ Sequences are composed of two data vectors (the vector which triggered
+ the sequence's creation and the vector introduced prior to the sequence's
+ creation) and an activation state.
+ Each time a sequence is created, the activation state of existing vectors
+ is calculated based on the divergence between the new vector and the existing
+ vectors, shifted in time such that the terminating points of the new vector
+ and the existing vectors have the same 
+\begin_inset Formula $t$
+\end_inset
+
+-coordinate.
+ This set of activation parameters is collected by the next layer's observer
+ and used as a data vector in the creation of a new sequence in the upper
+ level.
+ Once this upper level's activation states have been updated, the integrator
+ uses the set of sequence activation states in the upper level to update
+ the activation states on the lower level.
+ This process is executed in a full-hierarchy cycle; the bottom layer's
+ activation state is updated and passed to the next layer, whose activation
+ state is updated and then passed upwards again until the top layer has
+ been update; once this has happened the integrator for the next-to-top
+ layer is activated and the activation states of the full hierarchy are
+ updated from the top down.
+\end_layout
+
+\begin_layout Standard
+The controller operates by periodically testing if actions should be executed.
+ At each iteration at time 
+\begin_inset Formula $\bar{t}$
+\end_inset
+
+, the time delta 
+\begin_inset Formula $\Delta t$
+\end_inset
+
+ is calculated as the difference between the most recent data vector and
+ 
+\begin_inset Formula $\bar{t}$
+\end_inset
+
+.
+ Beginning with the lowest level in the model hierarcy, activation states
+ are computed for each sequence based on the most recent sequence in the
+ level shifted 
+\begin_inset Formula $\Delta t$
+\end_inset
+
+ and the rest of the sequences shifted by 
+\begin_inset Formula $\bar{t}-t_{i}$
+\end_inset
+
+.
+ This set of activation levels is then used to compute activation levels
+ for the next level with each sequence shifted by 
+\begin_inset Formula $\bar{t}-t_{i}$
+\end_inset
+
+ up through the hierarchy, then integrated back downwards.
+ The resulting activation states are then weighted by the utility function,
+ and the sequence with the highest expected utility is examined for actions.
+ If the sequence with maximal utility has associated actions, those actions
+ are executed.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+This model doesn't allow up/down exploration.
+ is this a problem, or am I introduction something based on intuition that
+ isn't justifiable mathematically?
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Observer
+\end_layout
+
+\begin_layout Standard
+The observer is responsible for collecting data from some data sources describin
+g the system's environment and combining it into a set of multi-variate
+ state vectors.
+ Each state vector has an associated time stamp, and is passed to the bottom
+ layer of the hierarchy (specifically, to each of the bottom-level sequences
+ for divergence analysis).
+\end_layout
+
+\end_body
+\end_document
