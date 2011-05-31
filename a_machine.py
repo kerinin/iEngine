@@ -14,7 +14,7 @@ from theano import function
 gamma = 100
 
 def k(X,Y):
-  return T.exp( -gamma * T.pow(X-Y,2) )
+  return T.prod(T.exp( -gamma * T.pow(X-Y,2) ), 3)
 
 # matrix types for parzen estimation between sets of points and sets of sequences
 col = T.TensorType('float32', [False, False,True,False])
@@ -22,7 +22,8 @@ row = T.TensorType('float32', [True, True,False,False])
 
 observations = col('parzen observations')
 test_points = row('parzen test points')
-probabilities = T.prod( T.sum( k(observations, test_points), 1), 2) / observations.shape[1]
+#probabilities = T.prod( T.sum( k(observations, test_points), 1), 2) / observations.shape[1]
+probabilities = T.sum( k(observations, test_points), 1) / observations.shape[1]
 
 # observations should be in format [sequence][observation][1][dimension]
 # test_points should be in format [1][1][test_point][dimension]
