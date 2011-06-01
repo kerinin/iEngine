@@ -25,8 +25,18 @@ parzen_function = function( [observations, test_points, gamma], probabilities )
 
 # Calculate the estimated probability of a set of test_points given a set of observations
 def from_one(observations, test_points, gamma):
+  if observations.ndim != 2:
+    raise ArgumentError, 'observations must be a 2-dimensional array in the form [sample point][dimension]'
+  elif test_points.ndim != 2:
+    raise ArgumentError, 'test_points must be a 2-dimensional arran in the form [test point][dimension]'
+    
   return parzen_function( observations.dimshuffle('x',0,1,2), test_points, gamma)
   
 # Calculate the estimated probability of a set of test_points given multiple sets of observations
 def from_many( observation_sets, test_points, gamma):
+  if observations.ndim != 2:
+    raise ArgumentError, 'observation sets must be a 3-dimensional array in the form [set][sample point][dimension]'
+  elif test_points.ndim != 2:
+    raise ArgumentError, 'test_points must be a 2-dimensional arran in the form [test point][dimension]'
+    
   return parzen_function( observation_sets, test_points, gamma)
