@@ -22,11 +22,12 @@ def run():
   xN = int((xrange[1]-xrange[0])/xstep)
   x=np.arange(xrange[0],xrange[1],xstep).astype('float32')
   
-  # 5 distributions containing 10 1-d points
-  distributions = np.random.rand(4,5,1,1).astype('float32')
-  base = np.random.rand(1,5,1,1).astype('float32')
+  # 5 distributions containing 5 1-d points
+  distributions = np.random.rand(4,5,1).astype('float32')
+  # distribution with 5 1-d points
+  base = np.random.rand(5,1).astype('float32')
   
-  divergences = am.kl_divergence(distributions, base, base.reshape(1,1,5,1))
+  divergences = am.cs_divergence(distributions, base)
   
   for i in range(4):
     ax = plt.subplot(2,2,i+1, title="Divergence: %s" % divergences[i])

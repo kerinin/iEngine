@@ -13,11 +13,11 @@ from theano import function
 
 gamma = 100
 
-def k(X,Y):
+def k_parzen(X,Y):
   return T.prod(T.exp( -gamma * T.pow(X-Y,2) ), 3)
   
 def parzen(observations, test_points):
-  return T.sum( k(observations, test_points), 1) / observations.shape[1]
+  return T.sum( k_parzen(observations, test_points), 1) / observations.shape[1]
 
 # matrix types for parzen estimation between sets of points and sets of sequences
 col = T.TensorType('float32', [False, False,True,False])
@@ -52,7 +52,6 @@ row = T.TensorType('float32', [True, False])
 p_values = col('P(i)')
 q_values = row('Q(i)')
 
-#divergence = - T.sum( parzen_function(P, test_points) * T.log( parzen_function(P, test_points) / parzen_function( Q, test_points ) ), 1 )
 #divergence = - T.sum( parzen(P, test_points) * T.log( parzen(P, test_points) / parzen( Q, test_points ) ), 1 )
 
 divergence = -T.sum( p_values * T.log( p_values / q_values ), 1 )
@@ -64,6 +63,57 @@ def kl_divergence(P,Q,test_points):
   
   return kl_divergence_function(p_values, q_values)
   
+
+# Cauchy-Schwarz Divergence
+# -log( Sum(K(P,Q)) / Sqrt( Sum(K(P,P)) * Sum(K(Q,Q)) ) )
+# Where K(X,Y) is the kernel distance between the constituent points in two parzen estimators X, and Y
+#
+# This is a different formulation of the KL used above, but has the nice property of being
+# bounded & symmetric, and has a nice paper explaining its derivation and application to parzen
+# estimators.
+
+def k_cs(X,Y):
+  return T.exp( -gamma * T.pow(X-Y,2) )
+  
+# [distribution][point][dimension]
+distributions = T.TensorType('float32', [False,False,False])
+# [point][dimension]
+distribution = T.TensorType('float32', [False,False])
+
+P = distributions()
+Q = distribution()
+
+divergence = -T.log( 
+  T.sum(T.sum(
+    T.prod(
+      k_cs( P.dimshuffle(0,'x',1,2), Q.dimshuffle('x',0,'x',1) ), # => [distribution][P_i][Q_j][dimension]
+    3 ), # => [distribution][P_i][Q_j]
+  1), 1) / # => [distribution]
+  T.sqrt( 
+    ( 
+      T.sum(T.sum(
+        T.prod(
+          k_cs(P.dimshuffle(0,1,'x',2),P.dimshuffle(0,'x',1,2)), # => [distribution][P_i][P_j][dimension]
+        3 ), # => [distribution][P_i][P_j]
+      1), 1) # => [distribution]
+    ) *
+    (
+      T.sum(
+        T.prod(
+          k_cs(Q.dimshuffle(0,'x',1),Q.dimshuffle('x',0,1)), # => [Q_i][Q_j][dimension]
+        2 ), # => [Q_i][Q_j]
+      ) # => []
+    ).dimshuffle('x')
+  ) # => [distribution]
+)
+cs_divergence_function = function( [P,Q], divergence)
+
+def cs_divergence(P,Q):
+  # If P is a single distribution, reshape it to [distribution(1)][point][dimension]
+  if P.ndim == 2:
+    P = P.dimshuffle('x',0,1,2)
+  
+  return cs_divergence_function(P,Q)
 
 class model:
   def __init__(self):
