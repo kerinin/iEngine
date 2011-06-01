@@ -14,8 +14,13 @@ from theano import function
 # bounded & symmetric, and has a nice paper explaining its derivation and application to parzen
 # estimators.
 
-def k_cs(X,Y, gamma):
-  return T.exp( -gamma * T.pow(X-Y,2) )
+
+def k(X,Y,gamma):
+  return ( 1 / T.pow( 
+    2 * pi * T.pow( sqrt(2) * gamma,2),
+  Y.shape[-1]/2) ) * T.exp( 
+    -T.pow(X-Y, 2) / (2 * T.pow(sqrt(2) * gamma, 2) ) 
+  ) 
   
 # [distribution][point][dimension]
 distributions = T.TensorType('float32', [False,False,False])
@@ -29,21 +34,21 @@ gamma = T.fscalar('gamma')
 divergence = -T.log( 
   T.sum(T.sum(
     T.prod(
-      k_cs( P.dimshuffle(0,'x',1,2), Q.dimshuffle('x',0,'x',1), gamma ), # => [distribution][P_i][Q_j][dimension]
+      k( P.dimshuffle(0,'x',1,2), Q.dimshuffle('x',0,'x',1), gamma ), # => [distribution][P_i][Q_j][dimension]
     3 ), # => [distribution][P_i][Q_j]
   1), 1) / # => [distribution]
   T.sqrt( 
     ( 
       T.sum(T.sum(
         T.prod(
-          k_cs(P.dimshuffle(0,1,'x',2),P.dimshuffle(0,'x',1,2), gamma), # => [distribution][P_i][P_j][dimension]
+          k(P.dimshuffle(0,1,'x',2),P.dimshuffle(0,'x',1,2), gamma), # => [distribution][P_i][P_j][dimension]
         3 ), # => [distribution][P_i][P_j]
       1), 1) # => [distribution]
     ) *
     (
       T.sum(
         T.prod(
-          k_cs(Q.dimshuffle(0,'x',1),Q.dimshuffle('x',0,1), gamma), # => [Q_i][Q_j][dimension]
+          k(Q.dimshuffle(0,'x',1),Q.dimshuffle('x',0,1), gamma), # => [Q_i][Q_j][dimension]
         2 ), # => [Q_i][Q_j]
       ) # => []
     ).dimshuffle('x')

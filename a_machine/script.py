@@ -23,7 +23,7 @@ def test_divergence():
   xstep = .01
   xN = int((xrange[1]-xrange[0])/xstep)
   x=np.arange(xrange[0],xrange[1],xstep).astype('float32')
-  gamma = 100
+  gamma = .1
   
   # 5 distributions containing 5 1-d points
   distributions = np.random.rand(4,5,1).astype('float32')
@@ -61,7 +61,7 @@ def test_parzen():
 	X = np.dstack(np.mgrid[xrange[0]:xrange[1]:xstep,yrange[0]:yrange[1]:ystep]).reshape([ xN *yN,2])
 	x = np.arange(xrange[0],xrange[1],xstep)
 	y = np.arange(yrange[0],yrange[1],ystep)
-	gamma = 100
+	gamma = .1
 
 	# [distribution][observation][dimension]
 	observations = np.random.rand(1,10,2).astype('float32')
