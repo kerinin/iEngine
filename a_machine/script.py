@@ -7,15 +7,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 
-_Functions = ['run', 'test_parzen']
+_Functions = ['run', 'test_parzen', 'test_divergence']
 	
 import theano.tensor as T
 from theano import function
 
-def run():
+def test_divergence():
   print "Starting"
   
-  import cs_divergence, parzen
+  import cs_divergence, parzen_probability
   
   print "compiled for GPU"
   
@@ -30,13 +30,13 @@ def run():
   # distribution with 5 1-d points
   base = np.random.rand(5,1).astype('float32')
   
-  divergences = cs_divergence.cs_divergence(distributions, base, gamma=gamma)
+  divergences = cs_divergence.from_many(distributions, base, gamma=gamma)
   
   for i in range(4):
     ax = plt.subplot(2,2,i+1, title="Divergence: %s" % divergences[i])
     
-    ax.plot(x, parzen.parzen_function( distributions[i].reshape(1,5,1,1), x.reshape(1,1,xN,1), gamma=gamma ).reshape(xN), 'b' )
-    ax.plot(x, parzen.parzen_function( base.reshape(1,5,1,1), x.reshape(1,1,xN,1), gamma=gamma ).reshape(xN), 'g--' )
+    ax.plot(x, parzen_probability.from_many( distributions[i].reshape(1,5,1), x.reshape(xN,1), gamma=gamma ).reshape(xN), 'b' )
+    ax.plot(x, parzen_probability.from_many( base.reshape(1,5,1), x.reshape(xN,1), gamma=gamma ).reshape(xN), 'g--' )
     ax.axis([0,1,0,None])
     
   print divergences
@@ -48,7 +48,7 @@ def run():
 def test_parzen():
 	print "Starting"
 	
-	import parzen
+	import parzen_probability
 	
 	print "compiled for GPU"
 	
@@ -71,8 +71,8 @@ def test_parzen():
 	observation_label_points = observations.reshape(10,2)
 	
 	# NOTE: the PDF contours seem to be *displaying* properly (not being computed properly though)
-	pdf = parzen.parzen_function(observations,test_points,gamma)
-	observation_probability = parzen.parzen_function(observations,observation_label_points,gamma)
+	pdf = parzen_probability.from_many(observations,test_points,gamma)
+	observation_probability = parzen_probability.from_many(observations,observation_label_points,gamma)
   
 	z = pdf.reshape([xN,yN]).T
 	sizes = observation_probability.reshape(10)

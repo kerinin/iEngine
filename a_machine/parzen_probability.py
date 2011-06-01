@@ -23,4 +23,10 @@ probabilities = T.sum(
   
 parzen_function = function( [observations, test_points, gamma], probabilities )
 
-
+# Calculate the estimated probability of a set of test_points given a set of observations
+def from_one(observations, test_points, gamma):
+  return parzen_function( observations.dimshuffle('x',0,1,2), test_points, gamma)
+  
+# Calculate the estimated probability of a set of test_points given multiple sets of observations
+def from_many( observation_sets, test_points, gamma):
+  return parzen_function( observation_sets, test_points, gamma)

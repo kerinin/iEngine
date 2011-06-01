@@ -51,12 +51,13 @@ divergence = -T.log(
 )
 cs_divergence_function = function( [P,Q,gamma], divergence)
 
-def cs_divergence(P,Q, gamma):
-  # If P is a single distribution, reshape it to [distribution(1)][point][dimension]
-  if P.ndim == 2:
-    P = P.dimshuffle('x',0,1,2)
+# Calcualte the divergence of a distribution Q from a distribution P
+def from_one(P,Q, gamma):
+  return cs_divergence_function(P.dimshuffle('x',0,1,2), Q, gamma)
   
-  return cs_divergence_function(P,Q, gamma)
-
+# Calculate the divergence of a distribution Q from a set of distributions PP
+def from_many(PP,Q, gamma):
+  return cs_divergence_function(PP,Q, gamma)
+  
 
 		
