@@ -12,6 +12,53 @@ _Functions = ['run', 'test_parzen', 'test_divergence']
 import theano.tensor as T
 from theano import function
 
+def run():
+  print "Starting"
+  
+  import system
+  m = system.model()
+  
+  print "compiled for GPU"
+  
+  xRange=[0,100]
+  yRange=[-1.5,1.5]
+  
+  # Generate observation sequence
+  oRange=[0,50]
+  oStep=.5
+  oN = int((oRange[1]-oRange[0]/oStep))
+  oX = np.arange(oRange[0],oRange[1],oStep).astype('float32')
+  
+  oY = np.sin(oX/2)
+  
+  # Generate predictions
+  pRangeX = [50,100]
+  pRangeY = yRange
+  pStepX = .1
+  pStepY = .01
+  pxN = int((pRangeX[1]-pRangeX[0])/pStepX)
+  pyN = int((pRangeY[1]-pRangeY[0])/pStepY)
+  P = np.dstack(np.mgrid[pRangeX[0]:pRangeX[1]:pStepX,pRangeY[0]:pRangeY[1]:pStepY]).reshape([ pxN*pyN,2])
+  px = np.arange(pRangeX[0],pRangeX[1],pStepX)
+  py = np.arange(pRangeY[0],pRangeY[1],pStepY)
+  gamma = .1
+  
+  for i in range(oN):
+    m.process( [oY[i]], time=oX[i])
+  
+  print len(m.layers)
+  print m.layers[0].sequences.shape
+   
+  pz = (P[:,0]+P[:,1]).reshape([pxN,pyN]).T
+  
+  CS = plt.contour(px,py,pz,10)
+  plt.clabel(CS, inline=1, fontsize=10)
+  
+  plt.scatter( oX, oY)
+  plt.axis( [xRange[0], xRange[1], yRange[0], yRange[1]] )
+  
+  plt.show()
+  
 def test_divergence():
   print "Starting"
   
