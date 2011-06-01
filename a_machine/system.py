@@ -56,6 +56,7 @@ class layer:
     self.last_time = None
     self.point_cache = None
     self.gamma = gamma
+    self.layer_number = 0 if lower_level == None else lower_level.layer_number + 1
     
     # [sequence][point][dimension]
     self.sequences = None
@@ -66,6 +67,8 @@ class layer:
   
   # point => array()[dimension]
   def process(self, point, time=None, extra_dim=None):
+    print "processing point on layer %s" % self.layer_number
+    
     point = np.insert(point,0,0).astype('float32')
     
     if not time:
@@ -83,12 +86,16 @@ class layer:
       if self.last_time:
         points_from_previous[:,0] = points_from_previous[:,0] - time + self.last_time
         
+      if not extra_dim == None and not self.sequences == None:
+        print extra_dim.shape
+        print self.sequences.shape
+          
+      print points_from_previous.shape
+      print point.shape
+      
       sequence = np.vstack((points_from_previous, point))
     
       if sequence.shape[0] == self.sequence_length:
-      
-        if extra_dim:
-          pass
         
         if self.sequences == None:
           self.sequences = np.array([sequence]).reshape(1,self.sequence_length,sequence.shape[1]).astype('float32')
@@ -100,11 +107,13 @@ class layer:
         if not self.upper_level:
           self.upper_level = layer( self.model, self.sequence_length, self)
         
-        # NOTE: this is going to require figuring out that dimensional expansion issue
         # pass activation to upper level if 'sequence_length' points have been observed since last pass
-        #if not (self.sequences.shape[0] % self.upper_level.sequence_length):
+        if not (self.sequences.shape[0] % self.upper_level.sequence_length):
           # calculate vector activation
-          #self.upper_level.process( self.activation() )
+          self.upper_level.process( 
+            self.activation(),
+            extra_dim = cs_divergence.from_many( self.sequences[:-1,:,:], self.sequences[-1], self.gamma )
+          )
               
       self.point_cache = sequence
     
