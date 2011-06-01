@@ -3,8 +3,6 @@
 import sys, getopt, math, datetime, os
 from random import gauss
 
-import a_machine as am
-
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
@@ -17,23 +15,28 @@ from theano import function
 def run():
   print "Starting"
   
+  import cs_divergence, parzen
+  
+  print "compiled for GPU"
+  
   xrange = [0,1]
   xstep = .01
   xN = int((xrange[1]-xrange[0])/xstep)
   x=np.arange(xrange[0],xrange[1],xstep).astype('float32')
+  gamma = 100
   
   # 5 distributions containing 5 1-d points
   distributions = np.random.rand(4,5,1).astype('float32')
   # distribution with 5 1-d points
   base = np.random.rand(5,1).astype('float32')
   
-  divergences = am.cs_divergence(distributions, base)
+  divergences = cs_divergence.cs_divergence(distributions, base, gamma=gamma)
   
   for i in range(4):
     ax = plt.subplot(2,2,i+1, title="Divergence: %s" % divergences[i])
     
-    ax.plot(x, am.parzen_function( distributions[i].reshape(1,5,1,1), x.reshape(1,1,xN,1) ).reshape(xN), 'b' )
-    ax.plot(x, am.parzen_function( base.reshape(1,5,1,1), x.reshape(1,1,xN,1) ).reshape(xN), 'g--' )
+    ax.plot(x, parzen.parzen_function( distributions[i].reshape(1,5,1,1), x.reshape(1,1,xN,1), gamma=gamma ).reshape(xN), 'b' )
+    ax.plot(x, parzen.parzen_function( base.reshape(1,5,1,1), x.reshape(1,1,xN,1), gamma=gamma ).reshape(xN), 'g--' )
     ax.axis([0,1,0,None])
     
   print divergences
@@ -45,6 +48,10 @@ def run():
 def test_parzen():
 	print "Starting"
 	
+	import parzen
+	
+	print "compiled for GPU"
+	
 	xrange = [0,1]
 	yrange = [0,1]
 	xstep = .01
@@ -54,6 +61,7 @@ def test_parzen():
 	X = np.dstack(np.mgrid[xrange[0]:xrange[1]:xstep,yrange[0]:yrange[1]:ystep]).reshape([ xN *yN,2])
 	x = np.arange(xrange[0],xrange[1],xstep)
 	y = np.arange(yrange[0],yrange[1],ystep)
+	gamma = 100
 	
 	# observations should be in format [sequence][observation][1][dimension]
 	observations = np.random.rand(1,10,1,2).astype('float32')
@@ -63,9 +71,9 @@ def test_parzen():
 	observation_label_points = observations.reshape(1,1,10,2)
 	
 	# NOTE: the PDF contours seem to be *displaying* properly (not being computed properly though)
-	pdf = am.parzen_function(observations,test_points)
+	pdf = parzen.parzen_function(observations,test_points,gamma)
 	#pdf = X.reshape(1,1,xN*yN,2).sum(3)
-	observation_probability = am.parzen_function(observations,observation_label_points)
+	observation_probability = parzen.parzen_function(observations,observation_label_points,gamma)
 
 	z = pdf.reshape([xN,yN]).T
 	sizes = observation_probability.reshape(10)
