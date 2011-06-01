@@ -24,23 +24,27 @@ def test_divergence():
   xN = int((xrange[1]-xrange[0])/xstep)
   x=np.arange(xrange[0],xrange[1],xstep).astype('float32')
   gamma = .1
+  distN = 20
+  baseN = 20
   
   # 5 distributions containing 5 1-d points
-  distributions = np.random.rand(4,5,1).astype('float32')
+  distributions = np.array( [
+    np.random.normal(.2, .05, distN), 
+    np.random.normal(.4, .05, distN), 
+    np.random.normal(.6, .05, distN),  
+    np.random.normal(.8, .05, distN)
+  ] ).reshape(4,distN,1).astype('float32')
   # distribution with 5 1-d points
-  base = np.random.rand(5,1).astype('float32')
+  base = np.random.normal(.8, .05, baseN).reshape(baseN,1).astype('float32')
   
   divergences = cs_divergence.from_many(distributions, base, gamma=gamma)
   
   for i in range(4):
     ax = plt.subplot(2,2,i+1, title="Divergence: %s" % divergences[i])
     
-    ax.plot(x, parzen_probability.from_many( distributions[i].reshape(1,5,1), x.reshape(xN,1), gamma=gamma ).reshape(xN), 'b' )
-    ax.plot(x, parzen_probability.from_many( base.reshape(1,5,1), x.reshape(xN,1), gamma=gamma ).reshape(xN), 'g--' )
+    ax.plot(x, parzen_probability.from_many( distributions[i].reshape(1,distN,1), x.reshape(xN,1), gamma=gamma ).reshape(xN), 'b' )
+    ax.plot(x, parzen_probability.from_many( base.reshape(1,baseN,1), x.reshape(xN,1), gamma=gamma ).reshape(xN), 'g--' )
     ax.axis([0,1,0,None])
-    
-  print divergences
-  print divergences.shape
   
   plt.show()
   
