@@ -62,26 +62,25 @@ def test_parzen():
 	x = np.arange(xrange[0],xrange[1],xstep)
 	y = np.arange(yrange[0],yrange[1],ystep)
 	gamma = 100
+
+	# [distribution][observation][dimension]
+	observations = np.random.rand(1,10,2).astype('float32')
 	
-	# observations should be in format [sequence][observation][1][dimension]
-	observations = np.random.rand(1,10,1,2).astype('float32')
-	
-	# test_points should be in format [1][1][test_point][dimension]
-	test_points = X.astype('float32').reshape(1,1,xN*yN,2)
-	observation_label_points = observations.reshape(1,1,10,2)
+	# [test point][dimension]
+	test_points = X.astype('float32').reshape(xN*yN,2)
+	observation_label_points = observations.reshape(10,2)
 	
 	# NOTE: the PDF contours seem to be *displaying* properly (not being computed properly though)
 	pdf = parzen.parzen_function(observations,test_points,gamma)
-	#pdf = X.reshape(1,1,xN*yN,2).sum(3)
 	observation_probability = parzen.parzen_function(observations,observation_label_points,gamma)
-
+  
 	z = pdf.reshape([xN,yN]).T
 	sizes = observation_probability.reshape(10)
 	sizes = sizes * ( 50/sizes.max() )
 	
 	
 	CS = plt.contour(x,y,z,10)
-	plt.scatter( observations[0,:,0,0], observations[0,:,0,1], sizes ) # NOTE: these points seem to be displaying properly
+	plt.scatter( observations[0,:,0], observations[0,:,1], sizes ) # NOTE: these points seem to be displaying properly
 	plt.clabel(CS, inline=1, fontsize=10)
 	plt.axis( [xrange[0],xrange[1],yrange[0],yrange[1]] )
 	plt.show()
