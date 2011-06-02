@@ -68,54 +68,64 @@ class layer:
   # point => array()[dimension]
   def process(self, point, time=None, extra_dim=None):
     print "processing point on layer %s" % self.layer_number
-    
-    point = np.insert(point,0,0).astype('float32')
-    
+
     if not time:
       time = total_seconds(datetime.now() - self.model.born)
-
-    if self.point_cache == None:
-      self.point_cache = np.array([point]).reshape(1,point.shape[0]).astype('float32')
+          
+    # prefix the point with time value (0), format correctly
+    point = np.insert(point,0,0).astype('float32')
       
+    # behavior for new layers
+    if self.sequences == None:
+      
+      # behavior for first run
+      if self.point_cache == None:
+        self.point_cache = np.array([point]).reshape(1,point.shape[0]).astype('float32')
+        
+      # behavior for points before sequence length reached
+      else:
+        # add extra dimensions
+        if not extra_dim == None:
+          self.point_cache = np.hstack((self.point_cache,extra_dim.reshape(1,extra_dim.shape[0])))
+          
+        # shift existing points along time axis
+        self.point_cache[:,0] = self.point_cache[:,0] - time + self.last_time
+        # add the new point
+        self.point_cache = np.vstack((self.point_cache,point))
+        
+        if self.point_cache.shape[0] == self.sequence_length:
+          # converte point cache into sequence list
+          self.sequences = np.array(self.point_cache).reshape(1,self.point_cache.shape[0],self.point_cache.shape[1]).astype('float32')
+          
+          # cleanup
+          self.point_cache = None
+          
+    # behavior for layers with at least one previous sequence
     else:
-      # append point to sequences
-      # pulls the last (dimension-1) points from the last sequence,
-      # shifts the previous points backward so the sequence is zeroed at 'time'
-      # appends 'point' the the end, and adds it to the sequences array
-      points_from_previous = self.point_cache[1:] if self.point_cache.shape[0] == self.sequence_length else self.point_cache
-      if self.last_time:
-        points_from_previous[:,0] = points_from_previous[:,0] - time + self.last_time
+      # add extra dimensions
+      if not extra_dim == None:
+        self.point_cache = np.dstack((self.sequences,extra_dim.reshape(1,1,extra_dim.shape[0])))
         
-      if not extra_dim == None and not self.sequences == None:
-        print extra_dim.shape
-        print self.sequences.shape
-          
-      print points_from_previous.shape
-      print point.shape
+      # pull the tail from the last sequence
+      points_from_previous = self.sequences[-1][1:]
       
+      # shift the points in time
+      points_from_previous[:,0] = points_from_previous[:,0] - time + self.last_time
+      
+      # add the point to make a sequence and add it to the list
       sequence = np.vstack((points_from_previous, point))
-    
-      if sequence.shape[0] == self.sequence_length:
+      self.sequences = np.vstack((self.sequences, sequence.reshape(1,self.sequence_length,sequence.shape[1])))
         
-        if self.sequences == None:
-          self.sequences = np.array([sequence]).reshape(1,self.sequence_length,sequence.shape[1]).astype('float32')
-        else:
-          self.sequences = np.vstack((self.sequences, sequence.reshape(1,self.sequence_length,sequence.shape[1])))
-          
+      # create upper level if it doesn't exist
+      if not self.upper_level:
+        self.upper_level = layer( self.model, 2, self)
       
-        # create upper level if it doesn't exist
-        if not self.upper_level:
-          self.upper_level = layer( self.model, self.sequence_length, self)
-        
-        # pass activation to upper level if 'sequence_length' points have been observed since last pass
-        if not (self.sequences.shape[0] % self.upper_level.sequence_length):
-          # calculate vector activation
-          self.upper_level.process( 
-            self.activation(),
-            extra_dim = cs_divergence.from_many( self.sequences[:-1,:,:], self.sequences[-1], self.gamma )
-          )
-              
-      self.point_cache = sequence
+      # pass activation to upper level if 'sequence_length' points have been observed since last pass
+      if not (self.sequences.shape[0] % self.upper_level.sequence_length):
+        # calculate vector activation
+        self.upper_level.process( 
+          self.activation(),
+          extra_dim = cs_divergence.from_many( self.sequences[:-2,:,:], self.sequences[-1], self.gamma )
+        )
     
-
     self.last_time = time
