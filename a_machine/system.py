@@ -86,7 +86,9 @@ class layer:
       else:
         # add extra dimensions
         if not extra_dim == None:
+          print self.point_cache.shape
           self.point_cache = np.hstack((self.point_cache,extra_dim.reshape(1,extra_dim.shape[0])))
+          print self.point_cache.shape
           
         # shift existing points along time axis
         self.point_cache[:,0] = self.point_cache[:,0] - time + self.last_time
@@ -121,11 +123,15 @@ class layer:
         self.upper_level = layer( self.model, 2, self)
       
       # pass activation to upper level if 'sequence_length' points have been observed since last pass
-      if not (self.sequences.shape[0] % self.upper_level.sequence_length):
+      print "%s sequences" % self.sequences.shape[0]
+      if not ((self.sequences.shape[0]) % self.upper_level.sequence_length):
         # calculate vector activation
+        extra_dim = cs_divergence.from_many( self.sequences[:-1,:,:], self.sequences[-1], self.gamma )
+        print self.sequences.shape
+        print extra_dim.shape
         self.upper_level.process( 
           self.activation(),
-          extra_dim = cs_divergence.from_many( self.sequences[:-2,:,:], self.sequences[-1], self.gamma )
+          extra_dim = extra_dim
         )
     
     self.last_time = time
