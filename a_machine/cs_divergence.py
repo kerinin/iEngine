@@ -59,18 +59,19 @@ cs_divergence_function = function( [P,Q,gamma], divergence)
 # Calcualte the divergence of a distribution Q from a distribution P
 def from_one(P,Q, gamma):
   if P.ndim != 2:
-    raise ArgumentError, 'P must be a 2-dimensional array in the form [sample point][dimension]'
+    raise ValueError, 'P must be a 2-dimensional array in the form [sample point][dimension], not shape %s' % str(P.shape)
   elif Q.ndim != 2:
-    raise ArgumentError, 'Q must be a 2-dimensional arran in the form [sample point][dimension]'
+    raise ValueError, 'Q must be a 2-dimensional arran in the form [sample point][dimension], not shape %s' % str(Q.shape)
     
-  return cs_divergence_function(P.dimshuffle('x',0,1,2), Q, gamma)
+  #return cs_divergence_function(P.dimshuffle('x',0,1,2), Q, gamma)
+  return cs_divergence_function(np.expand_dims(P, axis=0), Q, gamma)
   
 # Calculate the divergence of a distribution Q from a set of distributions PP
 def from_many(PP,Q, gamma):
   if P.ndim != 3:
-    raise ArgumentError, 'P must be a 3-dimensional array in the form [distribution][sample point][dimension]'
+    raise ValueError, 'P must be a 3-dimensional array in the form [distribution][sample point][dimension], not shape %s' % str(P.shape)
   elif Q.ndim != 2:
-    raise ArgumentError, 'Q must be a 2-dimensional arran in the form [sample point][dimension]'
+    raise ValueError, 'Q must be a 2-dimensional arran in the form [sample point][dimension], not shape %s' % str(Q.shape)
     
   return cs_divergence_function(PP,Q, gamma)
   
