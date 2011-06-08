@@ -46,7 +46,7 @@ def run():
   print "Predictions done"
   
   X = np.arange(0,iterations * training_increment, training_increment)
-  plt.plot(X, accuracies[:,0] )
+  plt.plot(X, accuracies[:,2] )
   plt.show()
   
   

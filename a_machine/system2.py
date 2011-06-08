@@ -13,6 +13,7 @@ from theano import function
 
 def k(X,Y,gamma):
   return T.exp(-T.pow(X-Y,2)/(2*gamma**2))
+  #return T.exp(X-Y)
   
 col = T.TensorType('float32', [False, False, False])
 row = T.TensorType('float32', [False, False])
@@ -57,15 +58,15 @@ class model:
     # compute the kernel distance between the sequence and each observed point
     dd = distance( self.data.astype('float32'), sequence.astype('float32'), self.gamma )
     #print dd.shape  # => [training set][training point][sequence point][dimension]
-    
+        
     # append the target points
     dd = np.dstack( [dd, np.expand_dims(self.data, axis=2) ] )
     #print dd.shape  # => [training set][training point][sequence point + target][dimension]
     
     # shift the points to create sequences
     for i in np.arange(1, dd.shape[2]):
-      dd[:,:,:-i,:] = dd[:,:,i:,:]
-      
+      dd[:,:-i,i,:] = dd[:,i:,i,:]
+            
     # drop the partial sequences
     dd = dd[:,:dd.shape[1]-dd.shape[2],:,:]
     #print dd.shape
@@ -76,7 +77,7 @@ class model:
     # calculated weighted average
     d_cond = dd[:,:-1,:]
     d_pred = dd[:,-1,:]
-    activation = d_cond.prod(2).prod(1).reshape(d_cond.shape[0],1)
+    activation = d_cond.prod(2).sum(1).reshape(d_cond.shape[0],1)
     average = (d_pred * activation).sum(0) / d_pred.shape[0]
     #print average.shape
     print average
