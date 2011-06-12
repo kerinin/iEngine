@@ -89,7 +89,6 @@ def run():
   
   print "Generating Predictions"
   
-  # This is SO wrong, but I'm too out of it to see why...
   # [model][test_point][dimension][class_probability]
   predictions = []
   for model in models:
@@ -98,19 +97,28 @@ def run():
   
   # Sum over models & take max over class
   boc_class = predictions.sum(0).argmax(2)
+  print boc_class.shape
   
   # replace index with normalized value
-  boc_norm = points[ boc_class ]
-  print boc_norm.shape
+  # NOTE: this is sorta hacky
+  boc_norm = []
+  for i in range(points.shape[1]):
+    boc_norm.append ( points[:,i][boc_class[:,i]] )
+  boc_norm = np.array(boc_norm).T
+
   
   # denormalize
   boc = ( std * boc_norm ) + median
-  print boc
+  #print boc
   
-  error = np.abs( test[sequence_length+1 : sequence_length+1+test_size] - boc )
-  print error.sum()
+  error = np.abs( test[sequence_length : sequence_length+test_size-2] - boc )
+  print error.sum(0) / test_size
+  print std
   
-  
+  for i in range(points.shape[1]):
+    fig = plt.subplot(points.shape[1], 1, i+1)
+    fig.hist(error[:,i])
+  plt.show()
   
   
   

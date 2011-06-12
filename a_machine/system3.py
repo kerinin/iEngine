@@ -73,10 +73,10 @@ class model:
     points = self.make_sequences(data)
     
     # [train_i][test_j]
-    k = test_distance(self.sequences, points, self.gamma )
+    k = test_distance(self.sequences, points, self.gamma ).T
     
-    # predictions: [sequence][dimension][class]
-    predictions = np.array([]).reshape(self.labels.shape[0], 0, self.classes.shape[0])
+    # predictions: [test_sequence][dimension][class]
+    predictions = np.array([]).reshape(points.shape[0], 0, self.classes.shape[0])
     
     for SVM in self.SVMs:
       # NOTE: this is returning |classes|+1 results ???
