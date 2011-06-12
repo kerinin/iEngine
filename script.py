@@ -18,16 +18,19 @@ from theano import function
 def run():
   print "Initializing"
   
-  gamma_increment = 10
+  gamma_increment = 50
+  class_percentile = 10
   gamma_samples = 100
   sequence_length = 2
+  train_size = 1000
+  test_size = 10
 
   import a_machine.system3 as system
   
   print "Importing & Normalizing Data"
   
   from santa_fe import getData
-  data = getData('B1.dat')[:1000,:]
+  data = getData('B1.dat')[:train_size,:]
   test = getData('B2.dat')
   median = np.median(data, axis=0)
   std = np.std(data, axis=0)
@@ -43,19 +46,27 @@ def run():
   g_samples = g_samples[:gamma_samples]
   g_diff = np.abs( g_samples.reshape(g_samples.shape[0],1,g_samples.shape[1]) - g_samples.reshape(1,g_samples.shape[0],g_samples.shape[1]) )
   g_diff = g_diff.reshape(g_samples.shape[1]*g_samples.shape[0]**2)
-  percentiles = np.arange(gamma_increment / 2,100,gamma_increment).astype('float')
+  g_percentiles = np.arange(gamma_increment / 2,100,gamma_increment).astype('float')
+  p_percentiles = np.arange(class_percentile, 100, class_percentile).astype('float')
   gammas = []
   points = []
-  for i in percentiles:
+  for i in g_percentiles:
     gammas.append( sp.stats.stats.scoreatpercentile(g_diff, i) ) 
+  for i in p_percentiles:
     points.append( [
       sp.stats.stats.scoreatpercentile(g_samples[:,0], i),
       sp.stats.stats.scoreatpercentile(g_samples[:,1], i),
       sp.stats.stats.scoreatpercentile(g_samples[:,2], i) 
     ] ) 
   points = np.array(points)
-  labels = ( data.reshape(data.shape[0], 1, data.shape[1]) > points.reshape(1, points.shape[0], points.shape[1]) ).sum(1)
-  
+  labels = np.clip( 
+    ( data.reshape(data.shape[0], 1, data.shape[1]) > points.reshape(1, points.shape[0], points.shape[1]) ).sum(1),
+    0,
+    points.shape[0]-1
+  )
+  print "--> %s gamma values: %s" % (len(gammas), str(gammas))
+  print "--> %s classes" % points.shape[0]
+  print points
   #plt.plot( labels[:1000,1], data[:1000,1], 'o' )
   #plt.show()
   
@@ -71,7 +82,7 @@ def run():
   
   models = []
   for gamma in gammas:
-    model = system.model(gamma, sequence_length)
+    model = system.model(gamma, sequence_length, points)
     model.train(data, labels)
     models.append(model)
     
@@ -79,13 +90,24 @@ def run():
   print "Generating Predictions"
   
   # This is SO wrong, but I'm too out of it to see why...
-  # [model][test_point][value][probability]
+  # [model][test_point][dimension][class_probability]
   predictions = []
   for model in models:
-    predictions.append(model.predict(test))
+    predictions.append(model.predict(test[:test_size,:]))
   predictions = np.array(predictions)
-  predictions = predictions.sum(0).sum(0).max(1) # Sum the probability of each value given model and test point, take the value with the highest sum
-  error = np.abs( test - predictions )
+  
+  # Sum over models & take max over class
+  boc_class = predictions.sum(0).argmax(2)
+  
+  # replace index with normalized value
+  boc_norm = points[ boc_class ]
+  print boc_norm.shape
+  
+  # denormalize
+  boc = ( std * boc_norm ) + median
+  print boc
+  
+  error = np.abs( test[sequence_length+1 : sequence_length+1+test_size] - boc )
   print error.sum()
   
   
