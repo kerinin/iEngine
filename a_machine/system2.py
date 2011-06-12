@@ -44,6 +44,16 @@ class model:
         raise ValueError, 'new data must be the same size as previous chunks (%s, not %s)' % (self.data.shape[1], new_data.shape[0])
       
       self.data = np.vstack( [ self.data, np.expand_dims(new_data, axis=0) ] )
+      
+    x = np.arange(1., self.data.shape[0] * self.data.shape[1], 10.)
+    l = (self.data.shape[0]*self.data.shape[1]) - x
+    h = 10 * x
+    print (l > h).sum()
+    G_max = h * ( np.log( l/h ) + 1)
+    y = 4 * np.exp( l * ( ( G_max/l ) - .1 ) )
+    
+    plt.plot(x,y)
+    plt.show()
     
   def predict_from(self, sequence):
     if sequence.shape[0] != self.sequence_length:

@@ -7,6 +7,8 @@ from random import gauss
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
+import scikits.statsmodels.api as sm
+import scipy as sp
 
 _Functions = ['run', 'test_parzen', 'test_divergence']
 	
@@ -14,19 +16,113 @@ import theano.tensor as T
 from theano import function
 
 def run():
-  print "Starting"
+  print "Initializing"
   
-  sequence_length = 20
-  training_increment = 200
-  iterations = 20
+  gamma_increment = 10
+  gamma_samples = 100
+  sequence_length = 2
+
+  import a_machine.system3 as system
   
-  import a_machine.system2 as system
-  
-  print "Compiled for GPU"
+  print "Importing & Normalizing Data"
   
   from santa_fe import getData
-  data = getData('B1.dat')
+  data = getData('B1.dat')[:1000,:]
   test = getData('B2.dat')
+  median = np.median(data, axis=0)
+  std = np.std(data, axis=0)
+
+  # normalizing to median 0, std deviation 1
+  data = ( data - median ) / std
+
+
+  print "Dermining gamma values"
+  
+  g_samples = data.copy()
+  np.random.shuffle(g_samples)
+  g_samples = g_samples[:gamma_samples]
+  g_diff = np.abs( g_samples.reshape(g_samples.shape[0],1,g_samples.shape[1]) - g_samples.reshape(1,g_samples.shape[0],g_samples.shape[1]) )
+  g_diff = g_diff.reshape(g_samples.shape[1]*g_samples.shape[0]**2)
+  percentiles = np.arange(gamma_increment / 2,100,gamma_increment).astype('float')
+  gammas = []
+  points = []
+  for i in percentiles:
+    gammas.append( sp.stats.stats.scoreatpercentile(g_diff, i) ) 
+    points.append( [
+      sp.stats.stats.scoreatpercentile(g_samples[:,0], i),
+      sp.stats.stats.scoreatpercentile(g_samples[:,1], i),
+      sp.stats.stats.scoreatpercentile(g_samples[:,2], i) 
+    ] ) 
+  points = np.array(points)
+  labels = ( data.reshape(data.shape[0], 1, data.shape[1]) > points.reshape(1, points.shape[0], points.shape[1]) ).sum(1)
+  
+  #plt.plot( labels[:1000,1], data[:1000,1], 'o' )
+  #plt.show()
+  
+  #ecdf = sm.tools.tools.ECDF(g_diff)
+  #x = np.linspace(min(g_diff), max(g_diff))
+  #y = ecdf(x)
+  #plt.step(x, y)
+  #plt.plot(gammas, np.array(percentiles)/100, 'o')
+  #plt.show()
+  
+  
+  print "Initializing Models"
+  
+  models = []
+  for gamma in gammas:
+    model = system.model(gamma, sequence_length)
+    model.train(data, labels)
+    models.append(model)
+    
+  
+  print "Generating Predictions"
+  
+  # This is SO wrong, but I'm too out of it to see why...
+  # [model][test_point][value][probability]
+  predictions = []
+  for model in models:
+    predictions.append(model.predict(test))
+  predictions = np.array(predictions)
+  predictions = predictions.sum(0).sum(0).max(1) # Sum the probability of each value given model and test point, take the value with the highest sum
+  error = np.abs( test - predictions )
+  print error.sum()
+  
+  
+  
+  
+  
+
+  return
+  #sequences = series.reshape(series.shape[0],1) + np.zeros((1,3))
+  #sequences[:-1,1] = sequences[1:,1]
+  #sequences[:-2,2] = sequences[2:,2]
+  #sequences[:-2,2] = data[2:,2]
+  #sequences = sequences[:-2,:]
+  
+  #print sequences[:,0]
+  #print sequences[:,1]
+  #mask1 = np.ma.masked_less( sequences[:,2], median - std).mask
+  #mask2 = np.ma.masked_inside( sequences[:,2], median - std, median).mask
+  #mask3 = np.ma.masked_inside( sequences[:,2], median, median + std).mask
+  #mask4 = np.ma.masked_greater( sequences[:,2], median + std).mask
+  
+  #plt.plot(np.ma.array(sequences[:,0], mask=mask1), np.ma.array(sequences[:,1], mask=mask1), 'ro', alpha=.05 )
+  #plt.plot(np.ma.array(sequences[:,0], mask=mask2), np.ma.array(sequences[:,1], mask=mask2), 'go', alpha=.05 )
+  #plt.plot(np.ma.array(sequences[:,0], mask=mask3), np.ma.array(sequences[:,1], mask=mask3), 'bo', alpha=.05 )
+  #plt.plot(np.ma.array(sequences[:,0], mask=mask4), np.ma.array(sequences[:,1], mask=mask4), 'yo', alpha=.05 )
+  #plt.show()
+  #return
+  
+  #fig = plt.figure()
+  #a = fig.add_subplot(3,1,1)
+  #a.plot( np.arange(0,400), data[:400,0])
+  #b = fig.add_subplot(3,1,2)
+  #b.plot( np.arange(0,400), data[:400,1])
+  #c = fig.add_subplot(3,1,3)
+  #c.plot( np.arange(0,400), data[:400,2])
+  #plt.show()
+  #return
   
   print "Data Imported"
   
