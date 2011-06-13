@@ -2715,6 +2715,643 @@ Sparse variates
 How is invariance handled?
 \end_layout
 
+\begin_layout Section
+Generalized approach
+\end_layout
+
+\begin_layout Standard
+Given a sequence of observations in some space 
+\begin_inset Formula $A$
+\end_inset
+
+, we would like to predict the next value, given a set of observations 
+\begin_inset Formula $A'$
+\end_inset
+
+ and a test set 
+\begin_inset Formula $A$
+\end_inset
+
+.
+ To simplify the general procedure, we will assume that the set 
+\begin_inset Formula $A'$
+\end_inset
+
+ is split into a set of 4-element sequences
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+We'll assume for the sake of simplicity that 
+\begin_inset Formula $\ell$
+\end_inset
+
+ is divisible by 4.
+\end_layout
+
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+[a_{1},...,a_{\ell}] & \longmapsto\left[[a_{1},a_{2},a_{3},a_{4}],...,[a_{\ell/4},a_{\ell/4+1},a_{\ell/4+2},a_{\ell/4+3}]\right]
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This translation generates a set of random variables
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+A & \longmapsto[A^{1},A^{2},A^{3},A^{4}]\\
+A^{1} & =[a_{1},a_{5},...,a_{\ell/4}]\\
+A^{2} & =[a_{2},a_{6},...,a_{\ell/4+1}]\\
+A^{3} & =[a_{3},a_{7},...,a_{\ell/4+2}]\\
+A^{4} & =[a_{4},a_{8},...,a_{\ell/4+3}]
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We will then construct an encoding of 
+\begin_inset Formula $A$
+\end_inset
+
+ is a new space 
+\begin_inset Formula $B$
+\end_inset
+
+ defined by pairs of observations in 
+\begin_inset Formula $A$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+[A^{1},A^{2},A^{3},A^{4}] & \longmapsto[B^{1},B^{2}]\\
+b_{i} & =[a_{2i-1},a_{2i}]\\
+B^{1} & =[b_{1},.b_{3},...b_{\ell/2}]\\
+B^{2} & =[b_{2},.b_{4},...b_{\ell/2+1}]
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We can predict the probability of 
+\begin_inset Formula $A^{4}|\ A^{1}\cap A^{2}\cap A^{3}$
+\end_inset
+
+by observing that 
+\begin_inset Formula $B^{2}=[A^{3},A^{4}]$
+\end_inset
+
+, and predicting the probability of 
+\begin_inset Formula $B^{2}|\ B^{1}\cap A^{3}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\Pr(B^{2}|B^{1}\cap A^{3}) & =\frac{\Pr(B^{2}\cap B^{1}\cap A^{3})}{\Pr(B^{1}\cap A^{3})}\\
+ & =\frac{\Pr(A^{3}|\ B^{2}\cap B^{1})\Pr(B^{2}|\ B^{1})\Pr(B^{1})}{\Pr(A^{3}|\ B^{1})\Pr(B^{1})}\\
+ & =\frac{\Pr(A^{3}|\ B^{2}\cap B^{1})\Pr(B^{2}|\ B^{1})}{\Pr(A^{3}|\ B^{1})}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This allows us to use knowledge of the relationship between 
+\begin_inset Formula $B^{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $B^{2}$
+\end_inset
+
+ to make predictions in 
+\begin_inset Formula $A$
+\end_inset
+
+ between observations of 
+\begin_inset Formula $B$
+\end_inset
+
+.
+ This works because we can determine 
+\begin_inset Formula $\Pr(A^{3}|\ B^{1})$
+\end_inset
+
+ using 
+\begin_inset Formula $\Pr(B^{2}|\ B^{1})$
+\end_inset
+
+ and 
+\begin_inset Formula $\Pr(A^{3}\cap B^{2})$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+Extension to Longer Sequences
+\end_layout
+
+\begin_layout Standard
+Notice that we can extend this to longer sequences, for example 
+\begin_inset Formula $A=[A^{1},...,A^{6}],\ b_{i}=[a_{3i-1},...,a_{3i+1}],\ B=[B^{1},B^{2}]$
+\end_inset
+
+.
+ In this case we can frame the prediction as:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\Pr(B^{2}|\ B^{1}\cap A^{4}\cap A^{5}) & =\frac{\Pr(B^{1}\cap B^{2}\cap A^{4}\cap A^{5})}{\Pr(B^{1}\cap A^{4}\cap A^{5})}\\
+ & =\frac{\Pr(A^{4}\cap A^{5}|\ B^{2}\cap B^{1})\Pr(B^{2}|\ B^{1})\Pr(B^{1})}{\Pr(A^{4}\cap A^{5}|\ B^{1})\Pr(B^{1})}\\
+ & =\frac{\Pr(A^{4}\cap A^{5}|\ B^{2}\cap B^{1})\Pr(B^{2}|\ B^{1})}{\Pr(A^{4}\cap A^{5}|\ B^{1})}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Equivalently, we can construct sequences as 
+\begin_inset Formula $A=[A^{1},...,A^{6}],\ b_{i}=[a_{3i-1},a_{3i}],\ B=[B^{1},B^{2},B^{3}]$
+\end_inset
+
+ and predict as:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\Pr(B^{3}|\ B^{1}\cap B^{2}\cap A^{5}) & =\frac{\Pr(B^{1}\cap B^{2}\cap B^{3}\cap A^{5})}{\Pr(B^{1}\cap B^{2}\cap A^{5})}\\
+ & =\frac{\Pr(A^{5}|\ B^{1}\cap B^{2}\cap B^{3})\Pr(B^{3}|\ B^{2}\cap B^{1})\Pr(B^{2}\cap B^{1})}{\Pr(A^{5}|\ B^{1}\cap B^{2})\Pr(B^{1}\cap B^{2})}\\
+ & =\frac{\Pr(A^{5}|\ B^{1}\cap B^{2}\cap B^{3})\Pr(B^{3}|\ B^{2}\cap B^{1})}{\Pr(A^{5}|\ B^{1}\cap B^{2})}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The general form of the solution looks something like this:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\Pr\left(B^{i}|\ \bigcap B^{j}\cap\bigcap A^{k}\right) & =\frac{\Pr\left(\bigcap A^{k}|\ B^{i}\cap\bigcap B^{j}\right)\Pr\left(B^{i}|\ \bigcap B^{j}\right)}{\Pr\left(\bigcap A^{k}|\ \bigcap B^{j}\right)}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In general, we constrain 
+\begin_inset Formula $A^{k}$
+\end_inset
+
+ to observations of 
+\begin_inset Formula $A$
+\end_inset
+
+ which take place after the last observation in 
+\begin_inset Formula $B^{j}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+Extension to Deeper Hierarchies
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+X & =[x_{1},...,x_{\ell}]\\
+a_{i} & =[x_{i}]\\
+A & =[a_{1},...,a_{\ell}]\\
+b_{i} & =[a_{2i-1},a_{2i}]\\
+B & =[b_{1},...,b_{\ell/2}]\\
+c_{i} & =[b_{2i-1},b_{2i}]\mapsto[a_{4i-3},a_{4i-2},a_{4i-1},a_{4i}]\\
+C & =[c_{1},...,c_{\ell/4}]
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+A & =[A^{1},...,A^{8}]
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+b_{i} & =[a_{2i-1},a_{2i}]\\
+B^{1} & =[b_{1},.b_{5},...b_{\ell/4}]\\
+B^{2} & =[b_{2},.b_{6},...b_{\ell/4+1}]\\
+B^{3} & =[b_{3},.b_{7},...b_{\ell/4+2}]\\
+B^{4} & =[b_{4},.b_{8},...b_{\ell/4+3}]\\
+B & =[B^{1},B^{2},B^{3},B^{4}]
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+c_{i} & =[b_{2i-1},b_{2i}]\\
+C^{1} & =[c_{1},.c_{3},...c_{\ell/2}]\\
+C^{2} & =[c_{2},.c_{4},...c_{\ell/2+1}]\\
+C & =[C^{1},C^{2}]
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+X & =[x_{1},...,x_{\ell}]\\
+a_{i} & =[x_{i}]\\
+A & =[a_{1},...,a_{\ell}]\\
+b_{i} & =[a_{2i-1},a_{2i}]\\
+B & =[b_{1},...,b_{\ell/2}]\\
+c_{i} & =[b_{2i-1},b_{2i}]\mapsto[a_{4i-3},a_{4i-2},a_{4i-1},a_{4i}]\\
+C & =[c_{1},...,c_{\ell/4}]
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+c_{i}^{1} & =b_{2i-1}\\
+C^{1} & =[b_{1},...,b_{\ell/2}]
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We would like to predict conditional probabilities in each of these spaces
+ in terms of the joint probability spaces 
+\begin_inset Formula $A\times A$
+\end_inset
+
+ , 
+\begin_inset Formula $A\times B$
+\end_inset
+
+, 
+\begin_inset Formula $B\times B$
+\end_inset
+
+, 
+\begin_inset Formula $B\times C$
+\end_inset
+
+ and 
+\begin_inset Formula $C\times C$
+\end_inset
+
+.
+ For example, we want to avoid the need to evaluate 
+\begin_inset Formula $\Pr(C|\ A)$
+\end_inset
+
+ directly, as this would require us to know the joint probability 
+\begin_inset Formula $C\cap A$
+\end_inset
+
+ defined over 
+\begin_inset Formula $C\times A$
+\end_inset
+
+.
+ This is possible due to the following equivalencies:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\Pr(C^{i}) & =\Pr(B^{i}\cap B^{i+1})\\
+\Pr(B^{i}) & =\Pr(A^{i}\cap A^{i+1})
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Prediction in 
+\begin_inset Formula $A$
+\end_inset
+
+ is trivial given the join probability space 
+\begin_inset Formula $A\times A$
+\end_inset
+
+ and the marginal probability of 
+\begin_inset Formula $A$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\Pr(A|\ \bigcap A^{i}) & =\frac{\Pr(A\cap\bigcap A^{i})}{\Pr(\bigcap A^{i})}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Prediction in 
+\begin_inset Formula $B$
+\end_inset
+
+ is similarly trivial:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\Pr\left(B|\ \bigcap A^{i}\cap\bigcap B^{j}\right) & =\frac{\Pr\left(B\cap\bigcap A^{i}\cap\bigcap B^{j}\right)}{\Pr\left(\bigcap A^{i}\cap\bigcap B^{j}\right)}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We can predict in 
+\begin_inset Formula $C$
+\end_inset
+
+ by first separating translating the problem into 
+\begin_inset Formula $B\times A$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\Pr\left(\bar{C}|\ \bigcap A^{i}\cap\bigcap B^{j}\cap\bigcap C^{k}\right) & =\frac{\Pr\left(\bar{C}\cap\bigcap A^{i}\cap\bigcap B^{j}\cap\bigcap C^{k}\right)}{\Pr\left(\bigcap A^{i}\cap\bigcap B^{j}\cap\bigcap C^{k}\right)}\\
+ & =\frac{\Pr\left(\bigcap_{1}^{|C|}\bar{B}_{n}\cap\bigcap A^{i}\cap\bigcap B^{j}\cap\bigcap_{1}^{|C|}B_{n}^{k}\right)}{\Pr\left(\bigcap A^{i}\cap\bigcap B^{j}\cap\bigcap_{1}^{|C|}B_{n}^{k}\right)}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The splitting out 
+\begin_inset Formula $A$
+\end_inset
+
+ for simplicity
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\Pr\left(\bigcap_{1}^{|C|}\bar{B}_{n}\cap\bigcap A^{i}\cap\bigcap B^{j}\cap\bigcap_{1}^{|C|}B_{n}^{k}\right)}{\Pr\left(\bigcap A^{i}\cap\bigcap B^{j}\cap\bigcap_{1}^{|C|}B_{n}^{k}\right)} & =\frac{\Pr\left(\bigcap A^{i}|\ \bigcap_{1}^{|C|}\bar{B}_{n}\cap\bigcap B^{j}\cap\bigcap_{1}^{|C|}B_{n}^{k}\right)\Pr\left(\bar{B}_{1}\cap\bar{B}_{2}\cap\bigcap B^{j}\cap\bigcap_{1}^{|C|}B_{n}^{k}\right)}{\Pr\left(\bigcap A^{i}|\ \bigcap B^{j}\cap\bigcap_{1}^{|C|}B_{n}^{k}\right)\Pr\left(\bigcap B^{j}\cap\bigcap_{1}^{|C|}B_{n}^{k}\right)}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This gives us a probibility estimate in 
+\begin_inset Formula $C$
+\end_inset
+
+ based on a conditional probability in 
+\begin_inset Formula $A\times B$
+\end_inset
+
+ and joint probabilities in 
+\begin_inset Formula $B$
+\end_inset
+
+.
+ Notice that the conditional probabilities of 
+\begin_inset Formula $A$
+\end_inset
+
+ need only be evaluated on aligned elements.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Are you being sloppy? Does 
+\begin_inset Formula $A^{1}=A^{2}$
+\end_inset
+
+, or are they different distributions? 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Older stuff...
+\end_layout
+
+\begin_layout Standard
+First, we expand the probability in 
+\begin_inset Formula $B$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\Pr(B^{1}|\ \bar{A}^{1}) & =\Pr(A^{1}\cap A^{2}|\ \bar{A}^{1})\\
+ & =\frac{\Pr(A^{1}\cap A^{2}\cap\bar{A}^{1})}{\Pr(\bar{A}^{1})}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Then substitute that probability into 
+\begin_inset Formula $C$
+\end_inset
+
+, giving us a functional in the form 
+\begin_inset Formula $C(B(A))$
+\end_inset
+
+, rather than 
+\begin_inset Formula $C(A)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\Pr(C^{1}|\ \bar{A}^{1}) & =\Pr(B^{1}\cap B^{2}|\ \bar{A}^{1})\\
+ & =\Pr(A^{1}\cap A^{2}\cap B^{2}|\ \bar{A}^{1})\\
+ & =\frac{\Pr(A^{1}\cap A^{2}\cap B^{2}\cap\bar{A}^{1})}{\Pr(\bar{A}^{1})}\\
+ & =\frac{\Pr(B^{2}|\ A^{1}\cap A^{2}\cap\bar{A}^{1})\Pr(A^{1}\cap A^{2}\cap\bar{A}^{1})}{\Pr(\bar{A}^{1})}\\
+ & =\Pr(B^{1}|\ \bar{A}^{1})\Pr(B^{2}|\ A^{1}\cap A^{2}\cap\bar{A}^{1})
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+More thoughts
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\Pr\left(\bar{C}|\ \bigcap A^{i}\cap\bigcap B^{j}\cap\bigcap C^{k}\right) & =\frac{\Pr\left(\bar{C}\cap\bigcap A^{i}\cap\bigcap B^{j}\cap\bigcap C^{k}\right)}{\Pr\left(\bigcap A^{i}\cap\bigcap B^{j}\cap\bigcap C^{k}\right)}\\
+ & =\frac{\Pr\left(\bigcap A^{i}\cap\bigcap B^{j}|\ \bar{C}\cap\bigcap C^{k}\right)\Pr\left(\bar{C}|\ \bigcap C^{k}\right)\Pr\left(\bigcap C^{k}\right)}{\Pr\left(\bigcap A^{i}\cap\bigcap B^{j}\cap\bigcap C^{k}\right)}\\
+ & =\frac{\Pr\left(\bar{C}\cap\bigcap C^{k}|\ \bigcap A^{i}\cap\bigcap B^{j}\right)\Pr\left(\bigcap A^{i}\cap\bigcap B^{j}\right)\Pr\left(\bar{C}|\ \bigcap C^{k}\right)\Pr\left(\bigcap C^{k}\right)}{\Pr\left(\bigcap A^{i}\cap\bigcap B^{j}\cap\bigcap C^{k}\right)\Pr\left(\bar{C}\cap\bigcap C^{k}\right)}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+OK, so we can say that 
+\begin_inset Formula $\Pr(C|\ B)$
+\end_inset
+
+ is the probability of string 
+\begin_inset Formula $C$
+\end_inset
+
+ given a substring 
+\begin_inset Formula $B$
+\end_inset
+
+, or that 
+\begin_inset Formula $\Pr(C|\ A)$
+\end_inset
+
+ is the probability of a string 
+\begin_inset Formula $C$
+\end_inset
+
+ given a substring 
+\begin_inset Formula $A$
+\end_inset
+
+.
+ Part of my challenge is that I'm moving from a known sequence in 
+\begin_inset Formula $A$
+\end_inset
+
+ to a distribution in 
+\begin_inset Formula $B$
+\end_inset
+
+, and trying to use that distribution as my conditional variable.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\Pr(C|\ A) & =\Pr(A^{1}\cap A^{2}\cap A^{3}\cap A^{4}|\ A)\\
+ & =\frac{\Pr(A^{1}\cap A^{2}\cap A^{3}\cap A^{4}\cap A)}{\Pr(A)}\\
+ & =\frac{\Pr(A^{1}\cap A)\Pr(A^{2}\cap A^{3}\cap A^{4})}{\Pr(A)}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This shows that we can separate matched instances (since they're independant
+ of the rest).
+ It also shows that the probability is the prior probability of the last
+ 3 elements, times the probability the first element is A.
+\end_layout
+
 \begin_layout Chapter
 Choice
 \end_layout
