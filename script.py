@@ -19,11 +19,11 @@ def run():
   print "Initializing"
   
   gamma_increment = 50
-  class_percentile = 10
-  gamma_samples = 100
+  class_percentile = 5
+  gamma_samples = 1000
   sequence_length = 2
   train_size = 1000
-  test_size = 10
+  test_size = 2000
 
   import a_machine.system3 as system
   

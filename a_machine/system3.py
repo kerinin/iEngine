@@ -18,15 +18,15 @@ def k(X,Y,gamma):
   
 col = T.TensorType('float32', [False, False, False])
 
-observations = col()
-test = col()
+X = col()
+Y = col()
 gamma = T.dscalar()
 
-k_distance = k( observations.dimshuffle(0,'x',1,2), observations.dimshuffle('x',0,1,2), gamma )
-test_k_distance = k( observations.dimshuffle(0,'x',1,2), test.dimshuffle('x',0,1,2), gamma )
+k_distance = k( X.dimshuffle(0,'x',1,2), Y.dimshuffle('x',0,1,2), gamma )
+#test_k_distance = k( observations.dimshuffle(0,'x',1,2), test.dimshuffle('x',0,1,2), gamma )
 
-distance = function( [observations, gamma], k_distance )
-test_distance = function( [observations, test, gamma], test_k_distance)
+distance = function( [X, Y, gamma], k_distance )
+#test_distance = function( [observations, test, gamma], test_k_distance)
 
 class model:
   def __init__(self, gamma, sequence_length, classes):
@@ -51,7 +51,43 @@ class model:
     
     self.labels = labels[self.sequence_length:]
     
-    self.k = distance(self.sequences, self.gamma )
+    # Procedure for splitting kernel into 2^n sub-problems
+    # Avoids memory errors if array too large for GPU
+    n=2
+    while True:
+      print "Trying with n=%s" % n
+      try:
+        if n == 0:
+          self.k = distance(self.sequences, self.sequences, self.gamma)
+        else:
+          l_n = ceil( float(self.sequences.shape[0]) / (2**n) )
+          kk = np.array([]).reshape(0,self.sequences.shape[0])
+          
+          for i in range(2**n):
+            l_i1 = l_n * i
+            l_i2 = self.sequences.shape[0] if l_n * (i+1) > self.sequences.shape[0] else l_n * (i+1)
+            kk_i = np.array([]).reshape(l_i2,0)
+            
+            for j in range(2**n):
+              
+              l_j1 = l_n * j
+              l_j2 = self.sequences.shape[0] if l_n * (j+1) > self.sequences.shape[0] else l_n * (j+1)
+              
+              kk_j = distance( self.sequences[l_i1:l_i2,:,:], self.sequences[l_j1:l_j2,:,:], self.gamma)
+              
+              print "adding [%s:%s][%s:%s]" % (l_i1,l_i2,l_j1,l_j2)
+              print kk_i.shape
+              kk_i = np.hstack([kk_i, kk_j])
+              
+            kk = np.vstack([ kk, kk_i ])
+          print np.array(kk).shape
+          print self.sequences.shape
+          self.k = np.array(kk).reshape(self.sequences.shape[0], self.sequences.shape[0], self.sequences.shape[1], self.sequences.shape[2])
+      except MemoryError, RuntimeError:
+        n += 1
+      else:
+        break
+        
     #print "--> %s non-null kernel distances" % ( (self.k > .00001).sum() )
     # NOTE:  consider masking the kernel matrix with a small value
     # We're computing a range of kernel widths, loosing some fidelity at the tight
@@ -60,7 +96,7 @@ class model:
     # construct an SVM for each dimension of the observation data
     SVMs = []
     for i in range(data.shape[1]):
-      SVM = svm.NuSVC( nu = .2, kernel='precomputed', probability=True)
+      SVM = svm.NuSVC( nu = .2, kernel='precomputed', probability=True, cache=2000)
       SVM.fit(self.k, self.labels[:,i])
       SVMs.append(SVM)
     self.SVMs = SVMs
@@ -73,7 +109,7 @@ class model:
     points = self.make_sequences(data)
     
     # [train_i][test_j]
-    k = test_distance(self.sequences, points, self.gamma ).T
+    k = distance(self.sequences, points, self.gamma ).T
     
     # predictions: [test_sequence][dimension][class]
     predictions = np.array([]).reshape(points.shape[0], 0, self.classes.shape[0])
