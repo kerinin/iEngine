@@ -18,11 +18,11 @@ from theano import function
 def run():
   print "Initializing"
   
-  gamma_increment = 50
-  class_percentile = 5
+  gamma_increment = 20
+  class_percentile = 20
   gamma_samples = 1000
-  sequence_length = 2
-  train_size = 1000
+  sequence_length = 10
+  train_size = 10000
   test_size = 2000
 
   import a_machine.system3 as system
