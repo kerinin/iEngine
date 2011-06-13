@@ -12,6 +12,7 @@ from scikits.learn import svm
 import theano.tensor as T
 from theano import function
 
+
 # [sequence_i][sequence_j][observation][dimension]
 def k(X,Y,gamma):
   return T.prod( T.prod( T.exp(-T.pow(X-Y,2)/(2*gamma**2)), 3),  2)
@@ -35,10 +36,12 @@ def kernel_matrix(X,Y,gamma):
   # mem = 64*sequences^2*dimensions*points
   # I'm assuming the system has around 200M of video memory available
   mem = 64 * X.shape[0] * Y.shape[0] * X.shape[1] * X.shape[2]
-  n = int( ceil( sqrt( mem/200000000.0 ) ) )
+  mem_available = 2e9 # 2e8 for laptop
+  n = int( ceil( sqrt( mem/mem_available ) ) )
+  
   while True:
     l_n = ceil( float(X.shape[0]) / n )
-    print "Trying with n=%s, %s sub-matrices of size %sx%s (mem estimate %s)" % (n, n**2, l_n, l_n, mem/200000000.0)
+    print "Trying with n=%s, %s sub-matrices of size %sx%s (mem estimate %s)" % (n, n**2, l_n, l_n, mem/mem_available)
     
     try:
       if n == 0:
@@ -95,46 +98,6 @@ class model:
     
     self.k = kernel_matrix(self.sequences, self.sequences, self.gamma)
     
-    '''    
-    # Procedure for splitting kernel into 2^n sub-problems
-    # Avoids memory errors if array too large for GPU
-    # Let's assume 64-bits/point (float + link)
-    # mem = 64*sequences^2*dimensions*points
-    # I'm assuming the system has around 200M of video memory available
-    mem = 64 * (self.sequences.shape[0])**2 * self.sequences.shape[1] * self.sequences.shape[2]
-    n = int( ceil( sqrt( mem/200000000.0 ) ) )
-    while True:
-      print "Trying with n=%s" % n
-      try:
-        if n == 0:
-          self.k = distance(self.sequences, self.sequences, self.gamma)
-        else:         
-          l_n = ceil( float(self.sequences.shape[0]) / (2**n) )
-          kk = np.array([]).reshape(0,self.sequences.shape[0])
-          
-          for i in range(2**n):
-            l_i1 = l_n * i
-            l_i2 = self.sequences.shape[0] if l_n * (i+1) > self.sequences.shape[0] else l_n * (i+1)
-            kk_i = np.array([]).reshape(l_i2-l_i1,0)
-            
-            for j in range(2**n):
-              
-              l_j1 = l_n * j
-              l_j2 = self.sequences.shape[0] if l_n * (j+1) > self.sequences.shape[0] else l_n * (j+1)
-              
-              kk_j = distance( self.sequences[l_i1:l_i2,:,:], self.sequences[l_j1:l_j2,:,:], self.gamma)
-              
-              #print "adding [%s:%s][%s:%s]" % (l_i1,l_i2,l_j1,l_j2)
-              print "%s, %s" % (i,j)
-              kk_i = np.hstack([kk_i, kk_j])
-              
-            kk = np.vstack([ kk, kk_i ])
-          self.k = np.array(kk).reshape(self.sequences.shape[0], self.sequences.shape[0])
-      except MemoryError, RuntimeError:
-        n += 1
-      else:
-        break
-    '''        
     #print "--> %s non-null kernel distances" % ( (self.k > .00001).sum() )
     # NOTE:  consider masking the kernel matrix with a small value
     # We're computing a range of kernel widths, loosing some fidelity at the tight
