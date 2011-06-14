@@ -18,12 +18,12 @@ from theano import function
 def run():
   print "Initializing"
   
-  gamma_increment = 20
+  gamma_increment = 50
   class_percentile = 20
   gamma_samples = 1000
-  sequence_length = 10
+  sequence_length = 1
   train_size = 10000
-  test_size = 2000
+  test_size = 1000
 
   import a_machine.system3 as system
   
@@ -47,26 +47,26 @@ def run():
   g_diff = np.abs( g_samples.reshape(g_samples.shape[0],1,g_samples.shape[1]) - g_samples.reshape(1,g_samples.shape[0],g_samples.shape[1]) )
   g_diff = g_diff.reshape(g_samples.shape[1]*g_samples.shape[0]**2)
   g_percentiles = np.arange(gamma_increment / 2,100,gamma_increment).astype('float')
-  p_percentiles = np.arange(class_percentile, 100, class_percentile).astype('float')
+  #p_percentiles = np.arange(class_percentile, 100, class_percentile).astype('float')
   gammas = []
-  points = []
+  #points = []
   for i in g_percentiles:
     gammas.append( sp.stats.stats.scoreatpercentile(g_diff, i) ) 
-  for i in p_percentiles:
-    points.append( [
-      sp.stats.stats.scoreatpercentile(g_samples[:,0], i),
-      sp.stats.stats.scoreatpercentile(g_samples[:,1], i),
-      sp.stats.stats.scoreatpercentile(g_samples[:,2], i) 
-    ] ) 
-  points = np.array(points)
-  labels = np.clip( 
-    ( data.reshape(data.shape[0], 1, data.shape[1]) > points.reshape(1, points.shape[0], points.shape[1]) ).sum(1),
-    0,
-    points.shape[0]-1
-  )
+  #for i in p_percentiles:
+  #  points.append( [
+  #    sp.stats.stats.scoreatpercentile(g_samples[:,0], i),
+  #    sp.stats.stats.scoreatpercentile(g_samples[:,1], i),
+  #    sp.stats.stats.scoreatpercentile(g_samples[:,2], i) 
+  #  ] ) 
+  #points = np.array(points)
+  #labels = np.clip( 
+  #  ( data.reshape(data.shape[0], 1, data.shape[1]) > points.reshape(1, points.shape[0], points.shape[1]) ).sum(1),
+  #  0,
+  #  points.shape[0]-1
+  #)
   print "--> %s gamma values: %s" % (len(gammas), str(gammas))
-  print "--> %s classes" % points.shape[0]
-  print points
+  #print "--> %s classes" % points.shape[0]
+  #print points
   #plt.plot( labels[:1000,1], data[:1000,1], 'o' )
   #plt.show()
   
@@ -82,8 +82,8 @@ def run():
   
   models = []
   for gamma in gammas:
-    model = system.model(gamma, sequence_length, points)
-    model.train(data, labels)
+    model = system.model(gamma, sequence_length)
+    model.train(data)
     models.append(model)
     
   

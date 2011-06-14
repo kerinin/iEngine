@@ -46,10 +46,10 @@ def kernel_matrix(X,Y,gamma):
   
   while True:
     l_n = ceil( float(X.shape[0]) / n )
-    print "Trying with n=%s, %s sub-matrices of size %sx%s (mem estimate %s)" % (n, n**2, l_n, l_n, mem/mem_available)
+    print "--> Trying with n=%s, %s sub-matrices of size %sx%s (mem estimate %s)" % (n, n**2, l_n, l_n, mem/mem_available)
     
     try:
-      if n == 0:
+      if n == 1:
         return distance(X, Y, gamma)
       else:         
         kk = np.array([]).reshape(0,X.shape[0])
@@ -71,7 +71,7 @@ def kernel_matrix(X,Y,gamma):
             kk_i = np.hstack([kk_i, kk_j])
             
           kk = np.vstack([ kk, kk_i ])
-          print "Row %s" % i
+          print "--> Row %s" % i
         return np.array(kk).reshape(X.shape[0], Y.shape[0])
     except MemoryError, RuntimeError:
       n += 1
@@ -79,16 +79,15 @@ def kernel_matrix(X,Y,gamma):
       break
       
 class model:
-  def __init__(self, gamma, sequence_length, classes):
+  def __init__(self, gamma, sequence_length):
     self.sequence_length = sequence_length
     self.gamma = gamma
     self.sequences = None
     self.k = None
     self.SVMs = None
-    self.classes = classes
     
   # data: [observation][dimension]
-  def train(self, data, labels):
+  def train(self, data):
     print "--> Training on %s %s-element subsequences, gamma=%s" % (data.shape[0] - self.sequence_length, self.sequence_length, self.gamma)
 
     #sequences = data.reshape(data.shape[0], 1, data.shape[1])
@@ -96,11 +95,12 @@ class model:
     #  sequences = np.hstack([ sequences, np.roll(data, -i, 0).reshape(data.shape[0], 1, data.shape[1]) ])
     #self.sequences = np.array( sequences )[:-self.sequence_length,:,:].astype('float32')
     self.sequences = self.make_sequences(data)
+    self.labels = data[self.sequence_length:,:]
     
     # sequences: [sequence][observation][dimension]
     
-    self.labels = labels[self.sequence_length:]
-    
+    self.labels = data[self.sequence_length:,:].astype('float32')
+
     self.k = kernel_matrix(self.sequences, self.sequences, self.gamma)
     
     #print "--> %s non-null kernel distances" % ( (self.k > .00001).sum() )
@@ -111,7 +111,8 @@ class model:
     # construct an SVM for each dimension of the observation data
     SVMs = []
     for i in range(data.shape[1]):
-      SVM = svm.NuSVC( nu = .2, kernel='precomputed', probability=True, cache_size=2000)
+      SVM = svm.NuSVR( nu = .2, kernel='precomputed', probability=True, cache_size=2000)
+      
       SVM.fit(self.k, self.labels[:,i])
       SVMs.append(SVM)
     self.SVMs = SVMs
@@ -128,7 +129,7 @@ class model:
     k = kernel_matrix(self.sequences, points, self.gamma).T
     
     # predictions: [test_sequence][dimension][class]
-    predictions = np.array([]).reshape(points.shape[0], 0, self.classes.shape[0])
+    predictions = np.array([]).reshape(points.shape[0], 0, points.shape[2])
     
     for SVM in self.SVMs:
       # NOTE: this is returning |classes|+1 results ???

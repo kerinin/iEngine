@@ -1,9 +1,8 @@
 Immediate NOTES:
 =========
 
-Check the kernel function, make sure SD is being handled properly on gamma != 1
+Update prediction per SVR
 Shift the decomposition into the GPU using scan()
-Switch to Regression (if that works)
 BOC needs to incoporate model risk
 Mask SV's after calculation
 
