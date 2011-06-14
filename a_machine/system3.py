@@ -14,8 +14,12 @@ from theano import function
 
 
 # [sequence_i][sequence_j][observation][dimension]
+# (sqrt(2pi)sigma)^-d * exp( x^2 / -2sigma^2)
 def k(X,Y,gamma):
-  return T.prod( T.prod( T.exp(-T.pow(X-Y,2)/(2*gamma**2)), 3),  2)
+  #return T.prod( T.prod( T.exp(-T.pow(X-Y,2)/(2*gamma**2)), 3),  2)
+  return T.prod( T.prod( 
+    T.pow(gamma * sqrt(2*pi), X.shape[2]) * T.exp( T.pow(X-Y, 2) / (-2 * T.pow(gamma, 2))),
+  3), 2)
   
 col = T.TensorType('float32', [False, False, False])
 
@@ -36,7 +40,8 @@ def kernel_matrix(X,Y,gamma):
   # mem = 64*sequences^2*dimensions*points
   # I'm assuming the system has around 200M of video memory available
   mem = 64 * X.shape[0] * Y.shape[0] * X.shape[1] * X.shape[2]
-  mem_available = 2e9 # 2e8 for laptop
+  #mem_available = 2e9 # 2e8 for laptop
+  mem_available = 2e8
   n = int( ceil( sqrt( mem/mem_available ) ) )
   
   while True:
