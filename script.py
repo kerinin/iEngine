@@ -19,11 +19,10 @@ def run():
   print "Initializing"
   
   gamma_increment = 50
-  class_percentile = 20
   gamma_samples = 1000
   sequence_length = 1
   train_size = 10000
-  test_size = 1000
+  test_size = 500
 
   import a_machine.system3 as system
   
@@ -47,29 +46,11 @@ def run():
   g_diff = np.abs( g_samples.reshape(g_samples.shape[0],1,g_samples.shape[1]) - g_samples.reshape(1,g_samples.shape[0],g_samples.shape[1]) )
   g_diff = g_diff.reshape(g_samples.shape[1]*g_samples.shape[0]**2)
   g_percentiles = np.arange(gamma_increment / 2,100,gamma_increment).astype('float')
-  #p_percentiles = np.arange(class_percentile, 100, class_percentile).astype('float')
   gammas = []
-  #points = []
   for i in g_percentiles:
     gammas.append( sp.stats.stats.scoreatpercentile(g_diff, i) ) 
-  #for i in p_percentiles:
-  #  points.append( [
-  #    sp.stats.stats.scoreatpercentile(g_samples[:,0], i),
-  #    sp.stats.stats.scoreatpercentile(g_samples[:,1], i),
-  #    sp.stats.stats.scoreatpercentile(g_samples[:,2], i) 
-  #  ] ) 
-  #points = np.array(points)
-  #labels = np.clip( 
-  #  ( data.reshape(data.shape[0], 1, data.shape[1]) > points.reshape(1, points.shape[0], points.shape[1]) ).sum(1),
-  #  0,
-  #  points.shape[0]-1
-  #)
+    
   print "--> %s gamma values: %s" % (len(gammas), str(gammas))
-  #print "--> %s classes" % points.shape[0]
-  #print points
-  #plt.plot( labels[:1000,1], data[:1000,1], 'o' )
-  #plt.show()
-  
   #ecdf = sm.tools.tools.ECDF(g_diff)
   #x = np.linspace(min(g_diff), max(g_diff))
   #y = ecdf(x)
@@ -89,36 +70,37 @@ def run():
   
   print "Generating Predictions"
   
-  # [model][test_point][dimension][class_probability]
+  # [model][test_point][dimension]
+  normed_test = (test[:test_size,:] - median) / std
   predictions = []
   for model in models:
-    predictions.append(model.predict(test[:test_size,:]))
+    predictions.append(model.predict(normed_test))
   predictions = np.array(predictions)
   
-  # Sum over models & take max over class
-  boc_class = predictions.sum(0).argmax(2)
-  print boc_class.shape
-  
-  # replace index with normalized value
-  # NOTE: this is sorta hacky
-  boc_norm = []
-  for i in range(points.shape[1]):
-    boc_norm.append ( points[:,i][boc_class[:,i]] )
-  boc_norm = np.array(boc_norm).T
-
   
   # denormalize
-  boc = ( std * boc_norm ) + median
+  predictions = ( std.reshape(1,1,3) * predictions ) + median.reshape(1,1,3)
   #print boc
   
-  error = np.abs( test[sequence_length : sequence_length+test_size-2] - boc )
-  print error.sum(0) / test_size
+
+  print "Results!"
+  
+  
+  error = np.abs( np.expand_dims( test[sequence_length : test_size], 0) - predictions )
+  print error.sum(1) / test_size
   print std
   
-  for i in range(points.shape[1]):
-    fig = plt.subplot(points.shape[1], 1, i+1)
-    fig.hist(error[:,i])
+  plt.plot(np.arange(test_size-sequence_length), test[sequence_length : test_size,0], 'k')
+  plt.plot(np.arange(test_size-sequence_length), predictions[0,:,0], 'g--')
+  plt.plot(np.arange(test_size-sequence_length), predictions[1,:,0], 'r--')
   plt.show()
+
+  
+  #for i in range(data.shape[1]):
+    #fig = plt.subplot(data.shape[1], 1, i+1)
+    #fig.hist(error[:,i])
+    
+  #plt.show()
   
   
   
