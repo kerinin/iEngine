@@ -16,7 +16,7 @@ from theano import function
 # [sequence_i][sequence_j][observation][dimension]
 # (sqrt(2pi)sigma)^-d * exp( x^2 / -2sigma^2)
 def k(X,Y,gamma):
-  return T.prod( T.prod( T.exp(-T.pow(X-Y,2)*gamma), 3),  2)
+  #return T.prod( T.prod( T.exp(-T.pow(X-Y,2)*gamma), 3),  2)
   #return T.prod( T.prod( T.exp(-T.pow(X-Y,2)/(2*gamma**2)), 3),  2)
   return T.prod( T.prod( 
     T.pow(sqrt(gamma*2*pi), -X.shape[2]) * T.exp( T.pow(X-Y, 2) / (-2 * T.pow(gamma, 2))),
@@ -104,6 +104,19 @@ class model:
       
       SVM.fit(self.k, self.labels[:,i])
       SVMs.append(SVM)
+      # kk_sv = kk[clf.support_]
+      # kk_sv = kk_sv[:,clf.support_]
+      
+      # Prediction works like this, bitches:
+      # kk: [sample point][train point]
+      # kk_sv: [sample point][SV]
+      #kk_sv = kk[:,SVM.support_]
+      #(kk_sv * SVM.dual_coef_).sum(1) + SVM.intercept_
+      # R_emp = 1/ell sum_i L(|y_i - f(x)|)
+      # L(x) = 0 (x<epsilon), x-epsilon (otherwise)
+      # Looks like you'll need to determine the risk explicitly
+      # The optimization problem doesn't actually solve for it directly
+      
     self.SVMs = SVMs
     print "--> SVM's trained"
 
