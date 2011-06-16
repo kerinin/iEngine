@@ -13,20 +13,20 @@ General Concepts
 Immediate NOTES:
 ---
 
-Shift the decomposition into the GPU using scan()  (is this possible if the kernel matrix won't fit there?)
-Calculate per-SV Risk
-Mask SV's after calculation
-Integration function (2^-R(x))
-Cache intermediate results to disk
+1. Shift the decomposition into the GPU using scan()  (is this possible if the kernel matrix won't fit there?)
+2. Calculate per-SV Risk
+3. Mask SV's after calculation
+4. Integration function (2^-R(x))
+5. Cache intermediate results to disk
 
 
 Once that's done
 ---
 
-Look into weighting points for hybrid nu/epsilon
-Consider how to expand the time scale without massive dimensionality
-Use the nodes & pipes library so you can use both cores
-When splitting the kernel matrix, save output to file to free RAM - see if libsvm can read directly from the file
+1. Look into weighting points for hybrid nu/epsilon
+2. Consider how to expand the time scale without massive dimensionality
+3. Use the nodes & pipes library so you can use both cores
+4. When splitting the kernel matrix, save output to file to free RAM - see if libsvm can read directly from the file
 
 
 Scale Expansion
