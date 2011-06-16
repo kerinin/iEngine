@@ -18,10 +18,7 @@ from theano import function
 def run():
   print "Initializing"
   
-  gamma_increment = 50
-  gamma_samples = 1000
-  sequence_length = 1
-  train_size = 10000
+  train_size = 500
   test_size = 500
 
   import a_machine.system3 as system
@@ -36,46 +33,17 @@ def run():
 
   # normalizing to median 0, std deviation 1
   data = ( data - median ) / std
-
-
-  print "Dermining gamma values"
-  
-  g_samples = data.copy()
-  np.random.shuffle(g_samples)
-  g_samples = g_samples[:gamma_samples]
-  g_diff = np.abs( g_samples.reshape(g_samples.shape[0],1,g_samples.shape[1]) - g_samples.reshape(1,g_samples.shape[0],g_samples.shape[1]) )
-  g_diff = g_diff.reshape(g_samples.shape[1]*g_samples.shape[0]**2)
-  g_percentiles = np.arange(gamma_increment / 2,100,gamma_increment).astype('float')
-  gammas = []
-  for i in g_percentiles:
-    gammas.append( sp.stats.stats.scoreatpercentile(g_diff, i) ) 
-    
-  print "--> %s gamma values: %s" % (len(gammas), str(gammas))
-  #ecdf = sm.tools.tools.ECDF(g_diff)
-  #x = np.linspace(min(g_diff), max(g_diff))
-  #y = ecdf(x)
-  #plt.step(x, y)
-  #plt.plot(gammas, np.array(percentiles)/100, 'o')
-  #plt.show()
   
   
   print "Initializing Models"
   
-  models = []
-  for gamma in gammas:
-    model = system.model(gamma, sequence_length)
-    model.train(data)
-    models.append(model)
-    
+  model = system.model(gamma_samples=1000, gamma_quantile=100, sequence_length=2)    
   
   print "Generating Predictions"
   
   # [model][test_point][dimension]
   normed_test = (test[:test_size,:] - median) / std
-  predictions = []
-  for model in models:
-    predictions.append(model.predict(normed_test))
-  predictions = np.array(predictions)
+  predictions = model.predict(normed_test)
   
   
   # denormalize
@@ -95,67 +63,7 @@ def run():
   plt.plot(np.arange(test_size-sequence_length), predictions[1,:,0], 'r--')
   plt.show()
 
-  
-  #for i in range(data.shape[1]):
-    #fig = plt.subplot(data.shape[1], 1, i+1)
-    #fig.hist(error[:,i])
-    
-  #plt.show()
-  
-  
-  
-
   return
-  #sequences = series.reshape(series.shape[0],1) + np.zeros((1,3))
-  #sequences[:-1,1] = sequences[1:,1]
-  #sequences[:-2,2] = sequences[2:,2]
-  #sequences[:-2,2] = data[2:,2]
-  #sequences = sequences[:-2,:]
-  
-  #print sequences[:,0]
-  #print sequences[:,1]
-  #mask1 = np.ma.masked_less( sequences[:,2], median - std).mask
-  #mask2 = np.ma.masked_inside( sequences[:,2], median - std, median).mask
-  #mask3 = np.ma.masked_inside( sequences[:,2], median, median + std).mask
-  #mask4 = np.ma.masked_greater( sequences[:,2], median + std).mask
-  
-  #plt.plot(np.ma.array(sequences[:,0], mask=mask1), np.ma.array(sequences[:,1], mask=mask1), 'ro', alpha=.05 )
-  #plt.plot(np.ma.array(sequences[:,0], mask=mask2), np.ma.array(sequences[:,1], mask=mask2), 'go', alpha=.05 )
-  #plt.plot(np.ma.array(sequences[:,0], mask=mask3), np.ma.array(sequences[:,1], mask=mask3), 'bo', alpha=.05 )
-  #plt.plot(np.ma.array(sequences[:,0], mask=mask4), np.ma.array(sequences[:,1], mask=mask4), 'yo', alpha=.05 )
-  #plt.show()
-  #return
-  
-  #fig = plt.figure()
-  #a = fig.add_subplot(3,1,1)
-  #a.plot( np.arange(0,400), data[:400,0])
-  #b = fig.add_subplot(3,1,2)
-  #b.plot( np.arange(0,400), data[:400,1])
-  #c = fig.add_subplot(3,1,3)
-  #c.plot( np.arange(0,400), data[:400,2])
-  #plt.show()
-  #return
-  
-  print "Data Imported"
-  
-  # use the scaled standard deviation as a starting point for the dimension-wise gamma
-  gamma = np.std(data, axis=0) / 10
-  m = system.model(sequence_length, gamma)
-  
-  print "Model Built"
-  
-  accuracies = []
-  for i in range(iterations):
-    m.process( data[i*training_increment : (i+1)*training_increment] )
-    
-    accuracies.append( map( lambda x: test[x+sequence_length+1] - m.predict_from(test[x:x+sequence_length]), np.arange(500,600,10) ) )
-  accuracies = np.absolute( np.array(accuracies) ).sum(1)
-  
-  print "Predictions done"
-  
-  X = np.arange(0,iterations * training_increment, training_increment)
-  plt.plot(X, accuracies[:,2] )
-  plt.show()
   
   
 def test_divergence():

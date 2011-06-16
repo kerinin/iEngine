@@ -73,73 +73,100 @@ def kernel_matrix(X,Y,gamma):
     else:
       break
       
+class SVM:
+
+  # kk_sv = kk[clf.support_]
+  # kk_sv = kk_sv[:,clf.support_]
+  
+  # Prediction works like this, bitches:
+  # kk: [sample point][train point]
+  # kk_sv: [sample point][SV]
+  #kk_sv = kk[:,SVM.support_]
+  #(kk_sv * SVM.dual_coef_).sum(1) + SVM.intercept_
+  # R_emp = 1/ell sum_i L(|y_i - f(x)|)
+  # L(x) = 0 (x<epsilon), x-epsilon (otherwise)
+  # Looks like you'll need to determine the risk explicitly
+  # The optimization problem doesn't actually solve for it directly
+    
+  def __init__(self, nu=.2, C=.5):
+    self.nu = nu
+    self.C = C
+    self.optimizer = svm.NuSVR(nu=nu, C=C, kernel='precomputed', cache_size=2000)
+    self.SV_indices = None
+    self.SV_kk = None
+    self.SV_weights = None
+    self.SV_loss = None
+    slef.intercept = None
+    self.loss = None
+
+  def train(self, kk, values):
+    self.optimizer.fit(kk, values)
+    
+    self.SV_indices = self.optimizer.support_
+    self.SV_kk = ( kk[self.SV_indices] )[:,self.SV_indices]
+    self.SV_weights = self.optimizer.dual_coef_
+    self.SV_loss = self.optimizer.predict( self.SV_kk ) - values
+    
+    self.intercept = self.optimizer.intercept_
+    self.loss = self.SV_loss.sum()
+    
+    
 class model:
-  def __init__(self, gamma, sequence_length):
+  def __init__(self, gamma_samples=1000, gamma_quantile=100, sequence_length=2):
+    self.gamma_samples = None
+    self.gamma_quantile = None
     self.sequence_length = sequence_length
-    self.gamma = gamma
+    self.gammas = None
     self.sequences = None
     self.k = None
     self.SVMs = None
     
   # data: [observation][dimension]
   def train(self, data):
-    print "--> Training on %s %s-element subsequences, gamma=%s" % (data.shape[0] - self.sequence_length, self.sequence_length, self.gamma)
-
-    self.sequences = self.make_sequences(data)
-    self.labels = data[self.sequence_length:,:]
+    self.gammas = self.determine_gammas_from(data)
     
+    self.sequences = self.make_sequences(data)
     self.labels = data[self.sequence_length:,:].astype('float32')
 
-    self.k = kernel_matrix(self.sequences, self.sequences, self.gamma)
-    
-    print "--> %s non-null kernel distances" % ( (self.k > .00001).sum() )
-    # NOTE:  consider masking the kernel matrix with a small value
-    # We're computing a range of kernel widths, loosing some fidelity at the tight
-    # end shouldn't be a huge problem
-    
-    # construct an SVM for each dimension of the observation data
-    SVMs = []
-    for i in range(data.shape[1]):
-      SVM = svm.NuSVR( nu = .2, kernel='precomputed', probability=True, cache_size=1000)
+    self.SVMs = []
+    for gamma in self.gammas:
+      kk = kernel_matrix(self.sequences, self.sequences, gamma)
       
-      SVM.fit(self.k, self.labels[:,i])
-      SVMs.append(SVM)
-      # kk_sv = kk[clf.support_]
-      # kk_sv = kk_sv[:,clf.support_]
-      
-      # Prediction works like this, bitches:
-      # kk: [sample point][train point]
-      # kk_sv: [sample point][SV]
-      #kk_sv = kk[:,SVM.support_]
-      #(kk_sv * SVM.dual_coef_).sum(1) + SVM.intercept_
-      # R_emp = 1/ell sum_i L(|y_i - f(x)|)
-      # L(x) = 0 (x<epsilon), x-epsilon (otherwise)
-      # Looks like you'll need to determine the risk explicitly
-      # The optimization problem doesn't actually solve for it directly
-      
-    self.SVMs = SVMs
-    print "--> SVM's trained"
+      for dimension in range(data.shape[1]):
+        l = self.labels[:,dimension]
+        
+        # NOTE: this is where you would branch for nu/C
+        hyp = SVM(nu=.2)
+        hyp.train(kk,l)
+        self.SVMs.append(hyp)
+
 
   # data: [observation][dimension]      
   def predict(self, data):
-    print "--> Predicting on %s sequences, gamma=%s" % (data.shape[0] - self.sequence_length, self.gamma)
     
     # [sequence][point][dimension]
     points = self.make_sequences(data)
     
-    # [train_i][test_j]
-    k = kernel_matrix(self.sequences, points, self.gamma).T
-    print "--> %s non-null kernel distances" % ( (k > .00001).sum() )
+    # [test_sequence][gamma][dimension]
+    predictions = np.array([]).reshape(points.shape[0], 0, 0)
+    risk = 0
+    for gamma in self.gammas:
+      # [train_i][test_j]
+      kk = kernel_matrix(self.sequences, points, gamma).T
+      #print "--> %s non-null kernel distances" % ( (k > .00001).sum() )
     
     
-    # predictions: [test_sequence][dimension]
-    predictions = np.array([]).reshape(points.shape[0], 0)
+      for SVM in self.SVMs:
+        prediction = np.expand_dims( SVM.predict(kk), 1)
+        
+        # Normalize by risk
+        prediction = prediction * SVM.SV_risk
+        risk += SV.risk
+        
+        predictions = np.hstack( [predictions, prediction] )
+        
+    return predictions.sum(1) / risk
     
-    for SVM in self.SVMs:
-      # NOTE: this is returning |classes|+1 results ???
-      prediction = np.expand_dims( SVM.predict(k), 1)
-      predictions = np.hstack( [predictions, prediction] )
-    return predictions
     
   def make_sequences(self, data):
     sequences = data.reshape(data.shape[0], 1, data.shape[1])
@@ -148,5 +175,17 @@ class model:
     
     return np.array( sequences )[:-self.sequence_length,:,:].astype('float32')
 
+  def determine_gammas_from(self, data):
+    g_samples = data.copy()
+    np.random.shuffle(g_samples)
+    g_samples = g_samples[:self.gamma_samples]
+    g_diff = np.abs( g_samples.reshape(g_samples.shape[0],1,g_samples.shape[1]) - g_samples.reshape(1,g_samples.shape[0],g_samples.shape[1]) )
+    g_diff = g_diff.reshape(g_samples.shape[1]*g_samples.shape[0]**2)
+    g_percentiles = np.arange(self.gamma_quantile / 2,100,self.gamma_quantile).astype('float')
     
+    gammas = []
+    for i in g_percentiles:
+      gammas.append( sp.stats.stats.scoreatpercentile(g_diff, i) )   
+    
+    return np.array(gammas)
     
