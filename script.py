@@ -18,7 +18,9 @@ from theano import function
 def run():
   print "Initializing"
   
-  train_size = 500
+  train_size = 2000
+  sequence_length = 4
+  gamma_quantile = 20
   test_size = 500
 
   import a_machine.system3 as system
@@ -37,7 +39,8 @@ def run():
   
   print "Initializing Models"
   
-  model = system.model(gamma_samples=1000, gamma_quantile=100, sequence_length=2)    
+  model = system.model(gamma_samples=1000, gamma_quantile=gamma_quantile, sequence_length=sequence_length) 
+  model.train( data )   
   
   print "Generating Predictions"
   
@@ -47,7 +50,7 @@ def run():
   
   
   # denormalize
-  predictions = ( std.reshape(1,1,3) * predictions ) + median.reshape(1,1,3)
+  predictions = ( std.reshape(1,3) * predictions ) + median.reshape(1,3)
   #print boc
   
 
@@ -59,8 +62,7 @@ def run():
   print std
   
   plt.plot(np.arange(test_size-sequence_length), test[sequence_length : test_size,0], 'k')
-  plt.plot(np.arange(test_size-sequence_length), predictions[0,:,0], 'g--')
-  plt.plot(np.arange(test_size-sequence_length), predictions[1,:,0], 'r--')
+  plt.plot(np.arange(test_size-sequence_length), predictions[:,0], 'g--')
   plt.show()
 
   return

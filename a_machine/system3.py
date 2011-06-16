@@ -1,7 +1,10 @@
 #! /usr/bin/env python
+import sys
 from math import *
 from datetime import *
 import numpy as np
+import scikits.statsmodels.api as sm
+import scipy as sp
 
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
@@ -12,21 +15,20 @@ from scikits.learn import svm
 import theano.tensor as T
 from theano import function
 
-
-# [sequence_i][sequence_j][observation][dimension]
-# (sqrt(2pi)sigma)^-d * exp( x^2 / -2sigma^2)
-def k(X,Y,gamma):
-  #return T.prod( T.prod( T.exp(-T.pow(X-Y,2)*gamma), 3),  2)
-  #return T.prod( T.prod( T.exp(-T.pow(X-Y,2)/(2*gamma**2)), 3),  2)
-  return T.prod( T.prod( 
-    T.pow(sqrt(gamma*2*pi), -X.shape[2]) * T.exp( T.pow(X-Y, 2) / (-2 * T.pow(gamma, 2))),
-  3), 2)
-  
 col = T.TensorType('float32', [False, False, False])
 
 X = col()
 Y = col()
 gamma = T.dscalar()
+
+# [sequence_i][sequence_j][observation][dimension]
+# (sqrt(2pi)sigma)^-d * exp( x^2 / -2sigma^2)
+def k(X,Y,gamma):
+  return T.prod( T.prod( 
+    T.pow(T.sqrt(gamma*2*pi), -X.shape[2]) * T.exp( T.pow(X-Y,2) / (-2 * T.pow(gamma,2) ) ), 
+  3),  2)
+  
+
 
 k_distance = k( X.dimshuffle(0,'x',1,2), Y.dimshuffle('x',0,1,2), gamma )
 
@@ -43,10 +45,11 @@ def kernel_matrix(X,Y,gamma):
   
   while True:
     l_n = ceil( float(X.shape[0]) / n )
-    print "--> Trying with n=%s, %s sub-matrices of size %sx%s (mem estimate %s)" % (n, n**2, l_n, l_n, mem/mem_available)
-    
+    sys.stdout.write(  "--> Trying with n=%s, %s sub-matrices of size %sx%s (mem estimate %s)" % (n, n**2, l_n, l_n, mem/mem_available) )
+
     try:
       if n == 1:
+        sys.stdout.write('\n')
         return distance(X, Y, gamma)
       else:         
         kk = np.array([]).reshape(0,Y.shape[0])
@@ -66,12 +69,16 @@ def kernel_matrix(X,Y,gamma):
             kk_i = np.hstack([kk_i, kk_j])
             
           kk = np.vstack([ kk, kk_i ])
-          print "--> Row %s" % i
+          sys.stdout.write( " %s" % i )
+        #sys.stdout.write('\n')
         return np.array(kk).reshape(X.shape[0], Y.shape[0])
     except MemoryError, RuntimeError:
       n += 1
+      sys.stdout.write('\n')
     else:
       break
+      
+    
       
 class SVM:
 
@@ -96,25 +103,29 @@ class SVM:
     self.SV_kk = None
     self.SV_weights = None
     self.SV_loss = None
-    slef.intercept = None
-    self.loss = None
+    self.intercept = None
+    self.risk = None
 
   def train(self, kk, values):
     self.optimizer.fit(kk, values)
     
     self.SV_indices = self.optimizer.support_
-    self.SV_kk = ( kk[self.SV_indices] )[:,self.SV_indices]
+    self.kk_SV = kk[self.SV_indices]
     self.SV_weights = self.optimizer.dual_coef_
-    self.SV_loss = self.optimizer.predict( self.SV_kk ) - values
+    self.SV_loss = np.abs( self.optimizer.predict( self.kk_SV ) - values[self.SV_indices] )
+    self.SV_percent = int( 100 * float( self.SV_indices.shape[0] ) / kk.shape[0] )
     
     self.intercept = self.optimizer.intercept_
-    self.loss = self.SV_loss.sum()
+    self.risk = self.SV_loss.sum()
+    
+  def predict(self, kk):
+    return self.optimizer.predict(kk)
     
     
 class model:
   def __init__(self, gamma_samples=1000, gamma_quantile=100, sequence_length=2):
-    self.gamma_samples = None
-    self.gamma_quantile = None
+    self.gamma_samples = gamma_samples
+    self.gamma_quantile = gamma_quantile
     self.sequence_length = sequence_length
     self.gammas = None
     self.sequences = None
@@ -128,17 +139,25 @@ class model:
     self.sequences = self.make_sequences(data)
     self.labels = data[self.sequence_length:,:].astype('float32')
 
+    # [gamma][dimension]
     self.SVMs = []
     for gamma in self.gammas:
+      print "Computing kernel with gamma=%s" % gamma
       kk = kernel_matrix(self.sequences, self.sequences, gamma)
       
+      g_SVMs = []
       for dimension in range(data.shape[1]):
+        sys.stdout.write( "\nTraining dimension %s" % dimension )
         l = self.labels[:,dimension]
         
         # NOTE: this is where you would branch for nu/C
         hyp = SVM(nu=.2)
         hyp.train(kk,l)
-        self.SVMs.append(hyp)
+        g_SVMs.append(hyp)
+        
+        sys.stdout.write( " (%s percent SV's, risk=%s)" % ( hyp.SV_percent, hyp.risk ) )
+      sys.stdout.write('\n')
+      self.SVMs.append(g_SVMs)
 
 
   # data: [observation][dimension]      
@@ -148,24 +167,33 @@ class model:
     points = self.make_sequences(data)
     
     # [test_sequence][gamma][dimension]
-    predictions = np.array([]).reshape(points.shape[0], 0, 0)
+    predictions = np.array([]).reshape(points.shape[0], 0, data.shape[1])
     risk = 0
-    for gamma in self.gammas:
+    for i in range( len(self.SVMs) ):
+      gamma = self.gammas[i]
+      g_SVMs = self.SVMs[i]
+      
       # [train_i][test_j]
       kk = kernel_matrix(self.sequences, points, gamma).T
       #print "--> %s non-null kernel distances" % ( (k > .00001).sum() )
     
-    
-      for SVM in self.SVMs:
+      g_predictions = np.array([]).reshape(points.shape[0], 0)
+      for dimension in range( len(g_SVMs) ):
+        SVM = g_SVMs[dimension]
+                
+        # [test][dimension]
         prediction = np.expand_dims( SVM.predict(kk), 1)
         
         # Normalize by risk
-        prediction = prediction * SVM.SV_risk
-        risk += SV.risk
+        #prediction = prediction * SVM.SV_loss
+        #risk += SVM.risk
         
-        predictions = np.hstack( [predictions, prediction] )
+        g_predictions = np.hstack( [g_predictions, prediction] )
         
-    return predictions.sum(1) / risk
+      predictions = np.hstack( [predictions, np.expand_dims( g_predictions, 1) ])
+    
+    # For now, just average them
+    return predictions.sum(1) / len(self.gammas)
     
     
   def make_sequences(self, data):
