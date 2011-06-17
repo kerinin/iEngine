@@ -175,7 +175,7 @@ class model:
         
     # [test_sequence][gamma][dimension]
     predictions = np.array([]).reshape(points.shape[0], 0, data.shape[1])
-    risk = 0
+    risks = np.array([]).reshape(1, 0, data.shape[1])
     for i in range( len(self.SVMs) ):
       gamma = self.gammas[i]
       g_SVMs = self.SVMs[i]
@@ -185,6 +185,7 @@ class model:
       print "Computed kernel with gamma=%s, %s non-null entries" % (gamma, (kk > .00001).sum())
     
       g_predictions = np.array([]).reshape(points.shape[0], 0)
+      g_risk = np.array([]).reshape(1, 0)
       for dimension in range( len(g_SVMs) ):
         SVM = g_SVMs[dimension]
                 
@@ -197,16 +198,18 @@ class model:
         #risk += SVM.risk
         
         g_predictions = np.hstack( [g_predictions, prediction] )
+        g_risk = np.hstack( [ g_risk, np.array(SVM.risk).reshape(1,1) ])
         
       predictions = np.hstack( [predictions, np.expand_dims( g_predictions, 1) ])
+      risks = np.hstack( [risks, np.expand_dims( g_risk, 1 ) ])
     
     #print data[:self.sequence_length+4,0]
     #print "%s -> %s" % (str(points[0,:,0]), predictions[0,0,0])
     #print "%s -> %s" % (str(points[1,:,0]), predictions[1,0,0])
       
     # For now, just average them
-    return predictions.sum(1) / len(self.gammas)
-    
+    #return predictions.sum(1) / len(self.gammas)
+    return predictions, risks
     
   def make_sequences(self, data):
     sequences = data.reshape(data.shape[0], 1, data.shape[1])

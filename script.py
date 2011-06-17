@@ -18,9 +18,9 @@ from theano import function
 def run():
   print "Initializing"
   
-  train_size = 5000
+  train_size = 2000
   sequence_length = 1
-  gamma_quantile = 20
+  gamma_quantile = 50
   test_size = 500
 
   import a_machine.system3 as system
@@ -47,22 +47,33 @@ def run():
   # [test_point][dimension]
   normed_test = (test[:test_size,:] - median) / std
   #normed_test = data[:test_size]
-  predictions = model.predict(normed_test)
-  
+  predictions, risks = model.predict(normed_test)
+  hybrid = ( predictions * risks ).sum(1) / risks.sum(1)
   
   # denormalize
-  predictions = ( std.reshape(1,3) * predictions ) + median.reshape(1,3)
+  predictions = ( std.reshape(1,1,3) * predictions ) + median.reshape(1,1,3)
+  hybrid = ( std.reshape(1,3) * hybrid ) + median.reshape(1,3)
   
-
   print "Results!"
   
+  errors = np.abs( np.expand_dims( test[sequence_length : test_size], 1) - predictions )
+  hybrid_error = np.abs( test[sequence_length : test_size] - hybrid )
+  print hybrid.shape
+  print hybrid_error.shape
   
-  error = np.abs( np.expand_dims( test[sequence_length : test_size], 0) - predictions )
-  print ( error.sum(1) / test_size ).astype('int')
+  print ( hybrid_error.sum(0) / test_size )
+  print ( errors.sum(0) / test_size )
   print std.astype('int')
   
-  plt.plot(np.arange(test_size-sequence_length), test[sequence_length : test_size,0], 'k')
-  plt.plot(np.arange(test_size-sequence_length), predictions[:,0], 'g--')
+  x = np.arange(test_size-sequence_length)
+  for i in range(data.shape[1]):
+    fig = plt.subplot(data.shape[1],1,i)
+    
+    fig.plot(x, test[sequence_length : test_size,i], 'k--')
+    for j in range(predictions.shape[1]):
+      fig.plot(x, predictions[:,j,i] )
+
+    fig.plot(x, hybrid[:,i], 'r', lw=2)
   plt.show()
 
   return
