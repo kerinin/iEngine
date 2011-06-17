@@ -10,23 +10,24 @@ General Concepts
   Alternately, this could be treated as a post-processing step executed on the SV's
 
 
-Immediate NOTES:
+Science!:
 ---
 
-1. Shift the decomposition into the GPU using scan()  (is this possible if the kernel matrix won't fit there?)
-2. Calculate per-SV Risk
+1. explore risk of hybrid predictor vs. it's constituent predictors
+2. Look into weighting points for hybrid nu/epsilon
+3. Try per-dimension predictors
+4. Look into spatial mapping for scope expansion
+
+
+Implementation Notes:
+---
+
+1. Integrate using risk, integration function (2^-R(x))
+2. Shift the decomposition into the GPU using scan()  (is this possible if the kernel matrix won't fit there?)
 3. Mask SV's after calculation
-4. Integration function (2^-R(x))
-5. Cache intermediate results to disk
-
-
-Once that's done
----
-
-1. Look into weighting points for hybrid nu/epsilon
-2. Consider how to expand the time scale without massive dimensionality
-3. Use the nodes & pipes library so you can use both cores
-4. When splitting the kernel matrix, save output to file to free RAM - see if libsvm can read directly from the file
+4. Cache intermediate results to disk
+5. Use the nodes & pipes library so you can use both cores
+6. When splitting the kernel matrix, save output to file to free RAM - see if libsvm can read directly from the file
 
 
 Scale Expansion

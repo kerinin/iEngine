@@ -25,7 +25,7 @@ gamma = T.dscalar()
 # (sqrt(2pi)sigma)^-d * exp( x^2 / -2sigma^2)
 def k(X,Y,gamma):
   return T.prod( T.prod( 
-    T.pow(T.sqrt(gamma*2*pi), -X.shape[2]) * T.exp( T.pow(X-Y,2) / (-2 * T.pow(gamma,2) ) ), 
+    T.pow(gamma * T.sqrt(2*pi), -X.shape[2]) * T.exp( T.pow(X-Y,2) / (-2 * T.pow(gamma,2) ) ), 
   3),  2)
   
 
@@ -45,7 +45,7 @@ def kernel_matrix(X,Y,gamma):
   
   while True:
     l_n = ceil( float(X.shape[0]) / n )
-    sys.stdout.write(  "--> Trying with n=%s, %s sub-matrices of size %sx%s (mem estimate %s)" % (n, n**2, l_n, l_n, mem/mem_available) )
+    print "--> Trying with n=%s, %s sub-matrices of size %sx%s (mem estimate %s)" % (n, n**2, l_n, l_n, mem/mem_available)
 
     try:
       if n == 1:
@@ -69,12 +69,10 @@ def kernel_matrix(X,Y,gamma):
             kk_i = np.hstack([kk_i, kk_j])
             
           kk = np.vstack([ kk, kk_i ])
-          sys.stdout.write( " %s" % i )
-        #sys.stdout.write('\n')
+          #sys.stdout.write( " %s" % i )
         return np.array(kk).reshape(X.shape[0], Y.shape[0])
     except MemoryError, RuntimeError:
       n += 1
-      sys.stdout.write('\n')
     else:
       break
       
@@ -116,7 +114,7 @@ class SVM:
     self.SV_percent = int( 100 * float( self.SV_indices.shape[0] ) / kk.shape[0] )
     
     self.intercept = self.optimizer.intercept_
-    self.risk = self.SV_loss.sum()
+    self.risk = self.SV_loss.sum() / kk.shape[0]
     
   def predict(self, kk):
     return self.optimizer.predict(kk)
@@ -133,11 +131,22 @@ class model:
     self.SVMs = None
     
   # data: [observation][dimension]
-  def train(self, data):
+  def train(self, data, samples):
     self.gammas = self.determine_gammas_from(data)
     
-    self.sequences = self.make_sequences(data)
-    self.labels = data[self.sequence_length:,:].astype('float32')
+    sequences = self.make_sequences(data)
+    labels = data[self.sequence_length:,:].astype('float32')
+    
+    # Randomly sample |samples| sequences
+    full = np.hstack([sequences, np.expand_dims(labels,1)])
+    np.random.shuffle(full)
+    self.sequences = full[:samples,:-1,:]
+    self.labels = full[:samples,-1,:]
+
+    #print full[0,:,0]
+    #print "%s -> %s" % (str(self.sequences[0,:,0]), self.labels[0,0])
+    #print full[1,:,0]
+    #print "%s -> %s" % (str(self.sequences[1,:,0]), self.labels[1,0])
 
     # [gamma][dimension]
     self.SVMs = []
@@ -147,16 +156,14 @@ class model:
       
       g_SVMs = []
       for dimension in range(data.shape[1]):
-        sys.stdout.write( "\nTraining dimension %s" % dimension )
         l = self.labels[:,dimension]
         
         # NOTE: this is where you would branch for nu/C
-        hyp = SVM(nu=.2)
+        hyp = SVM(nu=.5)
         hyp.train(kk,l)
         g_SVMs.append(hyp)
         
-        sys.stdout.write( " (%s percent SV's, risk=%s)" % ( hyp.SV_percent, hyp.risk ) )
-      sys.stdout.write('\n')
+        print "--> SVM Trained: %s percent SV's, risk=%s" % ( hyp.SV_percent, hyp.risk ) 
       self.SVMs.append(g_SVMs)
 
 
@@ -165,7 +172,7 @@ class model:
     
     # [sequence][point][dimension]
     points = self.make_sequences(data)
-    
+        
     # [test_sequence][gamma][dimension]
     predictions = np.array([]).reshape(points.shape[0], 0, data.shape[1])
     risk = 0
@@ -175,7 +182,7 @@ class model:
       
       # [train_i][test_j]
       kk = kernel_matrix(self.sequences, points, gamma).T
-      #print "--> %s non-null kernel distances" % ( (k > .00001).sum() )
+      print "Computed kernel with gamma=%s, %s non-null entries" % (gamma, (kk > .00001).sum())
     
       g_predictions = np.array([]).reshape(points.shape[0], 0)
       for dimension in range( len(g_SVMs) ):
@@ -183,6 +190,7 @@ class model:
                 
         # [test][dimension]
         prediction = np.expand_dims( SVM.predict(kk), 1)
+        #print prediction
         
         # Normalize by risk
         #prediction = prediction * SVM.SV_loss
@@ -192,6 +200,10 @@ class model:
         
       predictions = np.hstack( [predictions, np.expand_dims( g_predictions, 1) ])
     
+    #print data[:self.sequence_length+4,0]
+    #print "%s -> %s" % (str(points[0,:,0]), predictions[0,0,0])
+    #print "%s -> %s" % (str(points[1,:,0]), predictions[1,0,0])
+      
     # For now, just average them
     return predictions.sum(1) / len(self.gammas)
     

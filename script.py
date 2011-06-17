@@ -18,8 +18,8 @@ from theano import function
 def run():
   print "Initializing"
   
-  train_size = 2000
-  sequence_length = 4
+  train_size = 5000
+  sequence_length = 1
   gamma_quantile = 20
   test_size = 500
 
@@ -28,7 +28,7 @@ def run():
   print "Importing & Normalizing Data"
   
   from santa_fe import getData
-  data = getData('B1.dat')[:train_size,:]
+  data = getData('B1.dat')
   test = getData('B2.dat')
   median = np.median(data, axis=0)
   std = np.std(data, axis=0)
@@ -40,26 +40,26 @@ def run():
   print "Initializing Models"
   
   model = system.model(gamma_samples=1000, gamma_quantile=gamma_quantile, sequence_length=sequence_length) 
-  model.train( data )   
+  model.train( data, train_size )   
   
   print "Generating Predictions"
   
-  # [model][test_point][dimension]
+  # [test_point][dimension]
   normed_test = (test[:test_size,:] - median) / std
+  #normed_test = data[:test_size]
   predictions = model.predict(normed_test)
   
   
   # denormalize
   predictions = ( std.reshape(1,3) * predictions ) + median.reshape(1,3)
-  #print boc
   
 
   print "Results!"
   
   
   error = np.abs( np.expand_dims( test[sequence_length : test_size], 0) - predictions )
-  print error.sum(1) / test_size
-  print std
+  print ( error.sum(1) / test_size ).astype('int')
+  print std.astype('int')
   
   plt.plot(np.arange(test_size-sequence_length), test[sequence_length : test_size,0], 'k')
   plt.plot(np.arange(test_size-sequence_length), predictions[:,0], 'g--')
