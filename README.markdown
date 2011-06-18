@@ -30,6 +30,47 @@ Implementation Notes:
 6. When splitting the kernel matrix, save output to file to free RAM - see if libsvm can read directly from the file
 
 
+Hybrid Estimators
+---
+
+The general idea here is to combine multiple predictors into a single optimization task by construction
+a block-diagonal matrix in which observations in disjoint predictors have kernel distance 0.  This allows the
+prediction task to optimize the selection of SV's across predictors.  If we further weight observations based
+on the local entropy, we can create an estimator 'tuned' to predicting different values of X based on which
+of the multiple predictors have the lowest risk in that neighborhood.
+
+The crude approach would be to construct the sequences, then calculate a kernel matrix based on a set of
+'slices' through the base sequences.  This would require storing a list of slices, and iteratively 
+slicing the sequences, constructing a kernel matrix, and then computing the block diagonal of the resulting
+kernel matrices.  The first iteration of the process would be to slice at each sequence offset / dimension pair,
+then to analyze the resulting support vectors to see if any of those pairs can be eliminated, and which ones
+are good targets for expansion.  Expansion would result in the same basic approach; taking a pair and expanding
+it into a set of slices in which each slice adds another sequence offset / dimension pair.
+
+Numpy provides the grid function which takes a two 1-D arrays and permutes them into a 2-D array.  This seems like 
+the best way to get our offsets; we permute the indices of the sequence length with the indices of the
+dimensionality. To extend the offsets, we would take the same permutation and merge it with the base pair, so if
+the base pair is (a,b), we could compute the NxM grid ((a,N),(b,M)).
+
+We can probably simplify this by only permuting a pair with a single axis, so given the pair (a,b), we would 
+determine the Nx1 array (a,(b,N)).  This requires that we decide between permuting with sequence length or
+dimension.  Given the causal state analysis, I think we can restrict sequence permutation to the next sequence
+element, so maybe the best approach is to permute a pair (a,b) with one sequence element and all the dimensional
+elements, producing the spaces (a,(b,N)) and ((a,a+1),(b,N)).  This lets us expand sequence depth iteratively
+while checking for the best dimensional correlation.
+
+We'll want to keep track of the permutations we've already calculated so we don't re-calculate them.  We can
+probably just keep track of the base permutations in the form [n,M], where n is the sequence length and M
+is the set of dimensions.  This means our first set of calculations would produce [1,()]; sequence length
+of 1, with each slide including a single dimension.  Our first expansion would be [1,a], [2,a]; the permutation
+of each dimension with a, and the permutation of each 2nd sequence element dimension with the first sequence element 
+and a.
+
+We'll also want to keep a set of slices that are 'active' for the current SV.  This can be in the form
+[offsets,dimensions], so it'll need to be a list (not an array, since we'll have different shapes).  If we
+keep a list, we would be able to do a map operation and then pass that to the block diagonal.
+
+
 Scale Expansion
 ---
 We can think of scale expansion as either reducing the dimensionality of the event space or of translating that space
