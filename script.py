@@ -74,7 +74,7 @@ def test_system3():
   print "Initializing"
   
   train_size = 500
-  sequence_length = 1
+  sequence_length = 2
   gamma_quantile = 50
   test_size = 500
 
@@ -100,8 +100,8 @@ def test_system3():
   print "Generating Predictions"
   
   # [test_point][dimension]
-  normed_test = (test[:test_size,:] - median) / std
-  #normed_test = data[:test_size]
+  #normed_test = (test[:test_size,:] - median) / std
+  normed_test = data[:test_size]
   predictions, risks = model.predict(normed_test)
   hybrid = ( predictions * risks ).sum(1) / risks.sum(1)
   

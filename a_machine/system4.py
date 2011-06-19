@@ -34,7 +34,7 @@ class model:
   # data: [observation][dimension]
   def train(self, data, samples):
     self.gammas = self.determine_gammas_from(data)
-    #self.gammas = [0.13438433,]
+    #self.gammas = [.5,]
     print "Gammas determined: %s" % str(self.gammas)
     # [gamma][sequence offset][dimension]
     #self.active_slices = np.mgrid[0:1,0:data.shape[1]].T.reshape(data.shape[1],2).tolist()
@@ -63,7 +63,7 @@ class model:
     print KK.shape
     print 'Training...'
     # Train that shist
-    self.svm = sparseNuSVR(nu=.9, C=.01)
+    self.svm = sparseNuSVR(nu=.1, C=.01)
     #self.svm.train(KK, Labels, sample_weight = weights)
     self.svm.train(KK, Labels)
 

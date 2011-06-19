@@ -1,6 +1,14 @@
 Working Thoughts
 ====
 
+Recent Notes
+---
+
+The solution for SV regression encodes the result as a set of weights from the mean.  In other words, beta is the distance
+from each SV to the mean.  Not sure what that means...
+
+
+
 General Concepts
 ---
 

@@ -24,6 +24,7 @@ class sparseNuSVR:
     #print self.SV_indices
     self.kk_SV = kk[self.SV_indices]
     self.SV_weights = self.optimizer.dual_coef_
+    print self.SV_weights
     self.SV_loss = np.abs( self.optimizer.predict( self.kk_SV ) - values[self.SV_indices] )
     self.SV_percent = int( 100 * float( self.SV_indices.shape[0] ) / kk.shape[0] )
     
