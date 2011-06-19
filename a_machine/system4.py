@@ -14,7 +14,7 @@ import matplotlib.cm as cm
 from scikits.learn import svm
 
 from gpu_funcs import kernel_matrix
-from svms import sparseNuSVR    
+from svms import sparseNuSVR, NuSVR
     
 class model:
   def __init__(self, dimension, gamma_samples=1000, gamma_quantile=100, sequence_length=2):
@@ -34,9 +34,12 @@ class model:
   # data: [observation][dimension]
   def train(self, data, samples):
     self.gammas = self.determine_gammas_from(data)
-    
+    #self.gammas = [0.13438433,]
+    print "Gammas determined: %s" % str(self.gammas)
     # [gamma][sequence offset][dimension]
-    self.active_slices = np.mgrid[0:1,0:data.shape[1]].T.reshape(data.shape[1],2).tolist()
+    #self.active_slices = np.mgrid[0:1,0:data.shape[1]].T.reshape(data.shape[1],2).tolist()
+    # Make a single slice consisting of the 1st sequence element and all 3 dimensions
+    self.active_slices = [[0,[0,1,2]],]
     
     sequences = self.make_sequences(data)
     labels = data[self.sequence_length:,:].astype('float32')
@@ -49,18 +52,21 @@ class model:
     
     self.sequences = sequences[:samples]
     self.labels = labels[:samples,self.dimension]
-    print self.sequences[:10]
-    
+
+    KK = self.make_subsets(self.sequences, self.sequences)
+    Labels = np.hstack( [ self.labels, np.zeros( self.labels.shape[0] * ( len(self.gammas) * len(self.active_slices) - 1) ) ] )
+    weights = np.hstack( [ np.ones( self.labels.shape[0] ), np.zeros( self.labels.shape[0] * ( len(self.gammas) * len(self.active_slices) - 1 ) ) ] ).astype('float32')
+    #KK = kernel_matrix(self.sequences, self.sequences, self.gammas[-1])
     #KK = self.make_subsets(self.sequences, self.sequences)
-    #Labels = np.hstack( [ self.labels, np.zeros( self.labels.shape[0] * ( len(self.gammas) * len(self.active_slices) - 1) ) ] )
-    #weights = np.hstack( [ np.ones( self.labels.shape[0] ), np.zeros( self.labels.shape[0] * ( len(self.gammas) * len(self.active_slices) - 1 ) ) ] )
-    
+    #Labels = self.labels
+
+    print KK.shape
     print 'Training...'
     # Train that shist
-    self.svm = sparseNuSVR(nu=.5)
+    self.svm = sparseNuSVR(nu=.9, C=.01)
     #self.svm.train(KK, Labels, sample_weight = weights)
-    #self.svm.train(KK, self.labels)
-    self.svm.train( kernel_matrix(self.sequences, self.sequences, self.gammas[-1]), self.labels)
+    self.svm.train(KK, Labels)
+
     print "--> SVM Trained: %s percent SV's, risk=%s" % ( self.svm.SV_percent, self.svm.risk ) 
 
 
@@ -69,13 +75,17 @@ class model:
     
     # [sequence][point][dimension]
     points = self.make_sequences(data)
-    print points[:10]
+    
     #KK = self.make_subsets(points, self.sequences)
-    KK = kernel_matrix( points, self.sequences, self.gammas[-1] )
+    KK = np.array([]).reshape(data.shape[0]-1, 0)
+
+    for gamma in self.gammas:
+      KK = np.hstack( [KK, kernel_matrix(points, self.sequences, gamma)] )
+    #KK = kernel_matrix( points, self.sequences, self.gammas[-1] )
     
     raw = self.svm.predict(KK)
 
-    return raw
+    return raw[:data.shape[0]-1]
     
     
     
@@ -128,24 +138,26 @@ class model:
 
       for gamma in self.gammas:
         # NOTE:  returning to test on single matrix
-        return kernel_matrix(subset_X,subset_Y,gamma)
         kk.append( kernel_matrix(subset_X, subset_Y, gamma) )
 
     
     # Construct the sparse block diagonal of the kernel matrices and extend the labels to match
     # return bdiag(kk, format='csr')
     
-    row = np.hstack(kk)
-    
-    zeros = np.zeros( (kk[0].shape[0] * (len(kk)-1), kk[0].shape[1] * (len(kk)-1)) )
-    k_column = np.vstack( kk[1:] )
+    if len(kk) > 1:
+      row = np.hstack(kk)
+      
+      zeros = np.zeros( (kk[0].shape[0] * (len(kk)-1), kk[0].shape[1] * (len(kk)-1)) )
+      k_column = np.vstack( kk[1:] )
 
-    base = sp.sparse.csr_matrix( np.hstack( 
-        [ k_column, zeros ] 
-    ) )
-    KK = sp.sparse.vstack([row,base])
+      base = sp.sparse.csr_matrix( np.hstack( 
+          [ k_column, zeros ] 
+      ) )
+      KK = sp.sparse.vstack([row,base]).todense()
 
-    return KK
+      return KK
+    else:
+      return kk[0]
     
   def determine_gammas_from(self, data):
     g_samples = data.copy()

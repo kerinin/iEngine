@@ -18,9 +18,9 @@ from theano import function
 def run():
   print "Initializing"
   
-  train_size = 5000
+  train_size = 1000
   sequence_length = 1
-  gamma_quantile = 40
+  gamma_quantile = 25
   test_size = 200
 
   import a_machine.system4 as system
@@ -52,19 +52,18 @@ def run():
   
   # denormalize
   #predictions = ( std[0] * predictions ) + median[0]
-  print "Results!"
+
+  errors = np.abs( normed_test[sequence_length : predictions.shape[0]+sequence_length, 0] - predictions )
   
-  #errors = np.abs( test[sequence_length : test_size, 0] - predictions )
+  print "Results!  Loss/point: %s (in normed space)" % ( errors.sum(0) / test_size )
   
-  #print ( errors.sum(0) / test_size )
+  x = np.arange( predictions.shape[0] )
   
-  x = np.arange(test_size)
-  
-  plt.plot(x,normed_test[sequence_length : test_size+sequence_length, 0], 'k', alpha=.4)
+  plt.plot(x,normed_test[sequence_length : predictions.shape[0]+sequence_length, 0], 'k', alpha=.4)
   #for i in range(predictions.shape[1]):
   #  for j in range(predictions.shape[2]):
   #    plt.plot(x,predictions[:,i,j])
-  
+
   plt.plot(x,predictions)
   
   plt.show()

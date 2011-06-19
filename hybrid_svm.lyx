@@ -1,0 +1,313 @@
+#LyX 1.6.5 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\language english
+\inputencoding auto
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\paperfontsize default
+\spacing onehalf
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 1
+\use_esint 1
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation skip
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Hybrid SVM
+\end_layout
+
+\begin_layout Section
+Original Formulation
+\end_layout
+
+\begin_layout Standard
+The original formulation was to minimize 
+\begin_inset Formula $F$
+\end_inset
+
+ subject to five inequality constraints, where 
+\begin_inset Formula $\xi$
+\end_inset
+
+ is the distance from each point to the hyperplane (minus insensitive zone
+ 
+\begin_inset Formula $\varepsilon$
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+F(\xi,\xi^{*}) & =\sum_{i=1}^{\ell}\xi_{i}^{*}+\sum_{i=1}^{\ell}\xi_{i}\\
+y_{i}-(w\cdot x_{i})-b & \le\varepsilon+\xi_{i}^{*}\\
+(w\cdot x_{i})+b-y_{i} & \le\varepsilon+\xi_{i}\\
+\xi_{i}^{*} & \ge\ 0\\
+\xi_{i} & \ge\ 0\\
+(w\cdot w) & \le c_{n}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This can be expressed as a Lagrange functional
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+L(w,\xi^{*},\xi;\alpha^{*},\alpha,C^{*},\gamma,\gamma^{*}) & =\sum_{i=1}^{\ell}(\xi_{i}^{*}+\xi_{i})-\sum_{i=1}^{\ell}\alpha_{i}\left[y_{i}-(w\cdot x_{i})-b+\varepsilon+\xi_{i}\right]\\
+ & \qquad-\sum_{i=1}^{\ell}\alpha_{i}^{*}\left[(w\cdot x_{i})+b-y_{i}+\varepsilon+\xi_{i}^{*}\right]-\frac{C^{*}}{2}(c_{n}-(w\cdot w))\\
+ & \qquad-\sum_{i=1}^{\ell}(\gamma_{i}^{*}\xi_{i}^{*}+\gamma_{i}\xi_{i})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+To find a maximum of the Lagrange function, we set the partial derivative
+ over the variables we want to maximize to 0, which should yield a system
+ of partial derivatives over the other variables.
+ This is due to the fact that if we're at a maximum, the derivative should
+ be 0.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\frac{\partial F}{\partial w}=0 & =-\frac{\partial}{\partial w}\left(\sum_{i=1}^{\ell}\alpha_{i}\left[y_{i}-(w\cdot x_{i})-b+\varepsilon+\xi_{i}\right]\right)-\frac{\partial}{\partial w}\left(\sum_{i=1}^{\ell}\alpha_{i}^{*}\left[(w\cdot x_{i})+b-y_{i}+\varepsilon+\xi_{i}\right]\right)-\frac{\partial}{\partial w}\left(\frac{C^{*}}{2}(c_{n}-(w\cdot w))\right)\\
+ & =\sum_{i=1}^{\ell}\alpha_{i}x_{i}-\sum_{i=1}^{\ell}\alpha_{i}^{*}x_{i}-wC^{*}\\
+wC^{*} & =\sum_{i=1}^{\ell}(\alpha_{i}-\alpha_{i}^{*})x_{i}\\
+w & =\sum_{i=1}^{\ell}\frac{\alpha_{i}-\alpha_{i}^{*}}{C^{*}}x_{i}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\frac{\partial F}{\partial\xi^{*}}=0 & =\frac{\partial}{\partial\xi^{*}}\left(\sum_{i=1}^{\ell}(\xi_{i}^{*}+\xi_{i})\right)-\frac{\partial}{\partial\xi^{*}}\left(\sum_{i=1}^{\ell}\alpha_{i}^{*}\left[(w\cdot x_{i})+b-y_{i}+\varepsilon+\xi_{i}^{*}\right]\right)-\frac{\partial}{\partial\xi^{*}}\left(\sum_{i=1}^{\ell}(\gamma_{i}^{*}\xi_{i}^{*}+\gamma_{i}\xi_{i})\right)\\
+ & =1-\sum_{i=1}^{\ell}\alpha_{i}^{*}-\sum_{i=1}^{\ell}\gamma_{i}^{*}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\frac{\partial F}{\partial\xi}=0 & =\frac{\partial}{\partial\xi}\left(\sum_{i=1}^{\ell}(\xi_{i}^{*}+\xi_{i})\right)-\frac{\partial}{\partial\xi}\left(\sum_{i=1}^{\ell}\alpha_{i}\left[y_{i}-(w\cdot x_{i})-b+\varepsilon+\xi_{i}\right]\right)-\frac{\partial}{\partial\xi}\left(\sum_{i=1}^{\ell}(\gamma_{i}^{*}\xi_{i}^{*}+\gamma_{i}\xi_{i})\right)\\
+ & =1-\sum_{i=1}^{\ell}\alpha_{i}-\sum_{i=1}^{\ell}\gamma_{i}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The last two can be combined
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+1-\sum_{i=1}^{\ell}\alpha_{i}^{*}-\sum_{i=1}^{\ell}\gamma_{i}^{*} & =1-\sum_{i=1}^{\ell}\alpha_{i}^{*}-\sum_{i=1}^{\ell}\gamma_{i}^{*}\\
+\sum_{i=1}^{\ell}\alpha_{i}^{*}+\sum_{i=1}^{\ell}\gamma_{i}^{*} & =\sum_{i=1}^{\ell}\alpha_{i}^{*}+\sum_{i=1}^{\ell}\gamma_{i}^{*}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Vapnik makes second term on each side go away somehow, leaving the following
+ two conditions:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+w= & \sum_{i=1}^{\ell}\frac{\alpha_{i}^{*}-\alpha_{i}}{C^{*}}x_{i}\\
+\sum_{i=1}^{\ell}\alpha_{i}^{*}= & \sum_{i=1}^{\ell}\alpha_{i}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Next, he puts those into the original lagrange (WTF?), apparently by eliminating
+ the variables we just took partials for and substituting for 
+\begin_inset Formula $w$
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Formula \begin{align*}
+W(\alpha^{*},\alpha,C^{*})= & \sum_{i=1}^{\ell}\alpha_{i}\left[y_{i}-(w\cdot x_{i})+\varepsilon\right]-\sum_{i=1}^{\ell}\alpha_{i}^{*}\left[(w\cdot x_{i})-y_{i}+\varepsilon\right]-\frac{C^{*}}{2}(c_{n}-(w\cdot w))\\
+= & \sum_{i=1}^{\ell}\alpha_{i}\left[y_{i}-\left(\sum_{j=1}^{\ell}\frac{\alpha_{j}^{*}-\alpha_{j}}{C^{*}}x_{j}\cdot x_{i}\right)+\varepsilon\right]-\sum_{i=1}^{\ell}\alpha_{i}^{*}\left[\left(\sum_{i=j}^{\ell}\frac{\alpha_{j}^{*}-\alpha_{j}}{C^{*}}x_{j}\cdot x_{i}\right)-y_{i}+\varepsilon\right]-\frac{C^{*}}{2}(c_{n}-\left(\sum_{j=1}^{\ell}\frac{\alpha_{j}^{*}-\alpha_{j}}{C^{*}}x_{j}\cdot\sum_{i=1}^{\ell}\frac{\alpha_{i}^{*}-\alpha_{i}}{C^{*}}x_{i}\right)\\
+= & \sum_{i=1}^{\ell}\alpha_{i}y_{i}-\sum_{i,j=1}^{\ell}\frac{\alpha_{i}(\alpha_{j}^{*}-\alpha_{j})}{C^{*}}x_{j}\cdot x_{i}+\sum_{i=1}^{\ell}\alpha_{i}\varepsilon-\sum_{i,j=1}^{\ell}\frac{\alpha_{i}^{*}(\alpha_{j}^{*}-\alpha_{j})}{C^{*}}x_{j}\cdot x_{i}+\sum_{i=1}^{\ell}\alpha_{i}^{*}y_{i}-\sum_{i=1}^{\ell}\alpha_{i}^{*}\varepsilon-\frac{c_{n}C^{*}}{2}-\frac{1}{2C^{*}}\sum_{i,j=1}^{\ell}\left(\alpha_{j}^{*}-\alpha_{j}\right)\left(\alpha_{i}^{*}-\alpha_{i}\right)\left(x_{i}\cdot x_{j}\right)\\
+= & \sum_{i=1}^{\ell}\left(\alpha_{i}y_{i}+\alpha_{i}^{*}y_{i}+\alpha_{i}\varepsilon-\alpha_{i}^{*}\varepsilon\right)-\sum_{i,j=1}^{\ell}\left[\frac{\alpha_{i}(\alpha_{j}^{*}-\alpha_{j})}{C^{*}}x_{j}\cdot x_{i}+\frac{\alpha_{i}^{*}(\alpha_{j}^{*}-\alpha_{j})}{C^{*}}x_{j}\cdot x_{i}\right]-\frac{c_{n}C^{*}}{2}-\frac{1}{2C^{*}}\sum_{i,j=1}^{\ell}\left(\alpha_{j}^{*}-\alpha_{j}\right)\left(\alpha_{i}^{*}-\alpha_{i}\right)\left(x_{i}\cdot x_{j}\right)\\
+= & \varepsilon\sum_{i=1}^{\ell}\left(\alpha_{i}+\alpha_{i}^{*}\right)+\sum_{i=1}^{\ell}y_{i}\left(\alpha_{i}^{*}-\alpha_{i}\right)-\frac{1}{2C^{*}}\sum_{i,j=1}^{\ell}\left(\alpha_{j}^{*}-\alpha_{j}\right)\left(\alpha_{i}^{*}-\alpha_{i}\right)\left(x_{i}\cdot x_{j}\right)-\frac{c_{n}C^{*}}{2}\\
+ & \qquad-\sum_{i,j=1}^{\ell}\left(\frac{\alpha_{i}(\alpha_{j}^{*}-\alpha_{j})}{C^{*}}x_{j}\cdot x_{i}+\frac{\alpha_{i}^{*}(\alpha_{j}^{*}-\alpha_{j})}{C^{*}}x_{j}\cdot x_{i}\right)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+So far, so good.
+ I'm messing up some signs, but basically on track.
+ Vapnik manages to get rid of that last line too.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\sum_{i,j=1}^{\ell}\frac{\alpha_{i}(\alpha_{j}^{*}-\alpha_{j})}{C^{*}}x_{j}\cdot x_{i}+\frac{\alpha_{i}^{*}(\alpha_{j}^{*}-\alpha_{j})}{C^{*}}x_{j}\cdot x_{i}= & \sum_{i,j=1}^{\ell}\frac{x_{j}\cdot x_{i}}{C^{*}}\left(\alpha_{i}(\alpha_{j}^{*}-\alpha_{j})+\alpha_{i}^{*}(\alpha_{j}^{*}-\alpha_{j}\right)\\
+= & \sum_{i,j=1}^{\ell}\frac{x_{j}\cdot x_{i}}{C^{*}}\left(\alpha_{i}\alpha_{j}^{*}-\alpha_{i}\alpha_{j}+\alpha_{i}^{*}\alpha_{j}^{*}-\alpha_{i}^{*}\alpha_{j}\right)\\
+=\frac{1}{C^{*}} & \sum_{i,j=1}^{\ell}\left(\alpha_{i}+\alpha_{i}^{*}\right)\left(\alpha_{j}^{*}-\alpha_{j}\right)\left(x_{i}\cdot x_{j}\right)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+And there it is.
+ Probably messed up some signs along the way, but I'm pretty sure that adds
+ to the previous term of the same form.
+ In any case, our final optimization problem looks like this;
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+W(\alpha,\alpha^{*},C^{*})= & -\varepsilon\sum_{i=1}^{\ell}\left(\alpha_{i}+\alpha_{i}^{*}\right)+\sum_{i=1}^{\ell}y_{i}\left(\alpha_{i}^{*}-\alpha_{i}\right)\\
+ & -\frac{1}{2C^{*}}\sum_{i,j=1}^{\ell}\left(\alpha_{i}^{*}-\alpha_{i}\right)\left(\alpha_{j}^{*}-\alpha_{j}\right)\left(x_{i}\cdot x_{j}\right)-\frac{c_{n}C^{*}}{2}\\
+\sum_{i=1}^{\ell}\alpha_{i}^{*}= & \sum_{i=1}^{\ell}\alpha_{i}\\
+0\le\alpha_{i}^{*}\le1, & \quad i=1,...,\ell\\
+0\le\alpha_{i}\le1, & \quad i=1,...,\ell\\
+C^{*}\ge & \ 0\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Moving from a linear decision function to a kernel, we can simply replace
+ 
+\begin_inset Formula $x_{i}\cdot x_{j}$
+\end_inset
+
+ with 
+\begin_inset Formula $K(x_{i},x_{j})$
+\end_inset
+
+.
+ In the end, we're going to combine 
+\begin_inset Formula $\alpha,\alpha^{*}$
+\end_inset
+
+ into a single multiplier 
+\begin_inset Formula $\beta$
+\end_inset
+
+, so depending on how we define 
+\begin_inset Formula $\beta$
+\end_inset
+
+ it looks like we can eliminate some of the messy 
+\begin_inset Formula $C$
+\end_inset
+
+ terms.
+ This gives us a final kernel estimation optimization problem of
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+W= & -\varepsilon\sum_{i=1}^{\ell}\left(\alpha_{i}^{*}+\alpha_{i}\right)+\sum_{i=1}^{\ell}y_{i}\left(\alpha_{i}^{*}-\alpha_{i}\right)-\frac{1}{2}\sum_{i,j=1}^{\ell}\left(\alpha_{i}^{*}-\alpha_{i}\right)\left(\alpha_{j}^{*}-\alpha_{j}\right)K(x_{i},x_{j})\\
+\sum_{i=1}^{\ell}\alpha_{i}^{*}= & \sum_{i=1}^{\ell}\alpha_{i}\\
+0\le\alpha_{i}^{*}\le1, & \quad i=1,...,\ell\\
+0\le\alpha_{i}\le1, & \quad i=1,...,\ell\\
+C^{*}\ge & \ 0\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Which generates estimates in the form 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+f(x;\ v,\beta)= & \sum_{i=1}^{N}\beta_{i}K(x,v_{i})+b\\
+\beta_{i}= & \alpha_{i}^{*}-\alpha_{i}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Here, 
+\begin_inset Formula $v$
+\end_inset
+
+ is the set of support vectors, and 
+\begin_inset Formula $x$
+\end_inset
+
+ is the point at which we wish to determine 
+\begin_inset Formula $y$
+\end_inset
+
+.
+ Not sure how to calculate 
+\begin_inset Formula $b$
+\end_inset
+
+, but that's a fairly minor issue, I think.
+\end_layout
+
+\end_body
+\end_document
