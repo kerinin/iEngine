@@ -10,7 +10,7 @@ import matplotlib.cm as cm
 import scikits.statsmodels.api as sm
 import scipy as sp
 
-_Functions = ['run', 'test_parzen', 'test_divergence']
+_Functions = ['run', 'test_system3', 'test_parzen', 'test_divergence']
 	
 import theano.tensor as T
 from theano import function
@@ -18,10 +18,10 @@ from theano import function
 def run():
   print "Initializing"
   
-  train_size = 500
+  train_size = 5000
   sequence_length = 1
-  gamma_quantile = 50
-  test_size = 500
+  gamma_quantile = 40
+  test_size = 200
 
   import a_machine.system4 as system
   
@@ -34,35 +34,38 @@ def run():
   std = np.std(data, axis=0)
 
   # normalizing to median 0, std deviation 1
-  data = ( data - median ) / std
+  normed_data = ( data - median ) / std
   
   
   print "Initializing Models"
   
   model = system.model(dimension=0, gamma_samples=1000, gamma_quantile=gamma_quantile, sequence_length=sequence_length) 
-  model.train( data, train_size )   
+  model.train( normed_data, train_size )   
   
   print "Generating Predictions"
   
   # [test_point][dimension]
-  normed_test = (test[:test_size,:] - median) / std
-  #normed_test = data[:test_size]
+  test = test[:test_size+sequence_length,:]
+  #test = data[:test_size+sequence_length,:]
+  normed_test = (test - median) / std
   predictions = model.predict(normed_test)
   
   # denormalize
-  predictions = ( std[0] * predictions ) + median[0]
-  print predictions.shape
+  #predictions = ( std[0] * predictions ) + median[0]
   print "Results!"
   
   #errors = np.abs( test[sequence_length : test_size, 0] - predictions )
   
   #print ( errors.sum(0) / test_size )
   
-  x = np.arange(test_size-sequence_length)
-  plt.plot(x,test[sequence_length : test_size, 0], 'k--')
-  for i in range(predictions.shape[1]):
-    for j in range(predictions.shape[2]):
-      plt.plot(x,predictions[:,i,j])
+  x = np.arange(test_size)
+  
+  plt.plot(x,normed_test[sequence_length : test_size+sequence_length, 0], 'k', alpha=.4)
+  #for i in range(predictions.shape[1]):
+  #  for j in range(predictions.shape[2]):
+  #    plt.plot(x,predictions[:,i,j])
+  
+  plt.plot(x,predictions)
   
   plt.show()
 
@@ -76,7 +79,7 @@ def test_system3():
   gamma_quantile = 50
   test_size = 500
 
-  import a_machine.system4 as system
+  import a_machine.system3 as system
   
   print "Importing & Normalizing Data"
   
@@ -119,8 +122,9 @@ def test_system3():
   print std.astype('int')
   
   x = np.arange(test_size-sequence_length)
+  
   for i in range(data.shape[1]):
-    fig = plt.subplot(data.shape[1],1,i)
+    fig = plt.subplot(data.shape[1],1,i+1)
     
     fig.plot(x, test[sequence_length : test_size,i], 'k--')
     for j in range(predictions.shape[1]):
@@ -129,8 +133,6 @@ def test_system3():
     fig.plot(x, hybrid[:,i], 'r', lw=2)
   plt.show()
 
-  return
-  
   
 def test_divergence():
   print "Starting"
