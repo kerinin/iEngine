@@ -15,12 +15,14 @@ _Functions = ['run', 'test_system3', 'test_parzen', 'test_divergence']
 import theano.tensor as T
 from theano import function
 
+from a_machine.gpu_funcs import kernel_matrix
+
 def run():
   print "Initializing"
   
   train_size = 1000
   sequence_length = 1
-  gamma_quantile = 25
+  gamma_quantile = 100
   test_size = 200
 
   import a_machine.system4 as system
@@ -35,7 +37,6 @@ def run():
 
   # normalizing to median 0, std deviation 1
   normed_data = ( data - median ) / std
-  
   
   print "Initializing Models"
   
@@ -59,13 +60,39 @@ def run():
   
   x = np.arange( predictions.shape[0] )
   
-  plt.plot(x,normed_test[sequence_length : predictions.shape[0]+sequence_length, 0], 'k', alpha=.4)
+  x_pred = np.dstack( [
+    np.arange(model.sequences[:,0,0].min(), model.sequences[:,0,0].max(), ( model.sequences[:,0,0].max() - model.sequences[:,0,0].min() ) / 100 ),
+    np.arange(model.sequences[:,0,1].min(), model.sequences[:,0,1].max(), ( model.sequences[:,0,1].max() - model.sequences[:,0,1].min() ) / 100 ),
+    np.arange(model.sequences[:,0,2].min(), model.sequences[:,0,2].max(), ( model.sequences[:,0,2].max() - model.sequences[:,0,2].min() ) / 100 ),
+  ]).astype('float32').reshape(100,1,3)
+
+  y_pred = model.svm.predict( kernel_matrix(x_pred, model.sequences, model.gammas[-1] ) )
+  print x_pred[0]
+  print x_pred[1]
+  
+  pr = plt.subplot(2,2,1)
+  pr.plot(x,normed_test[sequence_length : predictions.shape[0]+sequence_length, 0], 'k', alpha=.4)
   #for i in range(predictions.shape[1]):
   #  for j in range(predictions.shape[2]):
   #    plt.plot(x,predictions[:,i,j])
-
-  plt.plot(x,predictions)
+  pr.plot(x,predictions)
   
+  
+  reg0 = plt.subplot(2,2,2)
+  reg0.plot(model.sequences[:,0,0], model.labels, 'k,', alpha=.5) 
+  reg0.plot(model.sequences[model.svm.SV_indices,0,0], model.labels[model.svm.SV_indices], 'o', alpha=.15 )
+  reg0.plot(x_pred[:,0,0], y_pred, 'r', lw=2)
+
+  reg1 = plt.subplot(2,2,3)
+  reg1.plot(model.sequences[:,0,1], model.labels, 'k,', alpha=.5) 
+  reg1.plot(model.sequences[model.svm.SV_indices,0,1], model.labels[model.svm.SV_indices], 'o', alpha=.15 )
+  reg1.plot(x_pred[:,0,1], y_pred, 'r',lw=2)
+
+  reg2 = plt.subplot(2,2,4)
+  reg2.plot(model.sequences[:,0,2], model.labels, 'k,', alpha=.5) 
+  reg2.plot(model.sequences[model.svm.SV_indices,0,2], model.labels[model.svm.SV_indices], 'o', alpha=.15 )
+  reg2.plot(x_pred[:,0,2], y_pred, 'r',lw=2)
+    
   plt.show()
 
   return

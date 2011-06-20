@@ -44,6 +44,7 @@ class model:
     sequences = self.make_sequences(data)
     labels = data[self.sequence_length:,:].astype('float32')
     
+    
     # Randomly sample |samples| sequences
     #full = np.hstack([sequences, np.expand_dims(labels,1)])
     #np.random.shuffle(full)
@@ -63,12 +64,13 @@ class model:
     print KK.shape
     print 'Training...'
     # Train that shist
-    self.svm = sparseNuSVR(nu=.1, C=.01)
+    self.svm = sparseNuSVR(nu=.1, C=1)
     #self.svm.train(KK, Labels, sample_weight = weights)
     self.svm.train(KK, Labels)
 
     print "--> SVM Trained: %s percent SV's, risk=%s" % ( self.svm.SV_percent, self.svm.risk ) 
-
+    
+    return
 
   # data: [observation][dimension]      
   def predict(self, data):
