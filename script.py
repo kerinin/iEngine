@@ -7,10 +7,13 @@ from random import gauss
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
+#from mpl_toolkits.mplot3d import Axes3D
+#import enthought.mayavi.mlab as mlab
 import scikits.statsmodels.api as sm
 import scipy as sp
+from scikits.learn.svm import *
 
-_Functions = ['run', 'test_system3', 'test_parzen', 'test_divergence']
+_Functions = ['run', 'test_system4', 'test_system3', 'test_parzen', 'test_divergence']
 	
 import theano.tensor as T
 from theano import function
@@ -18,6 +21,46 @@ from theano import function
 from a_machine.gpu_funcs import kernel_matrix
 
 def run():
+  print "Initializing"
+  
+
+  from santa_fe import getData
+  data = getData('B1.dat')
+  test = getData('B2.dat')
+  median = np.median(data[:,0], axis=0)
+  std = np.std(data[:,0], axis=0)
+  
+  print median
+  print std
+  
+  train = ( np.dstack( [ data[:1000,0], data[:1000,0] ] ).reshape(1000,2) - median ) / std
+  train[:,1] = -train[:,1]
+  labels = ( data[1:1001,0] - median ) / std
+  
+  print train[0]
+  print train[1]
+  print labels.shape
+
+  svm = SVR( epsilon=.25, C=50, gamma=2, kernel='rbf' )
+  svm.fit( X=train, y=labels )
+  
+  x = np.hstack([
+    np.arange( train[:,0].min(), train[:,0].max(), ( train[:,0].max() - train[:,0].min() ) / 100 ).reshape(100,1),
+    np.arange( train[:,1].min(), train[:,1].max(), ( train[:,1].max() - train[:,1].min() ) / 100 ).reshape(100,1)
+  ])
+  y = svm.predict(x)
+  
+  #ax = plt.subplot(111, projection='3d')
+  #ax.plot( x[:,0], x[:,1], y, 'k,' )
+  #plt.plot( train[:,0], labels, 'k,', alpha=.2 )
+  #plt.plot( train[svm.support_,0], labels[svm.support_], 'o', alpha=.15 )
+  #plt.plot(x[:,0],y, 'r', lw=2)
+  #plt.show()
+  #mlab.points3d(x[:,0], x[:,1], y)
+  
+  #mlab.show()
+  
+def test_system4():
   print "Initializing"
   
   train_size = 1000
