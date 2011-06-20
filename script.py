@@ -8,7 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 #from mpl_toolkits.mplot3d import Axes3D
-#import enthought.mayavi.mlab as mlab
+import enthought.mayavi.mlab as mlab
 import scikits.statsmodels.api as sm
 import scipy as sp
 from scikits.learn.svm import *
@@ -27,28 +27,26 @@ def run():
   from santa_fe import getData
   data = getData('B1.dat')
   test = getData('B2.dat')
-  median = np.median(data[:,0], axis=0)
-  std = np.std(data[:,0], axis=0)
+  median = np.median(data[:,:2], axis=0)
+  std = np.std(data[:,:2], axis=0)
   
-  print median
-  print std
+  train = ( data[:1000,:2] - median ) / std
+  labels = ( data[1:1001,0] - median[0] ) / std[0]
   
-  train = ( np.dstack( [ data[:1000,0], data[:1000,0] ] ).reshape(1000,2) - median ) / std
-  train[:,1] = -train[:,1]
-  labels = ( data[1:1001,0] - median ) / std
-  
-  print train[0]
-  print train[1]
-  print labels.shape
-
-  svm = SVR( epsilon=.25, C=50, gamma=2, kernel='rbf' )
+  svm = NuSVR( nu=.1, C=50, gamma=2, kernel='rbf' )
   svm.fit( X=train, y=labels )
-  
-  x = np.hstack([
-    np.arange( train[:,0].min(), train[:,0].max(), ( train[:,0].max() - train[:,0].min() ) / 100 ).reshape(100,1),
-    np.arange( train[:,1].min(), train[:,1].max(), ( train[:,1].max() - train[:,1].min() ) / 100 ).reshape(100,1)
-  ])
-  y = svm.predict(x)
+
+  xN = 100
+  yN = 100
+  xrange = [train[:,0].min(), train[:,0].max()]
+  yrange = [train[:,1].min(), train[:,1].max()]
+  xstep = ((xrange[1]-xrange[0] ) / xN )
+  ystep = ((yrange[1]-yrange[0] ) / yN )
+  X = np.dstack(np.mgrid[xrange[0]:xrange[1]:xstep,yrange[0]:yrange[1]:ystep]).reshape([ xN *yN,2])
+  x = np.arange(xrange[0],xrange[1],xstep)
+  y = np.arange(yrange[0],yrange[1],ystep)
+
+  Z = svm.predict(X)
   
   #ax = plt.subplot(111, projection='3d')
   #ax.plot( x[:,0], x[:,1], y, 'k,' )
@@ -56,9 +54,15 @@ def run():
   #plt.plot( train[svm.support_,0], labels[svm.support_], 'o', alpha=.15 )
   #plt.plot(x[:,0],y, 'r', lw=2)
   #plt.show()
-  #mlab.points3d(x[:,0], x[:,1], y)
+  mlab.points3d(train[:,0], train[:,1], labels, scale_factor=.05, opacity=.2)
+  mlab.points3d(train[svm.support_,0], train[svm.support_,1], labels[svm.support_], scale_factor=.05)
+  mlab.surf( x,y,Z.reshape(xN,yN) )
+  #mlab.plot3d(x[:,0], x[:,1], y)
   
-  #mlab.show()
+  print len(svm.support_)
+  print svm._get_params()
+  
+  mlab.show()
   
 def test_system4():
   print "Initializing"
