@@ -31,13 +31,14 @@ def run():
   median = np.median(data[:,:2], axis=0)
   std = np.std(data[:,:2], axis=0)
   
-  train = ( data[:1000,:2] - median ) / std
-  labels = ( data[1:1001,0] - median[0] ) / std[0]
+  train = (( data[:1000,:2] - median ) / std).astype('float32')
+  labels = (( data[1:1001,0] - median[0] ) / std[0]).astype('float32')
   
   #svm = NuSVR( nu=.1, C=50, gamma=2, kernel='rbf' )
   #svm.fit( X=train, y=labels )
   svm = SVR( nu=.1, C=50)
-  svm.fit( X= kernel_matrix(train, train, 2), y=labels)
+  print train.shape
+  svm.train( kernel_matrix(np.expand_dims(train,1), np.expand_dims(train,1), .5), labels)
 
   xN = 100
   yN = 100
@@ -45,12 +46,12 @@ def run():
   yrange = [train[:,1].min(), train[:,1].max()]
   xstep = ((xrange[1]-xrange[0] ) / xN )
   ystep = ((yrange[1]-yrange[0] ) / yN )
-  X = np.dstack(np.mgrid[xrange[0]:xrange[1]:xstep,yrange[0]:yrange[1]:ystep]).reshape([ xN *yN,2])
+  X = np.dstack(np.mgrid[xrange[0]:xrange[1]:xstep,yrange[0]:yrange[1]:ystep]).reshape([ xN *yN,2]).astype('float32')
   x = np.arange(xrange[0],xrange[1],xstep)
   y = np.arange(yrange[0],yrange[1],ystep)
 
   #Z = svm.predict(X)
-  Z = svm.predict( kernel_matrix(X, train, 2) )
+  Z = svm.predict( kernel_matrix( np.expand_dims(X,1), np.expand_dims(train,1), .5) )
   
   #ax = plt.subplot(111, projection='3d')
   #ax.plot( x[:,0], x[:,1], y, 'k,' )
@@ -59,12 +60,12 @@ def run():
   #plt.plot(x[:,0],y, 'r', lw=2)
   #plt.show()
   mlab.points3d(train[:,0], train[:,1], labels, scale_factor=.05, opacity=.2)
-  mlab.points3d(train[svm.support_,0], train[svm.support_,1], labels[svm.support_], scale_factor=.05)
+  #mlab.points3d(train[svm.support_,0], train[svm.support_,1], labels[svm.support_], scale_factor=.05)
+  mlab.points3d(train[svm.SV_indices,0], train[svm.SV_indices,1], labels[svm.SV_indices], scale_factor=.05)
   mlab.surf( x,y,Z.reshape(xN,yN) )
   #mlab.plot3d(x[:,0], x[:,1], y)
   
-  print len(svm.support_)
-  print svm._get_params()
+  print len(svm.SV_indices)
   
   mlab.show()
   
