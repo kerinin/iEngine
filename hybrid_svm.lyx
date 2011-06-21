@@ -924,5 +924,201 @@ This is messy.
  
 \end_layout
 
+\begin_layout Standard
+Recap: the Lagrange function allows you to express a constrained optimization
+ problem as an optimization problem over a single equation.
+ This is done by finding the points with zero gradient in the Lagrange functiona
+l.
+ First, construct the Lagrange functional, then take the partial derivatives.
+ Hopefully the partials can be combined in such a way that they can be solved.
+ IE; the partials form a series of equations which we wish to solve.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+F(\xi,\xi^{*}) & =\sum_{i=1}^{\ell}\xi_{i}^{*}+\sum_{i=1}^{\ell}\xi_{i}\\
+y_{i}-\sum_{a}(w^{a}\cdot x_{i}^{a})-b & \le\varepsilon+\xi_{i}^{*}\\
+\sum_{a}(w^{a}\cdot x_{i}^{a})+b-y_{i} & \le\varepsilon+\xi_{i}\\
+(w^{a}\cdot w^{a}) & \le c_{n}^{a}\quad\forall a\\
+\sum_{a}c_{n}^{a} & \le\bar{c}_{n}\\
+\xi_{i} & \ge\ 0\\
+\xi_{i}^{*} & \ge\ 0\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note that under the KKT conditions, 
+\begin_inset Formula $g(x)\le c\rightarrow c-g(x)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+F(w,\xi,\xi^{*};\ \alpha,\alpha^{*},C,\mathcal{C},\gamma,\gamma^{*})= & \sum_{i=1}^{\ell}\xi_{i}^{*}+\sum_{i=1}^{\ell}\xi_{i}\\
+ & \qquad-\sum_{i}\alpha_{i}^{a*}\left(\sum_{a}(w^{a}\cdot x_{i}^{a})+b-y_{i}+\varepsilon+\xi_{i}^{*}\right)\\
+ & \qquad-\sum_{i}\alpha_{i}^{a}\left(y_{i}-\sum_{a}(w^{a}\cdot x_{i}^{a})-b+\varepsilon+\xi_{i}\right)\\
+ & \qquad-\sum_{a}C^{a}\left(c_{n}^{a}-\left(w^{a}\cdot w^{a}\right)\right)\\
+ & \qquad-\mathcal{C}\left(\bar{c}_{n}-\sum_{a}c_{n}^{a}\right)\\
+ & \qquad-\sum_{i}\gamma_{i}\xi_{i}-\sum_{i}\gamma_{i}^{*}\xi_{i}^{*}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In this case, we have 
+\begin_inset Formula $w,\xi,\xi^{*}$
+\end_inset
+
+ as free variables and the rest are Lagrange multipliers.
+ For this next bit, it turns out that 
+\begin_inset Formula $\frac{d}{dx}\left(a\cdot b\right)=a'\cdot b+a\cdot b'$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\frac{\partial F}{\partial w^{a}}=0= & -\frac{\partial}{\partial w^{a}}\left[\sum_{i}\alpha_{i}^{a*}\left(\sum_{a}(w^{a}\cdot x_{i}^{a})+b-y_{i}+\varepsilon+\xi_{i}^{*}\right)\right]\\
+ & \qquad-\frac{\partial}{\partial w^{a}}\left[\sum_{i}\alpha_{i}^{a}\left(y_{i}-\sum_{a}(w^{a}\cdot x_{i}^{a})-b+\varepsilon+\xi_{i}\right)\right]\\
+ & \qquad-\frac{\partial}{\partial w^{a}}\left[\sum_{a}C^{a}\left(c_{n}^{a}-\left(w^{a}\cdot w^{a}\right)\right)\right]\\
+= & -\sum_{i}\alpha_{i}^{a*}\frac{\partial}{\partial w^{a}}\left(w^{a}\cdot x_{i}^{a}\right)+\sum_{i}\alpha_{i}^{a}\frac{\partial}{\partial w^{a}}\left(w^{a}\cdot x_{i}^{a}\right)-C^{a}\frac{\partial}{\partial w^{a}}\left(w^{a}\cdot w^{a}\right)\\
+= & -\sum_{i}\alpha_{i}^{a*}\left(\left(1\cdot x_{i}^{a}\right)+\left(w^{a}\cdot0\right)\right)+\sum_{i}\alpha_{i}^{a}\left(\left(1\cdot x_{i}^{a}\right)+\left(w^{a}\cdot0\right)\right)\\
+ & \qquad-C^{a}\left(\left(1\cdot w^{a}\right)+\left(w^{a}\cdot1\right)\right)\\
+= & -\sum_{i}\alpha_{i}^{a*}x_{i}^{a}+\sum_{i}\alpha_{i}^{a}x_{i}^{a}-2C^{a}w^{a}\\
+2C^{a}w^{a}= & -\sum_{i}\alpha_{i}^{a*}x_{i}^{a}+\sum_{i}\alpha_{i}^{a}x_{i}^{a}\\
+w^{a}= & \sum_{i}\frac{\alpha_{i}^{a}-\alpha_{i}^{a*}}{2C^{a}}x_{i}^{a}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+THAT's the correct derivation.
+ Fucking A.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\frac{\partial F}{\partial\xi}=0= & \frac{\partial}{\partial\xi}\left[\sum_{i}\xi_{i}\right]-\frac{\partial}{\partial\xi}\left[\sum_{i}\alpha_{i}^{a}\left(y_{i}-\sum_{a}(w^{a}\cdot x_{i}^{a})-b+\varepsilon+\xi_{i}\right)\right]-\frac{\partial}{\partial\xi}\left[\sum_{i}\gamma_{i}\xi_{i}\right]\\
+= & \ell-\sum_{i}\alpha_{i}^{a}-\sum_{i}\gamma_{i}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\frac{\partial F}{\partial\xi^{*}}=0= & \frac{\partial}{\partial\xi^{*}}\left[\sum_{i}\xi_{i}^{*}\right]-\frac{\partial}{\partial\xi^{*}}\left[\sum_{i}\alpha_{i}^{a*}\left(\sum_{a}(w^{a}\cdot x_{i}^{a})+b-y_{i}+\varepsilon+\xi_{i}^{*}\right)\right]-\frac{\partial}{\partial\xi^{*}}\left[\sum_{i}\gamma_{i}^{*}\xi_{i}^{*}\right]\\
+= & \ell-\sum_{i}\alpha_{i}^{a*}-\sum_{i}\gamma_{i}^{*}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\ell-\sum_{i}\alpha_{i}^{a}-\sum_{i}\gamma_{i}= & \ell-\sum_{i}\alpha_{i}^{a*}-\sum_{i}\gamma_{i}^{*}\\
+-\sum_{i}\alpha_{i}^{a}-\sum_{i}\gamma_{i}= & \sum_{i}\alpha_{i}^{a*}-\sum_{i}\gamma_{i}^{*}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Same as before, but watch this!
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\frac{\partial F}{\partial b}=0= & -\frac{\partial}{\partial b}\left[\sum_{i}\alpha_{i}^{a*}\left(\sum_{a}(w^{a}\cdot x_{i}^{a})+b-y_{i}+\varepsilon+\xi_{i}^{*}\right)\right]\\
+ & \qquad-\frac{\partial}{\partial b}\left[\sum_{i}\alpha_{i}^{a}\left(y_{i}-\sum_{a}(w^{a}\cdot x_{i}^{a})-b+\varepsilon+\xi_{i}\right)\right]\\
+= & -\sum_{i}\alpha_{i}^{a*}+\sum_{i}\alpha_{i}^{a}\\
+\sum_{i}\alpha_{i}^{a}= & \sum_{i}\alpha_{i}^{a*}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+YEAH BITCHES.
+ Putting that into the previous one:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+-\sum_{i}\alpha_{i}^{a}-\sum_{i}\gamma_{i}= & \sum_{i}\alpha_{i}^{a*}-\sum_{i}\gamma_{i}^{*}\\
+-\sum_{i}\alpha_{i}^{a}-\sum_{i}\gamma_{i}= & \sum_{i}\alpha_{i}^{a}-\sum_{i}\gamma_{i}^{*}\\
+\sum_{i}\gamma_{i}^{*}-\sum_{i}\gamma_{i}= & 2\sum_{i}\alpha_{i}^{a}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Now for 
+\begin_inset Formula $C^{a}$
+\end_inset
+
+.
+ This can probably be expressed with or without the summation.
+ The result is the same, it's really a semantic issue.
+ Either you have a single constraing defined over a summation or you have
+ multiple constraints defined for 
+\begin_inset Formula $a$
+\end_inset
+
+, in the Lagrange functional the two are interchangeable.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\frac{\partial F}{\partial C^{a}}=0= & -\frac{\partial}{\partial C^{a}}\left[\sum_{a}C^{a}\left(c_{n}^{a}-\left(w^{a}\cdot w^{a}\right)\right)\right]\\
+= & -\sum_{a}\left(c_{n}^{a}-\left(w^{a}\cdot w^{a}\right)\right)\\
+\sum_{a}c_{n}^{a}= & \sum_{a}w^{a}\cdot w^{a}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Vapnik mentions 'taking into account the Kuhn Tucker conditions' when eliminatin
+g terms from 
+\begin_inset Formula $L$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection
+Known Good Equalities
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\sum_{i}\alpha_{i}^{a}= & \sum_{i}\alpha_{i}^{a*}\\
+w^{a}= & \sum_{i}\frac{\alpha_{i}^{a}-\alpha_{i}^{a*}}{2C^{a}}x_{i}^{a}\\
+\sum_{i}\gamma_{i}^{*}-\sum_{i}\gamma_{i}= & 2\sum_{i}\alpha_{i}^{a}\\
+\sum_{a}c_{n}^{a}= & \sum_{a}w^{a}\cdot w^{a}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
 \end_body
 \end_document
