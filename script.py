@@ -42,12 +42,14 @@ def run():
   
   
   #svm = SVR( nu=.1, C=50)
-  m = model( dimension=0, sequence_length=sequence_length )
+  m1 = model( dimension=0, sequence_length=sequence_length )
+  m2 = model( dimension=0, sequence_length=sequence_length )
   #svm.train( kernel_matrix(np.expand_dims(train,1), np.expand_dims(train,1), .5), labels)
-  m.train(train[:,:2], train_size)
+  m1.train(train[:,:2], train_size, [ [0,[0,1]], [0,[0]] ])
+  m2.train(train[:,:2], train_size, [ [0,[0,1]], ])
 
-  xN = 100
-  yN = 100
+  xN = 20
+  yN = 20
   xrange = [train[:,0].min(), train[:,0].max()]
   yrange = [train[:,1].min(), train[:,1].max()]
   xstep = ((xrange[1]-xrange[0] ) / xN )
@@ -57,8 +59,9 @@ def run():
   y = np.arange(yrange[0],yrange[1],ystep)
 
   #Z = svm.predict( kernel_matrix( np.expand_dims(X,1), np.expand_dims(train,1), .5) )
-  Z = m.predict( np.expand_dims(X,1) )
-  
+  Z1 = m1.predict( np.expand_dims(X,1) )
+  Z2 = m2.predict( np.expand_dims(X,1) )
+
   #ax = plt.subplot(111, projection='3d')
   #ax.plot( x[:,0], x[:,1], y, 'k,' )
   #plt.plot( train[:,0], labels, 'k,', alpha=.2 )
@@ -67,11 +70,13 @@ def run():
   #plt.show()
   
   mlab.points3d(train[:,0], train[:,1], labels, scale_factor=.05, opacity=.2)
-  mlab.points3d(train[m.svm.SV_indices,0], train[m.svm.SV_indices,1], labels[m.svm.SV_indices], scale_factor=.05)
-  mlab.surf( x,y,Z.reshape(xN,yN) )
+  #mlab.points3d(train[m.svm.SV_indices,0], train[m.svm.SV_indices,1], labels[m.svm.SV_indices], scale_factor=.05)
+  mlab.surf( x,y,Z1.reshape(xN,yN), color=(1,0,0) ) #red
+  mlab.surf( x,y,Z2.reshape(xN,yN)+.1, color=(0,1,0) ) #green
 
   
-  print "%s SV of %s" % (len(m.svm.SV_indices), train.shape[0])
+  print "%s SV of %s" % (len(m1.svm.SV_indices), train.shape[0])
+  print "%s SV of %s" % (len(m2.svm.SV_indices), train.shape[0])
   
   mlab.show()
   

@@ -32,7 +32,7 @@ class model:
     self.all_slices = None
     
   # data: [observation][dimension]
-  def train(self, data, samples):
+  def train(self, data, samples, slices):
     #self.gammas = self.determine_gammas_from(data)
     self.gammas = [.5,]
     print "Gammas determined: %s" % str(self.gammas)
@@ -40,11 +40,11 @@ class model:
     # [gamma][sequence offset][dimension]
     #self.active_slices = np.mgrid[0:1,0:data.shape[1]].T.reshape(data.shape[1],2).tolist()
     # Make a single slice consisting of the 1st sequence element and all 3 dimensions
-    self.active_slices = [[0,[0,1]],]
+    #self.active_slices = [ [0,[0,1]], [0,[0]] ]
+    self.active_slices = slices
     
     sequences = self.make_sequences(data)
     labels = data[self.sequence_length:,:].astype('float32')
-    
     
     # Randomly sample |samples| sequences
     #self.sequences, self.labels = self.random_sample(self, sequences, labels, samples)
@@ -57,8 +57,8 @@ class model:
     print 'Training...'
     # Train that shist
     self.svm = SVR(epsilon=.1, C=50)
-    #self.svm.train(KK, Labels, sample_weight = weights)
-    self.svm.train(KK, Labels)
+    self.svm.train(KK, Labels, sample_weight = weights)
+    #self.svm.train(KK, Labels)
 
     print "--> SVM Trained: %s percent SV's, risk=%s" % ( self.svm.SV_percent, self.svm.risk ) 
 
@@ -72,9 +72,13 @@ class model:
     
     KK = self.make_subsets(points, self.sequences)
 
+    print KK.shape
+    
     raw = self.svm.predict(KK)
-
-    return raw
+    
+    print raw[:data.shape[0]].shape
+    
+    return raw[:data.shape[0]]
 
   def random_sample(self, sequences, labels, samples):
     full = np.hstack([sequences, np.expand_dims(labels,1)])
@@ -100,7 +104,7 @@ class model:
       else:
         subset_X = X[:,s[0],s[1]].reshape(X.shape[0], s[0]+1, len(s[1]))
         subset_Y = Y[:,s[0],s[1]].reshape(Y.shape[0], s[0]+1, len(s[1]))
-
+      
       for gamma in self.gammas:
         # NOTE:  returning to test on single matrix
         kk.append( kernel_matrix(subset_X, subset_Y, gamma) )
