@@ -37,6 +37,7 @@
 \tracking_changes false
 \output_changes false
 \author "" 
+\author "" 
 \end_header
 
 \begin_body
@@ -175,10 +176,6 @@ Next, he puts those into the original lagrange (WTF?), apparently by eliminating
 \end_inset
 
 
-\begin_inset Newline newline
-\end_inset
-
-
 \begin_inset Formula \begin{align*}
 W(\alpha^{*},\alpha,C^{*})= & \sum_{i=1}^{\ell}\alpha_{i}\left[y_{i}-(w\cdot x_{i})+\varepsilon\right]-\sum_{i=1}^{\ell}\alpha_{i}^{*}\left[(w\cdot x_{i})-y_{i}+\varepsilon\right]-\frac{C^{*}}{2}(c_{n}-(w\cdot w))\\
 = & \sum_{i=1}^{\ell}\alpha_{i}\left[y_{i}-\left(\sum_{j=1}^{\ell}\frac{\alpha_{j}^{*}-\alpha_{j}}{C^{*}}x_{j}\cdot x_{i}\right)+\varepsilon\right]-\sum_{i=1}^{\ell}\alpha_{i}^{*}\left[\left(\sum_{i=j}^{\ell}\frac{\alpha_{j}^{*}-\alpha_{j}}{C^{*}}x_{j}\cdot x_{i}\right)-y_{i}+\varepsilon\right]-\frac{C^{*}}{2}(c_{n}-\left(\sum_{j=1}^{\ell}\frac{\alpha_{j}^{*}-\alpha_{j}}{C^{*}}x_{j}\cdot\sum_{i=1}^{\ell}\frac{\alpha_{i}^{*}-\alpha_{i}}{C^{*}}x_{i}\right)\\
@@ -307,6 +304,623 @@ Here,
 \end_inset
 
 , but that's a fairly minor issue, I think.
+ 
+\end_layout
+
+\begin_layout Section
+Hybrid Estimator
+\end_layout
+
+\begin_layout Standard
+Starting at the same point, but we now include a summation over multiple
+ predictors in the constraints
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+F(\xi,\xi^{*}) & =\sum_{i=1}^{\ell}\xi_{i}^{*}+\sum_{i=1}^{\ell}\xi_{i}\\
+y_{i}-\sum_{a}(w^{a}\cdot x_{i}^{a})-b & \le\varepsilon+\xi_{i}^{*}\\
+\sum_{a}(w^{a}\cdot x_{i}^{a})+b-y_{i} & \le\varepsilon+\xi_{i}\\
+\xi_{i}^{*} & \ge\ 0\\
+\xi_{i} & \ge\ 0\\
+\sum_{a}(w^{a}\cdot w^{a}) & \le c_{n}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Go see why that constraint exists - I really don't understand the role of
+ 
+\begin_inset Formula $c_{n}$
+\end_inset
+
+, or what the inner product means, or where 
+\begin_inset Formula $C^{*}$
+\end_inset
+
+ comes from (I think it's a Lagrange multiplier).
+ One thing to note is that the dot product of two vectors 
+\begin_inset Formula $A=[a_{1},...a_{n}],\ B=[b_{1},...,b_{n}]$
+\end_inset
+
+ is the sum of the element-wise product 
+\begin_inset Formula $A\cdot B=\sum a_{i}b_{i}$
+\end_inset
+
+.
+ What this means is that if we can construct 
+\begin_inset Formula $W=[w^{1},...,w^{n}]$
+\end_inset
+
+, than the sum of the dot product of 
+\begin_inset Formula $w^{a}$
+\end_inset
+
+ is the same as the dot product of 
+\begin_inset Formula $W$
+\end_inset
+
+, ie 
+\begin_inset Formula $\sum_{a}w^{a}\cdot w^{a}=W\cdot W$
+\end_inset
+
+.
+ So we might be able to eliminate that complexity.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The final constraint isn't exactly clear.
+ I want the final result to be centered at 
+\begin_inset Formula $b$
+\end_inset
+
+, and I don't see any reason to calculate the inner product of all the 
+\begin_inset Formula $w^{a}$
+\end_inset
+
+, so for now I'll just sum them all up.
+ Reconstructing the Lagrange we have
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+L(w,\xi^{*},\xi;\alpha^{*},\alpha,C^{*},\gamma,\gamma^{*}) & =\sum_{i=1}^{\ell}(\xi_{i}^{*}+\xi_{i})-\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a}\left[y_{i}-(w^{a}\cdot x_{i}^{a})-b+\varepsilon+\xi_{i}\right]\\
+ & \qquad-\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a*}\left[(w^{a}\cdot x_{i}^{a})+b-y_{i}+\varepsilon+\xi_{i}^{*}\right]-\frac{C^{*}}{2}(c_{n}-\sum_{a}(w^{a}\cdot w^{a}))\\
+ & \qquad-\sum_{i=1}^{\ell}(\gamma_{i}^{*}\xi_{i}^{*}+\gamma_{i}\xi_{i})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We'll use a set of 
+\begin_inset Formula $\alpha$
+\end_inset
+
+ which is estimator-specific, as we want to decide which points in each
+ estimator to keep.
+ The next step is tricky - we're computing partials for variables which
+ are split into groups.
+ I'm going to assume that we can compute 
+\begin_inset Formula $\partial w$
+\end_inset
+
+ without resorting to 
+\begin_inset Formula $\partial w^{a}$
+\end_inset
+
+ explicitly...
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\frac{\partial F}{\partial w}=0 & =-\frac{\partial}{\partial w}\left(\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a}\left[y_{i}-(w^{a}\cdot x_{i}^{a})-b+\varepsilon+\xi_{i}\right]\right)-\frac{\partial}{\partial w}\left(\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a*}\left[(w^{a}\cdot x_{i}^{a})+b-y_{i}+\varepsilon+\xi_{i}\right]\right)-\frac{\partial}{\partial w}\left(\frac{C^{*}}{2}(c_{n}-\sum_{a}(w^{a}\cdot w^{a}))\right)\\
+ & =\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a}x_{i}^{a}-\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a*}x_{i}^{a}-\sum_{a}w^{a}C^{*}\\
+\sum_{a}w^{a}C^{*} & =\sum_{i=1}^{\ell}\sum_{a}(\alpha_{i}^{a}-\alpha_{i}^{a*})x_{i}^{a}\\
+\sum_{a}w^{a} & =\sum_{i=1}^{\ell}\sum_{a}\frac{\alpha_{i}^{a}-\alpha_{i}^{a*}}{C^{*}}x_{i}^{a}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This is an odd result, as it retains the summation.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\frac{\partial F}{\partial\xi^{*}}=0 & =\frac{\partial}{\partial\xi^{*}}\left(\sum_{i=1}^{\ell}(\xi_{i}^{*}+\xi_{i})\right)-\frac{\partial}{\partial\xi^{*}}\left(\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a*}\left[(w^{a}\cdot x_{i}^{a})+b-y_{i}+\varepsilon+\xi_{i}^{*}\right]\right)-\frac{\partial}{\partial\xi^{*}}\left(\sum_{i=1}^{\ell}(\gamma_{i}^{*}\xi_{i}^{*}+\gamma_{i}\xi_{i})\right)\\
+ & =1-\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a*}-\sum_{i=1}^{\ell}\gamma_{i}^{*}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Nothing too odd here
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\frac{\partial F}{\partial\xi}=0 & =\frac{\partial}{\partial\xi}\left(\sum_{i=1}^{\ell}(\xi_{i}^{*}+\xi_{i})\right)-\frac{\partial}{\partial\xi}\left(\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a}\left[y_{i}-(w^{a}\cdot x_{i}^{a})-b+\varepsilon+\xi_{i}\right]\right)-\frac{\partial}{\partial\xi}\left(\sum_{i=1}^{\ell}(\gamma_{i}^{*}\xi_{i}^{*}+\gamma_{i}\xi_{i})\right)\\
+ & =1-\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a}-\sum_{i=1}^{\ell}\gamma_{i}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The last two can still be combined
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+1-\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a*}-\sum_{i=1}^{\ell}\gamma_{i}^{*} & =1-\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a*}-\sum_{i=1}^{\ell}\gamma_{i}^{*}\\
+\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a*}+\sum_{i=1}^{\ell}\gamma_{i}^{*} & =\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a*}+\sum_{i=1}^{\ell}\gamma_{i}^{*}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We can probably still eliminate the 
+\begin_inset Formula $\gamma$
+\end_inset
+
+ terms, leaving us with an expanded equality constraint:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a*}= & \sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This is where I expected to end up on that issue.
+ How to handle the optimization problem isn't so clear.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\sum_{a}w^{a} & =\sum_{i=1}^{\ell}\sum_{a}\frac{\alpha_{i}^{a}-\alpha_{i}^{a*}}{C^{*}}x_{i}^{a}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Let's try putting that back into the original lagrange as before
+\begin_inset Formula \begin{align*}
+W(\alpha^{*},\alpha,C^{*})= & \sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a}\left[y_{i}-(w^{a}\cdot x_{i}^{a})+\varepsilon\right]-\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a*}\left[(w^{a}\cdot x_{i}^{a})-y_{i}+\varepsilon\right]-\frac{C^{*}}{2}(c_{n}-\sum_{a}(w^{a}\cdot w^{a}))\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+And here's the first hitch: in the previous example we could substitute
+ 
+\begin_inset Formula $w$
+\end_inset
+
+ in and reduce away.
+ This time we have 
+\begin_inset Formula $\sum_{a}(w^{a}\cdot w^{a})$
+\end_inset
+
+ and 
+\begin_inset Formula $\sum_{a}w^{a}$
+\end_inset
+
+, so it doesn't seem we can do a straight substitution.
+\end_layout
+
+\begin_layout Standard
+I wonder if we can break that out into 
+\begin_inset Formula $w^{a}=\sum(\alpha_{i}^{a}-\alpha_{i}^{a*})x_{i}^{a}/C^{*}$
+\end_inset
+
+, essentially removing the summation from both parts.
+ The summation will hold, although it's a stricter constraint.
+ Maybe we can show that the minimal value of the revised version has the
+ same solution as the original version?
+\end_layout
+
+\begin_layout Standard
+One point to consider is that the last term expands out to the following
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+-\sum_{i,j=1}^{\ell}\left(\alpha_{j}^{*}-\alpha_{j}\right)\left(\alpha_{i}^{*}-\alpha_{i}\right)\left(x_{i}\cdot x_{j}\right)= & -\sum_{i,j=1}^{\ell}\left(\alpha_{j}^{*}-\alpha_{j}\right)\left(\alpha_{i}^{*}-\alpha_{i}\right)K(x_{i},x_{j})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Does this make sense as a summation, something like
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $ $
+\end_inset
+
+
+\begin_inset Formula \[
+-\sum_{a}\sum_{i,j=1}^{\ell}\beta_{i}^{a}\beta_{j}^{a}K(x_{i}^{a},x_{j}^{a})\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+I don't see any obvious reason it wouldn't...
+\end_layout
+
+\begin_layout Subsection
+Assuming we can substitue 
+\begin_inset Formula $W\cdot W$
+\end_inset
+
+ for 
+\begin_inset Formula $\sum_{a}w^{a}\cdot w^{a}$
+\end_inset
+
+...
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+L(w,\xi^{*},\xi;\alpha^{*},\alpha,C^{*},\gamma,\gamma^{*}) & =\sum_{i=1}^{\ell}(\xi_{i}^{*}+\xi_{i})-\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a}\left[y_{i}-(w^{a}\cdot x_{i}^{a})-b+\varepsilon+\xi_{i}\right]\\
+ & \qquad-\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a*}\left[(w^{a}\cdot x_{i}^{a})+b-y_{i}+\varepsilon+\xi_{i}^{*}\right]-\frac{C^{*}}{2}(c_{n}-(W\cdot W))\\
+ & \qquad-\sum_{i=1}^{\ell}(\gamma_{i}^{*}\xi_{i}^{*}+\gamma_{i}\xi_{i})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\frac{\partial F}{\partial w}=0 & =-\frac{\partial}{\partial w}\left(\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a}\left[y_{i}-(w^{a}\cdot x_{i}^{a})-b+\varepsilon+\xi_{i}\right]\right)-\frac{\partial}{\partial w}\left(\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a*}\left[(w^{a}\cdot x_{i}^{a})+b-y_{i}+\varepsilon+\xi_{i}\right]\right)-\frac{\partial}{\partial w}\left(\frac{C^{*}}{2}(c_{n}-(W\cdot W))\right)\\
+ & =\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a}x_{i}^{a}-\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a*}x_{i}^{a}-WC^{*}\\
+WC^{*} & =\sum_{i=1}^{\ell}\sum_{a}(\alpha_{i}^{a}-\alpha_{i}^{a*})x_{i}^{a}\\
+W & =\sum_{i=1}^{\ell}\sum_{a}\frac{\alpha_{i}^{a}-\alpha_{i}^{a*}}{C^{*}}x_{i}^{a}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+W(\alpha^{*},\alpha,C^{*})= & \sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a}\left[y_{i}-(w^{a}\cdot x_{i}^{a})+\varepsilon\right]-\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a*}\left[(w^{a}\cdot x_{i}^{a})-y_{i}+\varepsilon\right]-\frac{C^{*}}{2}(c_{n}-(W\cdot W))\\
+= & \sum_{i=1}^{\ell}\sum_{a}\left(\alpha_{i}^{a}y_{i}-\alpha_{i}^{a}(w^{a}\cdot x_{i}^{a})+\alpha_{i}^{a}\varepsilon\right)\\
+ & \qquad-\sum_{i=1}^{\ell}\sum_{a}\left(\alpha_{i}^{a*}(w^{a}\cdot x_{i}^{a})-\alpha_{i}^{a*}y_{i}+\alpha_{i}^{a*}\varepsilon\right)\\
+ & \qquad\qquad-\frac{C^{*}}{2}(c_{n}-(W\cdot W))\\
+= & \sum_{i=1}^{\ell}\sum_{a}(\alpha_{i}^{a*}-\alpha_{i}^{a})(w^{a}\cdot x_{i}^{a})+\sum_{i=1}^{\ell}\sum_{a}y_{i}(\alpha_{i}^{a}+\alpha_{i}^{a*})+\varepsilon\sum_{i=1}^{\ell}\sum_{a}(\alpha_{i}^{a}-\alpha_{i}^{a*})\\
+ & \qquad-\frac{C^{*}}{2}(c_{n}-(W\cdot W))\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+And here we have our second issue; we can expand 
+\begin_inset Formula $W$
+\end_inset
+
+, but it's not clear wat can be done about the 
+\begin_inset Formula $w^{a}$
+\end_inset
+
+ terms - we can't pull them outside the summation.
+ Not sure if we can switch to 
+\begin_inset Formula $X$
+\end_inset
+
+ and not fuck up the 
+\begin_inset Formula $\alpha$
+\end_inset
+
+ bits.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\sum_{i=1}^{\ell}\sum_{a}(\alpha_{i}^{a*}-\alpha_{i}^{a})(w^{a}\cdot x_{i}^{a})\neq & \sum_{i=1}^{\ell}\sum_{a}w^{a}\cdot(x_{i}^{a}(\alpha_{i}^{a*}-\alpha_{i}^{a}))\\
+\sum_{a}(\alpha_{i}^{a*}-\alpha_{i}^{a})(w^{a}\cdot x_{i}^{a})=? & \left(\Lambda_{i}^{*}-\Lambda_{i}\right)\left(W\cdot X_{i}\right)\\
+\sum_{a}n_{a}m_{a}=? & \sum_{a}n_{a}\sum_{a}m_{a}\\
+n_{1}m_{1}+n_{2}m_{2}=? & (n_{1}+n_{2})(m_{1}+m_{2})\\
+= & n_{1}m_{1}+n_{1}m_{2}+n_{2}m_{1}+n_{2}m_{2}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+see what the implications of using multiple constraints 
+\begin_inset Formula $w^{a}\cdot w^{a}\le c_{n}^{a}$
+\end_inset
+
+ would be, maybe with a final constraint 
+\begin_inset Formula $\sum_{a}c_{n}^{a}=c_{n}$
+\end_inset
+
+ .
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+What if we treat each 
+\begin_inset Formula $w^{a}$
+\end_inset
+
+ as an independent variable / constraint?
+\end_layout
+
+\begin_layout Standard
+Same basic idea, but now we'll take 
+\begin_inset Formula $\partial w^{a}$
+\end_inset
+
+ and add a constraint to pull the individual 
+\begin_inset Formula $c_{n}$
+\end_inset
+
+ together.
+ This could be framed as equality over the dot product and inequality over
+ the summation or the other way around.
+ For now I'll treat them both as inequalities, just so I don't get into
+ unknown Lagrange territory
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+F(\xi,\xi^{*}) & =\sum_{i=1}^{\ell}\xi_{i}^{*}+\sum_{i=1}^{\ell}\xi_{i}\\
+y_{i}-\sum_{a}(w^{a}\cdot x_{i}^{a})-b & \le\varepsilon+\xi_{i}^{*}\\
+\sum_{a}(w^{a}\cdot x_{i}^{a})+b-y_{i} & \le\varepsilon+\xi_{i}\\
+\xi_{i}^{*} & \ge\ 0\\
+\xi_{i} & \ge\ 0\\
+(w^{a}\cdot w^{a}) & \le c_{n}^{a}\quad\forall a\\
+\sum_{a}c_{n}^{a} & \le\bar{c}_{n}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+I'll introduce 
+\begin_inset Formula $\mathcal{C}$
+\end_inset
+
+ as the Langrange multiplier for the new condition.
+ We'll want to minimize over 
+\begin_inset Formula $\mathcal{C}$
+\end_inset
+
+, but we don't really care about 
+\begin_inset Formula $C^{a}$
+\end_inset
+
+ (I think...)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+L(w,\xi^{*},\xi;\alpha^{*},\alpha,C^{a},\mathcal{C},\gamma,\gamma^{*}) & =\sum_{i=1}^{\ell}(\xi_{i}^{*}+\xi_{i})-\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a}\left[y_{i}-(w^{a}\cdot x_{i}^{a})-b+\varepsilon+\xi_{i}\right]\\
+ & \qquad-\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a*}\left[(w^{a}\cdot x_{i}^{a})+b-y_{i}+\varepsilon+\xi_{i}^{*}\right]-\sum_{a}\frac{C^{a}}{2}(c_{n}^{a}-(w^{a}\cdot w^{a}))\\
+ & \qquad-\mathcal{C}\left(\bar{c}_{n}-\sum_{a}c_{n}^{a}\right)-\sum_{i=1}^{\ell}(\gamma_{i}^{*}\xi_{i}^{*}+\gamma_{i}\xi_{i})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Now for our partials
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\frac{\partial F}{\partial w^{a}}=0 & =-\frac{\partial}{\partial w^{a}}\left(\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a}\left[y_{i}-(w^{a}\cdot x_{i}^{a})-b+\varepsilon+\xi_{i}\right]\right)-\frac{\partial}{\partial w^{a}}\left(\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a*}\left[(w^{a}\cdot x_{i}^{a})+b-y_{i}+\varepsilon+\xi_{i}\right]\right)\\
+ & \qquad-\frac{\partial}{\partial w^{a}}\sum_{a}\left(\frac{C^{a}}{2}(c_{n}^{a}-(w^{a}\cdot w^{a}))\right)\\
+ & =\sum_{i=1}^{\ell}\alpha_{i}^{a}x_{i}^{a}-\sum_{i=1}^{\ell}\alpha_{i}^{a*}x_{i}^{a}-w^{a}C^{a}\\
+w^{a}C^{a} & =\sum_{i=1}^{\ell}(\alpha_{i}^{a}-\alpha_{i}^{a*})x_{i}^{a}\\
+w^{a} & =\sum_{i=1}^{\ell}\frac{\alpha_{i}^{a}-\alpha_{i}^{a*}}{C^{a}}x_{i}^{a}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+That was the simplification I was hoping for.
+ Let's hope that we don't have trouble elsewhere
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\frac{\partial F}{\partial\xi^{*}}=0 & =\frac{\partial}{\partial\xi^{*}}\left(\sum_{i=1}^{\ell}(\xi_{i}^{*}+\xi_{i})\right)-\frac{\partial}{\partial\xi^{*}}\left(\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a*}\left[(w^{a}\cdot x_{i}^{a})+b-y_{i}+\varepsilon+\xi_{i}^{*}\right]\right)-\frac{\partial}{\partial\xi^{*}}\left(\sum_{i=1}^{\ell}(\gamma_{i}^{*}\xi_{i}^{*}+\gamma_{i}\xi_{i})\right)\\
+ & =1-\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a*}-\sum_{i=1}^{\ell}\gamma_{i}^{*}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\frac{\partial F}{\partial\xi}=0 & =\frac{\partial}{\partial\xi}\left(\sum_{i=1}^{\ell}(\xi_{i}^{*}+\xi_{i})\right)-\frac{\partial}{\partial\xi}\left(\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a}\left[y_{i}-(w^{a}\cdot x_{i}^{a})-b+\varepsilon+\xi_{i}\right]\right)-\frac{\partial}{\partial\xi}\left(\sum_{i=1}^{\ell}(\gamma_{i}^{*}\xi_{i}^{*}+\gamma_{i}\xi_{i})\right)\\
+ & =1-\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a}-\sum_{i=1}^{\ell}\gamma_{i}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+These remain unchanged, so we end up with the same result
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+1-\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a*}-\sum_{i=1}^{\ell}\gamma_{i}^{*} & =1-\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a}-\sum_{i=1}^{\ell}\gamma_{i}\\
+\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a*}+\sum_{i=1}^{\ell}\gamma_{i}^{*} & =\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a}+\sum_{i=1}^{\ell}\gamma_{i}\\
+\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a*}= & \sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+I think we could take 
+\begin_inset Formula $\partial\mathcal{C}$
+\end_inset
+
+ or 
+\begin_inset Formula $\partial C^{a}$
+\end_inset
+
+.
+ In his discussion, Vapnik starts with an optimization problem which minimizes
+ over 
+\begin_inset Formula $C^{*}$
+\end_inset
+
+, but to 'simply computation', he sets 
+\begin_inset Formula $C^{*}$
+\end_inset
+
+ to a given value.
+ I think the analogy is that we try to minimize 
+\begin_inset Formula $C^{a}$
+\end_inset
+
+, and set 
+\begin_inset Formula $\mathcal{C}$
+\end_inset
+
+ to a given value.
+ This means we want to minimize with respect to 
+\begin_inset Formula $C^{a}$
+\end_inset
+
+.
+ Hopefully this will work...
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\frac{\partial F}{\partial C^{a}}=0= & \frac{\partial F}{\partial C^{a}}\left(\frac{C^{a}}{2}(c_{n}^{a}-(w^{a}\cdot w^{a}))\right)\\
+= & \frac{C^{a}}{2}(c_{n}^{a}-(w^{a}\cdot w^{a}))\\
+= & \frac{C^{a}c_{n}^{a}}{2}-\frac{C^{a}(w^{a}\cdot w^{a})}{2}\\
+\frac{C^{a}c_{n}^{a}}{2}= & \frac{C^{a}(w^{a}\cdot w^{a})}{2}\\
+c_{n}^{a}= & w^{a}\cdot w^{a}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Back to the original condition
+\end_layout
+
+\begin_layout Standard
+Let's just see what happens if we minimize with respect to 
+\begin_inset Formula $\partial\mathcal{C}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\frac{\partial F}{\partial\mathcal{C}}=0= & -\frac{\partial F}{\partial\mathcal{C}}\mathcal{C}\left(\bar{c}_{n}-\sum_{a}c_{n}^{a}\right)\\
+= & \bar{c}_{n}-\sum_{a}c_{n}^{a}\\
+\bar{c}_{n}= & \sum_{a}c_{n}^{a}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Back to our original condition...
+\end_layout
+
+\begin_layout Standard
+Let's see what happens when we substitute.
+ We can eliminate the 
+\begin_inset Formula $C^{a}$
+\end_inset
+
+ term due to that equality above, which evaluates to 
+\begin_inset Formula $c_{n}^{a}-c_{n}^{a}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+W(\alpha^{*},\alpha,\mathcal{C})= & \sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a}\left[y_{i}-(w^{a}\cdot x_{i}^{a})+\varepsilon i\right]-\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a*}\left[(w^{a}\cdot x_{i}^{a})-y_{i}+\varepsilon\right]-\mathcal{C}\left(\bar{c}_{n}-\sum_{a}c_{n}^{a}\right)\\
+= & \sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a}\left[y_{i}-\left(\sum_{j=1}^{\ell}\frac{\alpha_{j}^{a}-\alpha_{j}^{a*}}{C^{a}}x_{j}^{a}\cdot x_{i}^{a}\right)+\varepsilon i\right]-\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a*}\left[\left(\sum_{i=1}^{\ell}\frac{\alpha_{i}^{a}-\alpha_{i}^{a*}}{C^{a}}x_{i}^{a}\cdot x_{i}^{a}\right)-y_{i}+\varepsilon\right]-\mathcal{C}\left(\bar{c}_{n}-\sum_{a}w^{a}\cdot w^{a}\right)\\
+=\sum_{a} & \left[\sum_{i=1}^{\ell}\alpha_{i}^{a}y_{i}-\sum_{i,j=1}^{\ell}\frac{\alpha_{i}^{a}\left(\alpha_{j}^{a}-\alpha_{j}^{a*}\right)}{C^{a}}x_{j}^{a}\cdot x_{i}^{a}+\sum_{i=1}^{\ell}\alpha_{i}^{a}\varepsilon-\sum_{i,j=1}^{\ell}\frac{\alpha_{i}^{a*}\left(\alpha_{j}^{a}-\alpha_{j}^{a*}\right)}{C^{a}}x_{j}^{a}\cdot x_{i}^{a}+\sum_{i=1}^{\ell}\alpha_{i}^{a*}y_{i}-\sum_{i=1}^{\ell}\alpha_{i}^{a*}\varepsilon\right]\\
+ & \qquad-\mathcal{C}\left(\bar{c}_{n}-\sum_{a}\left(\sum_{i=1}^{\ell}\frac{\alpha_{i}^{a}-\alpha_{i}^{a*}}{C^{a}}x_{i}^{a}\right)\cdot\left(\sum_{j=1}^{\ell}\frac{\alpha_{j}^{a}-\alpha_{j}^{a*}}{C^{a}}x_{j}^{a}\right)\right)\\
+= & \sum_{a}\left[\sum_{i=1}^{\ell}y_{i}\left(\alpha_{i}^{a}+\alpha_{i}^{a*}\right)+\varepsilon\sum_{i=1}^{\ell}\alpha_{i}^{a}-\alpha_{i}^{a*}-\sum_{i,j=1}^{\ell}\frac{\alpha_{i}^{a}\left(\alpha_{j}^{a}-\alpha_{j}^{a*}\right)}{C^{a}}x_{j}^{a}\cdot x_{i}^{a}+\frac{\alpha_{i}^{a*}\left(\alpha_{j}^{a}-\alpha_{j}^{a*}\right)}{C^{a}}x_{j}^{a}\cdot x_{i}^{a}\right]\\
+ & \qquad-\mathcal{C}\bar{c}_{n}+\sum_{a}\frac{\mathcal{C}}{C^{*}}\sum_{i,j=1}^{\ell}\left(\alpha_{j}^{*}-\alpha_{j}\right)\left(\alpha_{i}^{*}-\alpha_{i}\right)\left(x_{i}\cdot x_{j}\right)\\
+= & \sum_{a}\left[\sum_{i=1}^{\ell}y_{i}\left(\alpha_{i}^{a}+\alpha_{i}^{a*}\right)+\varepsilon\sum_{i=1}^{\ell}\alpha_{i}^{a}-\alpha_{i}^{a*}-\frac{1}{2C^{a}}\sum_{i,j=1}^{\ell}\left(\alpha_{j}^{*}-\alpha_{j}\right)\left(\alpha_{i}^{*}-\alpha_{i}\right)\left(x_{j}^{a}\cdot x_{i}^{a}\right)+\frac{\mathcal{C}}{2C^{a}}\sum_{i,j=1}^{\ell}\left(\alpha_{j}^{a*}-\alpha_{j}^{a}\right)\left(\alpha_{i}^{a*}-\alpha_{i}^{a}\right)\left(x_{i}^{a}\cdot x_{j}^{a}\right)\right]-\mathcal{C}\bar{c}_{n}\\
+= & \sum_{a}\left[\sum_{i=1}^{\ell}y_{i}\left(\alpha_{i}^{a}+\alpha_{i}^{a*}\right)+\varepsilon\sum_{i=1}^{\ell}\alpha_{i}^{a}-\alpha_{i}^{a*}-\frac{\mathcal{C}-1}{2C^{a}}\sum_{i,j=1}^{\ell}\left(\alpha_{j}^{*}-\alpha_{j}\right)\left(\alpha_{i}^{*}-\alpha_{i}\right)\left(x_{j}^{a}\cdot x_{i}^{a}\right)\right]-\mathcal{C}\bar{c}_{n}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This is messy.
+ And probably full of mistakes.
  
 \end_layout
 
