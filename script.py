@@ -71,9 +71,11 @@ def run():
   
   mlab.points3d(train[:,0], train[:,1], labels, scale_factor=.05, opacity=.2)
   #mlab.points3d(train[m.svm.SV_indices,0], train[m.svm.SV_indices,1], labels[m.svm.SV_indices], scale_factor=.05)
-  mlab.surf( x,y,Z1.reshape(xN,yN), color=(1,0,0) ) #red
-  mlab.surf( x,y,Z2.reshape(xN,yN)+.1, color=(0,1,0) ) #green
+  mlab.surf( x,y,Z1.reshape(xN,yN), color=(1,0,0) ) #red, multiple slices
+  mlab.surf( x,y,Z2.reshape(xN,yN)+.1, color=(0,1,0) ) #green, single slice
 
+  print m1.svm.SV_indices
+  print m2.svm.SV_indices
   
   print "%s SV of %s" % (len(m1.svm.SV_indices), train.shape[0])
   print "%s SV of %s" % (len(m2.svm.SV_indices), train.shape[0])

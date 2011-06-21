@@ -52,8 +52,9 @@ class model:
 
     KK = self.make_subsets(self.sequences, self.sequences)
     Labels = np.hstack( [ self.labels, np.zeros( self.labels.shape[0] * ( len(self.gammas) * len(self.active_slices) - 1) ) ] )
+    #Labels = np.repeat( self.labels, len(slices), axis=0 )
     weights = np.hstack( [ np.ones( self.labels.shape[0] ), np.zeros( self.labels.shape[0] * ( len(self.gammas) * len(self.active_slices) - 1 ) ) ] ).astype('float32')
-
+    
     print 'Training...'
     # Train that shist
     self.svm = SVR(epsilon=.1, C=50)
