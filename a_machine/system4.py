@@ -14,7 +14,7 @@ import matplotlib.cm as cm
 from scikits.learn import svm
 
 from gpu_funcs import kernel_matrix
-from svms import sparseNuSVR, NuSVR
+from svms import sparseNuSVR, NuSVR, SVR
     
 class model:
   def __init__(self, dimension, gamma_samples=1000, gamma_quantile=100, sequence_length=2):
@@ -33,93 +33,56 @@ class model:
     
   # data: [observation][dimension]
   def train(self, data, samples):
-    self.gammas = self.determine_gammas_from(data)
-    #self.gammas = [.5,]
+    #self.gammas = self.determine_gammas_from(data)
+    self.gammas = [.5,]
     print "Gammas determined: %s" % str(self.gammas)
+    
     # [gamma][sequence offset][dimension]
     #self.active_slices = np.mgrid[0:1,0:data.shape[1]].T.reshape(data.shape[1],2).tolist()
     # Make a single slice consisting of the 1st sequence element and all 3 dimensions
-    self.active_slices = [[0,[0,1,2]],]
+    self.active_slices = [[0,[0,1]],]
     
     sequences = self.make_sequences(data)
     labels = data[self.sequence_length:,:].astype('float32')
     
     
     # Randomly sample |samples| sequences
-    #full = np.hstack([sequences, np.expand_dims(labels,1)])
-    #np.random.shuffle(full)
-    #self.sequences = full[:samples,:-1,:]
-    #self.labels = full[:samples,-1,self.dimension]
-    
-    self.sequences = sequences[:samples]
-    self.labels = labels[:samples,self.dimension]
+    #self.sequences, self.labels = self.random_sample(self, sequences, labels, samples)
+    self.sequences, self.labels = sequences[:samples], labels[:samples, self.dimension]
 
     KK = self.make_subsets(self.sequences, self.sequences)
     Labels = np.hstack( [ self.labels, np.zeros( self.labels.shape[0] * ( len(self.gammas) * len(self.active_slices) - 1) ) ] )
     weights = np.hstack( [ np.ones( self.labels.shape[0] ), np.zeros( self.labels.shape[0] * ( len(self.gammas) * len(self.active_slices) - 1 ) ) ] ).astype('float32')
-    #KK = kernel_matrix(self.sequences, self.sequences, self.gammas[-1])
-    #KK = self.make_subsets(self.sequences, self.sequences)
-    #Labels = self.labels
 
-    print KK.shape
     print 'Training...'
     # Train that shist
-    self.svm = sparseNuSVR(nu=.1, C=1)
+    self.svm = SVR(epsilon=.1, C=50)
     #self.svm.train(KK, Labels, sample_weight = weights)
     self.svm.train(KK, Labels)
 
     print "--> SVM Trained: %s percent SV's, risk=%s" % ( self.svm.SV_percent, self.svm.risk ) 
-    
-    return
+
 
   # data: [observation][dimension]      
   def predict(self, data):
     
     # [sequence][point][dimension]
-    points = self.make_sequences(data)
+    #points = self.make_sequences(data)
+    points = data
     
-    #KK = self.make_subsets(points, self.sequences)
-    KK = np.array([]).reshape(data.shape[0]-1, 0)
+    KK = self.make_subsets(points, self.sequences)
 
-    for gamma in self.gammas:
-      KK = np.hstack( [KK, kernel_matrix(points, self.sequences, gamma)] )
-    #KK = kernel_matrix( points, self.sequences, self.gammas[-1] )
-    
     raw = self.svm.predict(KK)
 
-    return raw[:data.shape[0]-1]
-    
-    
-    
-    
-    
-    
-    # [test_sequence][gamma][dimension]
-    predictions = np.array([]).reshape(points.shape[0], 0, data.shape[1])
-    risks = np.array([]).reshape(1, 0, data.shape[1])
-    for i in range( len(self.SVMs) ):
-      gamma = self.gammas[i]
-      g_SVMs = self.SVMs[i]
-      
-      # [train_i][test_j]
-      kk = kernel_matrix(self.sequences, points, gamma).T
-      print "Computed kernel with gamma=%s, %s non-null entries" % (gamma, (kk > .00001).sum())
-    
-      g_predictions = np.array([]).reshape(points.shape[0], 0)
-      g_risk = np.array([]).reshape(1, 0)
-      for dimension in range( len(g_SVMs) ):
-        SVM = g_SVMs[dimension]
-                
-        # [test][dimension]
-        prediction = np.expand_dims( SVM.predict(kk), 1)
-        
-        g_predictions = np.hstack( [g_predictions, prediction] )
-        g_risk = np.hstack( [ g_risk, np.array(SVM.risk).reshape(1,1) ])
-        
-      predictions = np.hstack( [predictions, np.expand_dims( g_predictions, 1) ])
-      risks = np.hstack( [risks, np.expand_dims( g_risk, 1 ) ])
+    return raw
 
-    return predictions, risks
+  def random_sample(self, sequences, labels, samples):
+    full = np.hstack([sequences, np.expand_dims(labels,1)])
+    np.random.shuffle(full)
+    self.sequences = full[:samples,:-1,:]
+    self.labels = full[:samples,-1,self.dimension] 
+    (full[:samples,:-1,:], full[:samples,-1,self.dimension] )
+    
     
   def make_sequences(self, data):
     sequences = data.reshape(data.shape[0], 1, data.shape[1])

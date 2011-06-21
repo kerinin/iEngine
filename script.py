@@ -24,21 +24,27 @@ from a_machine.svms import SVR
 def run():
   print "Initializing"
   
+  from a_machine.system4 import model
 
   from santa_fe import getData
   data = getData('B1.dat')
   test = getData('B2.dat')
   median = np.median(data[:,:2], axis=0)
   std = np.std(data[:,:2], axis=0)
+
+  train_size = 1000
+  sequence_length = 1
+  gamma_quantile = 100
+  test_size = 200
+    
+  train = (( data[:train_size,:2] - median ) / std).astype('float32')
+  labels = (( data[sequence_length:train_size+sequence_length,0] - median[0] ) / std[0]).astype('float32')
   
-  train = (( data[:1000,:2] - median ) / std).astype('float32')
-  labels = (( data[1:1001,0] - median[0] ) / std[0]).astype('float32')
   
-  #svm = NuSVR( nu=.1, C=50, gamma=2, kernel='rbf' )
-  #svm.fit( X=train, y=labels )
-  svm = SVR( nu=.1, C=50)
-  print train.shape
-  svm.train( kernel_matrix(np.expand_dims(train,1), np.expand_dims(train,1), .5), labels)
+  #svm = SVR( nu=.1, C=50)
+  m = model( dimension=0, sequence_length=sequence_length )
+  #svm.train( kernel_matrix(np.expand_dims(train,1), np.expand_dims(train,1), .5), labels)
+  m.train(train[:,:2], train_size)
 
   xN = 100
   yN = 100
@@ -50,8 +56,8 @@ def run():
   x = np.arange(xrange[0],xrange[1],xstep)
   y = np.arange(yrange[0],yrange[1],ystep)
 
-  #Z = svm.predict(X)
-  Z = svm.predict( kernel_matrix( np.expand_dims(X,1), np.expand_dims(train,1), .5) )
+  #Z = svm.predict( kernel_matrix( np.expand_dims(X,1), np.expand_dims(train,1), .5) )
+  Z = m.predict( np.expand_dims(X,1) )
   
   #ax = plt.subplot(111, projection='3d')
   #ax.plot( x[:,0], x[:,1], y, 'k,' )
@@ -59,13 +65,13 @@ def run():
   #plt.plot( train[svm.support_,0], labels[svm.support_], 'o', alpha=.15 )
   #plt.plot(x[:,0],y, 'r', lw=2)
   #plt.show()
-  mlab.points3d(train[:,0], train[:,1], labels, scale_factor=.05, opacity=.2)
-  #mlab.points3d(train[svm.support_,0], train[svm.support_,1], labels[svm.support_], scale_factor=.05)
-  mlab.points3d(train[svm.SV_indices,0], train[svm.SV_indices,1], labels[svm.SV_indices], scale_factor=.05)
-  mlab.surf( x,y,Z.reshape(xN,yN) )
-  #mlab.plot3d(x[:,0], x[:,1], y)
   
-  print len(svm.SV_indices)
+  mlab.points3d(train[:,0], train[:,1], labels, scale_factor=.05, opacity=.2)
+  mlab.points3d(train[m.svm.SV_indices,0], train[m.svm.SV_indices,1], labels[m.svm.SV_indices], scale_factor=.05)
+  mlab.surf( x,y,Z.reshape(xN,yN) )
+
+  
+  print "%s SV of %s" % (len(m.svm.SV_indices), train.shape[0])
   
   mlab.show()
   

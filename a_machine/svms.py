@@ -66,10 +66,10 @@ class NuSVR:
     return self.optimizer.predict(kk)
 
 class SVR:
-  def __init__(self, nu=.2, C=.5):
-    self.nu = nu
+  def __init__(self, epsilon=.2, C=.5):
+    self.epsilon = epsilon
     self.C = C
-    self.optimizer = svm.SVR(nu=nu, C=C, kernel='precomputed', cache_size=2000)
+    self.optimizer = svm.SVR(epsilon=epsilon, C=C, kernel='precomputed', cache_size=2000)
     self.SV_indices = None
     self.SV_kk = None
     self.SV_weights = None
