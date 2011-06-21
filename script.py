@@ -11,7 +11,7 @@ import matplotlib.cm as cm
 import enthought.mayavi.mlab as mlab
 import scikits.statsmodels.api as sm
 import scipy as sp
-from scikits.learn.svm import *
+#from scikits.learn.svm import *
 
 _Functions = ['run', 'test_system4', 'test_system3', 'test_parzen', 'test_divergence']
 	
@@ -19,6 +19,7 @@ import theano.tensor as T
 from theano import function
 
 from a_machine.gpu_funcs import kernel_matrix
+from a_machine.svms import SVR
 
 def run():
   print "Initializing"
@@ -33,8 +34,10 @@ def run():
   train = ( data[:1000,:2] - median ) / std
   labels = ( data[1:1001,0] - median[0] ) / std[0]
   
-  svm = NuSVR( nu=.1, C=50, gamma=2, kernel='rbf' )
-  svm.fit( X=train, y=labels )
+  #svm = NuSVR( nu=.1, C=50, gamma=2, kernel='rbf' )
+  #svm.fit( X=train, y=labels )
+  svm = SVR( nu=.1, C=50)
+  svm.fit( X= kernel_matrix(train, train, 2), y=labels)
 
   xN = 100
   yN = 100
@@ -46,7 +49,8 @@ def run():
   x = np.arange(xrange[0],xrange[1],xstep)
   y = np.arange(yrange[0],yrange[1],ystep)
 
-  Z = svm.predict(X)
+  #Z = svm.predict(X)
+  Z = svm.predict( kernel_matrix(X, train, 2) )
   
   #ax = plt.subplot(111, projection='3d')
   #ax.plot( x[:,0], x[:,1], y, 'k,' )
