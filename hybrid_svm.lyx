@@ -1,4 +1,4 @@
-#LyX 1.6.7 created this file. For more info see http://www.lyx.org/
+#LyX 1.6.5 created this file. For more info see http://www.lyx.org/
 \lyxformat 345
 \begin_document
 \begin_header
@@ -45,6 +45,422 @@
 
 \begin_layout Title
 Hybrid SVM
+\end_layout
+
+\begin_layout Section
+Direct-Regression SVM
+\end_layout
+
+\begin_layout Standard
+The classical SVR problem is framed as finding a function 
+\begin_inset Formula $f(x)=(w\cdot x)+b$
+\end_inset
+
+.
+ While this is useful, it relies on determining the hyperplane 
+\begin_inset Formula $w$
+\end_inset
+
+ directly.
+ A simpler approach would be to use the set of observations directly, and
+ to use the kernel function as an averaging tool; 
+\begin_inset Formula $f(x)=\sum y_{i}\beta_{i}K(x,x_{i})$
+\end_inset
+
+.
+ This appraoch has the benefit of being able to use 
+\begin_inset Formula $y$
+\end_inset
+
+ as a source of information, so the optimization is simplified from finding
+ a hyperplane to finding a combination of observations.
+ 
+\end_layout
+
+\begin_layout Standard
+Vapnik points out that this function 
+\begin_inset Formula $f(x)$
+\end_inset
+
+ is generated as a by-product of estimating a conditional PDF using a loss
+ function based on the CDF of the distribution and the estimator.
+ We'll use his general approach as a starting point, namely his use of bounded
+ loss as a constraint.
+ Vapnik uses the regularizer 
+\begin_inset Formula $\Omega(\beta)=\sum\beta_{i}\beta_{j}K(x_{i},x_{j})$
+\end_inset
+
+ as the minimization target, due the the fact that he's trying to establish
+ a PDF, and the only way to create sparsity is to eliminate 'similar' points.
+ In our case, we're only trying to estimate the regression function, and
+ we want to use as few points as possible.
+ As a result, we can probaly just minimize 
+\begin_inset Formula $\beta$
+\end_inset
+
+ - this will give us most compact set of points that generates the hyperplane.
+ Hopefully.
+ I'm keeping the regularizer notation, but this problem may not even be
+ ill-posed.
+\end_layout
+
+\begin_layout Standard
+Minize
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Take a look at Vapnik p.235 - I think this is the 'P' method of regularization,
+ and we need to use a different 
+\begin_inset Formula $\Omega(f)$
+\end_inset
+
+.
+ Also p.256 for discussion of what we're using
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+W_{\gamma}(\beta)=\Omega(f)= & \sum_{i=1}^{\ell}\beta_{i}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Subject to
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\sup_{x}\left|\left(A_{\ell}f\right)(x,y)-F_{\ell}(x,y)\right|= & \sigma_{\ell}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Because we're not trying to generate a PDF, there's no need to constrain
+ 
+\begin_inset Formula $\sum\beta$
+\end_inset
+
+.
+ We can eliminate the supremum function by making the constraing an inequality
+ constraint
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\sigma_{\ell}^{i}\ge & \left|\left(A_{\ell}f\right)(x_{i},y_{i})-F_{\ell}(x_{i},y_{i})\right|\quad i=1,...,\ell\\
+= & \left|\left(\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)-y_{i}\right|\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We can eliminate the norm by splitting this into positive and negative componten
+ts; the different is now upper bounded by 
+\begin_inset Formula $\sigma$
+\end_inset
+
+ and lower bounded by 
+\begin_inset Formula $-\sigma$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\sigma_{\ell}^{i}\ge & \left(\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)-y_{i}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+-\sigma_{\ell}^{i}\le & \left(\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)-y_{i}\\
+\sigma_{\ell}^{i}\ge & y_{i}-\left(\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This can be expressed as a linear optimization task quite easily.
+ The form is defined as
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\text{Minimize }\quad W(\beta)= & c^{T}\beta\\
+\text{Subject to}\quad\qquad G\beta & \preceq h\\
+A\beta & =b\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We can formuate our problem as follows:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+c_{i}= & 1\\
+G_{i,j}^{+}= & y_{j}K(x_{i},x_{j})\\
+G_{i,j}^{-}= & -y_{j}K(x_{i},x_{j})\\
+h_{i}^{+}= & \sigma_{\ell}+y_{i}\\
+h_{i}^{-}= & \sigma_{\ell}-y_{i}\\
+A,b= & \emptyset\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+It's possible that you'll need to use 
+\begin_inset Formula $y_{i}K(x_{i},x_{j})$
+\end_inset
+
+ - not sure if there's a difference
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Hybrid Direct Regression SVM
+\end_layout
+
+\begin_layout Standard
+The next step is to extend this to generating estimates over observations
+ in disjoint subspaces.
+ The previous formulation assumes that 
+\begin_inset Formula $K(x_{i},x_{j})$
+\end_inset
+
+ was valid for all 
+\begin_inset Formula $i,j$
+\end_inset
+
+.
+ We'll not consider cases where this isn't true, or where we would like
+ to use different kernel functions in different subspaces.
+ To do this we'll, simply sum over each of the disjoint subspaces.
+ We'll assume that for a set of subspaces 
+\begin_inset Formula $a=(1,...,m)$
+\end_inset
+
+, we have 
+\begin_inset Formula $\ell$
+\end_inset
+
+ observations, and that the conditional variable 
+\begin_inset Formula $y$
+\end_inset
+
+ is shared between subspaces.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+W(\beta)=\Omega(f)= & \sum_{a}\sum_{i=1}^{\ell}\beta_{i}^{a}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\sigma_{\ell}^{i}\ge & \left(\sum_{a}\sum_{j=1}^{\ell}y_{j}\beta_{j}^{a}K^{a}(x_{i}^{a},x_{j}^{a})\right)-y_{i}\\
+\sigma_{\ell}^{i}\ge & y_{i}-\left(\sum_{a}\sum_{j=1}^{\ell}y_{j}\beta_{j}^{a}K^{a}(x_{i}^{a},x_{j}^{a})\right)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\bar{c}_{i,a}= & 1\\
+\bar{G}_{i,j,a}^{+}= & y_{j}K^{a}(x_{i}^{a},x_{j}^{a})\\
+\bar{G}_{i,j,a}^{-}= & -y_{j}K^{a}(x_{i}^{a},x_{j}^{a})\\
+\bar{h}_{i,a}^{+}= & \sigma_{\ell}+y_{i}\\
+\bar{h}_{i,a}^{-}= & \sigma_{\ell}-y_{i}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The quadratic optimization problem requires 
+\begin_inset Formula $P$
+\end_inset
+
+ to be positive semi-definite.
+ We'll do this by constructing the diagonal matrix of 
+\begin_inset Formula $P,G$
+\end_inset
+
+ and tiling 
+\begin_inset Formula $q,h$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+c_{a\ell+i}= & \bar{c}_{i,a}\\
+G_{a\ell+i,a\ell+j}= & \bar{G}_{i,j,a}\\
+h_{a\ell+i}= & \bar{h}_{i,a}\\
+A,b= & \emptyset\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This allows us to optimize over multiple kernel functions and select SV's
+ based on a mixture of kernels, selecting the optimal local kernel.
+ Alternately, it allows us to restrict the VC Dimension of a set of multi-dimens
+ional observations by considering only specific subsets of the dimensions.
+ 
+\end_layout
+
+\begin_layout Subsection
+Direct Optimization of Risk
+\end_layout
+
+\begin_layout Standard
+The only 'hard' parameter is 
+\begin_inset Formula $\sigma_{\ell}$
+\end_inset
+
+.
+ To optimize over 
+\begin_inset Formula $\sigma_{\ell}$
+\end_inset
+
+, we would need to include the risk functional in the optimization functional.
+ 
+\end_layout
+
+\begin_layout Standard
+Let's see if this is feasible.
+ One formula for the risk is
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+R(\alpha_{\ell})= & R_{\text{emp}}(\alpha_{\ell})+\frac{BE}{2}\left(1+\sqrt{1+\frac{4R_{\text{emp}}(\alpha_{\ell})}{BE}}\right)\\
+E= & 4\frac{h(\ln\frac{2\ell}{h}+1)-\ln(\eta/4)}{\ell}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This would require the Taylor expanson of one term
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\sqrt{1+x}= & \sum_{n=0}^{\infty}\frac{(-1)^{n}(2n)!}{(1-2n)(n!)^{2}(4^{n})}x^{n}=1+\frac{1}{2}x-\frac{1}{8}x^{2}+\frac{1}{16}x^{3}+\ldots\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We could concievably approximate this by setting 
+\begin_inset Formula $n$
+\end_inset
+
+ to some large number, but that doesn't seem ideal.
+ There's also the problem of the exponent - we can't handle an exponent
+ above 2 with a QP optimization.
+ So we could use the first 3 terms, but who knows how well that would work.
+ In this case 
+\begin_inset Formula $h$
+\end_inset
+
+ would become an optimization parameter.
+ This would require that we keep the inequality constraint and construct
+ a function 
+\begin_inset Formula $\varphi(h,\gamma)\rightarrow\sigma$
+\end_inset
+
+.
+ I think we should probably start by implementing the 'regular' version,
+ then see if the Taylor version works.
+ If we do this, we'd need to do something like this:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+W(\alpha_{\ell},h)= & \lambda\Omega(f)+(1-\lambda)R(\alpha)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Vapnik says to minimize the Risk, one must find the minimal of the sum of
+ the empirical risk and the confidence interval, and to do so me must make
+ the VC Dimension a controlling variable.
+ This doesn't clarify if the VC Dimension can be optimized in a QP problem
+ though.
+ 
+\end_layout
+
+\begin_layout Standard
+The reason this won't work is that it requires optimizing 
+\begin_inset Formula $h\ln h$
+\end_inset
+
+, which doesn't fit into our nice clean QP framework.
+ It's possible that we can express the minimization task as a convex twice
+ differentiable function, in which case we may be able to use nonlinear
+ convex optimization (see CVXOPT).
+ It would seem that the risk is both those things (decreases with decreasing
+ 
+\begin_inset Formula $h$
+\end_inset
+
+, increasing 
+\begin_inset Formula $\ell$
+\end_inset
+
+), so maybe this is worth considering once the basics are done.
 \end_layout
 
 \begin_layout Section
