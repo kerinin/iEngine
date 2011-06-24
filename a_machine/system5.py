@@ -12,7 +12,7 @@ import matplotlib.cm as cm
 
 from gpu_funcs import kernel_matrix
 from cvxopt import matrix
-from cvxopt.solvers import conelp
+from cvxopt.solvers import qp
     
 class model:
   def __init__(self, dimension, sigma, gamma_samples=1000, gamma_quantile=100):
@@ -29,7 +29,7 @@ class model:
   # data: [observation][dimension]
   def train(self, data, slices=[[0,[0]]]):
     #self.gammas = self.determine_gammas_from(data)
-    self.gammas = [.5,]
+    self.gammas = [.3,]
     print "Gammas determined: %s" % str(self.gammas)
     
     # [gamma][sequence offset][dimension]
@@ -39,31 +39,38 @@ class model:
     self.active_slices = slices
     
     # Working with 1 sequence element for now
-    sequences = data[:-1,:].astype('float32')
+    sequences = data[:-1,:2].astype('float32')
     labels = data[1:,self.dimension].astype('float32')
-    
-    kk = kernel_matrix( np.expand_dims( sequences, 1), np.expand_dims( sequences, 1), self.gammas[-1] )
-    _c = np.ones( [sequences.shape[0], 1] )
-    _G = np.vstack( [labels * kk, -labels * kk] )
-    _h = np.hstack( [self.sigma + labels, self.sigma - labels] ).astype('float')
-    
-    c = matrix( _c )
-    G = matrix( _G )
-    h = matrix( _h )
 
-    solution = conelp(c,G,h)
+    self.sequences = sequences
+    self.labels = labels
     
-    if solution['status'] != 'optimal':
-      raise ApplicationError( "Optimal solution not found" )
-    else:
+    kx = kernel_matrix( np.expand_dims( sequences, 1), np.expand_dims( sequences, 1), self.gammas[-1] )
+    ky = kernel_matrix( labels.reshape(labels.shape[0],1,1), labels.reshape(labels.shape[0],1,1), self.gammas[-1] )
+    
+    _P = np.triu( 2 * kx * ky )
+    _q = np.zeros( [sequences.shape[0], 1] )
+    _G = np.vstack( [labels.T * kx, -labels.T * kx] )
+    _h = np.hstack( [self.sigma + labels, self.sigma - labels] ).astype('float')
+    _A = np.ones( [1, sequences.shape[0]] )
+    _b = np.ones( [1,1] )
+
+    solution = qp( matrix(_P), matrix(_q), matrix(_G), matrix(_h), matrix(_A), matrix(_b) )
+    
+    if solution['status'] == 'optimal':
       X = np.array( solution['x'] )
-      self.SV_mask = X > 1e-4
-      self.beta = np.ma.compress_rows( np.ma.array( X, mask = self.SV_mask ) )
-      self.SVx = np.ma.compress_rows( np.ma.array( sequences, mask = self.SV_mask ) )
-      self.SVy = np.ma.compress_rows( np.ma.array( labels, mask = self.SV_mask ) )
+      
+      print X.shape
+      print sequences.shape
+      print labels.shape
+      
+      self.SV_mask = ( X > 0 )
+      self.beta = np.ma.compress_rows( np.ma.array( X, mask = self.SV_mask ) ).astype('float32')
+      self.SVx = np.ma.compress_rows( np.ma.array( sequences, mask = np.repeat( self.SV_mask, sequences.shape[1], 1) ) ).astype('float32')
+      self.SVy = np.ma.compress_rows( np.ma.array( labels.reshape(labels.shape[0],1), mask = self.SV_mask ) ).astype('float32')
       
     
-    print "--> SVM Trained: %s percent SV's, risk=%s" % ( self.svm.SV_percent, self.svm.risk ) 
+    print "--> SVM Trained: %s SV's of %s" % ( self.SV_mask.sum(), self.SV_mask.shape[0] ) 
 
 
   # data: [observation][dimension]      
@@ -71,11 +78,37 @@ class model:
     
     # [sequence][point][dimension]
     #points = self.make_sequences(data)
-    points = data
+    points = data.astype('float32')
     
-    kk = kernel_matrix( points, self.SVx )
     
-    return ( self.SVy * self.beta * kk ).sum(1)
+    print points.shape
+    print self.sequences.shape
+    #print SVs.shape
+    
+    #kk = kernel_matrix( points, np.expand_dims(self.sequences,1), self.gammas[-1] )
+    #prediction = ( self.labels * kk ).sum(1) / kk.sum(1)
+    
+    #print kk.shape
+    #print prediction.shape
+    
+    #return prediction
+    
+    
+    
+    
+    
+    SVs = np.expand_dims( self.SVx, 1 )
+    
+    kk = kernel_matrix( points, SVs, self.gammas[-1] )
+    
+    print kk.shape
+    print self.SVy.T.shape
+    print self.beta.T.shape
+    
+    prediction = ( self.SVy.T * self.beta.T * kk )
+    print prediction.sum(1).shape
+    
+    return prediction.sum(1) / (self.beta.T * kk ).sum(1)
 
   def random_sample(self, sequences, labels, samples):
     full = np.hstack([sequences, np.expand_dims(labels,1)])

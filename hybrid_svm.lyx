@@ -251,6 +251,148 @@ It's possible that you'll need to use
 \end_layout
 
 \begin_layout Section
+Direct-Regression SVM Part II
+\end_layout
+
+\begin_layout Standard
+The problem with the first version is that there isn't a unique solution.
+ Because we're allowing a range of losses, there are multiple values of
+ 
+\begin_inset Formula $\beta$
+\end_inset
+
+ which are minimal - they're minimal in different ways.
+ We'll use Vapnik's PDF formulation with the regression constraint
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+W_{\gamma}(\beta)=\Omega(f)= & \sum_{i,j=1}^{\ell}\beta_{i}\beta_{j}K(x_{i},x_{j})K(y_{i},y_{j})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Subject to
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\sup_{x}\left|\left(A_{\ell}f\right)(x,y)-F_{\ell}(x,y)\right|= & \sigma_{\ell}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Because we're not trying to generate a PDF, there's no need to constrain
+ 
+\begin_inset Formula $\sum\beta$
+\end_inset
+
+.
+ We can eliminate the supremum function by making the constraing an inequality
+ constraint
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\sigma_{\ell}^{i}\ge & \left|\left(A_{\ell}f\right)(x_{i},y_{i})-F_{\ell}(x_{i},y_{i})\right|\quad i=1,...,\ell\\
+= & \left|\left(\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)-y_{i}\right|\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We can eliminate the norm by splitting this into positive and negative componten
+ts; the different is now upper bounded by 
+\begin_inset Formula $\sigma$
+\end_inset
+
+ and lower bounded by 
+\begin_inset Formula $-\sigma$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\sigma_{\ell}^{i}\ge & \left(\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)-y_{i}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+-\sigma_{\ell}^{i}\le & \left(\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)-y_{i}\\
+\sigma_{\ell}^{i}\ge & y_{i}-\left(\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This version generates a quadratic optimization problem defined as 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\text{Minimize }\quad W(\beta)= & \frac{1}{2}\beta^{T}P\beta+q^{T}\beta\\
+\text{Subject to}\quad\qquad G\beta & \preceq h\\
+A\beta & =b\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We can formuate our problem as follows:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+P_{i,j}= & K(x_{i},x_{j})K(y_{i},y_{j})\\
+q_{i}= & 0\\
+G_{i,j}^{+}= & y_{j}K(x_{i},x_{j})\\
+G_{i,j}^{-}= & -y_{j}K(x_{i},x_{j})\\
+h_{i}^{+}= & \sigma_{\ell}+y_{i}\\
+h_{i}^{-}= & \sigma_{\ell}-y_{i}\\
+A_{i}= & 1\\
+b= & 1\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+It's possible that you'll need to use 
+\begin_inset Formula $y_{i}K(x_{i},x_{j})$
+\end_inset
+
+ - not sure if there's a difference
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
 Hybrid Direct Regression SVM
 \end_layout
 

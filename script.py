@@ -27,23 +27,23 @@ def run():
   from santa_fe import getData
   data = getData('B1.dat')
   test = getData('B2.dat')
-  median = np.median(data[:,:2], axis=0)
-  std = np.std(data[:,:2], axis=0)
+  median = np.median(data[:,:3], axis=0)
+  std = np.std(data[:,:3], axis=0)
 
   train_size = 1000
   sequence_length = 1
   gamma_quantile = 100
   test_size = 200
 
-  train = (( data[:train_size,:2] - median ) / std).astype('float32')
+  train = (( data[:train_size,:3] - median ) / std).astype('float32')
 
   m = model( dimension=0, sigma=1 )
   m.train(train)
 
   xN = 20
   yN = 20
-  xrange = [train[:,0].min(), train[:,0].max()]
-  yrange = [train[:,1].min(), train[:,1].max()]
+  xrange = [train[:-1,0].min(), train[:-1,0].max()]
+  yrange = [train[:-1,1].min(), train[:-1,1].max()]
   xstep = ((xrange[1]-xrange[0] ) / xN )
   ystep = ((yrange[1]-yrange[0] ) / yN )
   X = np.dstack(np.mgrid[xrange[0]:xrange[1]:xstep,yrange[0]:yrange[1]:ystep]).reshape([ xN *yN,2]).astype('float32')
@@ -51,9 +51,9 @@ def run():
   y = np.arange(yrange[0],yrange[1],ystep)
 
   Z1 = m.predict( np.expand_dims(X,1) )
-
   
-  mlab.points3d(train[:,0], train[:,1], labels, scale_factor=.05, opacity=.2)
+  mlab.points3d(train[:-1,0], train[:-1,1], train[1:,0], scale_factor=.02, opacity=.2)
+  mlab.points3d(m.SVx[:,0],m.SVx[:,1], m.SVy[:,0], scale_factor=.05)
   mlab.surf( x,y,Z1.reshape(xN,yN), color=(1,0,0) ) #red, multiple slices
   
   #print "%s SV of %s" % (len(m1.svm.SV_indices), train.shape[0])
