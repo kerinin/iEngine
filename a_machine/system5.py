@@ -29,7 +29,7 @@ class model:
   # data: [observation][dimension]
   def train(self, data, slices=[[0,[0]]]):
     #self.gammas = self.determine_gammas_from(data)
-    self.gammas = [.3,]
+    self.gammas = [.1,]
     print "Gammas determined: %s" % str(self.gammas)
     
     # [gamma][sequence offset][dimension]
@@ -44,6 +44,8 @@ class model:
 
     self.sequences = sequences
     self.labels = labels
+    
+    return 
     
     kx = kernel_matrix( np.expand_dims( sequences, 1), np.expand_dims( sequences, 1), self.gammas[-1] )
     ky = kernel_matrix( labels.reshape(labels.shape[0],1,1), labels.reshape(labels.shape[0],1,1), self.gammas[-1] )
@@ -85,13 +87,13 @@ class model:
     print self.sequences.shape
     #print SVs.shape
     
-    #kk = kernel_matrix( points, np.expand_dims(self.sequences,1), self.gammas[-1] )
-    #prediction = ( self.labels * kk ).sum(1) / kk.sum(1)
+    kk = kernel_matrix( points, np.expand_dims(self.sequences,1), self.gammas[-1] )
+    prediction = ( (self.labels * kk ).sum(1) / kk.sum(1)
     
     #print kk.shape
     #print prediction.shape
     
-    #return prediction
+    return prediction
     
     
     

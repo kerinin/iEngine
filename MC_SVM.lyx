@@ -1,0 +1,334 @@
+#LyX 1.6.5 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\language english
+\inputencoding auto
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\paperfontsize default
+\spacing onehalf
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_amsmath 1
+\use_esint 1
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\leftmargin 1in
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation skip
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\author "" 
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Modulus of Continuity SVM
+\end_layout
+
+\begin_layout Section
+Modulus of Continuity
+\end_layout
+
+\begin_layout Standard
+We can establish bounds on the Risk using the modulus of continuity
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+R(f_{n})_{L_{1}}\le & R_{\text{emp}}(f_{n})_{L_{1}}+\frac{1}{\ell^{2}}\sum_{i,j=1}^{\ell}\left(\left|y_{i}-y_{j}\right|+\left|f_{n}(x_{i})-f_{n}(x_{j})\right|\right)\\
+ & \qquad+\left(\omega(f_{n},h_{0})+C\right)\sqrt{\frac{1}{2\ell}\ln\frac{2}{\delta}}\\
+C= & \left|f_{n}(x_{0})-f_{n}(x_{0}^{\prime})\right|+2\left\Vert f\right\Vert _{\infty}+2\sigma_{\varepsilon}\sqrt{\frac{1}{\delta}}\qquad x_{0},x_{0}^{\prime}\in[x_{1},...,x_{\ell}]\\
+\omega(f,h)= & \max_{x,x+t\in X,|t|\le h}\left|f(x+t)-f(x)\right|\\
+\min_{1\le i\le\ell}d(x_{i},x_{0})\le & h_{0}\le D(x_{1},...,x_{\ell})\\
+d(x_{i},x) & =\left|x-x_{i}\right|\\
+D(x_{1},...,x_{\ell}) & =\sup_{x\in X}\inf_{1\le i\le\ell}d(x_{i},x)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+where 
+\begin_inset Formula $\left\Vert f\right\Vert _{\infty}$
+\end_inset
+
+ is the supremum norm of 
+\begin_inset Formula $f$
+\end_inset
+
+, 
+\begin_inset Formula $\delta\in[0,1]$
+\end_inset
+
+ is a confidence parameter, and 
+\begin_inset Formula $\sigma_{\varepsilon}$
+\end_inset
+
+ is the variance of the noise.
+ Since our objective is model selection (rather than estimating 
+\begin_inset Formula $R$
+\end_inset
+
+ explicitly), we will eliminate terms which are unaffected by the choice
+ of 
+\begin_inset Formula $f_{n}$
+\end_inset
+
+, producing the MCIC decision function
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\text{MCIC}(f_{n})= & R_{\text{emp}}(f_{n})_{L_{1}}+\frac{\omega(f_{n},h_{0})}{3}\sqrt{\frac{1}{2N}\ln\frac{1}{\delta}}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We would like to frame the estimation problem as a convex optimization of
+ the MCIC given a class of functions 
+\begin_inset Formula $f$
+\end_inset
+
+ which implement regression.
+ As such, we cannot use the given definition of 
+\begin_inset Formula $\omega$
+\end_inset
+
+, as it requires determining the maximum of the difference between 
+\begin_inset Formula $f$
+\end_inset
+
+ at different times.
+ Instead, we can observe that the modulus of continuity determines a lower
+ bound on a related quantity
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $ $
+\end_inset
+
+
+\begin_inset Formula \begin{align*}
+\omega(f,h)\le\omega_{L_{1}}^{\prime}(f,h)= & \sum_{x\in X}\sum_{x+t\in X,t\le h}\left|f(x+t)-f(x)\right|\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+That is, the sum of all 
+\begin_inset Formula $f(x+t)-f(x)$
+\end_inset
+
+ in 
+\begin_inset Formula $X$
+\end_inset
+
+ where 
+\begin_inset Formula $t\le h$
+\end_inset
+
+ is greater than 
+\begin_inset Formula $\omega$
+\end_inset
+
+.
+ This is obvious due to the fact that 
+\begin_inset Formula $\omega\subset\omega^{\prime}$
+\end_inset
+
+.
+ As a result, we can state the following:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+R(f_{n})_{L_{1}}\le & R_{\text{emp}}(f_{n})_{L_{1}}+\frac{1}{\ell^{2}}\sum_{i,j=1}^{\ell}\left(\left|y_{i}-y_{j}\right|+\left|f_{n}(x_{i})-f_{n}(x_{j})\right|\right)\\
+ & \qquad+\left(\omega^{\prime}(f_{n},h_{0})+C\right)\sqrt{\frac{1}{2\ell}\ln\frac{2}{\delta}}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In order to eliminate the absolute value operator, we'll consider the 
+\begin_inset Formula $L_{2}$
+\end_inset
+
+ norm, giving us the following
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\omega(f,h)\le\omega_{L_{2}}^{\prime}(f,h)= & \sum_{x\in X}\sum_{x+t\in X,t\le h}\left(f(x+t)-f(x)\right)^{2}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+R(f_{n})_{L_{2}}\le & R_{\text{emp}}(f_{n})_{L_{2}}+\frac{1}{\ell^{2}}\sum_{i,j=1}^{\ell}\left(\left|y_{i}-y_{j}\right|_{L_{2}}+\left|f_{n}(x_{i})-f_{n}(x_{j})\right|_{L_{2}}\right)\\
+ & \qquad+\left(\omega_{L_{2}}^{\prime}(f_{n},h_{0})+C\right)\sqrt{\frac{1}{2\ell}\ln\frac{2}{\delta}}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Which generates an equivalent decision function we'll call MCIC' (we'll
+ assume that 
+\begin_inset Formula $\omega^{\prime}=\omega_{L_{2}}^{\prime}$
+\end_inset
+
+ going forward)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\text{MCIC}^{\prime}(f_{n}) & =R_{\text{emp}}(f_{n})_{L_{2}}+\frac{\omega^{\prime}(f_{n},h_{0})}{3}\sqrt{\frac{1}{2N}\ln\frac{1}{\delta}}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+One challenge with this approach is that the risk bounds are clearly larger
+ than necessary, due to the addition of elements in 
+\begin_inset Formula $\omega^{\prime}$
+\end_inset
+
+ which are not the maximum.
+\end_layout
+
+\begin_layout Section
+Optimization problem
+\end_layout
+
+\begin_layout Standard
+We'll start with Vapnik's conditional PDF formulation again, but rather
+ than constraining the loss to 
+\begin_inset Formula $\sigma$
+\end_inset
+
+, we'll optimize for it directly using the MCIC and the regression function
+ (since we don't need to retain the full density).
+ We'll need to keep the constraint which forces the problem to be a density,
+ even if the resulting density isn't the original density.
+ This seems to be required for the regression function to hold
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\varphi(x)= & \sum_{i=1}^{\ell}y_{i}\beta_{i}K(x,x_{i})\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\text{Minimize}\quad W(\beta)= & R_{\text{emp }}(\varphi)_{L_{2}}+\frac{\omega^{\prime}(\varphi,h_{0})}{3}\sqrt{\frac{1}{2\ell}\ln\frac{1}{\delta}}\\
+\text{Subject To}\qquad1= & \sum_{i=1}^{\ell}\left(\frac{1}{\ell}\sum_{j=1}^{\ell}\beta_{j}K(x_{i},x_{j})\right)\\
+\beta_{i}\ge & 0\quad i=1,...,\ell\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+R_{\text{emp }}(\varphi)_{L_{2}}= & \sum_{i=1}^{\ell}\left(y_{i}-\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)^{2}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\omega^{\prime}(\varphi,h_{0})= & \sum_{i,j=1}^{\ell}\left(\varphi(x_{i})-\varphi(x_{j})\right)^{2}\theta_{h_{0}}(|x_{i}-x_{j}|)\\
+\theta_{h_{0}}(x)= & \begin{cases}
+1 & x\le h_{0}\\
+0 & x>h_{0}\end{cases}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+R_{\text{emp }}(\varphi)_{L_{2}}= & \sum_{i=1}^{\ell}\left(y_{i}-\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)^{2}\\
+= & \sum_{i=1}^{\ell}\left(y_{i}-\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)\left(y_{i}-\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)\\
+= & \sum_{i=1}^{\ell}\left(y_{i}^{2}-2y_{i}\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})+\sum_{j,k=1}^{\ell}y_{j}y_{k}\beta_{j}\beta_{k}K(x_{i},x_{j})K(x_{i},x_{k})\right)\\
+= & \sum_{i=1}^{\ell}y_{i}^{2}-2\sum_{i,j=1}^{\ell}y_{i}y_{j}\beta_{j}K(x_{i},x_{j})+\sum_{i,j,k=1}^{\ell}y_{j}y_{k}\beta_{j}\beta_{k}K(x_{i},x_{j})K(x_{i},x_{k})\\
+= & \sum_{j,k=1}^{\ell}\beta_{j}\beta_{k}\sum_{i=1}^{\ell}y_{j}y_{k}K(x_{i},x_{j})K(x_{i},x_{k})-\sum_{j=1}^{\ell}\beta_{j}\sum_{i=1}^{\ell}2y_{i}y_{j}K(x_{i},x_{j})+\sum_{i=1}^{\ell}y_{i}^{2}\\
+= & \sum_{i,j=1}^{\ell}\beta_{i}\beta_{j}\sum_{k=1}^{\ell}y_{i}y_{j}K(x_{i},x_{k})K(x_{j},x_{k})-\sum_{i=1}^{\ell}\beta_{i}\sum_{j=1}^{\ell}2y_{i}y_{j}K(x_{i},x_{j})+\sum_{i=1}^{\ell}y_{i}^{2}\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+\omega^{\prime}(\varphi,h_{0})= & \sum_{i,j=1}^{\ell}\left(\varphi(x_{i})-\varphi(x_{j})\right)^{2}\theta_{h_{0}}(|x_{i}-x_{j}|)\\
+= & \sum_{i,j=1}^{\ell}\left(\varphi(x_{i})^{2}-2\varphi(x_{i})\varphi(x_{j})+\varphi(x_{j})^{2}\right)\theta_{h_{0}}(|x_{i}-x_{j}|)\\
+= & \sum_{i,j=1}^{\ell}\left(\sum_{k=1}^{\ell}y_{k}\beta_{k}K(x_{i},x_{k})\sum_{l=1}^{\ell}y_{l}\beta_{l}K(x_{i},x_{l})-2\sum_{k=1}^{\ell}y_{k}\beta_{k}K(x_{i},x_{k})\sum_{l=1}^{\ell}y_{l}\beta_{l}K(x_{j},x_{l})+\sum_{k=1}y_{k}\beta_{k}K(x_{j},x_{k})\sum_{l=1}^{\ell}y_{l}\beta_{l}K(x_{j},x_{l})\right)\theta_{h_{0}}(|x_{i}-x_{j}|)\\
+= & \sum_{i,j=1}^{\ell}\left(\sum_{k,l=1}^{\ell}y_{k}y_{l}\beta_{k}\beta_{l}K(x_{i},x_{k})K(x_{i},x_{l})-2\sum_{k,l=1}^{\ell}y_{k}y_{l}\beta_{k}\beta_{l}K(x_{i},x_{k})K(x_{j},x_{l})+\sum_{k,l=1}^{\ell}y_{k}y_{l}\beta_{k}\beta_{l}K(x_{j},x_{k})K(x_{j},x_{l})\right)\theta_{h_{0}}(|x_{i}-x_{j}|)\\
+= & \sum_{k,l=1}^{\ell}\beta_{k}\beta_{l}\left(\sum_{i,j=1}^{\ell}\left(y_{k}y_{l}K(x_{i},x_{k})K(x_{i},x_{l})-2y_{k}y_{l}K(x_{i}x_{k})K(x_{j},x_{l})+y_{k}y_{l}K(x_{j},x_{k})K(x_{j},x_{l})\right)\theta_{h_{0}}(|x_{i}-x_{j}|)\right)\\
+= & \sum_{k,l=1}^{\ell}\beta_{k}\beta_{l}\left(\sum_{i,j=1}^{\ell}\theta_{h_{0}}(|x_{i}-x_{j}|)y_{k}y_{l}\left(K(x_{i},x_{k})K(x_{i},x_{l})-2K(x_{i}x_{k})K(x_{j},x_{l})+K(x_{j},x_{k})K(x_{j},x_{l})\right)\right)\\
+= & \sum_{i,j=1}^{\ell}\beta_{i}\beta_{j}\left(\sum_{k,l=1}^{\ell}\theta_{h_{0}}(|x_{k}-x_{l}|)y_{i}y_{j}\left(K(x_{i},x_{k})K(x_{j},x_{k})-2K(x_{i}x_{k})K(x_{j},x_{l})+K(x_{i},x_{l})K(x_{j},x_{l})\right)\right)\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula \begin{align*}
+1= & \sum_{i=1}^{\ell}\left(\frac{1}{\ell}\sum_{j=1}^{\ell}\beta_{j}K(x_{i},x_{j})\right)\\
+= & \sum_{j=1}^{\ell}\beta_{j}\sum_{i=1}^{\ell}\frac{1}{\ell}K(x_{i},x_{j})\\
+= & \sum_{i=1}^{\ell}\beta_{i}\sum_{j=1}^{\ell}\frac{1}{\ell}K(x_{i},x_{j})\end{align*}
+
+\end_inset
+
+_
+\end_layout
+
+\end_body
+\end_document

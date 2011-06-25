@@ -53,7 +53,7 @@ def run():
   Z1 = m.predict( np.expand_dims(X,1) )
   
   mlab.points3d(train[:-1,0], train[:-1,1], train[1:,0], scale_factor=.02, opacity=.2)
-  mlab.points3d(m.SVx[:,0],m.SVx[:,1], m.SVy[:,0], scale_factor=.05)
+  #mlab.points3d(m.SVx[:,0],m.SVx[:,1], m.SVy[:,0], scale_factor=.05)
   mlab.surf( x,y,Z1.reshape(xN,yN), color=(1,0,0) ) #red, multiple slices
   
   #print "%s SV of %s" % (len(m1.svm.SV_indices), train.shape[0])
