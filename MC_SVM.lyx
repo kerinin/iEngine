@@ -1,21 +1,29 @@
-#LyX 1.6.5 created this file. For more info see http://www.lyx.org/
-\lyxformat 345
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
 \begin_document
 \begin_header
 \textclass article
 \use_default_options true
+\maintain_unincluded_children false
 \language english
+\language_package default
 \inputencoding auto
+\fontencoding global
 \font_roman default
 \font_sans default
 \font_typewriter default
 \font_default_family default
+\use_non_tex_fonts false
 \font_sc false
 \font_osf false
 \font_sf_scale 100
 \font_tt_scale 100
 
 \graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
 \paperfontsize default
 \spacing onehalf
 \use_hyperref false
@@ -23,9 +31,18 @@
 \use_geometry true
 \use_amsmath 1
 \use_esint 1
+\use_mhchem 1
+\use_mathdots 1
 \cite_engine basic
 \use_bibtopic false
+\use_indices false
 \paperorientation portrait
+\suppress_date false
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
 \leftmargin 1in
 \secnumdepth 3
 \tocdepth 3
@@ -37,8 +54,9 @@
 \paperpagestyle default
 \tracking_changes false
 \output_changes false
-\author "" 
-\author "" 
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
 \end_header
 
 \begin_body
@@ -56,14 +74,16 @@ We can establish bounds on the Risk using the modulus of continuity
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 R(f_{n})_{L_{1}}\le & R_{\text{emp}}(f_{n})_{L_{1}}+\frac{1}{\ell^{2}}\sum_{i,j=1}^{\ell}\left(\left|y_{i}-y_{j}\right|+\left|f_{n}(x_{i})-f_{n}(x_{j})\right|\right)\\
  & \qquad+\left(\omega(f_{n},h_{0})+C\right)\sqrt{\frac{1}{2\ell}\ln\frac{2}{\delta}}\\
 C= & \left|f_{n}(x_{0})-f_{n}(x_{0}^{\prime})\right|+2\left\Vert f\right\Vert _{\infty}+2\sigma_{\varepsilon}\sqrt{\frac{1}{\delta}}\qquad x_{0},x_{0}^{\prime}\in[x_{1},...,x_{\ell}]\\
 \omega(f,h)= & \max_{x,x+t\in X,|t|\le h}\left|f(x+t)-f(x)\right|\\
 \min_{1\le i\le\ell}d(x_{i},x_{0})\le & h_{0}\le D(x_{1},...,x_{\ell})\\
 d(x_{i},x) & =\left|x-x_{i}\right|\\
-D(x_{1},...,x_{\ell}) & =\sup_{x\in X}\inf_{1\le i\le\ell}d(x_{i},x)\end{align*}
+D(x_{1},...,x_{\ell}) & =\sup_{x\in X}\inf_{1\le i\le\ell}d(x_{i},x)
+\end{align*}
 
 \end_inset
 
@@ -101,8 +121,10 @@ where
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-\text{MCIC}(f_{n})= & R_{\text{emp}}(f_{n})_{L_{1}}+\frac{\omega(f_{n},h_{0})}{3}\sqrt{\frac{1}{2N}\ln\frac{1}{\delta}}\end{align*}
+\begin_inset Formula 
+\begin{align*}
+\text{MCIC}(f_{n})= & R_{\text{emp}}(f_{n})_{L_{1}}+\frac{\omega(f_{n},h_{0})}{3}\sqrt{\frac{1}{2N}\ln\frac{1}{\delta}}
+\end{align*}
 
 \end_inset
 
@@ -134,8 +156,10 @@ We would like to frame the estimation problem as a convex optimization of
 \end_inset
 
 
-\begin_inset Formula \begin{align*}
-\omega(f,h)\le\omega_{L_{1}}^{\prime}(f,h)= & \sum_{x\in X}\sum_{x+t\in X,t\le h}\left|f(x+t)-f(x)\right|\end{align*}
+\begin_inset Formula 
+\begin{align*}
+\omega(f,h)\le\omega_{L_{1}}^{\prime}(f,h)= & \sum_{x\in X}\sum_{x+t\in X,t\le h}\left|f(x+t)-f(x)\right|
+\end{align*}
 
 \end_inset
 
@@ -169,9 +193,11 @@ That is, the sum of all
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 R(f_{n})_{L_{1}}\le & R_{\text{emp}}(f_{n})_{L_{1}}+\frac{1}{\ell^{2}}\sum_{i,j=1}^{\ell}\left(\left|y_{i}-y_{j}\right|+\left|f_{n}(x_{i})-f_{n}(x_{j})\right|\right)\\
- & \qquad+\left(\omega^{\prime}(f_{n},h_{0})+C\right)\sqrt{\frac{1}{2\ell}\ln\frac{2}{\delta}}\end{align*}
+ & \qquad+\left(\omega^{\prime}(f_{n},h_{0})+C\right)\sqrt{\frac{1}{2\ell}\ln\frac{2}{\delta}}
+\end{align*}
 
 \end_inset
 
@@ -187,8 +213,10 @@ In order to eliminate the absolute value operator, we'll consider the
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-\omega(f,h)\le\omega_{L_{2}}^{\prime}(f,h)= & \sum_{x\in X}\sum_{x+t\in X,t\le h}\left(f(x+t)-f(x)\right)^{2}\end{align*}
+\begin_inset Formula 
+\begin{align*}
+\omega(f,h)\le\omega_{L_{2}}^{\prime}(f,h)= & \sum_{x\in X}\sum_{x+t\in X,t\le h}\left(f(x+t)-f(x)\right)^{2}
+\end{align*}
 
 \end_inset
 
@@ -196,9 +224,11 @@ In order to eliminate the absolute value operator, we'll consider the
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 R(f_{n})_{L_{2}}\le & R_{\text{emp}}(f_{n})_{L_{2}}+\frac{1}{\ell^{2}}\sum_{i,j=1}^{\ell}\left(\left|y_{i}-y_{j}\right|_{L_{2}}+\left|f_{n}(x_{i})-f_{n}(x_{j})\right|_{L_{2}}\right)\\
- & \qquad+\left(\omega_{L_{2}}^{\prime}(f_{n},h_{0})+C\right)\sqrt{\frac{1}{2\ell}\ln\frac{2}{\delta}}\end{align*}
+ & \qquad+\left(\omega_{L_{2}}^{\prime}(f_{n},h_{0})+C\right)\sqrt{\frac{1}{2\ell}\ln\frac{2}{\delta}}
+\end{align*}
 
 \end_inset
 
@@ -215,8 +245,10 @@ Which generates an equivalent decision function we'll call MCIC' (we'll
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-\text{MCIC}^{\prime}(f_{n}) & =R_{\text{emp}}(f_{n})_{L_{2}}+\frac{\omega^{\prime}(f_{n},h_{0})}{3}\sqrt{\frac{1}{2N}\ln\frac{1}{\delta}}\end{align*}
+\begin_inset Formula 
+\begin{align*}
+\text{MCIC}^{\prime}(f_{n}) & =R_{\text{emp}}(f_{n})_{L_{2}}+\frac{\omega^{\prime}(f_{n},h_{0})}{3}\sqrt{\frac{1}{2N}\ln\frac{1}{\delta}}
+\end{align*}
 
 \end_inset
 
@@ -250,8 +282,10 @@ We'll start with Vapnik's conditional PDF formulation again, but rather
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-\varphi(x)= & \sum_{i=1}^{\ell}y_{i}\beta_{i}K(x,x_{i})\end{align*}
+\begin_inset Formula 
+\begin{align*}
+\varphi(x)= & \sum_{i=1}^{\ell}y_{i}\beta_{i}K(x,x_{i})
+\end{align*}
 
 \end_inset
 
@@ -259,10 +293,12 @@ We'll start with Vapnik's conditional PDF formulation again, but rather
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 \text{Minimize}\quad W(\beta)= & R_{\text{emp }}(\varphi)_{L_{2}}+\frac{\omega^{\prime}(\varphi,h_{0})}{3}\sqrt{\frac{1}{2\ell}\ln\frac{1}{\delta}}\\
 \text{Subject To}\qquad1= & \sum_{i=1}^{\ell}\left(\frac{1}{\ell}\sum_{j=1}^{\ell}\beta_{j}K(x_{i},x_{j})\right)\\
-\beta_{i}\ge & 0\quad i=1,...,\ell\end{align*}
+\beta_{i}\ge & 0\quad i=1,...,\ell
+\end{align*}
 
 \end_inset
 
@@ -270,8 +306,10 @@ We'll start with Vapnik's conditional PDF formulation again, but rather
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-R_{\text{emp }}(\varphi)_{L_{2}}= & \sum_{i=1}^{\ell}\left(y_{i}-\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)^{2}\end{align*}
+\begin_inset Formula 
+\begin{align*}
+R_{\text{emp }}(\varphi)_{L_{2}}= & \sum_{i=1}^{\ell}\left(y_{i}-\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)^{2}
+\end{align*}
 
 \end_inset
 
@@ -279,11 +317,14 @@ R_{\text{emp }}(\varphi)_{L_{2}}= & \sum_{i=1}^{\ell}\left(y_{i}-\sum_{j=1}^{\el
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 \omega^{\prime}(\varphi,h_{0})= & \sum_{i,j=1}^{\ell}\left(\varphi(x_{i})-\varphi(x_{j})\right)^{2}\theta_{h_{0}}(|x_{i}-x_{j}|)\\
 \theta_{h_{0}}(x)= & \begin{cases}
 1 & x\le h_{0}\\
-0 & x>h_{0}\end{cases}\end{align*}
+0 & x>h_{0}
+\end{cases}
+\end{align*}
 
 \end_inset
 
@@ -291,13 +332,15 @@ R_{\text{emp }}(\varphi)_{L_{2}}= & \sum_{i=1}^{\ell}\left(y_{i}-\sum_{j=1}^{\el
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 R_{\text{emp }}(\varphi)_{L_{2}}= & \sum_{i=1}^{\ell}\left(y_{i}-\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)^{2}\\
 = & \sum_{i=1}^{\ell}\left(y_{i}-\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)\left(y_{i}-\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)\\
 = & \sum_{i=1}^{\ell}\left(y_{i}^{2}-2y_{i}\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})+\sum_{j,k=1}^{\ell}y_{j}y_{k}\beta_{j}\beta_{k}K(x_{i},x_{j})K(x_{i},x_{k})\right)\\
 = & \sum_{i=1}^{\ell}y_{i}^{2}-2\sum_{i,j=1}^{\ell}y_{i}y_{j}\beta_{j}K(x_{i},x_{j})+\sum_{i,j,k=1}^{\ell}y_{j}y_{k}\beta_{j}\beta_{k}K(x_{i},x_{j})K(x_{i},x_{k})\\
 = & \sum_{j,k=1}^{\ell}\beta_{j}\beta_{k}\sum_{i=1}^{\ell}y_{j}y_{k}K(x_{i},x_{j})K(x_{i},x_{k})-\sum_{j=1}^{\ell}\beta_{j}\sum_{i=1}^{\ell}2y_{i}y_{j}K(x_{i},x_{j})+\sum_{i=1}^{\ell}y_{i}^{2}\\
-= & \sum_{i,j=1}^{\ell}\beta_{i}\beta_{j}\sum_{k=1}^{\ell}y_{i}y_{j}K(x_{i},x_{k})K(x_{j},x_{k})-\sum_{i=1}^{\ell}\beta_{i}\sum_{j=1}^{\ell}2y_{i}y_{j}K(x_{i},x_{j})+\sum_{i=1}^{\ell}y_{i}^{2}\end{align*}
+= & \sum_{i,j=1}^{\ell}\beta_{i}\beta_{j}\sum_{k=1}^{\ell}y_{i}y_{j}K(x_{i},x_{k})K(x_{j},x_{k})-\sum_{i=1}^{\ell}\beta_{i}\sum_{j=1}^{\ell}2y_{i}y_{j}K(x_{i},x_{j})+\sum_{i=1}^{\ell}y_{i}^{2}
+\end{align*}
 
 \end_inset
 
@@ -305,14 +348,16 @@ R_{\text{emp }}(\varphi)_{L_{2}}= & \sum_{i=1}^{\ell}\left(y_{i}-\sum_{j=1}^{\el
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 \omega^{\prime}(\varphi,h_{0})= & \sum_{i,j=1}^{\ell}\left(\varphi(x_{i})-\varphi(x_{j})\right)^{2}\theta_{h_{0}}(|x_{i}-x_{j}|)\\
 = & \sum_{i,j=1}^{\ell}\left(\varphi(x_{i})^{2}-2\varphi(x_{i})\varphi(x_{j})+\varphi(x_{j})^{2}\right)\theta_{h_{0}}(|x_{i}-x_{j}|)\\
 = & \sum_{i,j=1}^{\ell}\left(\sum_{k=1}^{\ell}y_{k}\beta_{k}K(x_{i},x_{k})\sum_{l=1}^{\ell}y_{l}\beta_{l}K(x_{i},x_{l})-2\sum_{k=1}^{\ell}y_{k}\beta_{k}K(x_{i},x_{k})\sum_{l=1}^{\ell}y_{l}\beta_{l}K(x_{j},x_{l})+\sum_{k=1}y_{k}\beta_{k}K(x_{j},x_{k})\sum_{l=1}^{\ell}y_{l}\beta_{l}K(x_{j},x_{l})\right)\theta_{h_{0}}(|x_{i}-x_{j}|)\\
 = & \sum_{i,j=1}^{\ell}\left(\sum_{k,l=1}^{\ell}y_{k}y_{l}\beta_{k}\beta_{l}K(x_{i},x_{k})K(x_{i},x_{l})-2\sum_{k,l=1}^{\ell}y_{k}y_{l}\beta_{k}\beta_{l}K(x_{i},x_{k})K(x_{j},x_{l})+\sum_{k,l=1}^{\ell}y_{k}y_{l}\beta_{k}\beta_{l}K(x_{j},x_{k})K(x_{j},x_{l})\right)\theta_{h_{0}}(|x_{i}-x_{j}|)\\
 = & \sum_{k,l=1}^{\ell}\beta_{k}\beta_{l}\left(\sum_{i,j=1}^{\ell}\left(y_{k}y_{l}K(x_{i},x_{k})K(x_{i},x_{l})-2y_{k}y_{l}K(x_{i}x_{k})K(x_{j},x_{l})+y_{k}y_{l}K(x_{j},x_{k})K(x_{j},x_{l})\right)\theta_{h_{0}}(|x_{i}-x_{j}|)\right)\\
 = & \sum_{k,l=1}^{\ell}\beta_{k}\beta_{l}\left(\sum_{i,j=1}^{\ell}\theta_{h_{0}}(|x_{i}-x_{j}|)y_{k}y_{l}\left(K(x_{i},x_{k})K(x_{i},x_{l})-2K(x_{i}x_{k})K(x_{j},x_{l})+K(x_{j},x_{k})K(x_{j},x_{l})\right)\right)\\
-= & \sum_{i,j=1}^{\ell}\beta_{i}\beta_{j}\left(\sum_{k,l=1}^{\ell}\theta_{h_{0}}(|x_{k}-x_{l}|)y_{i}y_{j}\left(K(x_{i},x_{k})K(x_{j},x_{k})-2K(x_{i}x_{k})K(x_{j},x_{l})+K(x_{i},x_{l})K(x_{j},x_{l})\right)\right)\end{align*}
+= & \sum_{i,j=1}^{\ell}\beta_{i}\beta_{j}\left(\sum_{k,l=1}^{\ell}\theta_{h_{0}}(|x_{k}-x_{l}|)y_{i}y_{j}\left(K(x_{i},x_{k})K(x_{j},x_{k})-2K(x_{i}x_{k})K(x_{j},x_{l})+K(x_{i},x_{l})K(x_{j},x_{l})\right)\right)
+\end{align*}
 
 \end_inset
 
@@ -320,14 +365,213 @@ R_{\text{emp }}(\varphi)_{L_{2}}= & \sum_{i=1}^{\ell}\left(y_{i}-\sum_{j=1}^{\el
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 1= & \sum_{i=1}^{\ell}\left(\frac{1}{\ell}\sum_{j=1}^{\ell}\beta_{j}K(x_{i},x_{j})\right)\\
 = & \sum_{j=1}^{\ell}\beta_{j}\sum_{i=1}^{\ell}\frac{1}{\ell}K(x_{i},x_{j})\\
-= & \sum_{i=1}^{\ell}\beta_{i}\sum_{j=1}^{\ell}\frac{1}{\ell}K(x_{i},x_{j})\end{align*}
+= & \sum_{i=1}^{\ell}\beta_{i}\sum_{j=1}^{\ell}\frac{1}{\ell}K(x_{i},x_{j})
+\end{align*}
 
 \end_inset
 
-_
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+W(\beta)= & R_{\text{emp }}(\varphi)_{L_{2}}+\frac{\omega^{\prime}(\varphi,h_{0})}{3}\sqrt{\frac{1}{2\ell}\ln\frac{1}{\delta}}\\
+= & \sum_{i,j=1}^{\ell}\beta_{i}\beta_{j}\sum_{k=1}^{\ell}y_{i}y_{j}K(x_{i},x_{k})K(x_{j},x_{k})-\sum_{i=1}^{\ell}\beta_{i}\sum_{j=1}^{\ell}2y_{i}y_{j}K(x_{i},x_{j})\\
+ & \qquad+\sum_{i,j=1}^{\ell}\beta_{i}\beta_{j}\sum_{k,l=1}^{\ell}\Psi_{i,j,k,l}\frac{1}{3}\sqrt{\frac{1}{2\ell}\ln\frac{1}{\delta}}\\
+= & \sum_{i,j=1}^{\ell}\beta_{i}\beta_{j}\sum_{k=1}^{\ell}y_{i}y_{j}K(x_{i},x_{k})K(x_{j},x_{k})-\sum_{i=1}^{\ell}\beta_{i}\sum_{j=1}^{\ell}2y_{i}y_{j}K(x_{i},x_{j})\\
+ & \qquad+\sum_{i,j=1}^{\ell}\beta_{i}\beta_{j}\left(\frac{1}{3}\sqrt{\frac{1}{2\ell}\ln\frac{1}{\delta}}\sum_{k,l=1}^{\ell}\Psi_{i,j,k,l}\right)\\
+= & \sum_{i,j=1}^{\ell}\beta_{i}\beta_{j}\left(\sum_{k=1}^{\ell}y_{i}y_{j}K(x_{i},x_{k})K(x_{j},x_{k})+\frac{1}{3}\sqrt{\frac{1}{2\ell}\ln\frac{1}{\delta}}\sum_{k,l=1}^{\ell}\Psi_{i,j,k,l}\right)\\
+ & \qquad-\sum_{i=1}^{\ell}\beta_{i}\sum_{j=1}^{\ell}2y_{i}y_{j}K(x_{i},x_{j})\\
+\Psi_{i,j,k,l}= & y_{i}y_{j}\theta_{h_{0}}(|x_{k}-x_{l}|)\left(K(x_{i},x_{k})K(x_{j},x_{k})-2K(x_{i}x_{k})K(x_{j},x_{l})+K(x_{i},x_{l})K(x_{j},x_{l})\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\text{Minimize }\quad W(\beta)= & \frac{1}{2}\beta^{T}P\beta+q^{T}\beta\\
+\text{Subject to}\quad\qquad G\beta & \preceq h\\
+A\beta & =b
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+P_{i,j}= & \sum_{k=1}^{\ell}2y_{i}y_{j}K(x_{i},x_{k})K(x_{j},x_{k})+\frac{2}{3}\sqrt{\frac{1}{2\ell}\ln\frac{1}{\delta}}\sum_{k,l=1}^{\ell}\Psi_{i,j,k,l}\\
+q_{i}= & -\sum_{j=1}^{\ell}2y_{i}y_{j}K(x_{i},x_{j})\\
+G_{i}= & -1\\
+h_{i}= & 0\\
+A_{i}= & \sum_{j=1}^{\ell}\frac{1}{\ell}K(x_{i},x_{j})\\
+b= & 1
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Quadratically Constrained Quadratic Optimization
+\end_layout
+
+\begin_layout Standard
+We can avoid inflating 
+\begin_inset Formula $R$
+\end_inset
+
+ by treating 
+\begin_inset Formula $\omega$
+\end_inset
+
+ as an optimization parameter and constraining the solution by 
+\begin_inset Formula $\omega$
+\end_inset
+
+.
+ Unfortunately, this requires that we be able to incorporate mutiple optimizatio
+n parameters in a single constraint.
+ QCQP allows us to do this using the 
+\begin_inset Formula $L_{2}$
+\end_inset
+
+ norm as before.
+ We keep the same target functional
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\varphi(x)= & \sum_{i=1}^{\ell}y_{i}\beta_{i}K(x,x_{i})
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+But now the optimization problem has an additional parameter 
+\begin_inset Formula $\omega_{h_{0}}^{\prime}$
+\end_inset
+
+ and a set of new constraints
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\text{Minimize}\quad W(\beta)= & R_{\text{emp }}(\varphi)_{L_{2}}+\frac{\omega_{h_{0}}^{\prime}}{3}\sqrt{\frac{1}{2\ell}\ln\frac{1}{\delta}}\\
+\text{Subject To}\qquad1= & \sum_{i=1}^{\ell}\left(\frac{1}{\ell}\sum_{j=1}^{\ell}\beta_{j}K(x_{i},x_{j})\right)\\
+\omega_{h_{0}}^{\prime}\ge & \left(\varphi(x_{i})-\varphi(x_{j})\right)^{2}\theta_{h_{0}}(|x_{i}-x_{j}|)\quad\forall i,j\in[1,...,\ell]\\
+\beta_{i}\ge & 0\quad i=1,...,\ell
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Where
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+R_{\text{emp }}(\varphi)_{L_{2}}= & \sum_{i=1}^{\ell}\left(y_{i}-\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)^{2}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\theta_{h_{0}}(x)= & \begin{cases}
+1 & x\le h_{0}\\
+0 & x>h_{0}
+\end{cases}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We can expand the inequality constraints the same way as before
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\omega_{h_{0}}^{\prime}= & \left(\varphi(x_{i})-\varphi(x_{j})\right)^{2}\theta_{h_{0}}(|x_{i}-x_{j}|)\\
+= & \left(\varphi(x_{i})^{2}-2\varphi(x_{i})\varphi(x_{j})+\varphi(x_{j})^{2}\right)\theta_{h_{0}}(|x_{i}-x_{j}|)\\
+= & \left(\sum_{k=1}^{\ell}y_{k}\beta_{k}K(x_{i},x_{k})\sum_{l=1}^{\ell}y_{l}\beta_{l}K(x_{i},x_{l})-2\sum_{k=1}^{\ell}y_{k}\beta_{k}K(x_{i},x_{k})\sum_{l=1}^{\ell}y_{l}\beta_{l}K(x_{j},x_{l})+\sum_{k=1}y_{k}\beta_{k}K(x_{j},x_{k})\sum_{l=1}^{\ell}y_{l}\beta_{l}K(x_{j},x_{l})\right)\theta_{h_{0}}(|x_{i}-x_{j}|)\\
+= & \left(\sum_{k,l=1}^{\ell}y_{k}y_{l}\beta_{k}\beta_{l}K(x_{i},x_{k})K(x_{i},x_{l})-2\sum_{k,l=1}^{\ell}y_{k}y_{l}\beta_{k}\beta_{l}K(x_{i},x_{k})K(x_{j},x_{l})+\sum_{k,l=1}^{\ell}y_{k}y_{l}\beta_{k}\beta_{l}K(x_{j},x_{k})K(x_{j},x_{l})\right)\theta_{h_{0}}(|x_{i}-x_{j}|)\\
+= & \sum_{k,l=1}^{\ell}\beta_{k}\beta_{l}\left(\left(y_{k}y_{l}K(x_{i},x_{k})K(x_{i},x_{l})-2y_{k}y_{l}K(x_{i}x_{k})K(x_{j},x_{l})+y_{k}y_{l}K(x_{j},x_{k})K(x_{j},x_{l})\right)\theta_{h_{0}}(|x_{i}-x_{j}|)\right)\\
+= & \sum_{k,l=1}^{\ell}\beta_{k}\beta_{l}\left(\theta_{h_{0}}(|x_{i}-x_{j}|)y_{k}y_{l}\left(K(x_{i},x_{k})K(x_{i},x_{l})-2K(x_{i}x_{k})K(x_{j},x_{l})+K(x_{j},x_{k})K(x_{j},x_{l})\right)\right)\\
+= & \sum_{i,j=1}^{\ell}\beta_{i}\beta_{j}\left(\theta_{h_{0}}(|x_{k}-x_{l}|)y_{i}y_{j}\left(K(x_{i},x_{k})K(x_{j},x_{k})-2K(x_{i}x_{k})K(x_{j},x_{l})+K(x_{i},x_{l})K(x_{j},x_{l})\right)\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Therefore, for we'll establish a set of 
+\begin_inset Formula $\ell\times\ell$
+\end_inset
+
+ constraints defined as 
+\begin_inset Formula $\omega_{h_{0},k,l}^{\prime}$
+\end_inset
+
+ for all 
+\begin_inset Formula $k$
+\end_inset
+
+ and 
+\begin_inset Formula $l$
+\end_inset
+
+ in 
+\begin_inset Formula $[1,...,\ell]$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $ $
+\end_inset
+
+
+\begin_inset Formula 
+\begin{align*}
+\omega_{h_{0},k,l}^{\prime}= & \sum_{i,j=1}^{\ell}\beta_{i}\beta_{j}\left(\theta_{h_{0}}(|x_{k}-x_{l}|)y_{i}y_{j}\left(K(x_{i},x_{k})K(x_{j},x_{k})-2K(x_{i}x_{k})K(x_{j},x_{l})+K(x_{i},x_{l})K(x_{j},x_{l})\right)\right)
+\end{align*}
+
+\end_inset
+
+
 \end_layout
 
 \end_body
