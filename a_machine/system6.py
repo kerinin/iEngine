@@ -13,11 +13,38 @@ import matplotlib.cm as cm
 from gpu_funcs import kernel_matrix
 from cvxopt import matrix
 from cvxopt.solvers import qp
+
+import theano.tensor as T
+from theano import function
+
+K = T.fmatrix()
+X = T.fcol()
+Y = T.fcol()
+h = T.dscalar()
+sigma = T.dscalar()
+
+def phi(K, X, h): 
+  return (X.dimshuffle(0,'x') - X.dimshuffle('x',0) < h) * ( 
+    K.dimshuffle(0,'x',1,'x') * K.dimshuffle('x',0,1,'x') -
+    2*K.dimshuffle(0,'x',1,'x') * K.dimshuffle('x',0,'x',1) +
+    K.dimshuffle(0,'x','x',1) * K.dimshuffle('x',0,'x',1) ) 
+
+P = function([K, X, Y, h, sigma], 
+  (2 * Y.dimshuffle(0,'x') * Y.dimshuffle('x',0) * K.dimshuffle(0,'x',1) * K.dimshuffle('x',0,1) ).sum(2) +
+  2 * Y.dimshuffle(0,'x') * Y.dimshuffle('x',0) * T.sqrt( ( 1 / (2*K.shape[0]) ) * T.log(1/sigma) ) * phi(K,X,h) / 3
+)
+
+q = function([K,Y], 
+  -( 2 * Y.dimshuffle(0,'x') * Y.dimshuffle('x',0) * K ).sum(1)
+)
+
+A = function([K], 
+  ( (1/K.shape[0]) * K ).sum(1)
+)
     
 class model:
-  def __init__(self, dimension, sigma, gamma_samples=1000, gamma_quantile=100):
+  def __init__(self, dimension, gamma_samples=1000, gamma_quantile=100):
     self.dimension = dimension
-    self.sigma = sigma
     self.gamma_samples = gamma_samples
     self.gamma_quantile = gamma_quantile
     self.gammas = None
@@ -39,8 +66,8 @@ class model:
     self.active_slices = slices
     
     # Working with 1 sequence element for now
-    sequences = data[:-1,:2].astype('float32')
-    labels = data[1:,self.dimension].astype('float32')
+    sequences = data[:-1].astype('float32').reshape(data.shape[0]-1,1)
+    labels = data[1:].astype('float32').reshape(data.shape[0]-1,1)
 
     self.sequences = sequences
     self.labels = labels
@@ -49,27 +76,11 @@ class model:
     
     # Still need to determine h_0
     
-    phi = function([K, X, h], 
-      (X.dimshuffle(0,'x') - X.dimshuffle('x',0) < h) * ( 
-      K.dimshuffle(0,'x',1,'x') * K.dimshuffle('x',0,1,'x') -
-      2*K.dimshuffle(0,'x',1,'x') * K.dimshuffle('x',0,'x',1) +
-      K.dimshuffle(0,'x','x',1) * K.dimshuffle('x',0,'x',1)
-    )
+    kk = kernel_matrix( sequences.reshape(sequences.shape[0],1,1), sequences.reshape(sequences.shape[0],1,1), self.gammas[-1] ).astype("float32")
     
-    P = function([K, X, Y, h, sigma], 
-      (2 * Y.dimshuffle(0,'x') * Y.dimshuffle('x',0) * K.dimshuffle(0,'x',1) * K.dimshuffle('x',0,1)).sum(2) +
-      2 * Y.dimshuffle(0,'x') * Y.dimshuffle('x',0) * T.sqrt( 1/(2*K.shape[0]) T.ln(1/sigma)) * phi(K,X,h) / 3
-    )
-    
-    q = function([K,Y], 
-      -( 2 * Y.dimshuffle(0,'x') * Y.dimshuffle('x',0) * K ).sum(1)
-    )
-    
-    A = function(K, 
-      ( (1/K.shape[0]) * K ).sum(1)
-    )
-    
-    kk = kernel_matrix( np.expand_dims( sequences, 1), np.expand_dims( sequences, 1), self.gammas[-1] )
+    print kk.shape
+    print self.sequences.shape
+    print self.labels.shape
     
     _P = P( kk, self.sequences, self.labels, 2, .2)
     _q = q( kk, self.labels )
@@ -109,7 +120,7 @@ class model:
     #print SVs.shape
     
     kk = kernel_matrix( points, np.expand_dims(self.sequences,1), self.gammas[-1] )
-    prediction = ( (self.labels * self.beta * kk ).sum(1)
+    prediction = (self.labels * self.beta * kk ).sum(1)
     
     #print kk.shape
     #print prediction.shape
