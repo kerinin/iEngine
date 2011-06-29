@@ -387,7 +387,9 @@ W(\beta)= & R_{\text{emp }}(\varphi)_{L_{2}}+\frac{\omega^{\prime}(\varphi,h_{0}
  & \qquad+\sum_{i,j=1}^{\ell}\beta_{i}\beta_{j}\left(\frac{y_{i}y_{j}}{3}\sqrt{\frac{1}{2\ell}\ln\frac{1}{\delta}}\sum_{k,l=1}^{\ell}\Psi_{i,j,k,l}\right)\\
 = & \sum_{i,j=1}^{\ell}\beta_{i}\beta_{j}\left(\sum_{k=1}^{\ell}y_{i}y_{j}K(x_{i},x_{k})K(x_{j},x_{k})+\frac{y_{i}y_{j}}{3}\sqrt{\frac{1}{2\ell}\ln\frac{1}{\delta}}\sum_{k,l=1}^{\ell}\Psi_{i,j,k,l}\right)\\
  & \qquad-\sum_{i=1}^{\ell}\beta_{i}\sum_{j=1}^{\ell}2y_{i}y_{j}K(x_{i},x_{j})\\
-\Psi_{i,j,k,l}= & \theta_{h_{0}}(|x_{k}-x_{l}|)\left(K(x_{i},x_{k})K(x_{j},x_{k})-2K(x_{i}x_{k})K(x_{j},x_{l})+K(x_{i},x_{l})K(x_{j},x_{l})\right)
+\Psi_{i,j,k,l}= & \theta_{h_{0}}(|x_{k}-x_{l}|)\left(K(x_{i},x_{k})K(x_{j},x_{k})-2K(x_{i}x_{k})K(x_{j},x_{l})+K(x_{i},x_{l})K(x_{j},x_{l})\right)\\
+= & \theta_{h_{0}}(|x_{k}-x_{l}|)\left(2K(x_{i},x_{k})K(x_{j},x_{k})-2K(x_{i},x_{k})K(x_{j},x_{l})\right)\\
+= & 2\theta_{h_{0}}(|x_{k}-x_{l}|)K(x_{i},x_{k})\left(K(x_{j},x_{k})-K(x_{j},x_{l})\right)
 \end{align*}
 
 \end_inset
@@ -411,12 +413,14 @@ A\beta & =b
 \begin_layout Standard
 \begin_inset Formula 
 \begin{align*}
-P_{i,j}= & \sum_{k=1}^{\ell}2y_{i}y_{j}K(x_{i},x_{k})K(x_{j},x_{k})+\frac{2y_{i}y_{j}}{3}\sqrt{\frac{1}{2\ell}\ln\frac{1}{\delta}}\sum_{k,l=1}^{\ell}\Psi_{i,j,k,l}\\
+P_{i,j}= & 2y_{i}y_{j}\Phi_{i,j}+\frac{4y_{i}y_{j}\Psi_{i,j}}{3}\sqrt{\frac{1}{2\ell}\ln\frac{1}{\delta}}\\
 q_{i}= & -\sum_{j=1}^{\ell}2y_{i}y_{j}K(x_{i},x_{j})\\
 G_{i}= & -1\\
 h_{i}= & 0\\
 A_{i}= & \sum_{j=1}^{\ell}\frac{1}{\ell}K(x_{i},x_{j})\\
-b= & 1
+b= & 1\\
+\Phi_{i,j}= & \sum_{k=1}^{\ell}K(x_{i},x_{k})K(x_{j},x_{k})\\
+\Psi_{i,j}= & \sum_{k,l=1}^{\ell}\theta_{h_{0}}(|x_{k}-x_{l}|)\left(K(x_{i},x_{k})K(x_{j},x_{k})-K(x_{i},x_{k})K(x_{j},x_{l})\right)
 \end{align*}
 
 \end_inset

@@ -17,11 +17,29 @@ from cvxopt.solvers import qp
 #import theano.tensor as T
 #from theano import function
 
-#K = T.fmatrix()
-#X = T.fcol()
-#Y = T.fcol()
-#h = T.dscalar()
-#sigma = T.dscalar()
+K = T.fmatrix()
+X = T.fcol()
+Y = T.fcol()
+h = T.dscalar()
+sigma = T.dscalar()
+
+def calculate_cell_sum(diff, result):
+  if diff < h:
+    result += 2 * K.shape[0] * ( K[i] * K[j] ).sum()
+    result -= 2 * ( K[i] * K[j].T ).sum()
+      
+def calculate_cell(diff, result, K, h):
+  j = index % K.shape[1]
+  i = K.shape[0] * K.shape[1] / (index - j )
+    
+  psi = T.map( calculate_cell_sum, sequences=[diff], non_sequences=[result, K,i,j,h] )
+  phi = ( K[i] * K[j] ).sum()
+  
+result = T.zeros_like(K)
+values, update = T.map( calculate_cell, sequences=[result, T.arange(indices.shape[0]) ], non_sequences=[K, diff, h] )
+
+psi = function( [K,X,Y,h,sigma], values[-1] )  
+
 
 def phi(K, X, h): 
   l = K.shape[0]
