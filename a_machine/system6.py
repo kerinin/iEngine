@@ -14,33 +14,51 @@ from gpu_funcs import kernel_matrix
 from cvxopt import matrix
 from cvxopt.solvers import qp
 
-import theano.tensor as T
-from theano import function
+#import theano.tensor as T
+#from theano import function
 
-K = T.fmatrix()
-X = T.fcol()
-Y = T.fcol()
-h = T.dscalar()
-sigma = T.dscalar()
+#K = T.fmatrix()
+#X = T.fcol()
+#Y = T.fcol()
+#h = T.dscalar()
+#sigma = T.dscalar()
 
 def phi(K, X, h): 
-  return (X.dimshuffle(0,'x') - X.dimshuffle('x',0) < h) * ( 
-    K.dimshuffle(0,'x',1,'x') * K.dimshuffle('x',0,1,'x') -
-    2*K.dimshuffle(0,'x',1,'x') * K.dimshuffle('x',0,'x',1) +
-    K.dimshuffle(0,'x','x',1) * K.dimshuffle('x',0,'x',1) ) 
+  l = K.shape[0]
+  return (X.reshape(l,1) - X.reshape(1,l) < h) * ( 
+    K.reshape(l,1,l,1) * K.reshape(1,l,l,1) -
+    2*K.reshape(l,1,l,1) * K.reshape(1,l,1,l) +
+    K.reshape(l,1,1,l) * K.reshape(1,l,1,l) )
+  
+  #return (X.dimshuffle(0,'x') - X.dimshuffle('x',0) < h) * ( 
+  #  K.dimshuffle(0,'x',1,'x') * K.dimshuffle('x',0,1,'x') -
+  #  2*K.dimshuffle(0,'x',1,'x') * K.dimshuffle('x',0,'x',1) +
+  #  K.dimshuffle(0,'x','x',1) * K.dimshuffle('x',0,'x',1) ) 
 
-P = function([K, X, Y, h, sigma], 
-  (2 * Y.dimshuffle(0,'x') * Y.dimshuffle('x',0) * K.dimshuffle(0,'x',1) * K.dimshuffle('x',0,1) ).sum(2) +
-  2 * Y.dimshuffle(0,'x') * Y.dimshuffle('x',0) * T.sqrt( ( 1 / (2*K.shape[0]) ) * T.log(1/sigma) ) * phi(K,X,h) / 3
-)
+def P(K,X,Y,h,sigma):
+  l = K.shape[0]
+  return ( (2 * Y.reshape(l,1) * Y.reshape(1,l) * K.reshape(l,1,l) * K.reshape(1,l,l) ).sum(2) +
+  2 * Y.reshape(l,1) * Y.reshape(1,l) * np.sqrt( ( 1 / (2*K.shape[0]) ) * np.log(1/sigma) ) * phi(K,X,h) / 3 )
+  
+#P = function([K, X, Y, h, sigma], 
+#  (2 * Y.dimshuffle(0,'x') * Y.dimshuffle('x',0) * K.dimshuffle(0,'x',1) * K.dimshuffle('x',0,1) ).sum(2) +
+#  2 * Y.dimshuffle(0,'x') * Y.dimshuffle('x',0) * T.sqrt( ( 1 / (2*K.shape[0]) ) * T.log(1/sigma) ) * phi(K,X,h) / 3
+#)
 
-q = function([K,Y], 
-  -( 2 * Y.dimshuffle(0,'x') * Y.dimshuffle('x',0) * K ).sum(1)
-)
+def q(K,Y):
+  l = K.shape[0]
+  return -( 2 * Y.reshape(l,1) * Y.reshape(1,l) * K ).sum(1)
+  
+#q = function([K,Y], 
+#  -( 2 * Y.dimshuffle(0,'x') * Y.dimshuffle('x',0) * K ).sum(1)
+#)
 
-A = function([K], 
-  ( (1/K.shape[0]) * K ).sum(1)
-)
+def A(K):
+  return ( (1/K.shape[0]) * K ).sum(1)
+  
+#A = function([K], 
+#  ( (1/K.shape[0]) * K ).sum(1)
+#)
     
 class model:
   def __init__(self, dimension, gamma_samples=1000, gamma_quantile=100):
@@ -78,9 +96,9 @@ class model:
     
     kk = kernel_matrix( sequences.reshape(sequences.shape[0],1,1), sequences.reshape(sequences.shape[0],1,1), self.gammas[-1] ).astype("float32")
     
-    print kk.shape
-    print self.sequences.shape
-    print self.labels.shape
+    #print kk.shape
+    #print self.sequences.shape
+    #print self.labels.shape
     
     _P = P( kk, self.sequences, self.labels, 2, .2)
     _q = q( kk, self.labels )
@@ -89,6 +107,8 @@ class model:
     _A = A( kk )
     _b = np.ones( [1,1] )
 
+    print "Passing to CVXOPT"
+    
     solution = qp( matrix(_P), matrix(_q), matrix(_G), matrix(_h), matrix(_A), matrix(_b) )
     
     if solution['status'] == 'optimal':
