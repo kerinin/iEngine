@@ -729,7 +729,8 @@ But now the optimization problem has an additional parameter
 \omega\ge & \varphi(x_{i})-\varphi(x_{j})\quad\forall i,j\in[1,...,\ell],\ |x_{i}-x_{j}|\le h_{0}\\
 \beta_{i}\ge & 0\quad i=1,...,\ell\\
 \mathcal{R}\ge & 0\\
-\mathcal{R}^{*}\ge & 0
+\mathcal{R}^{*}\ge & 0\\
+\mathcal{R}= & \mathcal{R}^{*}
 \end{align*}
 
 \end_inset
@@ -753,7 +754,8 @@ Before taking the Lagrangian, let's clean up the constraints a bit
 0\ge & \varphi(x_{i})-\varphi(x_{j})-\omega & \forall i,j\in[1,...,\ell],\ |x_{i}-x_{j}|\le h_{0}\\
 0\ge & -\beta_{i}\quad & i=1,...,\ell\\
 0\ge & -\mathcal{R}\\
-0\ge & -\mathcal{R}^{*}
+0\ge & -\mathcal{R}^{*}\\
+0= & \mathcal{R}-\mathcal{R}^{*}
 \end{align*}
 
 \end_inset
@@ -843,6 +845,155 @@ Not sure where to go from here.
 
 , and use zeros in our multipliers to accomplish the same thing.
  This should give us a LP problem subject to simple constraints
+\end_layout
+
+\begin_layout Section
+Simplified LP
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\varphi(x)= & \sum_{i=1}^{\ell}y_{i}\beta_{i}K(x,x_{i})
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\text{Minimize}\quad W(\beta)= & \mathcal{R}+\mathcal{R}^{*}\\
+\text{Subject To}\qquad1= & \sum_{i=1}^{\ell}\left(\frac{1}{\ell}\sum_{j=1}^{\ell}\beta_{j}K(x_{i},x_{j})\right)\\
+-\mathcal{R}^{*}\le & \sum_{i=1}^{\ell}\left(y_{i}-\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)\le\mathcal{R}\\
+\beta_{i}\ge & 0\quad i=1,...,\ell\\
+\mathcal{R}\ge & 0\\
+\mathcal{R}^{*}\ge & 0\\
+\mathcal{R}= & \mathcal{R}^{*}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Which translates into
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\text{Minimize}\quad W(\beta)= & \mathcal{R}+\mathcal{R}^{*}\\
+\\
+\text{Subject To}\qquad1= & \sum_{i=1}^{\ell}\left(\frac{1}{\ell}\sum_{j=1}^{\ell}\beta_{j}K(x_{i},x_{j})\right) & A\\
+0\ge & -\mathcal{R}^{*}-\sum_{i=1}^{\ell}\left(y_{i}-\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)\\
+= & \sum_{i=1}^{\ell}\left(\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})-y_{i}\right)-\mathcal{R}^{*} & B\\
+0\ge & \sum_{i=1}^{\ell}\left(y_{i}-\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)-\mathcal{R} & C\\
+0\ge & -\beta_{i}\quad & D_{i},i=1,...,\ell\\
+0\ge & -\mathcal{R} & E\\
+0\ge & -\mathcal{R}^{*} & F\\
+0= & \mathcal{R}-\mathcal{R}^{*} & G
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We have to keep 
+\begin_inset Formula $\mathcal{R}$
+\end_inset
+
+ as a variable to keep this as a LP problem, otherwise we'd have to take
+ the square loss to avoid the absolute value bit.
+ The constraints are labeled so we can clarify the optimization matrices
+\end_layout
+
+\begin_layout Subsection
+A
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+A^{A}\beta= & \sum_{i=1}^{\ell}\left(\frac{1}{\ell}\sum_{j=1}^{\ell}\beta_{j}K(x_{i},x_{j})\right)\\
+= & \sum_{j=1}^{\ell}\beta_{j}\sum_{i=1}^{\ell}\frac{1}{\ell}K(x_{i},x_{j})\\
+A_{1,j}^{A}= & \sum_{i=1}^{\ell}\frac{1}{\ell}K(x_{i},x_{j})\\
+A_{1,\mathcal{R}}^{A},G_{1,\mathcal{R}^{*}}^{A}= & 0\\
+b_{1}^{A}= & 1
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+B
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+G^{B}\beta= & \sum_{i=1}^{\ell}\left(\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})-y_{i}\right)-\mathcal{R}^{*}\\
+= & \sum_{j=1}^{\ell}\beta_{j}\sum_{i=1}^{\ell}y_{j}K(x_{i},x_{j})-\sum_{i=1}^{\ell}y_{i}-\mathcal{R}^{*}\\
+G_{1,j}^{B}= & \sum_{i=1}^{\ell}\frac{1}{\ell}K(x_{i},x_{j}\\
+G_{1,\mathcal{R^{*}}}^{B}= & -1\\
+G_{1,\mathcal{R}}^{B}= & 0\\
+h_{1}^{B}= & \sum_{i=1}^{\ell}y_{i}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+C
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+G^{C}\beta= & \sum_{i=1}^{\ell}\left(y_{i}-\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)-\mathcal{R}\\
+= & \sum_{i=1}^{\ell}y_{i}-\sum_{j=1}^{\ell}\beta_{j}\sum_{i=1}^{\ell}y_{j}K(x_{i},x_{j})-\mathcal{R}\\
+G_{1,j}^{C}= & -\sum_{i=1}^{\ell}y_{j}K(x_{i},x_{j})\\
+G_{1,\mathcal{R}}^{C}= & -1\\
+G_{1,\mathcal{R}^{*}}^{C}= & 0\\
+h_{1}^{C}= & -\sum_{i=1}^{\ell}y_{i}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+D
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+G_{1,i}^{D_{i}}\beta= & -\beta_{i}\\
+G_{1,i}^{D_{i}}= & -1\\
+G_{1,\cdot}^{D_{i}}= & 0\\
+G_{1,\mathcal{R}}^{C}= & 0\\
+G_{1,\mathcal{R}^{*}}^{C}= & 0\\
+h_{1}^{D_{i}}= & 0
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The rest of the simple constraints should be obvious from the last example
 \end_layout
 
 \end_body
