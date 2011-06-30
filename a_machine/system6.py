@@ -14,54 +14,55 @@ from gpu_funcs import kernel_matrix
 from cvxopt import matrix
 from cvxopt.solvers import qp
 
-#import theano.tensor as T
-#from theano import function
+import theano.tensor as T
+import theano
+from theano import function, shared
 
 K = T.fmatrix()
-X = T.fcol()
 Y = T.fcol()
-h = T.dscalar()
-sigma = T.dscalar()
+diff = T.fmatrix()
+h = T.fscalar()
+sigma = T.fscalar()
+N = T.iscalar()
 
-def calculate_cell_sum(diff, result):
-  if diff < h:
-    result += 2 * K.shape[0] * ( K[i] * K[j] ).sum()
-    result -= 2 * ( K[i] * K[j].T ).sum()
-      
-def calculate_cell(diff, result, K, h):
-  j = index % K.shape[1]
-  i = K.shape[0] * K.shape[1] / (index - j )
+
+def calculate_psi(index, accumulator, i, j, K, diff, h, N):
+  k = T.cast( index // (N * N), 'int32' )
+  l = T.cast( index // N, 'int32' )
+
+  if T.le( diff[k,l], h):
+    accumulator += 2 * ( K[i,k] * K[j,k] )
+    accumulator -= 2 * ( K[i,k] * K[j,l] )
     
-  psi = T.map( calculate_cell_sum, sequences=[diff], non_sequences=[result, K,i,j,h] )
+  return accumulator
+      
+def calculate_cell(index, K, Y, diff, h, sigma, N):
+  i = T.cast( index // (N * N), 'int32' )
+  j = T.cast( index // N, 'int32' )
+  
+  psi, updates = theano.scan( 
+    fn=calculate_psi, 
+    outputs_info=T.zeros_like(h), 
+    sequences=T.arange(N * N), 
+    non_sequences=(i,j,sK,diff,h, N)
+  )
+  psi = ( K[i] * K[j] ).sum()
   phi = ( K[i] * K[j] ).sum()
+  y_i = Y[i]
+  y_j = Y[j]
   
-result = T.zeros_like(K)
-values, update = T.map( calculate_cell, sequences=[result, T.arange(indices.shape[0]) ], non_sequences=[K, diff, h] )
-
-psi = function( [K,X,Y,h,sigma], values[-1] )  
-
-
-def phi(K, X, h): 
-  l = K.shape[0]
-  return (X.reshape(l,1) - X.reshape(1,l) < h) * ( 
-    K.reshape(l,1,l,1) * K.reshape(1,l,l,1) -
-    2*K.reshape(l,1,l,1) * K.reshape(1,l,1,l) +
-    K.reshape(l,1,1,l) * K.reshape(1,l,1,l) )
+  return (2*y_i*y_j*psi) + ( 4*y_i*y_j*phi*T.sqrt( (1/2*N)*T.log(1/sigma) )/3)
   
-  #return (X.dimshuffle(0,'x') - X.dimshuffle('x',0) < h) * ( 
-  #  K.dimshuffle(0,'x',1,'x') * K.dimshuffle('x',0,1,'x') -
-  #  2*K.dimshuffle(0,'x',1,'x') * K.dimshuffle('x',0,'x',1) +
-  #  K.dimshuffle(0,'x','x',1) * K.dimshuffle('x',0,'x',1) ) 
+p, update = theano.map( 
+  fn=calculate_cell, 
+  sequences=T.arange(N * N), 
+  non_sequences=(K, Y, diff, h, sigma, N)
+)
 
-def P(K,X,Y,h,sigma):
-  l = K.shape[0]
-  return ( (2 * Y.reshape(l,1) * Y.reshape(1,l) * K.reshape(l,1,l) * K.reshape(1,l,l) ).sum(2) +
-  2 * Y.reshape(l,1) * Y.reshape(1,l) * np.sqrt( ( 1 / (2*K.shape[0]) ) * np.log(1/sigma) ) * phi(K,X,h) / 3 )
-  
-#P = function([K, X, Y, h, sigma], 
-#  (2 * Y.dimshuffle(0,'x') * Y.dimshuffle('x',0) * K.dimshuffle(0,'x',1) * K.dimshuffle('x',0,1) ).sum(2) +
-#  2 * Y.dimshuffle(0,'x') * Y.dimshuffle('x',0) * T.sqrt( ( 1 / (2*K.shape[0]) ) * T.log(1/sigma) ) * phi(K,X,h) / 3
-#)
+pp = T.reshape(p, (N,N) )
+
+P = function( [K, Y, diff, h, sigma, N], pp )
+
 
 def q(K,Y):
   l = K.shape[0]
@@ -113,12 +114,18 @@ class model:
     # Still need to determine h_0
     
     kk = kernel_matrix( sequences.reshape(sequences.shape[0],1,1), sequences.reshape(sequences.shape[0],1,1), self.gammas[-1] ).astype("float32")
+    diff = np.abs( sequences - sequences.T ).astype("float32")
+    h = diff.min(0).max().astype("float32")
+    sigma = .2
     
     #print kk.shape
     #print self.sequences.shape
     #print self.labels.shape
+
+    print "starting P"
+    _P = P( kk, self.labels, diff, h, sigma, kk.shape[0] )
     
-    _P = P( kk, self.sequences, self.labels, 2, .2)
+    print 'starting q'
     _q = q( kk, self.labels )
     _G = -np.ones( [1, sequences.shape[0]] )
     _h = np.zeros( [1, sequences.shape[0]] )

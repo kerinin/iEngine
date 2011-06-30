@@ -696,5 +696,154 @@ Therefore, for we'll establish a set of
 
 \end_layout
 
+\begin_layout Section
+Linear Optimization
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\varphi(x)= & \sum_{i=1}^{\ell}y_{i}\beta_{i}K(x,x_{i})
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+But now the optimization problem has an additional parameter 
+\begin_inset Formula $\omega_{h_{0}}^{\prime}$
+\end_inset
+
+ and a set of new constraints
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\text{Minimize}\quad W(\beta)= & \mathcal{R}+\mathcal{R}^{*}+\omega\Omega\\
+\Omega= & \frac{1}{3}\sqrt{\frac{1}{2\ell}\ln\frac{1}{\delta}}\\
+\text{Subject To}\qquad1= & \sum_{i=1}^{\ell}\left(\frac{1}{\ell}\sum_{j=1}^{\ell}\beta_{j}K(x_{i},x_{j})\right)\\
+-\mathcal{R}^{*}\le & \sum_{i=1}^{\ell}\left(y_{i}-\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)\le\mathcal{R}\\
+\omega\ge & \varphi(x_{i})-\varphi(x_{j})\quad\forall i,j\in[1,...,\ell],\ |x_{i}-x_{j}|\le h_{0}\\
+\beta_{i}\ge & 0\quad i=1,...,\ell\\
+\mathcal{R}\ge & 0\\
+\mathcal{R}^{*}\ge & 0
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Before taking the Lagrangian, let's clean up the constraints a bit
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\text{Minimize}\quad W(\beta)= & \mathcal{R}+\mathcal{R}^{*}+\omega\Omega & \Omega=\frac{1}{3}\sqrt{\frac{1}{2\ell}\ln\frac{1}{\delta}}\\
+\\
+\text{Subject To}\qquad0= & \sum_{i=1}^{\ell}\left(\frac{1}{\ell}\sum_{j=1}^{\ell}\beta_{j}K(x_{i},x_{j})\right)-1\\
+0\ge & -\mathcal{R}^{*}-\sum_{i=1}^{\ell}\left(y_{i}-\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)\\
+= & \sum_{i=1}^{\ell}\left(\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})-y_{i}\right)-\mathcal{R}^{*}\\
+0\ge & \sum_{i=1}^{\ell}\left(y_{i}-\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)-\mathcal{R}\\
+0\ge & \varphi(x_{i})-\varphi(x_{j})-\omega & \forall i,j\in[1,...,\ell],\ |x_{i}-x_{j}|\le h_{0}\\
+0\ge & -\beta_{i}\quad & i=1,...,\ell\\
+0\ge & -\mathcal{R}\\
+0\ge & -\mathcal{R}^{*}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+OK, now we can get to work
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+L= & \mathcal{R}+\mathcal{R}^{*}+\omega\Omega+\lambda^{0}\left(\sum_{i=1}^{\ell}\left(\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})-y_{i}\right)-\mathcal{R}^{*}\right)+\lambda^{1}\left(\sum_{i=1}^{\ell}\left(y_{i}-\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)-\mathcal{R}\right)\\
+ & \qquad\qquad+\sum_{|x_{i}-x_{j}|\le h_{0}}\lambda_{i,j}^{2}\left(\varphi(x_{i})-\varphi(x_{j})-\omega\right)-\sum_{i=1}^{\ell}\lambda_{i}^{3}\beta_{i}-\lambda^{4}\mathcal{R}-\lambda^{5}\mathcal{R}^{*}+\lambda^{6}\left(\sum_{i=1}^{\ell}\left(\frac{1}{\ell}\sum_{j=1}^{\ell}\beta_{j}K(x_{i},x_{j})\right)-1\right)
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+That's as correct as I know how to make it.
+ Now, we want to minimize with respect to the risk and modulus of continuity,
+ so let's start there
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial}{\partial\mathcal{R}}= & 1-\lambda^{1}-\lambda^{4}\\
+\frac{\partial}{\partial\mathcal{R}^{*}}= & 1-\lambda^{0}-\lambda^{5}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Not too interesting, let's try 
+\begin_inset Formula $\omega$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\frac{\partial}{\partial\omega}= & \Omega-\sum_{|x_{i}-x_{j}|\le h_{0}}\lambda_{i,j}^{2}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+OK, so setting the partials to 0 gives use a couple equalities
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\lambda^{0}+\lambda^{5}= & \lambda^{1}+\lambda^{4}\\
+\Omega= & \sum_{|x_{i}-x_{j}|\le h_{0}}\lambda_{i,j}^{2}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Not sure where to go from here.
+ I think the conclusion is that instead of optimizing over a set of variables
+ 
+\begin_inset Formula $[\mathcal{R},\mathcal{R}^{*},\omega,\beta_{i}]$
+\end_inset
+
+, we should just construct a hybrid optimization variable 
+\begin_inset Formula $\alpha=[\mathcal{R},\mathcal{R}^{*},\omega,\beta_{i}]$
+\end_inset
+
+, and use zeros in our multipliers to accomplish the same thing.
+ This should give us a LP problem subject to simple constraints
+\end_layout
+
 \end_body
 \end_document
