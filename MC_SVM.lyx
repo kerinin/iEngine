@@ -865,7 +865,7 @@ Simplified LP
 \begin_layout Standard
 \begin_inset Formula 
 \begin{align*}
-\text{Minimize}\quad W(\beta)= & \mathcal{R}+\mathcal{R}^{*}\\
+\text{Minimize}\quad W(\beta)= & \mathcal{R}\\
 \text{Subject To}\qquad1= & \sum_{i=1}^{\ell}\left(\frac{1}{\ell}\sum_{j=1}^{\ell}\beta_{j}K(x_{i},x_{j})\right)\\
 -\mathcal{R}^{*}\le & \sum_{i=1}^{\ell}\left(y_{i}-\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)\le\mathcal{R}\\
 \beta_{i}\ge & 0\quad i=1,...,\ell\\
@@ -886,7 +886,7 @@ Which translates into
 \begin_layout Standard
 \begin_inset Formula 
 \begin{align*}
-\text{Minimize}\quad W(\beta)= & \mathcal{R}+\mathcal{R}^{*}\\
+\text{Minimize}\quad W(\beta)= & \mathcal{R}\\
 \\
 \text{Subject To}\qquad1= & \sum_{i=1}^{\ell}\left(\frac{1}{\ell}\sum_{j=1}^{\ell}\beta_{j}K(x_{i},x_{j})\right) & A\\
 0\ge & -\mathcal{R}^{*}-\sum_{i=1}^{\ell}\left(y_{i}-\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)\\
@@ -941,7 +941,7 @@ B
 \begin{align*}
 G^{B}\beta= & \sum_{i=1}^{\ell}\left(\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})-y_{i}\right)-\mathcal{R}^{*}\\
 = & \sum_{j=1}^{\ell}\beta_{j}\sum_{i=1}^{\ell}y_{j}K(x_{i},x_{j})-\sum_{i=1}^{\ell}y_{i}-\mathcal{R}^{*}\\
-G_{1,j}^{B}= & \sum_{i=1}^{\ell}\frac{1}{\ell}K(x_{i},x_{j}\\
+G_{1,j}^{B}= & \sum_{i=1}^{\ell}\frac{1}{\ell}K(x_{i},x_{j})\\
 G_{1,\mathcal{R^{*}}}^{B}= & -1\\
 G_{1,\mathcal{R}}^{B}= & 0\\
 h_{1}^{B}= & \sum_{i=1}^{\ell}y_{i}

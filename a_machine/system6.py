@@ -12,7 +12,7 @@ import matplotlib.cm as cm
 
 from gpu_funcs import kernel_matrix
 from cvxopt import matrix
-from cvxopt.solvers import qp
+from cvxopt.solvers import lp
 
 import theano.tensor as T
 import theano
@@ -109,32 +109,66 @@ class model:
     self.sequences = sequences
     self.labels = labels
     
-    
-    
-    # Still need to determine h_0
-    
-    kk = kernel_matrix( sequences.reshape(sequences.shape[0],1,1), sequences.reshape(sequences.shape[0],1,1), self.gammas[-1] ).astype("float32")
-    diff = np.abs( sequences - sequences.T ).astype("float32")
-    h = diff.min(0).max().astype("float32")
-    sigma = .2
-    
-    #print kk.shape
-    #print self.sequences.shape
-    #print self.labels.shape
 
-    print "starting P"
-    _P = P( kk, self.labels, diff, h, sigma, kk.shape[0] )
+    kk = kernel_matrix(self.sequences, self.sequences)
+    l = kk.shape[0]
     
-    print 'starting q'
-    _q = q( kk, self.labels )
-    _G = -np.ones( [1, sequences.shape[0]] )
-    _h = np.zeros( [1, sequences.shape[0]] )
-    _A = A( kk )
-    _b = np.ones( [1,1] )
+    c = np.hstack( [
+      np.zeros((1,l)),
+      [0,1]
+    ]) 
+    
+    A_A = np.vstack( [
+      kk.sum(0) / l,
+      [0,0]
+    ] )
+    b_A = np.ones((1,1))
+    
+    A_G = np.vstack( [
+      np.zeros((1,l)),
+      [1,-1]
+    ] )
+    b_G = np.zeros((1,1))
 
-    print "Passing to CVXOPT"
+    G_B = np.vstack( [
+      kk.sum(0) / l,
+      [0,-1]
+    ] )
+    h_B = self.labels.sum
     
-    solution = qp( matrix(_P), matrix(_q), matrix(_G), matrix(_h), matrix(_A), matrix(_b) )
+    G_C = np.vstack( [
+      -kk.sum(0) / l,
+      [-1,0]
+    ] )
+    h_C = -self.labels.sum
+    
+    G_D = np.hstack( [
+      -np.identity((l,l)),
+      np.zeros((2,l))
+    ])
+    h_D = np.zeros((1,l))
+    
+    G_E = np.hstack( [
+      np.zeros((1,l)),
+      [-1,0]
+    ])
+    h_E = np.zeros((1,1))
+
+    G_F = np.hstack( [
+      np.zeros((1,l)),
+      [0,-1]
+    ])
+    h_F = np.zeros((1,1))    
+    
+    
+    G = np.hstack([G_B,G_C,G_D,G_F])
+    h = np.hstack([h_B,h_C,h_D,h_F])
+    
+    A = np.hstack([A_A,A_G])
+    b = np.hstack([b_A,b_G])
+    
+    solution = lp( matrix(c), matrix(G), matrix(h), matrix(A), matrix(b) )
+    
     
     if solution['status'] == 'optimal':
       X = np.array( solution['x'] )
