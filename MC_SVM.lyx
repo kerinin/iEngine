@@ -880,6 +880,19 @@ Simplified LP
 \end_layout
 
 \begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+-\mathcal{R}^{*}\le & \sum_{i=1}^{\ell}\left(y_{i}-\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)\le\mathcal{R}\\
+-\mathcal{R}^{*}\le & \sum_{i=1}^{\ell}y_{i}-\sum_{i,j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\\
+\sum_{i,j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})-\sum_{i=1}^{\ell}y_{i}-\mathcal{R}^{*}\le & 0
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
 Which translates into
 \end_layout
 
@@ -889,9 +902,8 @@ Which translates into
 \text{Minimize}\quad W(\beta)= & \mathcal{R}\\
 \\
 \text{Subject To}\qquad1= & \sum_{i=1}^{\ell}\left(\frac{1}{\ell}\sum_{j=1}^{\ell}\beta_{j}K(x_{i},x_{j})\right) & A\\
-0\ge & -\mathcal{R}^{*}-\sum_{i=1}^{\ell}\left(y_{i}-\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)\\
-= & \sum_{i=1}^{\ell}\left(\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})-y_{i}\right)-\mathcal{R}^{*} & B\\
-0\ge & \sum_{i=1}^{\ell}\left(y_{i}-\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)-\mathcal{R} & C\\
+\sum_{i=1}^{\ell}y_{i}\ge & \sum_{i,j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})-\mathcal{R}^{*} & B\\
+-\sum_{i=1}^{\ell}y_{i}\ge & -\sum_{i,j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})-\mathcal{R} & C\\
 0\ge & -\beta_{i}\quad & D_{i},i=1,...,\ell\\
 0\ge & -\mathcal{R} & E\\
 0\ge & -\mathcal{R}^{*} & F\\
@@ -911,6 +923,13 @@ We have to keep
  as a variable to keep this as a LP problem, otherwise we'd have to take
  the square loss to avoid the absolute value bit.
  The constraints are labeled so we can clarify the optimization matrices
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $[\beta_{i},\mathcal{R},\mathcal{R}^{*}]$
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsection
@@ -939,10 +958,10 @@ B
 \begin_layout Standard
 \begin_inset Formula 
 \begin{align*}
-G^{B}\beta= & \sum_{i=1}^{\ell}\left(\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})-y_{i}\right)-\mathcal{R}^{*}\\
-= & \sum_{j=1}^{\ell}\beta_{j}\sum_{i=1}^{\ell}y_{j}K(x_{i},x_{j})-\sum_{i=1}^{\ell}y_{i}-\mathcal{R}^{*}\\
-G_{1,j}^{B}= & \sum_{i=1}^{\ell}\frac{1}{\ell}K(x_{i},x_{j})\\
-G_{1,\mathcal{R^{*}}}^{B}= & -1\\
+G^{B}\beta= & \sum_{i,j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})-\mathcal{R}^{*}\\
+= & \sum_{j=1}^{\ell}\beta_{j}\sum_{i=1}^{\ell}y_{j}K(x_{i},x_{j})-\mathcal{R}^{*}\\
+G_{1,j}^{B}= & y_{j}\sum_{i=1}^{\ell}K(x_{i},x_{j})\\
+G_{1,\mathcal{R}^{*}}^{B}= & -1\\
 G_{1,\mathcal{R}}^{B}= & 0\\
 h_{1}^{B}= & \sum_{i=1}^{\ell}y_{i}
 \end{align*}
@@ -959,9 +978,9 @@ C
 \begin_layout Standard
 \begin_inset Formula 
 \begin{align*}
-G^{C}\beta= & \sum_{i=1}^{\ell}\left(y_{i}-\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)-\mathcal{R}\\
-= & \sum_{i=1}^{\ell}y_{i}-\sum_{j=1}^{\ell}\beta_{j}\sum_{i=1}^{\ell}y_{j}K(x_{i},x_{j})-\mathcal{R}\\
-G_{1,j}^{C}= & -\sum_{i=1}^{\ell}y_{j}K(x_{i},x_{j})\\
+G^{C}\beta= & -\sum_{i,j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})-\mathcal{R}\\
+= & -\sum_{j=1}^{\ell}\beta_{j}\sum_{i=1}^{\ell}y_{j}K(x_{i},x_{j})-\mathcal{R}\\
+G_{1,j}^{C}= & -y_{j}\sum_{i=1}^{\ell}K(x_{i},x_{j})\\
 G_{1,\mathcal{R}}^{C}= & -1\\
 G_{1,\mathcal{R}^{*}}^{C}= & 0\\
 h_{1}^{C}= & -\sum_{i=1}^{\ell}y_{i}
@@ -994,6 +1013,430 @@ h_{1}^{D_{i}}= & 0
 
 \begin_layout Standard
 The rest of the simple constraints should be obvious from the last example
+\end_layout
+
+\begin_layout Section
+Simplified QP
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\varphi(x)= & \sum_{i=1}^{\ell}y_{i}\beta_{i}K(x,x_{i})
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\text{Minimize}\quad W(\beta)= & \sum_{i=1}^{\ell}\left(y_{i}-\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)^{2}\\
+\text{Subject To}\qquad1= & \sum_{i=1}^{\ell}\left(\frac{1}{\ell}\sum_{j=1}^{\ell}\beta_{j}K(x_{i},x_{j})\right)\\
+\beta_{i}\ge & 0\quad i=1,...,\ell
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\sum_{i=1}^{\ell}\left(y_{i}-\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)= & \sum_{i=1}^{\ell}\left[y_{i}^{2}-2y_{i}\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})+\left(\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)^{2}\right]\\
+= & \sum_{i=1}^{\ell}y_{i}^{2}-2\sum_{i,j=1}^{\ell}y_{i}y_{j}\beta_{j}K(x_{i},x_{j})+\sum_{i,j,k=1}^{\ell}y_{j}y_{k}\beta_{j}\beta_{k}K(x_{i},x_{j})K(x_{i},x_{k})\\
+\approx & \sum_{j,k=1}^{\ell}\beta_{j}\beta_{k}\sum_{i=1}^{\ell}y_{j}y_{k}K(x_{i},x_{j})K(x_{i},x_{k})-2\sum_{j=1}^{\ell}\beta_{j}\sum_{i=1}^{\ell}y_{i}y_{j}K(x_{i},x_{j})\\
+= & \sum_{i,j=1}^{\ell}\beta_{i}\beta_{j}\sum_{k=1}^{\ell}y_{i}y_{j}K(x_{k},x_{i})K(x_{k},x_{j})-2\sum_{i=1}^{\ell}\beta_{i}\sum_{j=1}^{\ell}y_{i}y_{j}K(x_{j},x_{i})\\
+= & \sum_{i,j=1}^{\ell}\beta_{i}\beta_{j}\sum_{k=1}^{\ell}y_{i}y_{j}K(x_{i},x_{k})K(x_{j},x_{k})-2\sum_{i=1}^{\ell}\beta_{i}\sum_{j=1}^{\ell}y_{i}y_{j}K(x_{i},x_{j})
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This give us the following optimization problem
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\text{Minimize }\quad W(\beta)= & \frac{1}{2}\beta^{T}P\beta+q^{T}\beta\\
+\text{Subject to}\quad\qquad G\beta & \preceq h\\
+A\beta & =b
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+P_{i,j}= & \sum_{k=1}^{\ell}y_{i}y_{j}K(x_{i},x_{k})K(x_{j},x_{k})\\
+q_{i}= & -\sum_{j=1}^{\ell}y_{i}y_{j}K(x_{i},x_{j})\\
+G= & -\mathbf{I}_{\ell\times\ell}\\
+h_{i}= & 0\\
+A_{i}= & \sum_{j=1}^{\ell}\frac{1}{\ell}K(x_{i},x_{j})\\
+b= & 1
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+I think that if we use an RKHS we can simplify the kernel product 
+\begin_inset Formula $K(x_{i},x_{k})K(x_{j},x_{k})$
+\end_inset
+
+ to 
+\begin_inset Formula $K(x_{i},x_{j})$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\text{Minimize }\quad W(\beta)= & \frac{1}{2}\beta^{T}P\beta+q^{T}\beta\\
+\text{Subject to}\quad\qquad G\beta & \preceq h\\
+A\beta & =b
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+P_{i,j}= & \sum_{k=1}^{\ell}y_{i}y_{j}K(x_{i},x_{j})\\
+q_{i}= & -\sum_{j=1}^{\ell}y_{i}y_{j}K(x_{i},x_{j})\\
+G= & -\mathbf{I}_{\ell\times\ell}\\
+h_{i}= & 0\\
+A_{i}= & \sum_{j=1}^{\ell}\frac{1}{\ell}K(x_{i},x_{j})\\
+b= & 1
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Modified Density (via Vapnik)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\varphi(x)= & \sum_{i=1}^{\ell}y_{i}\beta_{i}K(x,x_{i})
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\text{Minimize}\quad W(\beta)= & \sum_{i,j=1}^{\ell}\beta_{i}\beta_{j}K(x_{j},x_{i})K(y_{j,}y_{i})\\
+\text{Subject To}\qquad1= & \sum_{i=1}^{\ell}\left(\frac{1}{\ell}\sum_{j=1}^{\ell}\beta_{j}K(x_{i},x_{j})\right)\\
+\sigma^{*}\le & \left[y_{j}-\sum_{i=1}^{\ell}y_{i}\beta_{i}K(x_{j},x_{i})\right]\le\sigma\quad j=1,...,\ell
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\sigma^{*}\le & y_{j}-\sum_{i=1}^{\ell}y_{i}\beta_{i}K(x_{j},x_{i})\\
+\sum_{i=1}^{\ell}y_{i}\beta_{i}K(x_{j},x_{i})\le & y_{j}-\sigma^{*}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+y_{j}-\sum_{i=1}^{\ell}y_{i}\beta_{i}K(x_{j},x_{i})\le & \sigma\\
+-\sum_{i=1}^{\ell}y_{i}\beta_{i}K(x_{j},x_{i})\le & \sigma-y_{j}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Bare Bones SVR
+\end_layout
+
+\begin_layout Standard
+This is the typical SVR formulation, but without using 
+\begin_inset Formula $\varepsilon$
+\end_inset
+
+-insensitive zones or 
+\begin_inset Formula $w\cdot w\le c_{n}$
+\end_inset
+
+.
+ The idea is that if this works, we can control accuracy using the MCIC
+ principle
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\varphi(x)= & \sum_{i=1}^{\ell}(\alpha_{i}-\alpha_{i}^{*})K(x,x_{i})
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\text{Minimize}\quad W(\beta)= & \sum_{i=1}^{\ell}y_{i}(\alpha_{i}^{*}-\alpha_{i})-\frac{1}{2}\sum_{i,j=1}^{\ell}(\alpha_{i}^{*}-\alpha_{i})(\alpha_{j}^{*}-\alpha_{j})K(x_{i},x_{j})\\
+\\
+\text{Subject To}\qquad\sum_{i=1}^{\ell}\alpha_{i}^{*}= & \sum_{i=1}^{\ell}\alpha_{i}\\
+0\le\alpha_{i}\le1 & \quad i=1,...,\ell\\
+0\le\alpha_{i}^{*}\le1 & \quad i=1,...,\ell
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+W(\beta)= & \sum_{i=1}^{\ell}y_{i}(\alpha_{i}^{*}-\alpha_{i})-\frac{1}{2}\sum_{i,j=1}^{\ell}(\alpha_{i}^{*}-\alpha_{i})(\alpha_{j}^{*}-\alpha_{j})K(x_{i},x_{j})\\
+= & \sum_{i=1}^{\ell}y_{i}\alpha_{i}^{*}-\sum_{i=1}^{\ell}y_{i}\alpha_{i}-\frac{1}{2}\sum_{i,j=1}^{\ell}(\alpha_{i}^{*}\alpha_{j}^{*}-\alpha_{i}^{*}\alpha_{j}-\alpha_{i}\alpha_{j}^{*}+\alpha_{i}\alpha_{j})K(x_{i},x_{j})
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Part
+Discussion
+\end_layout
+
+\begin_layout Standard
+None of this is going well.
+ My hope was that I could find a way to directly minimize the risk, subject
+ to constraints which would ensure a valid target functional.
+ None of these attempts are working, either based on finding a hyperplane
+ or finding a PDF-based regression function.
+ 
+\end_layout
+
+\begin_layout Standard
+One remaining possibility is to modify the PDF function directly (rather
+ than trying to use the regression shortcut) and rather than taking a fixed
+ 
+\begin_inset Formula $\sigma$
+\end_inset
+
+, we use the modulus of continuity.
+ Even this seems difficult, as I'm not sure why the regularizer is being
+ used in place of the risk functional or how it can be modified.
+\end_layout
+
+\begin_layout Standard
+Let's try starting at the beginning.
+ Since we're not interested in creating a PDF (for now), there's no reason
+ to put an upper bound on our optimization variables.
+ One of the original formulations of the target functional was 
+\begin_inset Formula $f(x)=\sum y_{i}\beta_{i}K(x,x_{i})$
+\end_inset
+
+ - this can be accomplished without retaining 
+\begin_inset Formula $y_{i}$
+\end_inset
+
+ if 
+\begin_inset Formula $\beta_{i}$
+\end_inset
+
+ isn't constrained.
+ So unless there's a good reason to somehow constrain 
+\begin_inset Formula $\beta$
+\end_inset
+
+, I think we can use the following functional
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+f(x)= & \sum_{i=1}^{\ell}\beta_{i}K(x,x_{i})
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This essentially encodes the regression as a series of 
+\begin_inset Formula $\beta$
+\end_inset
+
+ whose value can take any value in the range of 
+\begin_inset Formula $y$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Next, we need to consider our optimization problem.
+ We know that we're trying to reduce the empirical risk (for now), and there's
+ a decent chance that the MCIC requires the 
+\begin_inset Formula $L_{1}$
+\end_inset
+
+ norm, so for now let's frame this as a simple task of minimizing the risk
+ 
+\begin_inset Formula $R$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\text{Minimize}\qquad W(\beta)= & R\\
+\text{Subject to}\qquad\quad R\ge & \sum_{i=1}^{\ell}\left|y_{i}-\sum_{l=1}^{\ell}\beta_{i}K(x_{i},x_{j})\right|_{L_{1}}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The brings us to our first challenge, which is that splitting this into
+ two summations (over 
+\begin_inset Formula $y$
+\end_inset
+
+ and 
+\begin_inset Formula $f$
+\end_inset
+
+) reduces the optimization problem to a problem of matching means, rather
+ than minimizing localized risk.
+ My initial response was to use the 
+\begin_inset Formula $L_{2}$
+\end_inset
+
+ norm, as this does a better job separating out pairwise dynamics from aggregate
+ dynamics.
+ Since our interest is in minimizing the aggregate local risk (loss), perhaps
+ there's a way to examine that directly.
+\end_layout
+
+\begin_layout Standard
+Moving to the most local formulation possible, we would want to consider
+ the loss at each point, but somehow either calculate or combine that loss
+ in such a way that it couldn't be reduced to matching means.
+ Vapnik's approach is to limit the local loss directly and optimize over
+ other variables.
+ Perhaps we could do something similar; we restrict the loss for each observatio
+n to an optimization variable 
+\begin_inset Formula $R_{i}$
+\end_inset
+
+, then minimize 
+\begin_inset Formula $R\cdot R$
+\end_inset
+
+.
+ This approach takes inspiration from the original SVM formulation in which
+ sparseness is achieved by including 
+\begin_inset Formula $w\cdot w$
+\end_inset
+
+ in the optimization term.
+\end_layout
+
+\begin_layout Standard
+Let's consider the dynamics of 
+\begin_inset Formula $R\cdot R$
+\end_inset
+
+.
+ Let's assume that 
+\begin_inset Formula $\sum R=c$
+\end_inset
+
+, some constant.
+ If 
+\begin_inset Formula $R_{i}=R_{j}$
+\end_inset
+
+, then 
+\begin_inset Formula $R\cdot R=\ell(c/\ell)^{2}=c^{2}/\ell$
+\end_inset
+
+.
+ On the other hand, if 
+\begin_inset Formula $R_{0}=c$
+\end_inset
+
+, then 
+\begin_inset Formula $R\cdot R=c^{2}$
+\end_inset
+
+ (since only 
+\begin_inset Formula $R_{0}\times R_{0}$
+\end_inset
+
+ is non-zero).
+ This shows that at least for these two examples, the smaller value of 
+\begin_inset Formula $R\cdot R$
+\end_inset
+
+ is the value in which risk is distributed.
+ Thanks to wikipedia, I can state that 
+\begin_inset Formula $R\cdot R=\left\Vert R\right\Vert ^{2}$
+\end_inset
+
+ - the dot product is proportional to the magnitude of 
+\begin_inset Formula $R$
+\end_inset
+
+, which means that for any 
+\begin_inset Formula $\sum R=c$
+\end_inset
+
+, the most even distribution along each axis should be minimal (extension
+ increases the sum exponentially, while distribution increases the sum linearly).
 \end_layout
 
 \end_body

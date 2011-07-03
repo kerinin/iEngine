@@ -23,7 +23,7 @@ from a_machine.svms import SVR
 
 
 def run():
-  from a_machine.system6 import model
+  from a_machine.system7 import model
 
   from santa_fe import getData
   data = getData('B1.dat')[:,0]
@@ -31,17 +31,35 @@ def run():
   median = np.median(data)
   std = np.std(data)
 
-  train_size = 500
+  train_size = 50
   sequence_length = 1
   gamma_quantile = 100
-  test_size = 200
+  test_size = 201
 
   train = (( data[:train_size] - median ) / std).astype('float32')
 
   m = model( dimension=0 )
   m.train(train)
 
-  Z1 = m.predict( np.expand_dims(X,1) )
+  xN = test_size
+  #yN = 20
+  xrange = [train.min(), train.max()]
+  #yrange = [train[:-1,1].min(), train[:-1,1].max()]
+  xstep = ((xrange[1]-xrange[0] ) / xN )
+  #ystep = ((yrange[1]-yrange[0] ) / yN )
+  #X = np.dstack(np.mgrid[xrange[0]:xrange[1]:xstep,yrange[0]:yrange[1]:ystep]).reshape([ xN *yN,2]).astype('float32')
+  X = np.arange(xrange[0],xrange[1],xstep)
+  #y = np.arange(yrange[0],yrange[1],ystep)
+
+  print X.shape
+  print xN
+  Y = m.predict( X.reshape(xN,1,1) )
+  
+  plt.plot(train[:-1], train[1:], 'k,')
+  plt.scatter( m.SVx, m.SVy, train_size*100*(m.beta**2), alpha=.15 )
+  plt.plot(X, Y, 'r', lw=2)
+  
+  plt.show()
   
   
 def test_system5():

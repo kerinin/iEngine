@@ -14,71 +14,6 @@ from gpu_funcs import kernel_matrix
 from cvxopt import matrix
 from cvxopt.solvers import lp
 
-import theano.tensor as T
-import theano
-from theano import function, shared
-
-K = T.fmatrix()
-Y = T.fcol()
-diff = T.fmatrix()
-h = T.fscalar()
-sigma = T.fscalar()
-N = T.iscalar()
-
-
-def calculate_psi(index, accumulator, i, j, K, diff, h, N):
-  k = T.cast( index // (N * N), 'int32' )
-  l = T.cast( index // N, 'int32' )
-
-  if T.le( diff[k,l], h):
-    accumulator += 2 * ( K[i,k] * K[j,k] )
-    accumulator -= 2 * ( K[i,k] * K[j,l] )
-    
-  return accumulator
-      
-def calculate_cell(index, K, Y, diff, h, sigma, N):
-  i = T.cast( index // (N * N), 'int32' )
-  j = T.cast( index // N, 'int32' )
-  
-  psi, updates = theano.scan( 
-    fn=calculate_psi, 
-    outputs_info=T.zeros_like(h), 
-    sequences=T.arange(N * N), 
-    non_sequences=(i,j,sK,diff,h, N)
-  )
-  psi = ( K[i] * K[j] ).sum()
-  phi = ( K[i] * K[j] ).sum()
-  y_i = Y[i]
-  y_j = Y[j]
-  
-  return (2*y_i*y_j*psi) + ( 4*y_i*y_j*phi*T.sqrt( (1/2*N)*T.log(1/sigma) )/3)
-  
-p, update = theano.map( 
-  fn=calculate_cell, 
-  sequences=T.arange(N * N), 
-  non_sequences=(K, Y, diff, h, sigma, N)
-)
-
-pp = T.reshape(p, (N,N) )
-
-P = function( [K, Y, diff, h, sigma, N], pp )
-
-
-def q(K,Y):
-  l = K.shape[0]
-  return -( 2 * Y.reshape(l,1) * Y.reshape(1,l) * K ).sum(1)
-  
-#q = function([K,Y], 
-#  -( 2 * Y.dimshuffle(0,'x') * Y.dimshuffle('x',0) * K ).sum(1)
-#)
-
-def A(K):
-  return ( (1/K.shape[0]) * K ).sum(1)
-  
-#A = function([K], 
-#  ( (1/K.shape[0]) * K ).sum(1)
-#)
-    
 class model:
   def __init__(self, dimension, gamma_samples=1000, gamma_quantile=100):
     self.dimension = dimension
@@ -93,7 +28,7 @@ class model:
   # data: [observation][dimension]
   def train(self, data, slices=[[0,[0]]]):
     #self.gammas = self.determine_gammas_from(data)
-    self.gammas = [.1,]
+    self.gammas = [.5,]
     print "Gammas determined: %s" % str(self.gammas)
     
     # [gamma][sequence offset][dimension]
@@ -108,82 +43,101 @@ class model:
 
     self.sequences = sequences
     self.labels = labels
+    l = self.sequences.shape[0]
     
-
-    kk = kernel_matrix(self.sequences, self.sequences)
-    l = kk.shape[0]
+    print "Calculating kernel matrix"
+    kk = kernel_matrix(self.sequences.reshape(l,1,1), self.sequences.reshape(l,1,1), self.gammas[-1])
     
+    print "Constructing constraints"
+    # column
     c = np.hstack( [
-      np.zeros((1,l)),
+      np.zeros(l),
       [0,1]
     ]) 
     
-    A_A = np.vstack( [
+    #[constraint][variable]
+    A_A = np.hstack( [
       kk.sum(0) / l,
       [0,0]
     ] )
-    b_A = np.ones((1,1))
+    #[constraint]
+    b_A = np.ones(1)
     
-    A_G = np.vstack( [
-      np.zeros((1,l)),
+    A_G = np.hstack( [
+      np.zeros(l),
       [1,-1]
     ] )
-    b_G = np.zeros((1,1))
+    b_G = np.zeros(1)
 
-    G_B = np.vstack( [
-      kk.sum(0) / l,
+
+    G_B = np.hstack( [
+      self.labels.flatten() * kk.sum(0),
       [0,-1]
     ] )
-    h_B = self.labels.sum
+    h_B = np.array( [self.labels.sum() ] )
     
-    G_C = np.vstack( [
-      -kk.sum(0) / l,
+    G_C = np.hstack( [
+      -self.labels.flatten() * kk.sum(0),
       [-1,0]
     ] )
-    h_C = -self.labels.sum
+    h_C = np.array( [ -self.labels.sum() ] )
     
+    # [variable][variable]
     G_D = np.hstack( [
-      -np.identity((l,l)),
-      np.zeros((2,l))
+      -np.identity(l),
+      np.zeros((l,2))
     ])
-    h_D = np.zeros((1,l))
+    h_D = np.zeros(l)
     
     G_E = np.hstack( [
-      np.zeros((1,l)),
+      np.zeros(l),
       [-1,0]
     ])
-    h_E = np.zeros((1,1))
+    h_E = np.zeros(1)
 
     G_F = np.hstack( [
-      np.zeros((1,l)),
+      np.zeros(l),
       [0,-1]
     ])
-    h_F = np.zeros((1,1))    
+    h_F = np.zeros(1)
+
+    G = np.vstack([G_B,G_C,G_D,G_E,G_F])
+    #G = np.vstack([G_B,G_C,G_D]).astype('float')
+    h = np.hstack([h_B,h_C,h_D,h_E,h_F])
+    #h = np.hstack([h_B,h_C,h_D]).astype('float')
     
+    print G
+    print h
+    #A = np.expand_dims( A_G, 0) 
+    A = np.vstack([A_A,A_G])
+    #b = b_G 
+    b = np.vstack([b_A,b_G])
     
-    G = np.hstack([G_B,G_C,G_D,G_F])
-    h = np.hstack([h_B,h_C,h_D,h_F])
+    #print G.shape
+    #print h.shape
+    print A.shape
+    print b.shape
     
-    A = np.hstack([A_A,A_G])
-    b = np.hstack([b_A,b_G])
-    
+    print "Solving"
     solution = lp( matrix(c), matrix(G), matrix(h), matrix(A), matrix(b) )
     
-    
+    print "Handling Solution"
     if solution['status'] == 'optimal':
-      X = np.array( solution['x'] )
+      X = np.array( solution['x'][:-2] )
+      R_emp = np.array( solution['x'][-1] )
       
-      print X.shape
-      print sequences.shape
-      print labels.shape
-      
-      self.SV_mask = ( X > 0 )
+      self.SV_mask = ( X < 0 )
       self.beta = np.ma.compress_rows( np.ma.array( X, mask = self.SV_mask ) ).astype('float32')
       self.SVx = np.ma.compress_rows( np.ma.array( sequences, mask = np.repeat( self.SV_mask, sequences.shape[1], 1) ) ).astype('float32')
       self.SVy = np.ma.compress_rows( np.ma.array( labels.reshape(labels.shape[0],1), mask = self.SV_mask ) ).astype('float32')
-      
+      self.nSV = self.beta.shape[0]
     
-    print "--> SVM Trained: %s SV's of %s" % ( self.SV_mask.sum(), self.SV_mask.shape[0] ) 
+      #print self.SVx.shape
+      #print self.SVy.shape
+      #print self.nSV
+      #print self.SV_mask
+      print solution['x']
+    print "--> SVM Trained: %s SV's of %s, Risk=%s" % ( self.nSV, self.SV_mask.shape[0], R_emp/X.shape[0] ) 
 
 
   # data: [observation][dimension]      
@@ -194,34 +148,23 @@ class model:
     points = data.astype('float32')
     
     
-    print points.shape
-    print self.sequences.shape
-    #print SVs.shape
+    #print points.shape
+    #print self.sequences.shape
     
-    kk = kernel_matrix( points, np.expand_dims(self.sequences,1), self.gammas[-1] )
-    prediction = (self.labels * self.beta * kk ).sum(1)
+    #print points.shape
+    #print self.SVx.reshape(self.nSV,1,1).shape
+    
+    kk = kernel_matrix( points, self.SVx.reshape(self.nSV,1,1), self.gammas[-1] )
     
     #print kk.shape
+    #print self.SVy.shape
+    #print self.beta.shape
+    
+    prediction = (self.SVy.T * self.beta.T * kk ).sum(1)
+    
     #print prediction.shape
     
     return prediction
-    
-    
-    
-    
-    
-    SVs = np.expand_dims( self.SVx, 1 )
-    
-    kk = kernel_matrix( points, SVs, self.gammas[-1] )
-    
-    print kk.shape
-    print self.SVy.T.shape
-    print self.beta.T.shape
-    
-    prediction = ( self.SVy.T * self.beta.T * kk )
-    print prediction.sum(1).shape
-    
-    return prediction.sum(1) / (self.beta.T * kk ).sum(1)
 
   def random_sample(self, sequences, labels, samples):
     full = np.hstack([sequences, np.expand_dims(labels,1)])
