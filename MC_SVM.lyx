@@ -1440,13 +1440,96 @@ Let's consider the dynamics of
 \end_layout
 
 \begin_layout Standard
-So, let's formalize this and see how it works
+OK, so I just ran the math and tried it, and it turns out that 
+\begin_inset Formula $P$
+\end_inset
+
+ is singular - because I'm not using 
+\begin_inset Formula $\beta$
+\end_inset
+
+ in the optimization function there's no array 
+\begin_inset Formula $A$
+\end_inset
+
+ for which 
+\begin_inset Formula $AP=\mathbf{I}$
+\end_inset
+
+.
+ This gives use two options, either we need to add 
+\begin_inset Formula $\beta$
+\end_inset
+
+ to the 
+\begin_inset Formula $W$
+\end_inset
+
+, or we need to reformulate 
+\begin_inset Formula $W$
+\end_inset
+
+ to not use 
+\begin_inset Formula $R$
+\end_inset
+
+.
+ I think the latter is the better option.
+ Notice that 
+\begin_inset Formula $R\cdot R=\sum R^{2}$
+\end_inset
+
+, and we've set 
+\begin_inset Formula $R_{i}\ge L(f(x_{i}),y_{i})$
+\end_inset
+
+, so we should be able to eliminate the intermediate step and simply optimize
+ the following
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula 
 \begin{align*}
-\varphi(x)= & \sum_{i=1}^{\ell}\beta_{i}K(x,x_{i})
+\text{Minimize}\qquad W(\beta)= & \sum_{i=1}^{\ell}\left(\varphi(x_{i})-y_{i}\right)^{2}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This has no constraints, which may be a problem (which would have been a
+ problem to begin with, since it's the equivalent problem).
+ In any case, let's see how that shakes out
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+W(\beta)= & \sum_{i=1}^{\ell}\varphi(x_{i})-y_{i}\\
+= & \sum_{i=1}^{\ell}\left(y_{i}-\sum_{j=1}^{\ell}\beta_{j}K(x_{i,}x_{j})\right)^{2}\\
+= & \sum_{i=1}^{\ell}\left[y_{i}^{2}-2y_{i}\sum_{j=1}^{\ell}\beta_{j}K(x_{i},x_{j})+\sum_{j,k=1}^{\ell}\beta_{j}\beta_{k}K(x_{i},x_{j})K(x_{i},x_{k})\right]\\
+\approx & \sum_{i,j,k=1}^{\ell}\beta_{j}\beta_{k}K(x_{i},x_{j})K(x_{i},x_{k})-\sum_{i,j=1}^{\ell}2y_{i}\beta_{j}K(x_{i},x_{j})\\
+= & \sum_{i,j,k=1}^{\ell}\beta_{i}\beta_{j}K(x_{k},x_{i})K(x_{k},x_{j})-\sum_{i,j=1}^{\ell}2y_{j}\beta_{i}K(x_{j},x_{i})\\
+= & \sum_{i,j=1}^{\ell}\beta_{i}\beta_{j}\sum_{k=1}^{\ell}K(x_{i},x_{k})K(x_{j},x_{k})-\sum_{i=1}^{\ell}\beta_{i}\sum_{j=1}^{\ell}2y_{j}K(x_{i},x_{j})
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Let's put thin in QP terms
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\text{Minimize }\quad W(\beta)= & \frac{1}{2}\beta^{T}P\beta+q^{T}\beta\\
+\text{Subject to}\quad\qquad G\beta & \preceq h\\
+A\beta & =b
 \end{align*}
 
 \end_inset
@@ -1457,11 +1540,8 @@ So, let's formalize this and see how it works
 \begin_layout Standard
 \begin_inset Formula 
 \begin{align*}
-\text{Minimize}\quad W(\beta,R,R^{*})= & R\cdot R+R^{*}\cdot R^{*}\\
-\\
-\text{Subject To}\qquad R_{i}^{*}\le & y_{i}-\sum_{j=1}^{\ell}\beta_{j}K(x_{i},x_{j})\le R_{i} & i=1,...,\ell\\
-R_{i}\ge & 0 & i=1,...,\ell\\
-R_{i}^{*}\ge & 0 & i=1,...,\ell
+P_{i,j}= & \sum_{k=1}^{\ell}K(x_{i},x_{k})K(x_{j},x_{k})\\
+q_{i}= & -\sum_{j=1}^{\ell}y_{j}K(x_{i},x_{j})
 \end{align*}
 
 \end_inset
@@ -1470,97 +1550,9 @@ R_{i}^{*}\ge & 0 & i=1,...,\ell
 \end_layout
 
 \begin_layout Standard
-Nice.
- Let's break this out a bit
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\begin{align*}
-R_{i}^{*}\le & y_{i}-\sum_{j=1}^{\ell}\beta_{j}K(x_{i},x_{j})\\
-R_{i}^{*}+\sum_{j=1}^{\ell}\beta_{j}K(x_{i},x_{j}) & \le y_{i}\\
-y_{i}\ge & R_{i}^{*}+\sum_{j=1}^{\ell}\beta_{j}K(x_{i},x_{j})
-\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\begin{align*}
-y_{i}-\sum_{j=1}^{\ell}\beta_{j}K(x_{i},x_{j})\le & R_{i}\\
-y_{i} & \le R_{i}+\sum_{j=1}^{\ell}\beta_{j}K(x_{i},x_{j})\\
--y_{i}\ge & -R_{i}-\sum_{j=1}^{\ell}\beta_{j}K(x_{i},x_{j})
-\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Let's re-state our constraints so we can enumerate the matrices
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\begin{align}
-\text{Minimize}\quad W(\beta,R,R^{*})= & R\cdot R+R^{*}\cdot R^{*}\nonumber \\
-\nonumber \\
-\text{Subject to}\quad\qquad-y_{i}\ge & -R_{i}-\sum_{j=1}^{\ell}\beta_{j}K(x_{i},x_{j}) & i=1,...,\ell\\
-y_{i}\ge & R_{i}^{*}+\sum_{j=1}^{\ell}\beta_{j}K(x_{i},x_{j}) & i=1,...,\ell\\
-0\ge & -R_{i} & i=1,...,\ell\\
-0\ge & -R_{i}^{*} & i=1,...,\ell
-\end{align}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-This should give us our QP optimization problem, in which we optimize 
-\begin_inset Formula $\alpha=[\beta,R,R^{*}]$
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\begin{align*}
-\text{Minimize }\quad W(\alpha)= & \frac{1}{2}\alpha^{T}P\alpha+q^{T}\alpha\\
-\text{Subject to}\quad\qquad G\alpha & \preceq h\\
-A\alpha & =b
-\end{align*}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\begin{align*}
-P= & \text{diag}\left[\mathbf{0}_{\ell\times\ell},\mathbf{I}_{2\ell\times2\ell}\right]\\
-q= & \mathbf{0}_{1\times3\ell}\\
-G_{i,j}^{1}= & -K(x_{i},x_{j}) & i,j=1,...,\ell\\
-G_{R}^{1}= & -\mathbf{I}_{\ell\times\ell}\\
-h^{1}= & -y_{i} & i=1,...,\ell\\
-G_{i,j}^{2}= & K(x_{i},x_{j}) & i,j=1,...,\ell\\
-G_{R^{*}}^{2}= & \mathbf{I}_{\ell\times\ell}\\
-h_{i}^{2}= & y_{i} & i=1,...,\ell\\
-G_{R}^{3}= & -\mathbf{I}_{\ell\times\ell}\\
-h^{3}= & \mathbf{0}_{1\times\ell}\\
-G_{R^{*}}^{4}= & -\mathbf{I}_{\ell\times\ell}\\
-h_{R^{*}}^{4}= & \mathbf{0}_{1\times\ell}
-\end{align*}
-
-\end_inset
-
-
+This just simply doesn't work.
+ No fucking clue why not, but I think we need to re-think the objective
+ function, maybe start with an actual kernel regression form.
 \end_layout
 
 \end_body

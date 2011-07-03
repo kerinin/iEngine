@@ -56,8 +56,9 @@ def run():
   Y = m.predict( X.reshape(xN,1,1) )
   
   plt.plot(train[:-1], train[1:], 'k,')
-  plt.scatter( m.SVx, m.SVy, train_size*100*(m.beta**2), alpha=.15 )
+  plt.scatter( m.SVx, m.SVy, train_size*1000*(m.beta**2), alpha=.15 )
   plt.plot(X, Y, 'r', lw=2)
+  plt.axhline(y=0)
   
   plt.show()
   

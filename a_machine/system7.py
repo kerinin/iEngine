@@ -28,7 +28,7 @@ class model:
   # data: [observation][dimension]
   def train(self, data, slices=[[0,[0]]]):
     #self.gammas = self.determine_gammas_from(data)
-    self.gammas = [.1,]
+    self.gammas = [.01,]
     print "Gammas determined: %s" % str(self.gammas)
     
     # [gamma][sequence offset][dimension]
@@ -51,63 +51,24 @@ class model:
     
     print "Constructing constraints"
     
-    P = np.identity(3l)
-    P[:l,:l] = 0
+    P = ( kx.reshape(l,1,l) * kx.reshape(1,l,l) ).sum(2)
     
-    q = np.zeros(3l)
-    
-    G_1 = np.hstack([
-      -kx,
-      -np.identity(l),
-      np.zeros((l,l))
-    ])
-    
-    h_1 = -self.labels
-    
-    G_2 = np.hstack([
-      kx,
-      np.zeros((l,l)),
-      np.identity(l)
-    ])
-    
-    h_2 = self.labels
-    
-    G_3 = np.hstack([
-      np.zeros((l,l)),
-      -np.identity(l),
-      np.zeros((l,l))
-    ])
-    
-    h_3 = np.zeros(l)
-    
-    G_4 = np.hstack([
-      np.zeros((2l,l)),
-      -np.identity(l)
-    ])
-    
-    h_4 = np.zeros(l)
-    
-    G = np.vstack([G_1,G_2,G_3,G_4])
-    h = np.vstack([h_1,h_2,h_3,h_4])
-    
-
-    print P.shape
-    print q.shape
-    print G.shape
-    print h.shape
+    q = -( self.labels.T * kx ).sum(1)
 
     
     print "Solving"
     solution = solvers.qp( 
       matrix( np.triu(P).astype('float')), 
       matrix(q.astype('float')), 
-      matrix(G.astype('float')), 
-      matrix(h.astype('float'))
+      #matrix(G.astype('float')), 
+      #matrix(h.astype('float')),
+      #matrix( np.zeros((3*l,3*l)).astype('float')),
+      #matrix( np.zeros(3*l).astype('float'))
     )
     
     print "Handling Solution"
     if solution['status'] == 'optimal':
-      X = np.array( solution['x'][:l] - solution['x'][l:] )
+      X = np.array( solution['x'] )
       #R_emp = np.array( solution['x'][-1] )
       print solution['x']
       self.SV_mask = ( np.abs(X) < 1e-8 )
