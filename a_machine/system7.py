@@ -51,50 +51,58 @@ class model:
     
     print "Constructing constraints"
     
-    P = np.hstack([
-      np.vstack( [-kx/2, kx/2] ),
-      np.vstack( [kx/2, -kx/2] )
+    P = np.identity(3l)
+    P[:l,:l] = 0
+    
+    q = np.zeros(3l)
+    
+    G_1 = np.hstack([
+      -kx,
+      -np.identity(l),
+      np.zeros((l,l))
     ])
     
-    q = np.vstack([
-      self.labels,
-      -self.labels
+    h_1 = -self.labels
+    
+    G_2 = np.hstack([
+      kx,
+      np.zeros((l,l)),
+      np.identity(l)
     ])
     
-    G = np.vstack([
-      np.identity(l*2),
-      -np.identity(l*2)
+    h_2 = self.labels
+    
+    G_3 = np.hstack([
+      np.zeros((l,l)),
+      -np.identity(l),
+      np.zeros((l,l))
     ])
     
-    h = np.hstack([
-      np.ones(l*2),
-      np.zeros(l*2)
+    h_3 = np.zeros(l)
+    
+    G_4 = np.hstack([
+      np.zeros((2l,l)),
+      -np.identity(l)
     ])
     
-    A = np.hstack([
-      np.ones(l),
-      -np.ones(l)
-    ]).reshape(1,l*2)
+    h_4 = np.zeros(l)
     
-    b = np.zeros(1)
+    G = np.vstack([G_1,G_2,G_3,G_4])
+    h = np.vstack([h_1,h_2,h_3,h_4])
     
-    print self.labels.shape
-    print self.labels.T.shape
+
     print P.shape
     print q.shape
     print G.shape
     print h.shape
-    print A.shape
-    print b.shape
+
     
     print "Solving"
     solution = solvers.qp( 
       matrix( np.triu(P).astype('float')), 
       matrix(q.astype('float')), 
       matrix(G.astype('float')), 
-      matrix(h.astype('float')), 
-      matrix(A.astype('float')), 
-      matrix(b.astype('float')) 
+      matrix(h.astype('float'))
     )
     
     print "Handling Solution"
