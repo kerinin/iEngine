@@ -26,17 +26,18 @@ def run():
   from a_machine.system7 import model
 
   from santa_fe import getData
-  data = getData('B1.dat')[:,0]
+  data = getData('B1.dat')[:,1]
   test = getData('B2.dat')
   median = np.median(data)
   std = np.std(data)
 
-  train_size = 50
+  train_size = 100
   sequence_length = 1
   gamma_quantile = 100
   test_size = 201
 
   train = (( data[:train_size] - median ) / std).astype('float32')
+  #train = data[:train_size].astype('float32')
 
   m = model( dimension=0 )
   m.train(train)
@@ -56,9 +57,9 @@ def run():
   Y = m.predict( X.reshape(xN,1,1) )
   
   plt.plot(train[:-1], train[1:], 'k,')
-  plt.scatter( m.SVx, m.SVy, train_size*1000*(m.beta**2), alpha=.15 )
+  plt.scatter( m.SVx, m.SVy, train_size*10*(m.beta**2), alpha=.15 )
   plt.plot(X, Y, 'r', lw=2)
-  plt.axhline(y=0)
+  #plt.axhline(y=0)
   
   plt.show()
   

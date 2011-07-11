@@ -1,21 +1,29 @@
-#LyX 1.6.5 created this file. For more info see http://www.lyx.org/
-\lyxformat 345
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
 \begin_document
 \begin_header
 \textclass article
 \use_default_options true
+\maintain_unincluded_children false
 \language english
+\language_package default
 \inputencoding auto
+\fontencoding global
 \font_roman default
 \font_sans default
 \font_typewriter default
 \font_default_family default
+\use_non_tex_fonts false
 \font_sc false
 \font_osf false
 \font_sf_scale 100
 \font_tt_scale 100
 
 \graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
 \paperfontsize default
 \spacing onehalf
 \use_hyperref false
@@ -23,9 +31,18 @@
 \use_geometry true
 \use_amsmath 1
 \use_esint 1
+\use_mhchem 1
+\use_mathdots 1
 \cite_engine basic
 \use_bibtopic false
+\use_indices false
 \paperorientation portrait
+\suppress_date false
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
 \leftmargin 1in
 \secnumdepth 3
 \tocdepth 3
@@ -37,8 +54,9 @@
 \paperpagestyle default
 \tracking_changes false
 \output_changes false
-\author "" 
-\author "" 
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
 \end_header
 
 \begin_body
@@ -125,8 +143,10 @@ Take a look at Vapnik p.235 - I think this is the 'P' method of regularization,
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-W_{\gamma}(\beta)=\Omega(f)= & \sum_{i=1}^{\ell}\beta_{i}\end{align*}
+\begin_inset Formula 
+\begin{align*}
+W_{\gamma}(\beta)=\Omega(f)= & \sum_{i=1}^{\ell}\beta_{i}
+\end{align*}
 
 \end_inset
 
@@ -138,8 +158,10 @@ Subject to
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-\sup_{x}\left|\left(A_{\ell}f\right)(x,y)-F_{\ell}(x,y)\right|= & \sigma_{\ell}\end{align*}
+\begin_inset Formula 
+\begin{align*}
+\sup_{x}\left|\left(A_{\ell}f\right)(x,y)-F_{\ell}(x,y)\right|= & \sigma_{\ell}
+\end{align*}
 
 \end_inset
 
@@ -158,9 +180,11 @@ Because we're not trying to generate a PDF, there's no need to constrain
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 \sigma_{\ell}^{i}\ge & \left|\left(A_{\ell}f\right)(x_{i},y_{i})-F_{\ell}(x_{i},y_{i})\right|\quad i=1,...,\ell\\
-= & \left|\left(\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)-y_{i}\right|\end{align*}
+= & \left|\left(\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)-y_{i}\right|
+\end{align*}
 
 \end_inset
 
@@ -181,8 +205,10 @@ ts; the different is now upper bounded by
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-\sigma_{\ell}^{i}\ge & \left(\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)-y_{i}\end{align*}
+\begin_inset Formula 
+\begin{align*}
+\sigma_{\ell}^{i}\ge & \left(\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)-y_{i}
+\end{align*}
 
 \end_inset
 
@@ -190,9 +216,11 @@ ts; the different is now upper bounded by
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 -\sigma_{\ell}^{i}\le & \left(\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)-y_{i}\\
-\sigma_{\ell}^{i}\ge & y_{i}-\left(\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)\end{align*}
+\sigma_{\ell}^{i}\ge & y_{i}-\left(\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)
+\end{align*}
 
 \end_inset
 
@@ -205,10 +233,12 @@ This can be expressed as a linear optimization task quite easily.
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 \text{Minimize }\quad W(\beta)= & c^{T}\beta\\
 \text{Subject to}\quad\qquad G\beta & \preceq h\\
-A\beta & =b\end{align*}
+A\beta & =b
+\end{align*}
 
 \end_inset
 
@@ -220,13 +250,15 @@ We can formuate our problem as follows:
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 c_{i}= & 1\\
 G_{i,j}^{+}= & y_{j}K(x_{i},x_{j})\\
 G_{i,j}^{-}= & -y_{j}K(x_{i},x_{j})\\
 h_{i}^{+}= & \sigma_{\ell}+y_{i}\\
 h_{i}^{-}= & \sigma_{\ell}-y_{i}\\
-A,b= & \emptyset\end{align*}
+A,b= & \emptyset
+\end{align*}
 
 \end_inset
 
@@ -266,8 +298,40 @@ The problem with the first version is that there isn't a unique solution.
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-W_{\gamma}(\beta)=\Omega(f)= & \sum_{i,j=1}^{\ell}\beta_{i}\beta_{j}K(x_{i},x_{j})K(y_{i},y_{j})\end{align*}
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Vapnik derives this target functional from the objective function 
+\begin_inset Formula $p(y|x)=\sum_{i=1}^{\ell}\beta_{i}K(x,x_{i})K(y,y_{i})$
+\end_inset
+
+.
+ If we're going to restrict ourselves to regression, we probably need a
+ target functional of the form 
+\begin_inset Formula $\Omega(f)=(f,f)_{H}$
+\end_inset
+
+.
+ The regression equation is 
+\begin_inset Formula $r(x)=\sum_{i=1}^{\ell}y_{i}\beta_{i}K(x,x_{i})$
+\end_inset
+
+, which is similar to the PDF target functional 
+\begin_inset Formula $p(x)=\sum_{i=1}^{\ell}\beta_{i}K(x,x_{i})$
+\end_inset
+
+.
+ The optimization target for PDF reduces to 
+\begin_inset Formula $\sum_{i,j}\beta_{i}\beta_{j}K(x_{i},x_{j})$
+\end_inset
+
+, which should allow us to use 
+\begin_inset Formula $\sum_{i,j}y_{i}y_{j}\beta_{i}\beta_{j}K(x_{i},x_{j})$
+\end_inset
+
+ as our target functional.
+\end_layout
 
 \end_inset
 
@@ -275,12 +339,43 @@ W_{\gamma}(\beta)=\Omega(f)= & \sum_{i,j=1}^{\ell}\beta_{i}\beta_{j}K(x_{i},x_{j
 \end_layout
 
 \begin_layout Standard
-Subject to
+\begin_inset Formula 
+\begin{align*}
+W_{\gamma}(\beta)=\Omega(f)= & \sum_{i,j=1}^{\ell}\beta_{i}\beta_{j}K(x_{i},x_{j})K(y_{i},y_{j})
+\end{align*}
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-\sup_{x}\left|\left(A_{\ell}f\right)(x,y)-F_{\ell}(x,y)\right|= & \sigma_{\ell}\end{align*}
+Subject to 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+We have 
+\begin_inset Formula $y_{i}$
+\end_inset
+
+ explicitly, so we don't need to use 
+\begin_inset Formula $F_{\ell}(x,y)$
+\end_inset
+
+ necessarily
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\sup_{x}\left|\left(A_{\ell}f\right)(x,y)-F_{\ell}(x,y)\right|= & \sigma_{\ell}
+\end{align*}
 
 \end_inset
 
@@ -294,14 +389,16 @@ Because we're not trying to generate a PDF, there's no need to constrain
 \end_inset
 
 .
- We can eliminate the supremum function by making the constraing an inequality
+ We can eliminate the supremum function by making the constraint an inequality
  constraint
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 \sigma_{\ell}^{i}\ge & \left|\left(A_{\ell}f\right)(x_{i},y_{i})-F_{\ell}(x_{i},y_{i})\right|\quad i=1,...,\ell\\
-= & \left|\left(\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)-y_{i}\right|\end{align*}
+= & \left|\left(\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)-y_{i}\right|
+\end{align*}
 
 \end_inset
 
@@ -322,8 +419,10 @@ ts; the different is now upper bounded by
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-\sigma_{\ell}^{i}\ge & \left(\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)-y_{i}\end{align*}
+\begin_inset Formula 
+\begin{align*}
+\sigma_{\ell}^{i}\ge & \left(\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)-y_{i}
+\end{align*}
 
 \end_inset
 
@@ -331,13 +430,58 @@ ts; the different is now upper bounded by
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 -\sigma_{\ell}^{i}\le & \left(\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)-y_{i}\\
-\sigma_{\ell}^{i}\ge & y_{i}-\left(\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)\end{align*}
+\sigma_{\ell}^{i}\ge & y_{i}-\left(\sum_{j=1}^{\ell}y_{j}\beta_{j}K(x_{i},x_{j})\right)
+\end{align*}
 
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+Considering the Nadaraya-Watson estimator
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+\phi(x)= & \frac{\sum_{i=1}^{\ell}y_{i}K(x,x_{i})}{\sum_{i=1}^{\ell}K(x,x_{i})}\longmapsto\frac{\sum_{i=1}^{\ell}y_{i}\beta_{i}K(x,x_{i})}{\sum_{i=1}^{\ell}\beta_{i}K(x,x_{i})}
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+it may be a good idea to constrain the denominator and use the right-hand
+ term for estimation.
+ This introduces 
+\begin_inset Formula $\ell$
+\end_inset
+
+ constraints of the form
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+1= & \sum_{i=1}^{\ell}\beta_{i}K(x_{i},x_{j}) & j=1,...,\ell
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+By introducing these constraints, we can use the NW-type estimator as our
+ target functional without having to worry about the form of the optimization
+ problem.
+ If the algorithm works, this might be worth considering eliminating.
 \end_layout
 
 \begin_layout Standard
@@ -345,10 +489,12 @@ This version generates a quadratic optimization problem defined as
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 \text{Minimize }\quad W(\beta)= & \frac{1}{2}\beta^{T}P\beta+q^{T}\beta\\
 \text{Subject to}\quad\qquad G\beta & \preceq h\\
-A\beta & =b\end{align*}
+A\beta & =b
+\end{align*}
 
 \end_inset
 
@@ -360,15 +506,17 @@ We can formuate our problem as follows:
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-P_{i,j}= & K(x_{i},x_{j})K(y_{i},y_{j})\\
+\begin_inset Formula 
+\begin{align*}
+P_{i,j}= & y_{i}y_{j}K(x_{i},x_{j})\\
 q_{i}= & 0\\
 G_{i,j}^{+}= & y_{j}K(x_{i},x_{j})\\
 G_{i,j}^{-}= & -y_{j}K(x_{i},x_{j})\\
 h_{i}^{+}= & \sigma_{\ell}+y_{i}\\
 h_{i}^{-}= & \sigma_{\ell}-y_{i}\\
-A_{i}= & 1\\
-b= & 1\end{align*}
+A_{i,j}= & K(x_{i},x_{j})\\
+b_{i}= & 1
+\end{align*}
 
 \end_inset
 
@@ -427,8 +575,10 @@ The next step is to extend this to generating estimates over observations
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-W(\beta)=\Omega(f)= & \sum_{a}\sum_{i=1}^{\ell}\beta_{i}^{a}\end{align*}
+\begin_inset Formula 
+\begin{align*}
+W(\beta)=\Omega(f)= & \sum_{a}\sum_{i=1}^{\ell}\beta_{i}^{a}
+\end{align*}
 
 \end_inset
 
@@ -436,9 +586,11 @@ W(\beta)=\Omega(f)= & \sum_{a}\sum_{i=1}^{\ell}\beta_{i}^{a}\end{align*}
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 \sigma_{\ell}^{i}\ge & \left(\sum_{a}\sum_{j=1}^{\ell}y_{j}\beta_{j}^{a}K^{a}(x_{i}^{a},x_{j}^{a})\right)-y_{i}\\
-\sigma_{\ell}^{i}\ge & y_{i}-\left(\sum_{a}\sum_{j=1}^{\ell}y_{j}\beta_{j}^{a}K^{a}(x_{i}^{a},x_{j}^{a})\right)\end{align*}
+\sigma_{\ell}^{i}\ge & y_{i}-\left(\sum_{a}\sum_{j=1}^{\ell}y_{j}\beta_{j}^{a}K^{a}(x_{i}^{a},x_{j}^{a})\right)
+\end{align*}
 
 \end_inset
 
@@ -446,12 +598,14 @@ W(\beta)=\Omega(f)= & \sum_{a}\sum_{i=1}^{\ell}\beta_{i}^{a}\end{align*}
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 \bar{c}_{i,a}= & 1\\
 \bar{G}_{i,j,a}^{+}= & y_{j}K^{a}(x_{i}^{a},x_{j}^{a})\\
 \bar{G}_{i,j,a}^{-}= & -y_{j}K^{a}(x_{i}^{a},x_{j}^{a})\\
 \bar{h}_{i,a}^{+}= & \sigma_{\ell}+y_{i}\\
-\bar{h}_{i,a}^{-}= & \sigma_{\ell}-y_{i}\end{align*}
+\bar{h}_{i,a}^{-}= & \sigma_{\ell}-y_{i}
+\end{align*}
 
 \end_inset
 
@@ -476,11 +630,13 @@ The quadratic optimization problem requires
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 c_{a\ell+i}= & \bar{c}_{i,a}\\
 G_{a\ell+i,a\ell+j}= & \bar{G}_{i,j,a}\\
 h_{a\ell+i}= & \bar{h}_{i,a}\\
-A,b= & \emptyset\end{align*}
+A,b= & \emptyset
+\end{align*}
 
 \end_inset
 
@@ -519,9 +675,11 @@ Let's see if this is feasible.
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 R(\alpha_{\ell})= & R_{\text{emp}}(\alpha_{\ell})+\frac{BE}{2}\left(1+\sqrt{1+\frac{4R_{\text{emp}}(\alpha_{\ell})}{BE}}\right)\\
-E= & 4\frac{h(\ln\frac{2\ell}{h}+1)-\ln(\eta/4)}{\ell}\end{align*}
+E= & 4\frac{h(\ln\frac{2\ell}{h}+1)-\ln(\eta/4)}{\ell}
+\end{align*}
 
 \end_inset
 
@@ -533,8 +691,10 @@ This would require the Taylor expanson of one term
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-\sqrt{1+x}= & \sum_{n=0}^{\infty}\frac{(-1)^{n}(2n)!}{(1-2n)(n!)^{2}(4^{n})}x^{n}=1+\frac{1}{2}x-\frac{1}{8}x^{2}+\frac{1}{16}x^{3}+\ldots\end{align*}
+\begin_inset Formula 
+\begin{align*}
+\sqrt{1+x}= & \sum_{n=0}^{\infty}\frac{(-1)^{n}(2n)!}{(1-2n)(n!)^{2}(4^{n})}x^{n}=1+\frac{1}{2}x-\frac{1}{8}x^{2}+\frac{1}{16}x^{3}+\ldots
+\end{align*}
 
 \end_inset
 
@@ -567,8 +727,10 @@ We could concievably approximate this by setting
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
-W(\alpha_{\ell},h)= & \lambda\Omega(f)+(1-\lambda)R(\alpha)\end{align*}
+\begin_inset Formula 
+\begin{align*}
+W(\alpha_{\ell},h)= & \lambda\Omega(f)+(1-\lambda)R(\alpha)
+\end{align*}
 
 \end_inset
 
@@ -627,13 +789,15 @@ The original formulation was to minimize
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 F(\xi,\xi^{*}) & =\sum_{i=1}^{\ell}\xi_{i}^{*}+\sum_{i=1}^{\ell}\xi_{i}\\
 y_{i}-(w\cdot x_{i})-b & \le\varepsilon+\xi_{i}^{*}\\
 (w\cdot x_{i})+b-y_{i} & \le\varepsilon+\xi_{i}\\
 \xi_{i}^{*} & \ge\ 0\\
 \xi_{i} & \ge\ 0\\
-(w\cdot w) & \le c_{n}\end{align*}
+(w\cdot w) & \le c_{n}
+\end{align*}
 
 \end_inset
 
@@ -645,10 +809,12 @@ This can be expressed as a Lagrange functional
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 L(w,\xi^{*},\xi;\alpha^{*},\alpha,C^{*},\gamma,\gamma^{*}) & =\sum_{i=1}^{\ell}(\xi_{i}^{*}+\xi_{i})-\sum_{i=1}^{\ell}\alpha_{i}\left[y_{i}-(w\cdot x_{i})-b+\varepsilon+\xi_{i}\right]\\
  & \qquad-\sum_{i=1}^{\ell}\alpha_{i}^{*}\left[(w\cdot x_{i})+b-y_{i}+\varepsilon+\xi_{i}^{*}\right]-\frac{C^{*}}{2}(c_{n}-(w\cdot w))\\
- & \qquad-\sum_{i=1}^{\ell}(\gamma_{i}^{*}\xi_{i}^{*}+\gamma_{i}\xi_{i})\end{align*}
+ & \qquad-\sum_{i=1}^{\ell}(\gamma_{i}^{*}\xi_{i}^{*}+\gamma_{i}\xi_{i})
+\end{align*}
 
 \end_inset
 
@@ -668,12 +834,14 @@ To find a maximum of the Lagrange function, we set the partial derivative
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 \frac{\partial F}{\partial w}=0 & =-\frac{\partial}{\partial w}\left(\sum_{i=1}^{\ell}\alpha_{i}\left[y_{i}-(w\cdot x_{i})-b+\varepsilon+\xi_{i}\right]\right)\\
  & \qquad-\frac{\partial}{\partial w}\left(\sum_{i=1}^{\ell}\alpha_{i}^{*}\left[(w\cdot x_{i})+b-y_{i}+\varepsilon+\xi_{i}\right]\right)-\frac{\partial}{\partial w}\left(\frac{C^{*}}{2}(c_{n}-(w\cdot w))\right)\\
  & =\sum_{i=1}^{\ell}\alpha_{i}x_{i}-\sum_{i=1}^{\ell}\alpha_{i}^{*}x_{i}-wC^{*}\\
 wC^{*} & =\sum_{i=1}^{\ell}(\alpha_{i}-\alpha_{i}^{*})x_{i}\\
-w & =\sum_{i=1}^{\ell}\frac{\alpha_{i}-\alpha_{i}^{*}}{C^{*}}x_{i}\end{align*}
+w & =\sum_{i=1}^{\ell}\frac{\alpha_{i}-\alpha_{i}^{*}}{C^{*}}x_{i}
+\end{align*}
 
 \end_inset
 
@@ -681,9 +849,11 @@ w & =\sum_{i=1}^{\ell}\frac{\alpha_{i}-\alpha_{i}^{*}}{C^{*}}x_{i}\end{align*}
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 \frac{\partial F}{\partial\xi^{*}}=0 & =\frac{\partial}{\partial\xi^{*}}\left(\sum_{i=1}^{\ell}(\xi_{i}^{*}+\xi_{i})\right)-\frac{\partial}{\partial\xi^{*}}\left(\sum_{i=1}^{\ell}\alpha_{i}^{*}\left[(w\cdot x_{i})+b-y_{i}+\varepsilon+\xi_{i}^{*}\right]\right)-\frac{\partial}{\partial\xi^{*}}\left(\sum_{i=1}^{\ell}(\gamma_{i}^{*}\xi_{i}^{*}+\gamma_{i}\xi_{i})\right)\\
- & =1-\sum_{i=1}^{\ell}\alpha_{i}^{*}-\sum_{i=1}^{\ell}\gamma_{i}^{*}\end{align*}
+ & =1-\sum_{i=1}^{\ell}\alpha_{i}^{*}-\sum_{i=1}^{\ell}\gamma_{i}^{*}
+\end{align*}
 
 \end_inset
 
@@ -691,9 +861,11 @@ w & =\sum_{i=1}^{\ell}\frac{\alpha_{i}-\alpha_{i}^{*}}{C^{*}}x_{i}\end{align*}
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 \frac{\partial F}{\partial\xi}=0 & =\frac{\partial}{\partial\xi}\left(\sum_{i=1}^{\ell}(\xi_{i}^{*}+\xi_{i})\right)-\frac{\partial}{\partial\xi}\left(\sum_{i=1}^{\ell}\alpha_{i}\left[y_{i}-(w\cdot x_{i})-b+\varepsilon+\xi_{i}\right]\right)-\frac{\partial}{\partial\xi}\left(\sum_{i=1}^{\ell}(\gamma_{i}^{*}\xi_{i}^{*}+\gamma_{i}\xi_{i})\right)\\
- & =1-\sum_{i=1}^{\ell}\alpha_{i}-\sum_{i=1}^{\ell}\gamma_{i}\end{align*}
+ & =1-\sum_{i=1}^{\ell}\alpha_{i}-\sum_{i=1}^{\ell}\gamma_{i}
+\end{align*}
 
 \end_inset
 
@@ -705,9 +877,11 @@ The last two can be combined
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 1-\sum_{i=1}^{\ell}\alpha_{i}^{*}-\sum_{i=1}^{\ell}\gamma_{i}^{*} & =1-\sum_{i=1}^{\ell}\alpha_{i}^{*}-\sum_{i=1}^{\ell}\gamma_{i}^{*}\\
-\sum_{i=1}^{\ell}\alpha_{i}^{*}+\sum_{i=1}^{\ell}\gamma_{i}^{*} & =\sum_{i=1}^{\ell}\alpha_{i}^{*}+\sum_{i=1}^{\ell}\gamma_{i}^{*}\end{align*}
+\sum_{i=1}^{\ell}\alpha_{i}^{*}+\sum_{i=1}^{\ell}\gamma_{i}^{*} & =\sum_{i=1}^{\ell}\alpha_{i}^{*}+\sum_{i=1}^{\ell}\gamma_{i}^{*}
+\end{align*}
 
 \end_inset
 
@@ -720,9 +894,11 @@ Vapnik makes second term on each side go away somehow, leaving the following
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 w= & \sum_{i=1}^{\ell}\frac{\alpha_{i}^{*}-\alpha_{i}}{C^{*}}x_{i}\\
-\sum_{i=1}^{\ell}\alpha_{i}^{*}= & \sum_{i=1}^{\ell}\alpha_{i}\end{align*}
+\sum_{i=1}^{\ell}\alpha_{i}^{*}= & \sum_{i=1}^{\ell}\alpha_{i}
+\end{align*}
 
 \end_inset
 
@@ -736,7 +912,8 @@ Next, he puts those into the original lagrange (WTF?), apparently by eliminating
 \end_inset
 
 
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 W(\alpha^{*},\alpha,C^{*})= & \sum_{i=1}^{\ell}\alpha_{i}\left[y_{i}-(w\cdot x_{i})+\varepsilon\right]-\sum_{i=1}^{\ell}\alpha_{i}^{*}\left[(w\cdot x_{i})-y_{i}+\varepsilon\right]-\frac{C^{*}}{2}(c_{n}-(w\cdot w))\\
 = & \sum_{i=1}^{\ell}\alpha_{i}\left[y_{i}-\left(\sum_{j=1}^{\ell}\frac{\alpha_{j}^{*}-\alpha_{j}}{C^{*}}x_{j}\cdot x_{i}\right)+\varepsilon\right]-\sum_{i=1}^{\ell}\alpha_{i}^{*}\left[\left(\sum_{i=j}^{\ell}\frac{\alpha_{j}^{*}-\alpha_{j}}{C^{*}}x_{j}\cdot x_{i}\right)-y_{i}+\varepsilon\right]\\
  & \qquad-\frac{C^{*}}{2}(c_{n}-\left(\sum_{j=1}^{\ell}\frac{\alpha_{j}^{*}-\alpha_{j}}{C^{*}}x_{j}\cdot\sum_{i=1}^{\ell}\frac{\alpha_{i}^{*}-\alpha_{i}}{C^{*}}x_{i}\right)\\
@@ -745,7 +922,8 @@ W(\alpha^{*},\alpha,C^{*})= & \sum_{i=1}^{\ell}\alpha_{i}\left[y_{i}-(w\cdot x_{
 = & \sum_{i=1}^{\ell}\left(\alpha_{i}y_{i}+\alpha_{i}^{*}y_{i}+\alpha_{i}\varepsilon-\alpha_{i}^{*}\varepsilon\right)-\sum_{i,j=1}^{\ell}\left[\frac{\alpha_{i}(\alpha_{j}^{*}-\alpha_{j})}{C^{*}}x_{j}\cdot x_{i}+\frac{\alpha_{i}^{*}(\alpha_{j}^{*}-\alpha_{j})}{C^{*}}x_{j}\cdot x_{i}\right]\\
  & \qquad-\frac{c_{n}C^{*}}{2}-\frac{1}{2C^{*}}\sum_{i,j=1}^{\ell}\left(\alpha_{j}^{*}-\alpha_{j}\right)\left(\alpha_{i}^{*}-\alpha_{i}\right)\left(x_{i}\cdot x_{j}\right)\\
 = & \varepsilon\sum_{i=1}^{\ell}\left(\alpha_{i}+\alpha_{i}^{*}\right)+\sum_{i=1}^{\ell}y_{i}\left(\alpha_{i}^{*}-\alpha_{i}\right)-\frac{1}{2C^{*}}\sum_{i,j=1}^{\ell}\left(\alpha_{j}^{*}-\alpha_{j}\right)\left(\alpha_{i}^{*}-\alpha_{i}\right)\left(x_{i}\cdot x_{j}\right)-\frac{c_{n}C^{*}}{2}\\
- & \qquad-\sum_{i,j=1}^{\ell}\left(\frac{\alpha_{i}(\alpha_{j}^{*}-\alpha_{j})}{C^{*}}x_{j}\cdot x_{i}+\frac{\alpha_{i}^{*}(\alpha_{j}^{*}-\alpha_{j})}{C^{*}}x_{j}\cdot x_{i}\right)\end{align*}
+ & \qquad-\sum_{i,j=1}^{\ell}\left(\frac{\alpha_{i}(\alpha_{j}^{*}-\alpha_{j})}{C^{*}}x_{j}\cdot x_{i}+\frac{\alpha_{i}^{*}(\alpha_{j}^{*}-\alpha_{j})}{C^{*}}x_{j}\cdot x_{i}\right)
+\end{align*}
 
 \end_inset
 
@@ -759,10 +937,12 @@ So far, so good.
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 \sum_{i,j=1}^{\ell}\frac{\alpha_{i}(\alpha_{j}^{*}-\alpha_{j})}{C^{*}}x_{j}\cdot x_{i}+\frac{\alpha_{i}^{*}(\alpha_{j}^{*}-\alpha_{j})}{C^{*}}x_{j}\cdot x_{i}= & \sum_{i,j=1}^{\ell}\frac{x_{j}\cdot x_{i}}{C^{*}}\left(\alpha_{i}(\alpha_{j}^{*}-\alpha_{j})+\alpha_{i}^{*}(\alpha_{j}^{*}-\alpha_{j}\right)\\
 = & \sum_{i,j=1}^{\ell}\frac{x_{j}\cdot x_{i}}{C^{*}}\left(\alpha_{i}\alpha_{j}^{*}-\alpha_{i}\alpha_{j}+\alpha_{i}^{*}\alpha_{j}^{*}-\alpha_{i}^{*}\alpha_{j}\right)\\
-=\frac{1}{C^{*}} & \sum_{i,j=1}^{\ell}\left(\alpha_{i}+\alpha_{i}^{*}\right)\left(\alpha_{j}^{*}-\alpha_{j}\right)\left(x_{i}\cdot x_{j}\right)\end{align*}
+=\frac{1}{C^{*}} & \sum_{i,j=1}^{\ell}\left(\alpha_{i}+\alpha_{i}^{*}\right)\left(\alpha_{j}^{*}-\alpha_{j}\right)\left(x_{i}\cdot x_{j}\right)
+\end{align*}
 
 \end_inset
 
@@ -777,13 +957,15 @@ And there it is.
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 W(\alpha,\alpha^{*},C^{*})= & -\varepsilon\sum_{i=1}^{\ell}\left(\alpha_{i}+\alpha_{i}^{*}\right)+\sum_{i=1}^{\ell}y_{i}\left(\alpha_{i}^{*}-\alpha_{i}\right)\\
  & -\frac{1}{2C^{*}}\sum_{i,j=1}^{\ell}\left(\alpha_{i}^{*}-\alpha_{i}\right)\left(\alpha_{j}^{*}-\alpha_{j}\right)\left(x_{i}\cdot x_{j}\right)-\frac{c_{n}C^{*}}{2}\\
 \sum_{i=1}^{\ell}\alpha_{i}^{*}= & \sum_{i=1}^{\ell}\alpha_{i}\\
 0\le\alpha_{i}^{*}\le1, & \quad i=1,...,\ell\\
 0\le\alpha_{i}\le1, & \quad i=1,...,\ell\\
-C^{*}\ge & \ 0\end{align*}
+C^{*}\ge & \ 0
+\end{align*}
 
 \end_inset
 
@@ -822,12 +1004,14 @@ Moving from a linear decision function to a kernel, we can simply replace
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 W= & -\varepsilon\sum_{i=1}^{\ell}\left(\alpha_{i}^{*}+\alpha_{i}\right)+\sum_{i=1}^{\ell}y_{i}\left(\alpha_{i}^{*}-\alpha_{i}\right)-\frac{1}{2}\sum_{i,j=1}^{\ell}\left(\alpha_{i}^{*}-\alpha_{i}\right)\left(\alpha_{j}^{*}-\alpha_{j}\right)K(x_{i},x_{j})\\
 \sum_{i=1}^{\ell}\alpha_{i}^{*}= & \sum_{i=1}^{\ell}\alpha_{i}\\
 0\le\alpha_{i}^{*}\le1, & \quad i=1,...,\ell\\
 0\le\alpha_{i}\le1, & \quad i=1,...,\ell\\
-C^{*}\ge & \ 0\end{align*}
+C^{*}\ge & \ 0
+\end{align*}
 
 \end_inset
 
@@ -839,9 +1023,11 @@ Which generates estimates in the form
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 f(x;\ v,\beta)= & \sum_{i=1}^{N}\beta_{i}K(x,v_{i})+b\\
-\beta_{i}= & \alpha_{i}^{*}-\alpha_{i}\end{align*}
+\beta_{i}= & \alpha_{i}^{*}-\alpha_{i}
+\end{align*}
 
 \end_inset
 
@@ -880,13 +1066,15 @@ Starting at the same point, but we now include a summation over multiple
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 F(\xi,\xi^{*}) & =\sum_{i=1}^{\ell}\xi_{i}^{*}+\sum_{i=1}^{\ell}\xi_{i}\\
 y_{i}-\sum_{a}(w^{a}\cdot x_{i}^{a})-b & \le\varepsilon+\xi_{i}^{*}\\
 \sum_{a}(w^{a}\cdot x_{i}^{a})+b-y_{i} & \le\varepsilon+\xi_{i}\\
 \xi_{i}^{*} & \ge\ 0\\
 \xi_{i} & \ge\ 0\\
-\sum_{a}(w^{a}\cdot w^{a}) & \le c_{n}\end{align*}
+\sum_{a}(w^{a}\cdot w^{a}) & \le c_{n}
+\end{align*}
 
 \end_inset
 
@@ -957,10 +1145,12 @@ The final constraint isn't exactly clear.
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 L(w,\xi^{*},\xi;\alpha^{*},\alpha,C^{*},\gamma,\gamma^{*}) & =\sum_{i=1}^{\ell}(\xi_{i}^{*}+\xi_{i})-\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a}\left[y_{i}-(w^{a}\cdot x_{i}^{a})-b+\varepsilon+\xi_{i}\right]\\
  & \qquad-\sum_{i=1}^{\ell}\sum_{a}\alpha_{i}^{a*}\left[(w^{a}\cdot x_{i}^{a})+b-y_{i}+\varepsilon+\xi_{i}^{*}\right]-\frac{C^{*}}{2}(c_{n}-\sum_{a}(w^{a}\cdot w^{a}))\\
- & \qquad-\sum_{i=1}^{\ell}(\gamma_{i}^{*}\xi_{i}^{*}+\gamma_{i}\xi_{i})\end{align*}
+ & \qquad-\sum_{i=1}^{\ell}(\gamma_{i}^{*}\xi_{i}^{*}+\gamma_{i}\xi_{i})
+\end{align*}
 
 \end_inset
 
@@ -972,8 +1162,10 @@ One point to consider is that the last term expands out to the following
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
--\sum_{i,j=1}^{\ell}\left(\alpha_{j}^{*}-\alpha_{j}\right)\left(\alpha_{i}^{*}-\alpha_{i}\right)\left(x_{i}\cdot x_{j}\right)= & -\sum_{i,j=1}^{\ell}\left(\alpha_{j}^{*}-\alpha_{j}\right)\left(\alpha_{i}^{*}-\alpha_{i}\right)K(x_{i},x_{j})\end{align*}
+\begin_inset Formula 
+\begin{align*}
+-\sum_{i,j=1}^{\ell}\left(\alpha_{j}^{*}-\alpha_{j}\right)\left(\alpha_{i}^{*}-\alpha_{i}\right)\left(x_{i}\cdot x_{j}\right)= & -\sum_{i,j=1}^{\ell}\left(\alpha_{j}^{*}-\alpha_{j}\right)\left(\alpha_{i}^{*}-\alpha_{i}\right)K(x_{i},x_{j})
+\end{align*}
 
 \end_inset
 
@@ -989,8 +1181,10 @@ Does this make sense as a summation, something like
 \end_inset
 
 
-\begin_inset Formula \[
--\sum_{a}\sum_{i,j=1}^{\ell}\beta_{i}^{a}\beta_{j}^{a}K(x_{i}^{a},x_{j}^{a})\]
+\begin_inset Formula 
+\[
+-\sum_{a}\sum_{i,j=1}^{\ell}\beta_{i}^{a}\beta_{j}^{a}K(x_{i}^{a},x_{j}^{a})
+\]
 
 \end_inset
 
@@ -1020,14 +1214,16 @@ l.
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 F(\xi,\xi^{*}) & =\sum_{i=1}^{\ell}\xi_{i}^{*}+\sum_{i=1}^{\ell}\xi_{i}\\
 y_{i}-\sum_{a}(w^{a}\cdot x_{i}^{a})-b & \le\varepsilon+\xi_{i}^{*}\\
 \sum_{a}(w^{a}\cdot x_{i}^{a})+b-y_{i} & \le\varepsilon+\xi_{i}\\
 (w^{a}\cdot w^{a}) & \le c_{n}^{a}\quad\forall a\\
 \sum_{a}c_{n}^{a} & \le\bar{c}_{n}\\
 \xi_{i} & \ge\ 0\\
-\xi_{i}^{*} & \ge\ 0\end{align*}
+\xi_{i}^{*} & \ge\ 0
+\end{align*}
 
 \end_inset
 
@@ -1043,13 +1239,15 @@ Note that under the KKT conditions,
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 F(w,\xi,\xi^{*};\ \alpha,\alpha^{*},C,\mathcal{C},\gamma,\gamma^{*})= & \sum_{i=1}^{\ell}\xi_{i}^{*}+\sum_{i=1}^{\ell}\xi_{i}\\
  & \qquad-\sum_{i}\alpha_{i}^{a*}\left(\sum_{a}(w^{a}\cdot x_{i}^{a})+b-y_{i}+\varepsilon+\xi_{i}^{*}\right)\\
  & \qquad-\sum_{i}\alpha_{i}^{a}\left(y_{i}-\sum_{a}(w^{a}\cdot x_{i}^{a})-b+\varepsilon+\xi_{i}\right)\\
  & \qquad-\sum_{a}C^{a}\left(c_{n}^{a}-\left(w^{a}\cdot w^{a}\right)\right)\\
  & \qquad-\mathcal{C}\left(\bar{c}_{n}-\sum_{a}c_{n}^{a}\right)\\
- & \qquad-\sum_{i}\gamma_{i}\xi_{i}-\sum_{i}\gamma_{i}^{*}\xi_{i}^{*}\end{align*}
+ & \qquad-\sum_{i}\gamma_{i}\xi_{i}-\sum_{i}\gamma_{i}^{*}\xi_{i}^{*}
+\end{align*}
 
 \end_inset
 
@@ -1070,7 +1268,8 @@ In this case, we have
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 \frac{\partial F}{\partial w^{a}}=0= & -\frac{\partial}{\partial w^{a}}\left[\sum_{i}\alpha_{i}^{a*}\left(\sum_{a}(w^{a}\cdot x_{i}^{a})+b-y_{i}+\varepsilon+\xi_{i}^{*}\right)\right]\\
  & \qquad-\frac{\partial}{\partial w^{a}}\left[\sum_{i}\alpha_{i}^{a}\left(y_{i}-\sum_{a}(w^{a}\cdot x_{i}^{a})-b+\varepsilon+\xi_{i}\right)\right]\\
  & \qquad-\frac{\partial}{\partial w^{a}}\left[\sum_{a}C^{a}\left(c_{n}^{a}-\left(w^{a}\cdot w^{a}\right)\right)\right]\\
@@ -1079,7 +1278,8 @@ In this case, we have
  & \qquad-C^{a}\left(\left(1\cdot w^{a}\right)+\left(w^{a}\cdot1\right)\right)\\
 = & -\sum_{i}\alpha_{i}^{a*}x_{i}^{a}+\sum_{i}\alpha_{i}^{a}x_{i}^{a}-2C^{a}w^{a}\\
 2C^{a}w^{a}= & -\sum_{i}\alpha_{i}^{a*}x_{i}^{a}+\sum_{i}\alpha_{i}^{a}x_{i}^{a}\\
-w^{a}= & \sum_{i}\frac{\alpha_{i}^{a}-\alpha_{i}^{a*}}{2C^{a}}x_{i}^{a}\end{align*}
+w^{a}= & \sum_{i}\frac{\alpha_{i}^{a}-\alpha_{i}^{a*}}{2C^{a}}x_{i}^{a}
+\end{align*}
 
 \end_inset
 
@@ -1092,9 +1292,11 @@ THAT's the correct derivation.
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 \frac{\partial F}{\partial\xi}=0= & \frac{\partial}{\partial\xi}\left[\sum_{i}\xi_{i}\right]-\frac{\partial}{\partial\xi}\left[\sum_{i}\alpha_{i}^{a}\left(y_{i}-\sum_{a}(w^{a}\cdot x_{i}^{a})-b+\varepsilon+\xi_{i}\right)\right]-\frac{\partial}{\partial\xi}\left[\sum_{i}\gamma_{i}\xi_{i}\right]\\
-= & \ell-\sum_{i}\alpha_{i}^{a}-\sum_{i}\gamma_{i}\end{align*}
+= & \ell-\sum_{i}\alpha_{i}^{a}-\sum_{i}\gamma_{i}
+\end{align*}
 
 \end_inset
 
@@ -1102,9 +1304,11 @@ THAT's the correct derivation.
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 \frac{\partial F}{\partial\xi^{*}}=0= & \frac{\partial}{\partial\xi^{*}}\left[\sum_{i}\xi_{i}^{*}\right]-\frac{\partial}{\partial\xi^{*}}\left[\sum_{i}\alpha_{i}^{a*}\left(\sum_{a}(w^{a}\cdot x_{i}^{a})+b-y_{i}+\varepsilon+\xi_{i}^{*}\right)\right]-\frac{\partial}{\partial\xi^{*}}\left[\sum_{i}\gamma_{i}^{*}\xi_{i}^{*}\right]\\
-= & \ell-\sum_{i}\alpha_{i}^{a*}-\sum_{i}\gamma_{i}^{*}\end{align*}
+= & \ell-\sum_{i}\alpha_{i}^{a*}-\sum_{i}\gamma_{i}^{*}
+\end{align*}
 
 \end_inset
 
@@ -1112,9 +1316,11 @@ THAT's the correct derivation.
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 \ell-\sum_{i}\alpha_{i}^{a}-\sum_{i}\gamma_{i}= & \ell-\sum_{i}\alpha_{i}^{a*}-\sum_{i}\gamma_{i}^{*}\\
--\sum_{i}\alpha_{i}^{a}-\sum_{i}\gamma_{i}= & \sum_{i}\alpha_{i}^{a*}-\sum_{i}\gamma_{i}^{*}\end{align*}
+-\sum_{i}\alpha_{i}^{a}-\sum_{i}\gamma_{i}= & \sum_{i}\alpha_{i}^{a*}-\sum_{i}\gamma_{i}^{*}
+\end{align*}
 
 \end_inset
 
@@ -1126,11 +1332,13 @@ Same as before, but watch this!
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 \frac{\partial F}{\partial b}=0= & -\frac{\partial}{\partial b}\left[\sum_{i}\alpha_{i}^{a*}\left(\sum_{a}(w^{a}\cdot x_{i}^{a})+b-y_{i}+\varepsilon+\xi_{i}^{*}\right)\right]\\
  & \qquad-\frac{\partial}{\partial b}\left[\sum_{i}\alpha_{i}^{a}\left(y_{i}-\sum_{a}(w^{a}\cdot x_{i}^{a})-b+\varepsilon+\xi_{i}\right)\right]\\
 = & -\sum_{i}\alpha_{i}^{a*}+\sum_{i}\alpha_{i}^{a}\\
-\sum_{i}\alpha_{i}^{a}= & \sum_{i}\alpha_{i}^{a*}\end{align*}
+\sum_{i}\alpha_{i}^{a}= & \sum_{i}\alpha_{i}^{a*}
+\end{align*}
 
 \end_inset
 
@@ -1143,10 +1351,12 @@ YEAH BITCHES.
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 -\sum_{i}\alpha_{i}^{a}-\sum_{i}\gamma_{i}= & \sum_{i}\alpha_{i}^{a*}-\sum_{i}\gamma_{i}^{*}\\
 -\sum_{i}\alpha_{i}^{a}-\sum_{i}\gamma_{i}= & \sum_{i}\alpha_{i}^{a}-\sum_{i}\gamma_{i}^{*}\\
-\sum_{i}\gamma_{i}^{*}-\sum_{i}\gamma_{i}= & 2\sum_{i}\alpha_{i}^{a}\end{align*}
+\sum_{i}\gamma_{i}^{*}-\sum_{i}\gamma_{i}= & 2\sum_{i}\alpha_{i}^{a}
+\end{align*}
 
 \end_inset
 
@@ -1170,10 +1380,12 @@ Now for
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 \frac{\partial F}{\partial C^{a}}=0= & -\frac{\partial}{\partial C^{a}}\left[\sum_{a}C^{a}\left(c_{n}^{a}-\left(w^{a}\cdot w^{a}\right)\right)\right]\\
 = & -\sum_{a}\left(c_{n}^{a}-\left(w^{a}\cdot w^{a}\right)\right)\\
-\sum_{a}c_{n}^{a}= & \sum_{a}w^{a}\cdot w^{a}\end{align*}
+\sum_{a}c_{n}^{a}= & \sum_{a}w^{a}\cdot w^{a}
+\end{align*}
 
 \end_inset
 
@@ -1194,11 +1406,13 @@ Known Good Equalities
 \end_layout
 
 \begin_layout Standard
-\begin_inset Formula \begin{align*}
+\begin_inset Formula 
+\begin{align*}
 \sum_{i}\alpha_{i}^{a}= & \sum_{i}\alpha_{i}^{a*}\\
 w^{a}= & \sum_{i}\frac{\alpha_{i}^{a}-\alpha_{i}^{a*}}{2C^{a}}x_{i}^{a}\\
 \sum_{i}\gamma_{i}^{*}-\sum_{i}\gamma_{i}= & 2\sum_{i}\alpha_{i}^{a}\\
-\sum_{a}c_{n}^{a}= & \sum_{a}w^{a}\cdot w^{a}\end{align*}
+\sum_{a}c_{n}^{a}= & \sum_{a}w^{a}\cdot w^{a}
+\end{align*}
 
 \end_inset
 

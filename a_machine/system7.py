@@ -3,6 +3,7 @@ import sys
 from math import *
 from datetime import *
 import numpy as np
+import numpy.linalg as la
 import scikits.statsmodels.api as sm
 import scipy as sp
 
@@ -12,8 +13,14 @@ import matplotlib.cm as cm
 
 from gpu_funcs import kernel_matrix
 from cvxopt import matrix, solvers
-#solvers.options['feastol']=1e-9
+solvers.options['abstol']=1e-10
+solvers.options['reltol']=1e-10
+solvers.options['feastol']=1e-10
 
+def rank(A, tol=1e-10):
+  u, s, v = np.linalg.svd(A)
+  return np.sum(s > tol)
+  
 class model:
   def __init__(self, dimension, gamma_samples=1000, gamma_quantile=100):
     self.dimension = dimension
@@ -28,7 +35,7 @@ class model:
   # data: [observation][dimension]
   def train(self, data, slices=[[0,[0]]]):
     #self.gammas = self.determine_gammas_from(data)
-    self.gammas = [.01,]
+    self.gammas = [.1,]
     print "Gammas determined: %s" % str(self.gammas)
     
     # [gamma][sequence offset][dimension]
@@ -40,37 +47,64 @@ class model:
     # Working with 1 sequence element for now
     sequences = data[:-1].astype('float32').reshape(data.shape[0]-1,1)
     labels = data[1:].astype('float32').reshape(data.shape[0]-1,1)
-
-    self.sequences = sequences
-    self.labels = labels
-    l = self.sequences.shape[0]
+    
+    l = sequences.shape[0]
+    jitter = ( ( np.random.randn(l,1) / 10 ) ).astype('float32')
+    jittery = ( ( np.random.randn(l,1) / 10 ) ).astype('float32')
+    self.sequences = sequences + jitter
+    self.labels = labels + jittery
+    
     
     print "Calculating kernel matrix"
     kx = kernel_matrix(self.sequences.reshape(l,1,1), self.sequences.reshape(l,1,1), self.gammas[-1])
     ky = kernel_matrix(self.labels.reshape(l,1,1), self.labels.reshape(l,1,1), self.gammas[-1])
+    sigma = 1000
     
     print "Constructing constraints"
     
-    P = ( kx.reshape(l,1,l) * kx.reshape(1,l,l) ).sum(2)
+    P = self.labels * self.labels.T * kx
     
-    q = -( self.labels.T * kx ).sum(1)
+    q = np.zeros((l,1))
 
+    G_1 = self.labels.T * kx
+    
+    G_2 = -self.labels.T * kx
+    
+    h_1 = sigma + self.labels
+    
+    h_2 = sigma - self.labels
+    
+    G = np.vstack([G_1,G_2])
+    h = np.vstack([h_1,h_2])
+    
+    A = kx
+    
+    b = np.ones((l,1))
+        
+    print "p(A[0])=%s" % A.shape[0]
+    print "n(G[1],A[1])=%s or %s" % (G.shape[1], A.shape[1])
+    print "rank P: %s" % rank(P)
+    print "rank G: %s" % rank(G)
+    print "rank A: %s" % rank(A)
+    print "rand kernel: %s" % rank(kx)
+    print "unique source: %s" % np.unique(self.sequences).shape[0]
     
     print "Solving"
-    solution = solvers.qp( 
-      matrix( np.triu(P).astype('float')), 
+    solution = solvers.coneqp( 
+      matrix(P.astype('float')), 
       matrix(q.astype('float')), 
-      #matrix(G.astype('float')), 
-      #matrix(h.astype('float')),
-      #matrix( np.zeros((3*l,3*l)).astype('float')),
-      #matrix( np.zeros(3*l).astype('float'))
+      matrix(G.astype('float')), 
+      matrix(h.astype('float')),
+      None,
+      matrix(A.astype('float')),
+      matrix(b.astype('float'))
     )
     
     print "Handling Solution"
     if solution['status'] == 'optimal':
       X = np.array( solution['x'] )
       #R_emp = np.array( solution['x'][-1] )
-      print solution['x']
+      #print solution['x']
       self.SV_mask = ( np.abs(X) < 1e-8 )
       self.beta = np.ma.compress_rows( np.ma.array( X, mask = self.SV_mask ) ).astype('float32')
       self.SVx = np.ma.compress_rows( np.ma.array( sequences, mask = np.repeat( self.SV_mask, sequences.shape[1], 1) ) ).astype('float32')
@@ -102,11 +136,10 @@ class model:
     
     kk = kernel_matrix( points, self.SVx.reshape(self.nSV,1,1), self.gammas[-1] )
     
-    #print kk.shape
     #print self.SVy.shape
-    #print self.beta.shape
+    print self.beta
     
-    prediction = (self.beta.T * kk ).sum(1)
+    prediction = (self.labels.T * self.beta.T * kk ).sum(1) / (self.beta.T * kk).sum(1)
     
     #print prediction.shape
     
